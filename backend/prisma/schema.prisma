@@ -52,7 +52,7 @@ model Event {
   attendees Attendee[]
 }
 
-model Attendee {
+model Attendee { 
   id String @id @default(uuid())
   userId String
   eventId String 
