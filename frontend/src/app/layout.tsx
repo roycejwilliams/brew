@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { chillax } from "./fonts/chillax";
+import { chillax } from "../../public/fonts/chillax";
 import "./globals.css";
 
 export const metadata: Metadata = {

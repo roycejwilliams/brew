@@ -8,7 +8,7 @@ function LoginForm() {
   return (
     <motion.div
       key="login"
-      layout
+      layoutId="form-container" // <-- same ID used in InviteForm
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -24,7 +24,7 @@ function LoginForm() {
       <input
         type="text"
         id="first_name"
-        className=" border mt-8 w-full px-4 border-gray-300/30 text-gray-900 text-sm rounded-full placeholder:text-xs block mx-auto p-2.5 bg-transparent placeholder:text-white/50 focus:border-none"
+        className=" border focus:outline text-white mt-8 w-full px-4 border-gray-300/30  text-sm rounded-full placeholder:text-xs block mx-auto p-2.5 bg-transparent placeholder:text-white/50 focus:border-none"
         placeholder="email"
         required
       />
