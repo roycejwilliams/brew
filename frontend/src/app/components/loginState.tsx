@@ -6,20 +6,32 @@ import Image from "next/image";
 
 function LoginState() {
   const [active, setActive] = useState<"login" | "invite">("login");
+  const [phase, setPhase] = useState<"form" | "verify" | "success">("form");
 
   return (
     <motion.div layout className="flex flex-col items-center">
       <Image
+        hidden={phase === "success"}
         src="/brew-logo.png"
         width={80}
         height={80}
         alt="Brew Logo"
         priority
-        className="mx-auto z-10"
+        className="mx-auto z-10 w-auto h-auto"
       />
 
-      <div className="bg-black/35 m-4 shadow-2xl overflow-hidden max-w-sm backdrop-blur-2xl p-8  rounded-md border border-white/20">
-        <div className="max-w-2xl relative w-full mx-auto flex bg-white/10 my-4 justify-evenly items-center text-sm font-medium border border-white/15 shadow p-2 rounded-full">
+      <motion.div
+        layout
+        className={`${
+          phase === "success"
+            ? "bg-transparent"
+            : "bg-black/35 backdrop-blur-2xl border border-white/20 shadow-2xl "
+        }  m-4  overflow-hidden max-w-sm w-full  p-8 rounded-md `}
+      >
+        <div
+          hidden={phase === "success"}
+          className="max-w-2xl relative w-full mx-auto flex bg-white/10 my-4 justify-evenly items-center text-sm font-medium border border-white/15 shadow p-2 rounded-full "
+        >
           <div
             className={`absolute bg-black rounded-full transition-all duration-300 p-2 w-1/2 h-[calc(100%)]  shadow-lg ${
               active === "login" ? "left-0" : "left-1/2"
@@ -43,10 +55,14 @@ function LoginState() {
           </button>
         </div>
         {}
-        <AnimatePresence mode="wait">
-          {active === "login" ? <LoginForm /> : <InviteForm />}
+        <AnimatePresence mode="popLayout">
+          {active === "login" ? (
+            <LoginForm />
+          ) : (
+            <InviteForm state={phase} setState={setPhase} />
+          )}
         </AnimatePresence>
-      </div>
+      </motion.div>
     </motion.div>
   );
 }
