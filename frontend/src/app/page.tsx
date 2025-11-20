@@ -16,10 +16,10 @@ export default function Login() {
   }, []);
 
   return (
-    <section className="relative min-h-screen flex justify-center items-center transition-colors duration-500 bg-gradient-to-b from-[#19535F] to-[#98473E] overflow-hidden">
+    <section className="relative min-h-screen flex justify-center items-center transition-colors duration-500 bg-linear-to-b from-[#19535F] to-[#98473E] overflow-hidden">
       <div
-        className="absolute inset-0  before:absolute before:left-[20%] before:h-[50%] before:w-[50%] before:origin-[60%] before:animate-blob before:rounded-3xl before:bg-gradient-to-br before:from-[#19535F] before:to-[#98473E] before:blur-[50px] before:brightness-125 
-                      after:absolute after:left-[40%] after:top-[30%] after:h-[80%] after:w-[70%] after:origin-[60%] after:animate-blob-reverse after:rounded-3xl after:bg-gradient-to-br after:from-[#19535F] after:to-[#98473E] after:blur-[50px] after:brightness-125"
+        className="absolute inset-0  before:absolute before:left-[20%] before:h-[50%] before:w-[50%] before:origin-[60%] before:animate-blob before:rounded-3xl before:bg-linear-to-br before:from-[#19535F] before:to-[#98473E] before:blur-[50px] before:brightness-125 
+                      after:absolute after:left-[40%] after:top-[30%] after:h-[80%] after:w-[70%] after:origin-[60%] after:animate-blob-reverse after:rounded-3xl after:bg-linear-to-br after:from-[#19535F] after:to-[#98473E] after:blur-[50px] after:brightness-125"
       />
       <AnimatePresence mode="wait">
         {transition ? (
