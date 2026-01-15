@@ -1,7 +1,11 @@
-import { AnimatePresence, motion } from "motion/react";
+import { motion } from "motion/react";
 import React, { useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheck } from "@fortawesome/free-solid-svg-icons";
+import {
+  faArrowAltCircleRight,
+  faCheck,
+} from "@fortawesome/free-solid-svg-icons";
+import { useRouter } from "next/navigation";
 
 interface Phase {
   state: "form" | "verify" | "success";
@@ -59,16 +63,23 @@ function InviteForm({ state, setState }: Phase) {
     );
   };
 
+  const router = useRouter();
+
   //basically now to activate the success look we need to take the e.target.value;
 
   if (otp === serverOtp) setState("success");
 
   useEffect(() => {
-    // if serverOTP equals otp then success forms show
     if (otp.join("") === serverOtp.join("")) {
       setState("success");
+
+      const timeout = setTimeout(() => {
+        router.push("/discover");
+      }, 3000);
+
+      return () => clearTimeout(timeout);
     }
-  }, [otp, serverOtp]);
+  }, [otp]);
 
   return (
     <>
@@ -89,25 +100,25 @@ function InviteForm({ state, setState }: Phase) {
             We take privacy very seriously and will never share your phone
             number with anyone.
           </p>
-          <input
-            type="text"
-            id="phone"
-            className=" border focus:outline mt-8 w-full px-4 border-gray-300/30 text-white text-sm rounded-full placeholder:text-xs block mx-auto p-2.5 bg-transparent placeholder:text-white/50 focus:border-none"
-            placeholder="phone"
-            required
-          />
-
-          <div className="flex items-center gap-x-4 mt-8">
-            <p className="text-xs w-1/4 text-left flex-1">
-              By continuing, you agree to Brew&apos;s Terms & Privacy Policy.
-            </p>
+          <div className="flex gap-x-4 items-center mt-8 ">
+            <input
+              type="text"
+              id="phone_number"
+              className="border text-white w-5/6 px-4 border-gray-300/30 text-sm rounded-full placeholder:text-xs block mx-auto p-2.5 bg-transparent placeholder:text-white/50 focus:outline-none"
+              placeholder="enter phone number"
+              required
+            />
             <button
               onClick={() => setState("verify")}
-              className="rounded-full w-1/3 py-4 bg-[#19535F] shadow-md cursor-pointer"
+              className="w-10 h-10 flex justify-center items-center border border-gray-300/30 cursor-pointer shadow rounded-full"
             >
-              Next
+              <FontAwesomeIcon icon={faArrowAltCircleRight} />
             </button>
           </div>
+
+          <p className="text-xs w-full mt-8 text-center flex-1">
+            By continuing, you agree to Brew&apos;s Terms & Privacy Policy.
+          </p>
         </motion.div>
       )}
 
@@ -168,7 +179,7 @@ function InviteForm({ state, setState }: Phase) {
           className="z-10"
         >
           <h2 className="text-center relative mb-4 mt-8 text-lg">Success</h2>
-          <div className="w-32 h-32 bg-gradient-to-b from-[#98473E] to-[#19535F]  shadow relative rounded-full border-white/15 flex justify-center items-center mx-auto">
+          <div className="w-32 h-32 bg-linear-to-b from-[#98473E] to-[#19535F]  shadow relative rounded-full border-white/15 flex justify-center items-center mx-auto">
             <FontAwesomeIcon icon={faCheck} />{" "}
           </div>
         </motion.div>

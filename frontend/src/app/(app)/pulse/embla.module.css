@@ -1,0 +1,25 @@
+.embla {
+  max-width: 100%;
+  position: relative;
+  margin: auto;
+  --slide-height: 19rem;
+  --slide-spacing: 2.5rem;
+}
+
+.embla__viewport {
+  overflow: hidden;
+  padding-left: var(--slide-spacing);
+}
+.embla__container {
+  display: flex;
+  padding: 1rem 0;
+  touch-action: pan-y pinch-zoom;
+  margin-left: calc(var(--slide-spacing) * -1);
+  gap: 1rem;
+}
+
+.embla__slide {
+  transform: translate3d(0, 0, 0);
+  flex: 0 0 auto;
+  min-width: 0;
+}

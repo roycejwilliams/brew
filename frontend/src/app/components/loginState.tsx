@@ -6,12 +6,17 @@ import Image from "next/image";
 
 function LoginState() {
   const [active, setActive] = useState<"login" | "invite">("login");
-  const [phase, setPhase] = useState<"form" | "verify" | "success">("form");
+  const [loginPhase, setLoginPhase] = useState<"form" | "verify" | "success">(
+    "form"
+  );
+  const [invitePhase, setInvitePhase] = useState<"form" | "verify" | "success">(
+    "form"
+  );
 
   return (
     <motion.div layout className="flex flex-col items-center">
       <Image
-        hidden={phase === "success"}
+        hidden={loginPhase === "success" || invitePhase === "success"}
         src="/brew-logo.png"
         width={80}
         height={80}
@@ -23,13 +28,13 @@ function LoginState() {
       <motion.div
         layout
         className={`${
-          phase === "success"
+          loginPhase === "success" || invitePhase === "success"
             ? "bg-transparent"
             : "bg-black/35 backdrop-blur-2xl border border-white/20 shadow-2xl "
         }  m-4  overflow-hidden max-w-sm w-full  p-8 rounded-md `}
       >
         <div
-          hidden={phase === "success"}
+          hidden={loginPhase === "success" || invitePhase === "success"}
           className="max-w-2xl relative w-full mx-auto flex bg-white/10 my-4 justify-evenly items-center text-sm font-medium border border-white/15 shadow p-2 rounded-full "
         >
           <div
@@ -57,9 +62,9 @@ function LoginState() {
         {}
         <AnimatePresence mode="popLayout">
           {active === "login" ? (
-            <LoginForm />
+            <LoginForm state={loginPhase} setState={setLoginPhase} />
           ) : (
-            <InviteForm state={phase} setState={setPhase} />
+            <InviteForm state={invitePhase} setState={setInvitePhase} />
           )}
         </AnimatePresence>
       </motion.div>
