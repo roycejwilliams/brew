@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import Nav from "../components/nav";
+import ClientUi from "../components/ClientUi";
 
 export const metadata: Metadata = {
   title: "",
@@ -12,9 +13,12 @@ export default function AppLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <main className="flex">
-      <Nav />
-      {children}
+    <main>
+      <div className="relative flex-1 overflow-hidden">
+        <Nav />
+        {children}
+        <ClientUi />
+      </div>{" "}
     </main>
   );
 }

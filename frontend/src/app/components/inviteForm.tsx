@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from "motion/react";
+import { motion } from "motion/react";
 import React, { useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -79,7 +79,7 @@ function InviteForm({ state, setState }: Phase) {
 
       return () => clearTimeout(timeout);
     }
-  }, [otp]); // ✅ only depends on otp
+  }, [otp]);
 
   return (
     <>
@@ -179,7 +179,7 @@ function InviteForm({ state, setState }: Phase) {
           className="z-10"
         >
           <h2 className="text-center relative mb-4 mt-8 text-lg">Success</h2>
-          <div className="w-32 h-32 bg-gradient-to-b from-[#98473E] to-[#19535F]  shadow relative rounded-full border-white/15 flex justify-center items-center mx-auto">
+          <div className="w-32 h-32 bg-linear-to-b from-[#98473E] to-[#19535F]  shadow relative rounded-full border-white/15 flex justify-center items-center mx-auto">
             <FontAwesomeIcon icon={faCheck} />{" "}
           </div>
         </motion.div>

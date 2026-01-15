@@ -1,80 +1,170 @@
 "use client";
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faCircleNotch,
-  faDiagramProject,
-  faLocationDot,
-  faPlusCircle,
-  faUser,
-} from "@fortawesome/free-solid-svg-icons";
+  MapLocation,
+  SendMessageDm,
+  UserGroupAccounts,
+  MenuHambuger,
+  XCloseDelete,
+} from "react-basicons";
+
 import { usePathname } from "next/navigation";
+import { ToggleState } from "../utils/toggleState";
+import { useOutsideAlerter } from "../utils/outsideAlert";
+import { ScrollLock } from "../utils/scrollLock";
+import { motion, AnimatePresence, Variants, rgba } from "motion/react";
 
 export default function Nav() {
   const path = usePathname();
 
+  const ref = useRef<HTMLDivElement>(null);
+
+  const [openNav, setOpenNav] = useState<boolean>(false);
+  useOutsideAlerter(ref, () => setOpenNav(false));
+  // close on path change
+  useEffect(() => {
+    setOpenNav(false);
+  }, [path]);
+
+  ScrollLock(openNav);
+
+  const containerVariants: Variants = {
+    hidden: { opacity: 0, height: 0 },
+    visible: {
+      opacity: 1,
+      height: "auto",
+      maxHeight: "600px",
+      transition: {
+        delayChildren: 0.1,
+        staggerChildren: 0.15,
+      },
+    },
+    exit: {
+      opacity: 0,
+      height: 0,
+    },
+  };
+
+  const itemVariants: Variants = {
+    hidden: { opacity: 0, y: 8 },
+    visible: { opacity: 1, y: 0 },
+  };
+
   return (
-    <div
-      className="w-1/10 flex sticky left-0 top-0 h-screen flex-col justify-around items-center bg-linear-to-b
- from-[#19535F]/40 via-black to-[#98473E]/30  backdrop-blur-3xl shadow z-999"
-    >
-      <Link href="/discover" className=" text-4xl font-normal">
-        brew
-      </Link>
-      <ul className="flex flex-col justify-between text-center text-sm gap-y-12 ">
-        <Link
-          href="/discover"
-          className={` hover:text-white ease-in-out duration-300 flex flex-col items-center ${
-            path === "/discover" ? "text-white" : "text-white/50"
-          }`}
-        >
-          <FontAwesomeIcon
-            icon={faLocationDot}
-            className="w-4 h-4 mx-auto mb-4 "
-          />
-          <span>Discover</span>
+    <>
+      {" "}
+      <motion.div
+        initial={{ backgroundPosition: "0% 50%" }}
+        whileHover={{
+          backgroundPosition: "100% 50%",
+          backgroundColor:
+            "linear-gradient(to right, rgba(0,0,0,1), rgba(0,0,0,${opacityValue} / 100), rgba(0,0,0,0))",
+        }}
+        whileTap={{
+          scale: 0.95,
+          backgroundColor: "",
+        }}
+        transition={{
+          backgroundPosition: { duration: 0.4, ease: "easeInOut" },
+        }}
+        ref={ref}
+        className="absolute left-20 top-0 flex items-center mt-8 z-40 shadow-md px-4 py-2.5 bg-linear-to-r border border-white/10 backdrop-blur-2xl bg-[#2b2b2b]/25 rounded-sm gap-x-4"
+      >
+        <Link href="/pulse" className=" text-2xl font-normal">
+          brew
         </Link>
-        <Link
-          href="/profile"
-          className={` hover:text-white ease-in-out duration-300 flex flex-col items-center ${
-            path === "/profile" ? "text-white" : "text-white/50"
-          }`}
+        <button
+          onClick={() => ToggleState(setOpenNav)}
+          className="max-w-lg w-8 h-8 bg-black/20 shadow-2xl cursor-pointer flex justify-center items-center rounded-sm border border-white/10"
         >
-          <FontAwesomeIcon icon={faUser} className="w-4 h-4 mx-auto mb-4 " />
-          <span>Profile</span>
-        </Link>
-        <Link
-          href="/circle"
-          className={` hover:text-white ease-in-out duration-300 flex flex-col items-center ${
-            path === "/circle" ? "text-white" : "text-white/50"
-          }`}
-        >
-          <FontAwesomeIcon
-            icon={faCircleNotch}
-            className="w-4 h-4 mx-auto mb-4 "
-          />
-          <span>Circle</span>
-        </Link>{" "}
-        <Link
-          href="/events"
-          className={` hover:text-white ease-in-out duration-300 flex flex-col items-center ${
-            path === "/event" ? "text-white" : "text-white/50"
-          }`}
-        >
-          <FontAwesomeIcon
-            icon={faDiagramProject}
-            className="w-4 h-4 mx-auto mb-4 "
-          />
-          <span>Events</span>
-        </Link>{" "}
-      </ul>
-      <button className="flex flex-col text-white/75 hover:text-white ease-in-out duration-300 items-center cursor-pointer">
-        <div>
-          <FontAwesomeIcon icon={faPlusCircle} className="w-8 h-8" />
-        </div>
-        <span className="mt-4 text-sm">Create Event</span>
-      </button>
-    </div>
+          <AnimatePresence mode="wait">
+            {openNav ? (
+              <motion.span
+                key="close"
+                initial={{ opacity: 0, rotate: -90, scale: 0.8 }}
+                animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                exit={{ opacity: 0, rotate: 90, scale: 0.8 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+                className="inline-flex"
+              >
+                <XCloseDelete color="currentColor" size={16} weight={0.5} />
+              </motion.span>
+            ) : (
+              <motion.span
+                key="menu"
+                initial={{ opacity: 0, rotate: 90, scale: 0.8 }}
+                animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                exit={{ opacity: 0, rotate: -90, scale: 0.8 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+                className="inline-flex"
+              >
+                <MenuHambuger color="currentColor" size={16} weight={0.5} />
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </button>
+        {openNav && (
+          <>
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="absolute z-50 top-0 left-0 mt-16 border border-white/5  backdrop-blur-3xl rounded-sm w-[230px] flex justify-center items-center shadow-2xl  px-4 py-8 "
+            >
+              <motion.ul className="flex flex-col text-sm gap-y-8">
+                <motion.li variants={itemVariants}>
+                  <Link
+                    href="/pulse"
+                    className={`hover:text-white duration-300 flex gap-x-8 items-center px-2 py-4 ${
+                      path === "/pulse" ? "text-white" : "text-white/50"
+                    }`}
+                  >
+                    <MapLocation color="currentColor" size={20} />
+                    <span>Pulse</span>
+                  </Link>
+                </motion.li>
+
+                <motion.li variants={itemVariants}>
+                  <div className="hover:text-white  duration-300 flex gap-x-8 items-center px-2 py-4">
+                    <UserGroupAccounts color="currentColor" size={20} />
+                    <span>Create</span>
+                  </div>
+                </motion.li>
+
+                <motion.li variants={itemVariants}>
+                  <Link
+                    href="/inbox"
+                    className={`hover:text-white duration-300 flex gap-x-8 items-center px-2 py-4 ${
+                      path === "/inbox" ? "text-white" : "text-white/50"
+                    }`}
+                  >
+                    <SendMessageDm color="currentColor" size={20} />
+                    <span>Inbox</span>
+                  </Link>
+                </motion.li>
+              </motion.ul>
+            </motion.div>
+          </>
+        )}
+      </motion.div>
+      <AnimatePresence>
+        {openNav && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{
+                duration: 0.4,
+                ease: "easeInOut",
+              }}
+              className="fixed w-full h-screen bg-linear-to-br from-black/75 via-[#19535F]/25 to-[#98473E]/25 inset-0 backdrop-blur-xl z-30 overflow-hidden"
+            ></motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

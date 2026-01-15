@@ -1,78 +1,98 @@
 import React, { useState } from "react";
 import Image from "next/image";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faBell,
-  faGrip,
-  faKey,
-  faQrcode,
-} from "@fortawesome/free-solid-svg-icons";
+import { NotificationBellAlarm, LocationPin } from "react-basicons";
+import Link from "next/link";
+import NeedsAttention from "./needsAttention";
+import Confirmation from "./confirmation";
+import Nearby from "./nearby";
+import ScopeLocator from "./scopeLocator";
+import { ToggleState } from "../utils/toggleState";
+import { AnimatePresence } from "motion/react";
 
 interface OpenModal {
-  openModal: (type: "filter" | "notifications" | "qr") => void;
+  openModal: (type: "notifications") => void;
+  id: string;
 }
 
-export default function Events({ openModal }: OpenModal) {
+export default function Events({ openModal, id }: OpenModal) {
+  const [openScope, setOpenScope] = useState<boolean>(false);
+
+  const openScopeLocator = () => {
+    ToggleState(setOpenScope);
+  };
+
   return (
-    <section
-      className="absolute right-0 top-0 h-full transform w-[21.5%] bg-linear-to-b
- from-[#19535F]/10 via-black to-[#98473E]/5  backdrop-blur-3xl shadow border-l border-white/10 rounded-tl-3xl rounded-bl-3xl z-40"
-    >
-      <div className="flex justify-between  pb-4 items-center gap-x-4 border-b border-white/10  mt-14 px-8  text-white">
-        <h2 className=" rounded-md text-xl">Discover</h2>
-        <div className="flex items-center gap-x-4">
-          <button
-            role="Invite"
-            onClick={() => openModal("qr")}
-            className="w-8 h-8 cursor-pointer bg-white/10 transform translate-y-0 hover:-translate-y-1 ease-in-out duration-200 backdrop-blur-sm shadow-lg  flex items-center justify-center border border-white/10 rounded-full"
-          >
-            <FontAwesomeIcon icon={faQrcode} className="text-xs" />
-          </button>
+    <section className="absolute top-0 right-0 h-full overflow-y-hidden  max-w-lg  flex   shadow-lg   z-20">
+      {/* Actions */}
+      <div className=" mx-auto max-w-sm  h-full  border-l border-r border-white/10 backdrop-blur-xl  bg-linear-to-b from-black/30 to-black/10  text-white">
+        {/* <h2 className=" rounded-md text-xl">Discover</h2> */}
+        <div className="flex justify-between w-full h-fit  px-6 py-4  border-white/20">
+          <div className=" w-full">
+            <h2 className="text-lg mb-1">Pulse</h2>
+            <p className="text-xs">Here&apos;s what&apos;s next</p>
+          </div>
+
           <button
             role="notifications"
             onClick={() => openModal("notifications")}
-            className="w-8 h-8 cursor-pointer bg-white/10 transform translate-y-0 hover:-translate-y-1 ease-in-out duration-200 backdrop-blur-sm shadow-lg  flex items-center justify-center border border-white/10 rounded-full"
+            className="cursor-pointer group transform translate-y-0 hover:-translate-y-1 ease-in-out duration-500 backdrop-blur-sm shadow-lg  flex flex-col items-center justify-center gap-y-1"
           >
-            <FontAwesomeIcon icon={faBell} className="text-xs" />
-          </button>
-          <button
-            role="filter"
-            onClick={() => openModal("filter")}
-            aria-label="filter"
-            className="w-8 h-8 cursor-pointer bg-white/10 transform translate-y-0 hover:-translate-y-1 ease-in-out duration-200 backdrop-blur-sm shadow-lg  flex items-center justify-center border border-white/10 rounded-full"
-          >
-            <FontAwesomeIcon icon={faGrip} className="text-xs" />
+            <div className="w-8 h-8 cursor-pointer   bg-white/10 transform translate-y-0 hover:-translate-y-1 ease-in-out duration-200 backdrop-blur-sm shadow-lg  flex flex-col items-center justify-center border border-white/10 rounded-md">
+              <NotificationBellAlarm color="currentColor" size={16} />
+            </div>
+            <span className="text-xs opacity-0 group-hover:opacity-100 ease-in-out duration-500">
+              Moments
+            </span>
           </button>
         </div>
+        {/* Location picker */}
+        <div className="w-full px-4">
+          <div className="px-4 py-1 bg-black rounded-md border border-white/20 shadow flex justify-between items-center">
+            <p className="text-xs">San Francisco</p>
+            <div className="flex gap-x-4 items-center">
+              <span className="text-xs">Tonight</span>
+              <button
+                role="filter"
+                onClick={openScopeLocator}
+                className="w-8 h-8 rounded-md cursor-pointer hover:scale-95 duration-300 ease-in-out transition-all bg-[#2b2b2b]/50 backdrop-blur-md shadow-lg border border-white/10 flex justify-center items-center"
+              >
+                <LocationPin size={16} color="currentColor" weight={1} />
+              </button>
+            </div>
+          </div>
+          <AnimatePresence mode="popLayout">
+            {openScope && <ScopeLocator onClose={openScopeLocator} />}
+          </AnimatePresence>
+        </div>
+        {/* Pulse */}
+        <section className="flex flex-col  gap-2  pb-32 pt-4 mt-1 px-4  border-white/20 relative w-full max-w-sm h-screen mx-auto overflow-auto customScroll">
+          <NeedsAttention id={id} />
+          <Confirmation />
+          <Nearby />
+        </section>
       </div>
-      <section className="flex flex-wrap gap-2 px-8 pb-36 pt-4 relative w-full h-full mx-auto overflow-y-scroll overflow-hidden    ">
-        {Array.from({ length: 20 }, (_, i) => (
-          <button
-            key={i}
-            className="flex gap-x-4 rounded-md px-4 py-2 w-full  shadow-[#98473E]/15  hover:scale-105 origin-right duration-200 ease-in-out transition  mb-4 relative shadow-xl border border-white/20  cursor-pointer"
+
+      {/* Profile */}
+      <div className="w-[25%] bg-linear-to-b from-black/20 to-transparent/70 backdrop-blur-sm py-4">
+        <div className="cursor-pointer group transform  translate-y-0 hover:-translate-y-1 ease-in-out duration-500 shadow-lg px-4  flex  flex-col items-center gap-y-1">
+          <Link
+            href="/profile"
+            className="w-16 h-16 cursor-pointer bg-white/10 transform translate-y-0 hover:-translate-y-1 ease-in-out duration-200 backdrop-blur-sm shadow-lg overflow-hidden flex flex-col items-center justify-center border border-white/10 rounded-md"
           >
             <Image
-              src="/image-test-brew.jpg"
+              src="/profile_1.png"
+              alt="test"
               fill
-              alt="test image"
-              className="object-cover brightness-75 blur-xs w-full h-full absolute z-0"
+              className="w-full h-full cursor-pointer"
             />
-            <div className="flex flex-col justify-between items-center relative">
-              <div className="w-6 h-6  rounded-full bg-[#2b2b2b] shadow-lg border border-white/10 flex justify-center items-center">
-                <FontAwesomeIcon icon={faKey} className="text-xs" />
-              </div>
-              <span className="text-xs text-white/75 ">Private</span>
-            </div>
-            <div className="flex flex-col items-start justify-between text-left relative">
-              <h2 className="font-medium text-xs">AIMÉ LEON DORE</h2>
-              <p className="text-xs text-white/75">
-                Sat, Nov 9 <br></br> Washington DC, USA
-              </p>
-            </div>
-          </button>
-        ))}
-      </section>
-      <div className="w-full  h-full left-0 blur-3xl -z-10 absolute bottom-0"></div>
+          </Link>
+          <span className="text-xs opacity-0 group-hover:opacity-100 ease-in-out duration-500">
+            Profile
+          </span>
+        </div>
+      </div>
+
+      {/* Event Cards */}
     </section>
   );
 }

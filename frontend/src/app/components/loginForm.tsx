@@ -77,7 +77,7 @@ function LoginForm({ state, setState }: Phase) {
       setState("success");
 
       const timeout = setTimeout(() => {
-        router.push("/discover");
+        router.push("/circle");
       }, 3000);
 
       return () => clearTimeout(timeout);

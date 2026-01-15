@@ -49,7 +49,7 @@ function QRCode({ onClose }: QRProps) {
         </div>
 
         <div className="overflow-hidden rounded-xl w-fit mt-4 mx-auto">
-          <CanvasQRcode />
+          <CanvasQRcode qrWidth={175} />
         </div>
         <AnimatePresence mode="wait">
           {" "}

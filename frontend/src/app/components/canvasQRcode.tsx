@@ -1,7 +1,11 @@
 import React from "react";
 import { useQRCode } from "next-qrcode";
 
-function CanvasQRcode() {
+interface QRCodeProps {
+  qrWidth: number;
+}
+
+function CanvasQRcode({ qrWidth }: QRCodeProps) {
   const { Canvas } = useQRCode();
 
   return (
@@ -13,7 +17,7 @@ function CanvasQRcode() {
         errorCorrectionLevel: "M",
         margin: 3,
         scale: 4,
-        width: 175,
+        width: qrWidth,
         color: {
           light: "#ffff",
         },
