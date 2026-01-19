@@ -3,21 +3,19 @@ import { openEventCard } from "@/stores/store";
 import React, { useRef, useState } from "react";
 import { useOutsideAlerter } from "../utils/outsideAlert";
 import { AnimatePresence, motion } from "motion/react";
-import { XCloseDelete } from "react-basicons";
 import Image from "next/image";
 import EventStart from "./eventStart";
 import EventLive from "./eventLive";
 import EventEnd from "./eventEnd";
+import { CloseIcon } from "./icons";
 
 function EventCard() {
   const ref = useRef<HTMLDivElement | null>(null);
   const closeEventCard = openEventCard((state) => state.closeEvent);
   const scrollY = openEventCard((state) => state.scrollY);
-  // const eventId = openEventCard((state) => state.activeEventId);
   useOutsideAlerter(ref, closeEventCard);
 
   const [activeEvent, setActive] = useState<"prequel" | "live" | "end">("live");
-  setActive("live"); //using this as a placeholder now, this would be used to switch between states using the begin and end of the event.
 
   return (
     <motion.main
@@ -41,7 +39,7 @@ function EventCard() {
           onClick={closeEventCard}
           className="fixed top-0 right-0 m-4 cursor-pointer z-50"
         >
-          <XCloseDelete color="white" size={20} />
+          <CloseIcon color="#fff" size={20} />
         </button>
         {/* Start Up Details */}
         <section className="w-full grid grid-cols-1 xl:grid-cols-2 gap-12 py-24 min-h-[85vh]">

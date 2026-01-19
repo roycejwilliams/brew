@@ -1,10 +1,10 @@
 "use client";
 import React, { useState } from "react";
 import Image from "next/image";
-import { AddPlusNewSquareBoxSquare } from "react-basicons";
-import GridSpacious from "../icons/gridSpacious";
-import GridDefault from "../icons/gridDefault";
-import GridDense from "../icons/gridDense";
+import { PlusIcon } from "./icons";
+import GridSpacious from "./icons/gridSpacious";
+import GridDefault from "./icons/gridDefault";
+import GridDense from "./icons/gridDense";
 import { motion } from "motion/react";
 
 type GridDensity = "spacious" | "default" | "dense";
@@ -99,11 +99,7 @@ export default function EventRecap() {
               Drop your recap here.
             </h2>
             <div className="group-hover:scale-105 duration-300 ease-in-out transition-all">
-              <AddPlusNewSquareBoxSquare
-                size={40}
-                weight={0.3}
-                color="currentColor"
-              />
+              <PlusIcon size={40} color="currentColor" />
             </div>
           </button>
         </div>

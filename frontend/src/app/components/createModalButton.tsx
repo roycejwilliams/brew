@@ -1,6 +1,6 @@
 import React from "react";
-import { AsteriskStar } from "react-basicons";
 import { Variants, motion } from "motion/react";
+import Asterisk from "./icons/AsterikIcon";
 
 interface CreateModalProp {
   openModal: (type: "createModal") => void;
@@ -58,7 +58,7 @@ export default function CreateModalButtton({ openModal }: CreateModalProp) {
         className="absolute p-4 bottom-0 mb-12 left-1/2 duration-500 -translate-x-1/2 bg-linear-to-br from-[#555555] to-black hover:from-[#723630] hover:to-[#19535F] backdrop-blur-lg flex items-center justify-center cursor-pointer border border-[#3D3D3D] hover:border-white/10 rounded-lg text-base"
       >
         <motion.div variants={iconVariants}>
-          <AsteriskStar size={22} color="white" weight={1} />
+          <Asterisk size={24} color="white" />
         </motion.div>
         <motion.div
           variants={revealVariants}
