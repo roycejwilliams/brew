@@ -1,9 +1,9 @@
 "use client";
 import React, { useRef, useState } from "react";
-import { ArrowDropdownCaretSortSelectArrow } from "react-basicons";
 import CircleControls from "./circleControls";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
+import { ChevronDownIcon } from "./icons";
 
 export default function CircleScene() {
   const [activeIndex, setActiveIndex] = useState<number>(0);
@@ -19,7 +19,6 @@ export default function CircleScene() {
   //Calculates the markers around the radius
   //Configuring the left and right arrows we are going to have to make it a prop
 
-  //Next Marker
 
   //gsap configuration
   gsap.registerPlugin(useGSAP);
@@ -28,7 +27,6 @@ export default function CircleScene() {
 
   const rotation = useRef({ value: 0 });
 
-  //Marker Data
 
   const visibleMarkers = (i: number) => {
     const relativePosition =
@@ -129,7 +127,7 @@ export default function CircleScene() {
         <div className=" text-center w-fit ">
           <h2 className="">@firstlast</h2>
           <div className="w-fit mx-auto">
-            <ArrowDropdownCaretSortSelectArrow color="currentColor" size={28} />
+            <ChevronDownIcon color="currentColor" size={28} />
           </div>
         </div>
         <div className="absolute w-fit h-1/3 flex flex-col justify-between">

@@ -1,15 +1,8 @@
 "use client";
 import React, { useState } from "react";
-import {
-  TicketPass,
-  ArrowRight,
-  CoffeeTea,
-  ConnectionSignalWifi,
-  SendMessageDm,
-  PreviousArrowBackward,
-} from "react-basicons";
 import { AnimatePresence, motion } from "framer-motion";
 import CanvasQRcode from "./canvasQRcode";
+import { TicketIcon, BroadcastIcon, RefreshIcon, MailIcon, ChevronLeftIcon, SendIcon, ArrowRightIcon } from "./icons";
 
 function Transfer() {
   const [activeTransferModal, setTransferActiveModal] = useState<
@@ -18,10 +11,6 @@ function Transfer() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    // now YOU decide:
-    // what do you do with input?
-    // how do you validate it?
-    // what happens after submission?
   }
 
   return (
@@ -45,17 +34,17 @@ function Transfer() {
             className={`mb-8 w-20 h-20 bg-linear-to-b from-[#2f1613] to-[#00000084] border border-white/10  shadow-lg relative rounded-full  flex justify-center items-center mx-auto `}
           >
             {activeTransferModal === "transfer" && (
-              <ArrowRight size={44} weight={0.5} color="white" />
+              <RefreshIcon size={44}  color="#fff" />
             )}
             {activeTransferModal === "invite" && (
-              <CoffeeTea size={44} weight={0.5} color="white" />
+              <MailIcon size={44}  color="#fff" />
             )}
             {activeTransferModal === "connect" && (
-              <ConnectionSignalWifi size={44} weight={0.5} color="white" />
+              <BroadcastIcon size={44}  color="#fff" />
             )}
             {activeTransferModal === null && (
               <div className="transform rotate-45">
-                <TicketPass size={44} weight={0.5} color="white" />
+              <TicketIcon size={44}  color="#fff" />
               </div>
             )}
           </motion.div>
@@ -108,7 +97,7 @@ function Transfer() {
                   activeTransferModal ? "block" : "hidden"
                 }`}
               >
-                <PreviousArrowBackward size={36} weight={0.5} color="white" />
+                <ChevronLeftIcon size={36}  color="#fff" />
               </button>
               <input
                 type="text"
@@ -131,7 +120,7 @@ function Transfer() {
                   activeTransferModal ? "block" : "hidden"
                 }`}
               >
-                <SendMessageDm size={20} weight={1} color="black" />
+                <SendIcon size={20}  color="#000" />
               </button>
             </motion.form>
           ) : (
@@ -150,7 +139,7 @@ function Transfer() {
                 className="cursor-pointer group hover:text-white duration-300 ease-in-out transition "
               >
                 <div className=" w-20 h-20 rounded-full group-hover:scale-110 duration-300 ease-in-out transition   shadow-xl backdrop-blur-3xl flex justify-center items-center  border border-white/10 bg-linear-to-r from-black/25 to-[#2b2b2b]/20">
-                  <ArrowRight size={28} weight={0.5} color="currentColor" />
+                  <ArrowRightIcon size={28}  color="currentColor" />
                 </div>
                 <p className="mt-4 mx-auto text-center">Transfer</p>
               </button>
@@ -161,7 +150,7 @@ function Transfer() {
                 className="cursor-pointer group hover:text-white duration-300 ease-in-out transition "
               >
                 <div className=" w-20 h-20 rounded-full group-hover:scale-110 duration-300 ease-in-out transition   shadow-xl backdrop-blur-3xl flex justify-center items-center  border border-white/10 bg-linear-to-r from-black/25 to-[#2b2b2b]/20">
-                  <CoffeeTea size={28} weight={0.5} color="currentColor" />
+                    <MailIcon size={44}  color="#fff" />
                 </div>
                 <p className="mt-4 mx-auto text-center">Invite</p>
               </button>
@@ -172,11 +161,9 @@ function Transfer() {
                 className="cursor-pointer group hover:text-white duration-300 ease-in-out transition "
               >
                 <div className=" w-20 h-20 rounded-full group-hover:scale-110 duration-300 ease-in-out transition   shadow-xl backdrop-blur-3xl flex justify-center items-center  border border-white/10 bg-linear-to-r from-black/25 to-[#2b2b2b]/20">
-                  <ConnectionSignalWifi
-                    size={28}
-                    weight={0.5}
-                    color="currentColor"
-                  />
+                  {activeTransferModal === "connect" && (
+                    <BroadcastIcon size={44}  color="#fff" />
+                  )}
                 </div>
                 <p className="mt-4 mx-auto text-center">Contact</p>
               </button>

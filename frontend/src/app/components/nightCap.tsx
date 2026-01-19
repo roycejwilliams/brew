@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { SendMessageDm, MicrophoneMusicTalk } from "react-basicons";
+// import { SendMessageDm, MicrophoneMusicTalk } from "react-basicons";
 import Comments from "./comments";
+import { SendIcon, MicrophoneIcon } from "./icons";
 
 export default function NightCap() {
   const [comments, setComments] = useState<string[] | null>([]);
@@ -67,7 +68,7 @@ export default function NightCap() {
             type="button"
             className="text-white/50 hover:text-white transition ease-in-out duration-300 cursor-pointer"
           >
-            <MicrophoneMusicTalk size={20} color="currentColor" />
+            <MicrophoneIcon size={20} color="currentColor" />
           </button>
 
           {/* Send */}
@@ -75,7 +76,7 @@ export default function NightCap() {
             type="submit"
             className="w-9 h-9 flex items-center cursor-pointer transition ease-in-out duration-300 justify-center rounded-full bg-white text-black hover:scale-105 "
           >
-            <SendMessageDm size={18} weight={1} color="currentColor" />
+            <SendIcon size={20} color="currentColor" />
           </button>
         </div>
       </form>

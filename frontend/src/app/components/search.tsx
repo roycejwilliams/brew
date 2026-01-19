@@ -1,6 +1,6 @@
 "use client";
-import { Search } from "react-basicons";
 import { usePathname } from "next/navigation";
+import { SearchIcon } from "./icons";
 
 export default function SearchMap() {
   const path = usePathname();
@@ -10,7 +10,7 @@ export default function SearchMap() {
       {/* Search */}
       <div className=" w-full  px-4 py-2 bg-[#181818] backdrop-blur-lg  border-b border-white/10  mx-auto  flex items-center">
         <div className="w-fit h-fit flex justify-center items-center">
-          <Search size={20} color="currentColor" weight={1} />
+          <SearchIcon size={20} color="currentColor" />
         </div>
         <input
           type="text"

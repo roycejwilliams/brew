@@ -1,19 +1,12 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import {
-  MapLocation,
-  SendMessageDm,
-  UserGroupAccounts,
-  MenuHambuger,
-  XCloseDelete,
-} from "react-basicons";
-
 import { usePathname } from "next/navigation";
 import { ToggleState } from "../utils/toggleState";
 import { useOutsideAlerter } from "../utils/outsideAlert";
 import { ScrollLock } from "../utils/scrollLock";
-import { motion, AnimatePresence, Variants, rgba } from "motion/react";
+import { motion, AnimatePresence, Variants} from "motion/react";
+import { CloseIcon, MenuIcon, PinIcon, UsersPlusIcon, SpinnerIcon } from "./icons";
 
 export default function Nav() {
   const path = usePathname();
@@ -88,7 +81,7 @@ export default function Nav() {
                 transition={{ duration: 0.2, ease: "easeOut" }}
                 className="inline-flex"
               >
-                <XCloseDelete color="currentColor" size={16} weight={0.5} />
+                <CloseIcon size={16} color="currentColor" />
               </motion.span>
             ) : (
               <motion.span
@@ -99,7 +92,7 @@ export default function Nav() {
                 transition={{ duration: 0.2, ease: "easeOut" }}
                 className="inline-flex"
               >
-                <MenuHambuger color="currentColor" size={16} weight={0.5} />
+                <MenuIcon size={16} color="currentColor" />
               </motion.span>
             )}
           </AnimatePresence>
@@ -111,37 +104,35 @@ export default function Nav() {
               initial="hidden"
               animate="visible"
               exit="exit"
-              className="absolute z-50 top-0 left-0 mt-16 border border-white/5  backdrop-blur-3xl rounded-sm w-[230px] flex justify-center items-center shadow-2xl  px-4 py-8 "
+              className="absolute z-50 top-0 left-0 mt-16 border border-white/10  backdrop-blur-3xl rounded-sm w-[230px] flex justify-center items-center shadow-2xl  px-4 py-8 "
             >
               <motion.ul className="flex flex-col text-sm gap-y-8">
                 <motion.li variants={itemVariants}>
                   <Link
                     href="/pulse"
-                    className={`hover:text-white duration-300 flex gap-x-8 items-center px-2 py-4 ${
+                    className={`hover:text-white duration-300 flex gap-x-4 items-center px-2 py-4 ${
                       path === "/pulse" ? "text-white" : "text-white/50"
                     }`}
                   >
-                    <MapLocation color="currentColor" size={20} />
+                    <PinIcon size={26} color="currentColor" />
                     <span>Pulse</span>
                   </Link>
                 </motion.li>
-
                 <motion.li variants={itemVariants}>
-                  <div className="hover:text-white  duration-300 flex gap-x-8 items-center px-2 py-4">
-                    <UserGroupAccounts color="currentColor" size={20} />
+                  <div className={`hover:text-white cursor-pointer duration-300 flex gap-x-4 items-center px-2 py-4 ${path === "/manage" || path === "/pulse" ? "text-white/50" : "text-white" }`}>
+                    <UsersPlusIcon size={26} color="currentColor" />
                     <span>Create</span>
                   </div>
                 </motion.li>
-
                 <motion.li variants={itemVariants}>
                   <Link
-                    href="/inbox"
-                    className={`hover:text-white duration-300 flex gap-x-8 items-center px-2 py-4 ${
-                      path === "/inbox" ? "text-white" : "text-white/50"
+                    href="/manage"
+                    className={`hover:text-white duration-300 flex gap-x-4 items-center px-2 py-4 ${
+                      path === "/manage" ? "text-white" : "text-white/50"
                     }`}
                   >
-                    <SendMessageDm color="currentColor" size={20} />
-                    <span>Inbox</span>
+                    <SpinnerIcon size={26} color="currentColor" />
+                    <span>Manage</span>
                   </Link>
                 </motion.li>
               </motion.ul>

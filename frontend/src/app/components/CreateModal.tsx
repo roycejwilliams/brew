@@ -2,10 +2,11 @@ import { AnimatePresence, motion, Variants } from "motion/react";
 import React, { useRef, useState } from "react";
 import { useOutsideAlerter } from "../utils/outsideAlert";
 import { RadialGradientBackground } from "./radialNoiseBackground";
-import FingerprintIcon from "../icons/fingerPrint";
-import SlashIcon from "../icons/slashIcon";
-import { AsteriskStar } from "react-basicons";
+import FingerprintIcon from "./icons/fingerPrint";
+import SlashIcon from "./icons/slashIcon";
 import StartMoment from "./startMoment";
+import Asterisk from "./icons/AsterikIcon";
+
 
 interface CreateModalProp {
   onClose: () => void;
@@ -62,11 +63,11 @@ function CreateModal({ onClose }: CreateModalProp) {
           animate={{ rotate: 360 }}
           exit={{ rotate: 0 }}
           transition={{ duration: 0.75, ease: "easeInOut" }}
-          className="mx-auto text-center "
+          className="mx-auto text-center text-6xl"
         >
-          <AsteriskStar size={48} color="white" weight={1} />
+          <Asterisk size={48} color="white" />
         </motion.div>
-        <h1 className="text-3xl font-normal mt-4">
+        <h1 className="text-3xl font-normal mt-8">
           {cardAction === "create"
             ? "Start a moment"
             : cardAction === "invite"
@@ -82,7 +83,7 @@ function CreateModal({ onClose }: CreateModalProp) {
         </p>
       </div>
 
-      <div ref={cardActionRef} className="mt-16 ">
+      <div ref={cardActionRef} className="mt-24 w-fit mx-auto">
         <AnimatePresence mode="popLayout">
           {cardAction === "create" ? (
             <StartMoment />

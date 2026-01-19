@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowDropdownCaretSortSelectArrow } from "react-basicons";
+import { ChevronDownIcon } from "./icons";
 
 interface FaqItemProps {
   question: string;
@@ -25,7 +25,7 @@ export default function FaqItem({
               isActive ? "-rotate-180" : "rotate-0"
             }`}
           >
-            <ArrowDropdownCaretSortSelectArrow size={20} color="currentColor" />
+            <ChevronDownIcon size={20} color="currentColor" />
           </button>
         </div>
         <div
