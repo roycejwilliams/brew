@@ -10,7 +10,7 @@ COPY package*.json ./
 #Install dependencies
 RUN npm install --legacy-peer-deps
 
-#Copy the app soruce code to the container
+#Copy the app source code to the container
 COPY . .
 
 #Build the next.js app

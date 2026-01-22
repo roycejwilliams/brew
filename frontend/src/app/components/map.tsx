@@ -13,9 +13,10 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
-import { X, Minus, Plus, Locate, Maximize, Loader2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { CloseIcon, MinusIcon, PlusIcon, MaximizeIcon, PinTackIcon } from "./icons";
+import Loading from "./loading";
 
 type MapContextValue = {
   map: MapLibreGL.Map | null;
@@ -384,7 +385,7 @@ function MarkerPopup({
           className="absolute top-1 right-1 z-10 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
           aria-label="Close popup"
         >
-          <X className="h-4 w-4" />
+          <CloseIcon size={24}  />
           <span className="sr-only">Close</span>
         </button>
       )}
@@ -633,10 +634,10 @@ function MapControls({
       {showZoom && (
         <ControlGroup>
           <ControlButton onClick={handleZoomIn} label="Zoom in">
-            <Plus className="size-4" />
+            <PlusIcon size={24} className="size-4" />
           </ControlButton>
           <ControlButton onClick={handleZoomOut} label="Zoom out">
-            <Minus className="size-4" />
+            <MinusIcon size={24} className="size-4" />
           </ControlButton>
         </ControlGroup>
       )}
@@ -653,9 +654,9 @@ function MapControls({
             disabled={waitingForLocation}
           >
             {waitingForLocation ? (
-              <Loader2 className="size-4 animate-spin" />
+              <Loading/>
             ) : (
-              <Locate className="size-4" />
+              <PinTackIcon className="size-4" />
             )}
           </ControlButton>
         </ControlGroup>
@@ -663,7 +664,7 @@ function MapControls({
       {showFullscreen && (
         <ControlGroup>
           <ControlButton onClick={handleFullscreen} label="Toggle fullscreen">
-            <Maximize className="size-4" />
+            <MaximizeIcon size={24} className="size-4" />
           </ControlButton>
         </ControlGroup>
       )}
@@ -802,7 +803,7 @@ function MapPopup({
           className="absolute top-1 right-1 z-10 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
           aria-label="Close popup"
         >
-          <X className="h-4 w-4" />
+          <CloseIcon size={24}  />
           <span className="sr-only">Close</span>
         </button>
       )}
