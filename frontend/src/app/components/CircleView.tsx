@@ -1,5 +1,4 @@
 import React from "react";
-import SearchMap from "./search";
 import CircleScene from "./CircleScene";
 import CircleSignal from "./CircleSignal";
 

@@ -16,7 +16,7 @@ export default function CustomRadio({
       classNames={{
         base: `
       flex gap-4 cursor-pointer 
-      rounded-full border border-white/10 px-4 py-2
+      rounded-md border border-white/10 px-4 py-2
       hover:opacity-75 transition
       data-[selected=true]:bg-[#98473E]/50 data-[selected=true]:text-white
     `,

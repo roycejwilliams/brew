@@ -83,7 +83,7 @@ function CreateModal({ onClose }: CreateModalProp) {
         </p>
       </div>
 
-      <div ref={cardActionRef} className="mt-24 w-fit mx-auto">
+      <div ref={cardActionRef} className={`w-fit mx-auto ${cardAction === "create" || cardAction === "invite" ? "mt-16" : "mt-24" }`}>
         <AnimatePresence mode="popLayout">
           {cardAction === "create" ? (
             <StartMoment />
