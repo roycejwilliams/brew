@@ -5,8 +5,14 @@ import { usePathname } from "next/navigation";
 import { ToggleState } from "../utils/toggleState";
 import { useOutsideAlerter } from "../utils/outsideAlert";
 import { ScrollLock } from "../utils/scrollLock";
-import { motion, AnimatePresence, Variants} from "motion/react";
-import { CloseIcon, MenuIcon, PinIcon, UsersPlusIcon, SpinnerIcon } from "./icons";
+import { motion, AnimatePresence, Variants } from "motion/react";
+import {
+  CloseIcon,
+  MenuIcon,
+  PinIcon,
+  UsersPlusIcon,
+  SpinnerIcon,
+} from "./icons";
 
 export default function Nav() {
   const path = usePathname();
@@ -119,7 +125,9 @@ export default function Nav() {
                   </Link>
                 </motion.li>
                 <motion.li variants={itemVariants}>
-                  <div className={`hover:text-white cursor-pointer duration-300 flex gap-x-4 items-center px-2 py-4 ${path === "/manage" || path === "/pulse" ? "text-white/50" : "text-white" }`}>
+                  <div
+                    className={`hover:text-white cursor-pointer duration-300 flex gap-x-4 items-center px-2 py-4 ${path === "/manage" || path === "/pulse" ? "text-white/50" : "text-white"}`}
+                  >
                     <UsersPlusIcon size={26} color="currentColor" />
                     <span>Create</span>
                   </div>

@@ -6,7 +6,7 @@ import FingerprintIcon from "./icons/fingerPrint";
 import SlashIcon from "./icons/slashIcon";
 import StartMoment from "./startMoment";
 import Asterisk from "./icons/AsterikIcon";
-
+import { CloseIcon } from "./icons";
 
 interface CreateModalProp {
   onClose: () => void;
@@ -45,9 +45,15 @@ function CreateModal({ onClose }: CreateModalProp) {
 
   useOutsideAlerter(cardActionRef, onClose);
 
-  const [action, setAction] = useState<"create" | "invite" | null>("create");
   const [cardAction, setCardAction] = useState<"create" | "invite" | null>(
-    null
+    null,
+  );
+  const [hoveredAction, setHoveredAction] = useState<
+    "create" | "invite" | null
+  >("create");
+
+  const [chooser, setChooser] = useState<"circle" | "people" | "nearby" | null>(
+    null,
   );
 
   return (
@@ -55,9 +61,34 @@ function CreateModal({ onClose }: CreateModalProp) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="w-full h-screen fixed left-0 top-0 bg-linear-to-br from-black/80 to-[#535353] backdrop-blur-sm z-80"
+      className="w-full h-screen  fixed left-0 top-0 bg-linear-to-br from-black/80 to-[#535353] backdrop-blur-sm z-80"
     >
-      <div className="mx-auto text-center mt-10 mb-8 flex flex-col justify-center items-center">
+      {cardAction === null && (
+        <motion.button
+          onClick={onClose}
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+          whileTap={{ scale: 0.95 }}
+          transition={{
+            type: "spring",
+            stiffness: 300,
+            damping: 25,
+          }}
+          className="absolute left-0 top-0 m-8 cursor-pointer flex gap-x-1 items-center text-white/80 hover:text-white transition-colors group"
+        >
+          <motion.span
+            className="inline-block"
+            whileHover={{ rotate: 90 }}
+            transition={{ duration: 0.2 }}
+          >
+            <CloseIcon size={18} />
+          </motion.span>
+          close
+        </motion.button>
+      )}
+
+      <div className="mx-auto text-center mt-10 mb-4 flex flex-col justify-center items-center">
         <motion.div
           initial={{ rotate: 0 }}
           animate={{ rotate: 360 }}
@@ -71,8 +102,8 @@ function CreateModal({ onClose }: CreateModalProp) {
           {cardAction === "create"
             ? "Start a moment"
             : cardAction === "invite"
-            ? "Invite"
-            : "Create a moment."}
+              ? "Invite"
+              : "Create a moment."}
         </h1>
         <h3 className="text-lg mt-2 font-light">
           {cardAction === null && "Turn a passing idea into a real plan."}
@@ -83,26 +114,34 @@ function CreateModal({ onClose }: CreateModalProp) {
         </p>
       </div>
 
-      <div ref={cardActionRef} className={`w-fit mx-auto ${cardAction === "create" || cardAction === "invite" ? "mt-16" : "mt-24" }`}>
+      <div
+        className={`w-full h-full mx-auto ${cardAction === "create" || cardAction === "invite" ? "mt-4" : "mt-24"}`}
+      >
         <AnimatePresence mode="popLayout">
           {cardAction === "create" ? (
-            <StartMoment />
+            //start moment
+            <StartMoment
+              chooser={chooser!}
+              setChooser={setChooser}
+              onGoBack={() => setCardAction(null)}
+            /> //invite
           ) : cardAction === "invite" ? (
             ""
           ) : (
+            //Create moment
             <div className="flex gap-x-20 justify-center items-center mx-auto max-w-xl">
               <button
-                onMouseEnter={() => setAction("create")}
+                onMouseEnter={() => setHoveredAction("create")}
                 onClick={() => setCardAction("create")}
                 className="cursor-pointer"
               >
                 <motion.div
-                  animate={action === "create" ? "active" : "rest"}
+                  animate={hoveredAction === "create" ? "active" : "rest"}
                   variants={scaleVariants}
                   className="text-center"
                 >
                   <motion.div
-                    animate={action === "create" ? "active" : "rest"}
+                    animate={hoveredAction === "create" ? "active" : "rest"}
                     variants={glowVariants}
                     className="w-64 h-64 border border-white/15 rounded-md shadow-lg relative overflow-hidden flex justify-center items-center"
                   >
@@ -114,7 +153,7 @@ function CreateModal({ onClose }: CreateModalProp) {
                     <SlashIcon width={75} height={75} />
                   </motion.div>
                   <motion.p
-                    animate={action === "create" ? "active" : "rest"}
+                    animate={hoveredAction === "create" ? "active" : "rest"}
                     variants={textVariants}
                     className="mt-6 text-sm"
                   >
@@ -124,17 +163,17 @@ function CreateModal({ onClose }: CreateModalProp) {
               </button>
 
               <button
-                onMouseEnter={() => setAction("invite")}
+                onMouseEnter={() => setHoveredAction("invite")}
                 onClick={() => setCardAction("invite")}
                 className="cursor-pointer"
               >
                 <motion.div
-                  animate={action === "invite" ? "active" : "rest"}
+                  animate={hoveredAction === "invite" ? "active" : "rest"}
                   variants={scaleVariants}
                   className="text-center"
                 >
                   <motion.div
-                    animate={action === "invite" ? "active" : "rest"}
+                    animate={hoveredAction === "invite" ? "active" : "rest"}
                     variants={glowVariants}
                     className="w-64 h-64 border border-white/15 rounded-md shadow-lg relative overflow-hidden  flex justify-center items-center"
                   >
@@ -149,7 +188,7 @@ function CreateModal({ onClose }: CreateModalProp) {
                     <FingerprintIcon width={65} height={103} />
                   </motion.div>
                   <motion.p
-                    animate={action === "invite" ? "active" : "rest"}
+                    animate={hoveredAction === "invite" ? "active" : "rest"}
                     variants={textVariants}
                     className="mt-6 text-sm"
                   >
