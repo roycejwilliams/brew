@@ -34,7 +34,7 @@ export default function Events({ openModal, id }: OpenModal) {
           <button
             role="notifications"
             onClick={() => openModal("notifications")}
-            className="cursor-pointer group transform translate-y-0 hover:-translate-y-1 ease-in-out duration-500 backdrop-blur-sm shadow-lg  flex flex-col items-center justify-center gap-y-1"
+            className="cursor-pointer group transform translate-y-0  hover:-translate-y-1 ease-in-out duration-500  flex flex-col items-center justify-center gap-y-1"
           >
             <div className="w-8 h-8 cursor-pointer   bg-white/10 transform translate-y-0 hover:-translate-y-1 ease-in-out duration-200 backdrop-blur-sm shadow-lg  flex flex-col items-center justify-center border border-white/10 rounded-md">
               <BellIcon size={16} color="currentColor" />

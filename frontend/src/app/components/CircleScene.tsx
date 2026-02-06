@@ -1,16 +1,41 @@
 "use client";
-import React, { useRef, useState } from "react";
-import CircleControls from "./circleControls";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
-import { ChevronDownIcon } from "./icons";
+import { CalendarDate } from "@internationalized/date";
+import { AnimatePresence, motion } from "motion/react";
 
-export default function CircleScene() {
-  const [activeIndex, setActiveIndex] = useState<number>(0);
+interface Circle {
+  circle: string;
+  date: CalendarDate | string;
+  image: string;
+}
+
+interface CircleSceneProp {
+  circles: Circle[];
+  selectedCircle: Circle | null;
+  activeIndex: number;
+}
+
+type MarkerGeometry = {
+  x: number;
+  y: number;
+  rotate: number;
+  scale: number;
+  visible: boolean;
+};
+
+export default function CircleScene({
+  circles,
+  activeIndex,
+  selectedCircle,
+}: CircleSceneProp) {
+  const circle = circles[activeIndex];
+  const [markerIndex, setMarkerIndex] = useState<number>(0);
   const markerRadius = 250;
   const windowSize = 24;
   const cadence = Math.round(360 / windowSize); // angular spacing between pins
-  const markerOffset = 35; // tweak until it matches Figma
+  const markerOffset = 50; // tweak until it matches Figma
   const markerData = Array.from({ length: 28 });
 
   const cx = 250;
@@ -19,7 +44,6 @@ export default function CircleScene() {
   //Calculates the markers around the radius
   //Configuring the left and right arrows we are going to have to make it a prop
 
-
   //gsap configuration
   gsap.registerPlugin(useGSAP);
 
@@ -27,127 +51,141 @@ export default function CircleScene() {
 
   const rotation = useRef({ value: 0 });
 
-
-  const visibleMarkers = (i: number) => {
+  const getMarkerGeometry = (
+    i: number,
+    rotationValue: number,
+    activeIndex: number,
+  ): MarkerGeometry => {
     const relativePosition =
-      (i - rotation.current.value + markerData.length) % markerData.length;
+      (i - rotationValue + markerData.length) % markerData.length;
+
     const angleDeg = relativePosition * cadence - 90;
     const angleRad = (Math.PI * angleDeg) / 180;
 
-    const x =
-      Math.round(
-        (cx + Math.cos(angleRad) * (markerRadius + markerOffset)) * 100
-      ) / 100;
-    const y =
-      Math.round(
-        (cy + Math.sin(angleRad) * (markerRadius + markerOffset)) * 100
-      ) / 100;
+    const x = cx + Math.cos(angleRad) * (markerRadius + markerOffset);
+    const y = cy + Math.sin(angleRad) * (markerRadius + markerOffset);
+
+    const visible =
+      (i - activeIndex + markerData.length) % markerData.length < windowSize;
 
     return {
-      transform: `translate(${x}px, ${y}px) rotate(${angleDeg + 90}deg) scale(${
-        i === activeIndex ? 0.65 : 0.5
-      })`,
-      opacity: 0,
+      x,
+      y,
+      rotate: angleDeg + 90,
+      scale: i === activeIndex ? 0.65 : 0.5,
+      visible,
     };
   };
 
+  //Visible Markers only for the first 24
+  const visibleMarkers = (i: number) => {
+    const g = getMarkerGeometry(i, rotation.current.value, markerIndex);
+
+    return {
+      transform: `translate(${g.x}px, ${g.y}px) rotate(${g.rotate}deg) scale(${
+        g.scale
+      })`,
+      opacity: g.visible ? 1 : 0,
+    };
+  };
+
+  //GSAP
   useGSAP(
     () => {
       const markers = gsap.utils.toArray<SVGGElement>(".circle-marker");
 
-      console.log(markers.length);
-
       gsap.to("#outerCircle", {
-        rotate: activeIndex * cadence + 360,
+        rotate: markerIndex * cadence + 360,
         transformOrigin: "50% 50%",
         ease: "power1.inOut",
-      });
+      }); //Outer Circle Rotation
 
       gsap.to("#innerCircle", {
-        rotate: -activeIndex * cadence + 180,
+        rotate: -markerIndex * cadence + 180,
         transformOrigin: "50% 50%",
         ease: "power1.inOut",
-      });
+      }); // Inner Circle Rotation
 
       gsap.to(rotation.current, {
-        value: activeIndex,
+        value: markerIndex,
         duration: 0.6,
         ease: "power1.inOut",
         onUpdate: () => {
-          const currentVisible = new Set<number>();
-
           markers.forEach((marker, i) => {
-            const relativePosition =
-              (i - rotation.current.value + markers.length) % markers.length;
-            const angleDeg = relativePosition * cadence - 90;
-            const angleRad = (Math.PI * angleDeg) / 180;
-            const isVisible =
-              (i - activeIndex + markers.length) % markers.length < windowSize;
+            const g = getMarkerGeometry(i, rotation.current.value, markerIndex);
 
-            if (isVisible) currentVisible.add(i);
-
-            const x = cx + Math.cos(angleRad) * (markerRadius + markerOffset);
-            const y = cy + Math.sin(angleRad) * (markerRadius + markerOffset);
-
-            if (isVisible) {
+            if (g.visible) {
               gsap.to(marker, {
-                x,
-                y,
-                rotate: angleDeg + 90,
-                opacity: i === activeIndex ? 1 : 0.6,
-                scale: i === activeIndex ? 0.65 : 0.5,
+                x: g.x,
+                y: g.y,
+                rotate: g.rotate,
+                scale: g.scale,
+                opacity: i === markerIndex ? 1 : 0.6,
                 duration: 0.6,
                 ease: "power1.inOut",
               });
             } else {
-              gsap.to(marker, { opacity: 0, duration: 0.6 });
+              gsap.to(marker, {
+                opacity: 0,
+                duration: 0.6,
+                ease: "power1.inOut",
+              });
             }
           });
         },
       });
     },
-    { scope: container, dependencies: [activeIndex] }
+    { scope: container, dependencies: [markerIndex] },
   );
 
+  //NEXT MARKER
   const nextMarker = () => {
-    setActiveIndex((i) => (i + 1) % markerData.length);
+    setMarkerIndex((i) => (i + 1) % markerData.length);
   };
 
+  //PREV MARKER
   //Previous Marker
   const prevMarker = () => {
-    setActiveIndex((i) => (i - 1 + markerData.length) % markerData.length);
+    setMarkerIndex((i) => (i - 1 + markerData.length) % markerData.length);
   };
 
   return (
     <>
-      <section
+      <motion.section
         ref={container}
-        className="mt-32 mx-auto max-w-4xl flex flex-col justify-center items-center relative"
+        className=" mx-auto max-w-4xl relative flex shrink-0 justify-center  items-center"
       >
-        <div className=" text-center w-fit ">
-          <h2 className="">@firstlast</h2>
-          <div className="w-fit mx-auto">
-            <ChevronDownIcon color="currentColor" size={28} />
+        {!selectedCircle && (
+          <div className="absolute w-fit font-medium z-10 mx-auto">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeIndex}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
+                className="text-center my-auto  text-[#ececec]/75"
+              >
+                <h1 className="text-lg">{circle.circle}</h1>
+              </motion.div>
+            </AnimatePresence>
           </div>
-        </div>
-        <div className="absolute w-fit h-1/3 flex flex-col justify-between">
-          <h2 className="font-light text-sm text-center">Attending</h2>
-          <div className="text-center ">
-            <h1 className="text-lg ">First Pour</h1>
-            <span className="font-light">Sat. Jan 3rd 2025</span>
-          </div>
-        </div>
-        <svg
-          width="525"
-          height="525"
-          viewBox="-43.5 -50 625 650"
+        )}
+
+        <motion.svg
+          width="625"
+          height="625"
+          viewBox="-50 -50 602.5 602.5"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className="w-full xl:max-w-[540px] max-w-[400px] h-auto ml-2"
+          className="w-full xl:max-w-150 max-w-100 h-auto"
           preserveAspectRatio="xMidYMid meet"
+          initial={{ opacity: 0, rotate: -5 }}
+          animate={{ opacity: 1, rotate: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
         >
           <g filter="url(#filter0_d_652_266)">
-            <circle
+            <motion.circle
               id="outerCircle"
               cx={cx}
               cy={cy}
@@ -155,10 +193,13 @@ export default function CircleScene() {
               stroke="white"
               strokeLinecap="round"
               strokeDasharray="10 10"
+              initial={{ pathLength: 0, opacity: 0 }}
+              animate={{ pathLength: 1, opacity: 1 }}
+              transition={{ duration: 1.2, ease: "easeInOut", delay: 0.2 }}
             />
           </g>
           <g filter="url(#filter1_d_652_266)">
-            <circle
+            <motion.circle
               id="innerCircle"
               cx={cx}
               cy={cy}
@@ -166,6 +207,9 @@ export default function CircleScene() {
               stroke="white"
               strokeLinecap="round"
               strokeDasharray="5 10"
+              initial={{ pathLength: 0, opacity: 0 }}
+              animate={{ pathLength: 1, opacity: 1 }}
+              transition={{ duration: 1.2, ease: "easeInOut", delay: 0.4 }}
             />
           </g>
           <g filter="url(#filter1_d_652_266)">
@@ -175,33 +219,46 @@ export default function CircleScene() {
               </clipPath>
             </defs>
 
-            <image
-              href="/ex2.jpg"
-              x={cx - 175}
-              y={cy - 175}
-              width={350}
-              height={350}
-              clipPath="url(#center-clip)"
-              preserveAspectRatio="xMidYMid slice"
-            />
+            <AnimatePresence mode="wait">
+              <motion.image
+                key={circle.image}
+                href={circle.image}
+                x={cx - 175}
+                y={cy - 175}
+                width={350}
+                height={350}
+                clipPath="url(#center-clip)"
+                preserveAspectRatio="xMidYMid slice"
+                className="brightness-110"
+                initial={{ opacity: 0, scale: 1.1 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{
+                  duration: 0.6,
+                  ease: [0.25, 0.1, 0.25, 1],
+                }}
+              />
+            </AnimatePresence>
 
-            <circle
+            <motion.circle
               cx={cx}
               cy={cy}
               r={175}
               fill="black"
               stroke="#3A3A3A"
               strokeWidth="1"
-              opacity="0.5"
+              opacity="0.15"
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 0.5 }}
+              transition={{ duration: 0.5, delay: 0.6 }}
             />
           </g>
           <g className="markers">
             {markerData.map((_, i) => (
               <g key={i} className="circle-marker" style={visibleMarkers(i)}>
-                {" "}
                 <text
-                  x={26} // Center of your marker (relative to the group)
-                  y={26} // Center of your marker (relative to the group)
+                  x={26}
+                  y={26}
                   fill="white"
                   fontSize="16"
                   fontWeight="bold"
@@ -210,27 +267,11 @@ export default function CircleScene() {
                 >
                   {i}
                 </text>
-                {/* A place to store things */}
                 <defs>
-                  {/* creates a clip and give it an id*/}
                   <clipPath id={`clip-${i}`}>
-                    {/* id is important to avoid using the same svg id */}
-                    {/* so now you created a circle */}
                     <circle cx="24" cy="24" r="24" />
-                    {/* cx = means the circle's center is 26 units to the right from the svg's origin  */}
-                    {/* cy = means the circle's center is 26 units down from the svg's origin  */}
-                    {/* r = the distance from the center to the edge */}
                   </clipPath>
                 </defs>
-                {/* <image
-                  href="/pexels-olya.jpg"
-                  x="0"
-                  y="0"
-                  width="48"
-                  height="48"
-                  clipPath={`url(#clip-${i})`}
-                  preserveAspectRatio="xMidYMid slice" //how it fills the cropping window
-                /> */}
                 <path
                   d="M26 58V96.5
        M51 26
@@ -318,9 +359,8 @@ export default function CircleScene() {
               />
             </filter>
           </defs>
-        </svg>
-      </section>
-      <CircleControls nextMarker={nextMarker} prevMarker={prevMarker} />
+        </motion.svg>
+      </motion.section>
     </>
   );
 }
