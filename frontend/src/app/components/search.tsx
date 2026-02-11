@@ -1,29 +1,69 @@
 "use client";
 import { usePathname } from "next/navigation";
+import { motion } from "framer-motion";
 import { SearchIcon } from "./icons";
 
-export default function SearchMap() {
+interface SearchMapProps {
+  placeholder?: string;
+  value?: string;
+  onChange?: (value: string) => void;
+  onFocus?: () => void;
+  autoFocus?: boolean;
+}
+
+export default function SearchMap({
+  placeholder,
+  value,
+  onChange,
+  onFocus,
+  autoFocus = false,
+}: SearchMapProps = {}) {
   const path = usePathname();
 
+  const defaultPlaceholder =
+    path === "/circle"
+      ? "Search Users, Groups, & Collectives"
+      : "Search a city or area";
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (onChange) {
+      onChange(e.target.value);
+    }
+  };
+
   return (
-    <section className="flex justify-evenly mx-auto items-center z-20">
-      {/* Search */}
-      <div className=" w-full  px-4 py-2 bg-[#181818] backdrop-blur-lg  border-b border-white/10  mx-auto  flex items-center">
-        <div className="w-fit h-fit flex justify-center items-center">
-          <SearchIcon size={20} color="currentColor" />
-        </div>
+    <motion.section
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+      className="flex justify-evenly mx-auto items-center"
+    >
+      <motion.div
+        whileFocus={{ scale: 1.01 }}
+        transition={{ duration: 0.2 }}
+        className="w-full px-5 py-3.5 bg-[#1c1c1c] backdrop-blur-xl  mx-auto flex items-center gap-3 shadow-2xl shadow-black/20"
+      >
+        <motion.div
+          initial={{ opacity: 0.5 }}
+          animate={{ opacity: 0.4 }}
+          whileHover={{ opacity: 0.6 }}
+          transition={{ duration: 0.2 }}
+          className="w-fit h-fit flex justify-center items-center"
+        >
+          <SearchIcon size={18} color="currentColor" />
+        </motion.div>
         <input
           type="text"
           id="search"
-          className="text-white flex-1  text-sm  placeholder:text-xs block mx-auto p-2.5 bg-transparent placeholder:text-white/50 focus:outline-none"
-          placeholder={
-            path === "/circle"
-              ? "Search Users, Groups, & Collectives"
-              : "Search a city or area"
-          }
+          value={value}
+          onChange={handleChange}
+          onFocus={onFocus}
+          autoFocus={autoFocus}
+          className="text-white/90 flex-1 text-sm placeholder:text-xs block p-0 bg-transparent placeholder:text-white/30 focus:outline-none transition-all"
+          placeholder={placeholder || defaultPlaceholder}
           required
         />
-      </div>
-    </section>
+      </motion.div>
+    </motion.section>
   );
 }

@@ -110,7 +110,7 @@ export default function Nav() {
               initial="hidden"
               animate="visible"
               exit="exit"
-              className="absolute z-50 top-0 left-0 mt-16 border border-white/10  backdrop-blur-3xl rounded-sm w-[230px] flex justify-center items-center shadow-2xl  px-4 py-8 "
+              className="absolute z-50 top-0 left-0 mt-16 border border-white/10  backdrop-blur-3xl rounded-sm w-57.5 flex justify-center items-center shadow-2xl  px-4 py-8 "
             >
               <motion.ul className="flex flex-col text-sm gap-y-8">
                 <motion.li variants={itemVariants}>
