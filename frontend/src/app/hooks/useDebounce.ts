@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 
 function useDebounce<T>(value: T, delay: number): T {
+  // gives a delayed version of that value
   const [debouncedValue, setDebouncedValue] = useState(value);
 
   useEffect(() => {
@@ -22,3 +23,7 @@ export default useDebounce;
 // Allows you to use reuseable functions,
 // classes, and interfaces that work
 // with a variety of types
+
+//Basically this is saying
+//Only update this value
+//if nothing has changed for X milliseconds

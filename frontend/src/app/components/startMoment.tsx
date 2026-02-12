@@ -14,17 +14,20 @@ import MomentConfirmation from "./momentConfirmation";
 type MomentSelectionProp = "start" | "circle" | "people" | "nearby" | "confirm";
 type WhoSelectionProp = "circle" | "people" | "nearby" | null;
 
-interface Signal {
-  circle: string;
-  people: string[];
-  time: string;
-  image: string;
+interface Moment {
+  id: string;
+  circleId: string; // relationship
+  title: string;
   date: CalendarDate;
+  time: string;
+  attendees: string[];
+  image: string;
 }
 
 interface Circle {
-  circle: string;
-  date: CalendarDate | string;
+  id: string;
+  name: string;
+  members: string[]; // or User[]
   image: string;
 }
 
@@ -39,6 +42,7 @@ export default function StartMoment({
   setChooser,
   onGoBack,
 }: GoBackProp) {
+  //Chips for time selection
   const timeChips = [
     {
       value: "tonight",
@@ -58,6 +62,7 @@ export default function StartMoment({
     },
   ];
 
+  //Invite intent
   const typeInvite = [
     {
       value: "circle",
@@ -73,6 +78,7 @@ export default function StartMoment({
     },
   ];
 
+  //framer motion animations
   const revealUp = {
     hidden: { opacity: 0, y: 8 },
     visible: { opacity: 1, y: 0 },
@@ -88,23 +94,29 @@ export default function StartMoment({
     visible: { opacity: 1, y: 0, scale: 1 },
   };
 
+  //Triggers showTimeInput, allows the whoSelectionIntent to show
   const [reveal, setReveal] = useState<boolean>(false);
+  //sets the moment name
   const [createMoment, setCreateMoment] = useState<string>("");
-  const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [selectedWho, setSelectedWho] = useState<WhoSelectionProp>();
+  //Current Time used for setSelectedTime
   const [time, setTime] = useState<Time>(
     new Time(new Date().getHours(), new Date().getMinutes()),
   );
+  //Captures the selectTime
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  //Captures the Invite intent
+  const [selectedWho, setSelectedWho] = useState<WhoSelectionProp>();
+  //Allows you to show submit button once Invite intent is selected
   const [showSubmit, setShowSubmit] = useState<boolean>(false);
+  //Allows you to switch between each modal depending on selection
   const [selectedModal, setSelectedModal] =
     useState<MomentSelectionProp>("start");
-  const [selectedCircleProp, setSelectedCircleProp] = useState<Signal | null>(
+  //Allows you to select the circle of friends you want invited
+  const [selectedCircleProp, setSelectedCircleProp] = useState<Circle | null>(
     null,
   );
-  //Active Signal
-  const [activeSignal, setActiveSignal] = useState<number>(0);
-
-  //copies whatever option that has been chosen to go back to.
+  //Points to the Active Circle ultimately for selection
+  const [activeCircle, setActiveCircle] = useState<number>(0);
 
   //allows the pick later dropdown to show
   const onSelectionTime = (value: string) => {
@@ -116,6 +128,7 @@ export default function StartMoment({
     }
   };
 
+  //Actions that designates what selectModal gets visibility
   const onSelectionWho = (value: WhoSelectionProp) => {
     setSelectedWho(value);
     setShowSubmit(true);
@@ -140,163 +153,27 @@ export default function StartMoment({
     setCreateMoment(e.target.value);
   };
 
-  const signals: Signal[] = [
+  const circles: Circle[] = [
     {
-      circle: "First Pour",
-      people: [
-        "Ava",
-        "Marcus",
-        "Elijah",
-        "Noah",
-        "Sofia",
-        "Cam",
-        "Jordan",
-        "Maya",
-        "Andre",
-        "Liam",
-        "Nina",
-        "Ty",
-        "Zoe",
-        "Chris",
-        "Ari",
-        "Jules",
-        "Ben",
-        "Kira",
-      ],
-      time: "Now",
+      id: "first-pour",
+      name: "First Pour",
+      members: ["Ava", "Marcus", "Elijah"],
       image: "/ex1.jpg",
-      date: new CalendarDate(2026, 3, 12),
     },
     {
-      circle: "Hermes Rooftop Session",
-      people: [
-        "Lina",
-        "Theo",
-        "Isabella",
-        "Mateo",
-        "Julian",
-        "Priya",
-        "Omar",
-        "Daniel",
-        "Rhea",
-        "Victor",
-        "Sienna",
-        "Alex",
-        "Milo",
-        "Anya",
-        "Sam",
-        "Leo",
-      ],
-      time: "Later",
+      id: "hermes",
+      name: "Hermes Rooftop Session",
+      members: ["Lina", "Theo", "Isabella"],
       image: "/ex2.jpg",
-      date: new CalendarDate(2026, 4, 24),
-    },
-    {
-      circle: "Studio 54",
-      people: [
-        "John",
-        "Max",
-        "Valentina",
-        "Luc",
-        "Bianca",
-        "Rafael",
-        "Sasha",
-        "Tony",
-        "Nico",
-        "Gia",
-        "Evan",
-        "Paolo",
-        "Iris",
-        "Marco",
-        "Elena",
-        "Dante",
-        "Rose",
-      ],
-      time: "After",
-      image: "/ex3.jpg",
-      date: new CalendarDate(2026, 5, 26),
-    },
-    {
-      circle: "Private",
-      people: [
-        "Peter",
-        "Claire",
-        "Jonah",
-        "Elliot",
-        "Freya",
-        "Miles",
-        "Hannah",
-        "Owen",
-        "Tess",
-        "Caleb",
-        "Rory",
-        "Luca",
-      ],
-      time: "Now",
-      image: "/ex4.jpg",
-      date: new CalendarDate(2026, 6, 8),
-    },
-    {
-      circle: "Second Light",
-      people: [
-        "Brian",
-        "Aiden",
-        "Naomi",
-        "Lucas",
-        "Emery",
-        "Phoebe",
-        "Khalil",
-        "Julio",
-        "Arman",
-        "Keisha",
-        "Finn",
-        "Layla",
-        "Theo",
-        "Rami",
-        "Ivy",
-      ],
-      time: "Later",
-      image: "/ex5.jpg",
-      date: new CalendarDate(2026, 7, 19),
-    },
-    {
-      circle: "3rd Lounge",
-      people: [
-        "Brianna",
-        "Jasper",
-        "Amira",
-        "Cole",
-        "Yara",
-        "Sebastian",
-        "Nolan",
-        "Marisol",
-        "Tariq",
-        "Anika",
-        "Drew",
-        "Hugo",
-        "Maeve",
-        "Reese",
-        "Kian",
-        "Lola",
-      ],
-      time: "After",
-      image: "/ex6.jpg",
-      date: new CalendarDate(2026, 8, 15),
     },
   ];
 
-  const circles: Circle[] = signals.map((circle) => ({
-    circle: circle.circle,
-    date: circle.date,
-    image: circle.image,
-  }));
-
   const nextSignal = () => {
-    setActiveSignal((i) => (i + 1) % signals.length);
+    setActiveCircle((i) => (i + 1) % circles.length);
   };
 
   const prevSignal = () => {
-    setActiveSignal((i) => (i - 1 + signals.length) % signals.length);
+    setActiveCircle((i) => (i - 1 + circles.length) % circles.length);
   };
 
   //function to cycleback
@@ -603,7 +480,7 @@ export default function StartMoment({
                       Inviting
                       <br />
                       <span className="text-white font-medium text-xl">
-                        {selectedCircleProp.circle}
+                        {selectedCircleProp.name}
                       </span>
                     </motion.h2>
                   ) : (
@@ -622,7 +499,7 @@ export default function StartMoment({
               {/* MIDDLE — persistent */}
               <CircleScene
                 circles={circles}
-                activeIndex={activeSignal}
+                activeIndex={activeCircle}
                 selectedCircle={selectedCircleProp}
               />
 
@@ -637,8 +514,8 @@ export default function StartMoment({
                     transition={{ duration: 0.2, ease: "easeOut" }}
                   >
                     <CircleSignal
-                      signals={signals}
-                      activeIndex={activeSignal}
+                      circles={circles}
+                      activeIndex={activeCircle}
                     />
                     <CircleControls
                       nextMarker={nextSignal}
@@ -659,7 +536,7 @@ export default function StartMoment({
             (selectedModal === "circle" && (
               <SelectAction
                 selectedSignal={selectedCircleProp}
-                onSelect={() => setSelectedCircleProp(signals[activeSignal])}
+                onSelect={() => setSelectedCircleProp(circles[activeCircle])}
                 onContinue={() => setSelectedModal("confirm")}
               />
             ))}

@@ -12,8 +12,10 @@ interface VenueResult {
   coordinates: { lat: number; lng: number };
 }
 
-interface Coordinates {
+interface VenueProp {
   viewport: [number, number];
+  selectedVenue: VenueResult | null;
+  setSelectedVenue: (selectedVenue: VenueResult | null) => void;
 }
 
 interface MapBoxSuggestion {
@@ -26,16 +28,22 @@ interface MapBoxSuggestion {
   poi_category?: string[];
 }
 
-export default function Venue({ viewport }: Coordinates) {
+export default function Venue({
+  viewport,
+  selectedVenue,
+  setSelectedVenue,
+}: VenueProp) {
   const [query, setQuery] = useState(""); //query for search
   const [results, setResults] = useState<VenueResult[]>([]); // search results compiled
-  const [selectedVenue, setSelectedVenue] = useState<VenueResult | null>(null); //holds the venue
   const [isSearching, setIsSearching] = useState(false); //searching indicator
   const [lng, lat] = viewport; // holds the view port center, which is lng + lat;
 
   const sessionToken = crypto.randomUUID(); // built in method that generates secure, random version 4 UUID. Ideal for unique database keys
 
-  const publicAccessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+  const publicAccessToken = process.env.NEXT_PUBLIC_MAPBOXGL_PUBLIC_TOKEN;
+  if (!publicAccessToken) {
+    throw new Error("Missing NEXT_PUBLIC_MAPBOXGL_PUBLIC_TOKEN");
+  }
 
   // Search function - actual venue search API
   const searchVenues = async (searchQuery: string) => {
@@ -120,8 +128,8 @@ export default function Venue({ viewport }: Coordinates) {
     setResults([]);
   };
 
+  //debounce logic
   const debouncedQuery = useDebounce(query, 300);
-
   useEffect(() => {
     if (debouncedQuery.length >= 2) {
       searchVenues(debouncedQuery);

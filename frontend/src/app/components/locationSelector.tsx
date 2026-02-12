@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Select, SelectItem } from "@heroui/react";
 
 type LocationIntent = "near" | "area" | "venue";
@@ -12,6 +12,7 @@ export default function LocationSelector({
   selectedLocation,
   onLocationChange,
 }: LocationSelectorProps) {
+  //Setting up key value pairs for Select Intent
   const locationOptions = [
     { key: "near", label: "Near you" },
     { key: "area", label: "Choose area…" },
@@ -29,11 +30,16 @@ export default function LocationSelector({
           "bg-neutral-900 border border-neutral-700 rounded-xl shadow-xl",
         listbox: "p-1",
       }}
-      items={locationOptions}
-      selectedKeys={new Set([selectedLocation])}
-      onSelectionChange={(keys) => {
-        const selectedKey = Array.from(keys)[0] as LocationIntent;
-        onLocationChange(selectedKey);
+      disallowEmptySelection
+      selectionMode="single"
+      items={locationOptions} //the key-value pair above
+      selectedKeys={new Set([selectedLocation])} //use a set for no duplicates,
+      // already being used with near
+      // as the first option called
+      onSelectionChange={(key) => {
+        const selectedKey = Array.from(key)[0] as LocationIntent;
+        // because it would clear the value if clicked again
+        onLocationChange(selectedKey); //just sets the location intent in the parent
       }}
       label="Location"
     >
@@ -43,7 +49,7 @@ export default function LocationSelector({
             title: "text-sm",
             base: `hover:bg-neutral-700 rounded-sm transition-all duration-300 ease-in-out`,
           }}
-          key={location.key}
+          key={location.key} //what gets emitted into the onSelectionChange function
         >
           {location.label}
         </SelectItem>

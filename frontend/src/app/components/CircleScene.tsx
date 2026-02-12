@@ -6,8 +6,9 @@ import { CalendarDate } from "@internationalized/date";
 import { AnimatePresence, motion } from "motion/react";
 
 interface Circle {
-  circle: string;
-  date: CalendarDate | string;
+  id: string;
+  name: string;
+  members: string[]; // or User[]
   image: string;
 }
 
@@ -166,7 +167,7 @@ export default function CircleScene({
                 transition={{ duration: 0.25, ease: "easeOut" }}
                 className="text-center my-auto  text-[#ececec]/75"
               >
-                <h1 className="text-lg">{circle.circle}</h1>
+                <h1 className="text-lg">{circle.name}</h1>
               </motion.div>
             </AnimatePresence>
           </div>

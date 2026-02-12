@@ -1,20 +1,21 @@
 "use client";
 import { motion } from "motion/react";
+import { CalendarDate } from "@internationalized/date";
 
 const dotVariants = {
   idle: { opacity: 0.55, scale: 1 },
   pressed: { opacity: 0.75, scale: 1.1 },
 };
 
-interface Signal {
-  circle: string;
-  people: string[];
-  time: string;
+interface Circle {
+  id: string;
+  name: string;
+  members: string[]; // or User[]
   image: string;
 }
 
 interface SelectedCircleSignalProp {
-  selectedSignal: Signal | null;
+  selectedSignal: Circle | null;
   onSelect: () => void;
   onContinue: () => void;
 }

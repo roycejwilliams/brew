@@ -5,6 +5,7 @@ import ChooseAreaPanel from "./chooseAreaPanel";
 import NearYou from "./nearYou";
 import Venue from "./Venue";
 import ImageDrop from "./imageDrop";
+import { error } from "console";
 
 type MapViewport = {
   center: [number, number];
@@ -12,26 +13,46 @@ type MapViewport = {
   bearing?: number;
   pitch?: number;
 };
+
+interface VenueResult {
+  id: string;
+  name: string;
+  category: string[];
+  location: string;
+  coordinates: { lat: number; lng: number };
+}
+
 type LocationIntent = "near" | "area" | "venue";
 
 export default function MomentConfirmation() {
+  //Selects the Location Intent
   const [selectedLocation, setSelectedLocation] =
     useState<LocationIntent>("near");
 
+  //Gets the selected area chosen
   const [selectedArea, setSelectedArea] = useState<{
     center: [number, number];
     zoom: number;
   } | null>(null);
 
+  //provides the coordinates from your current position
   const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
+  //Street level address from user's GPS coordinates
   const [near, setNear] = useState<string | null>(null);
+  //Broader city/region derived from the map center
   const [aroundLocation, setAroundLocation] = useState<string | null>(null);
-  const [venue, setVenue] = useState<string | null>(null);
+  //Exactly pinpoint venue, provides address as well from search
+  const [venue, setVenue] = useState<VenueResult | null>(null);
+  //For exact positioning and repositioning  when using the choose nearby
   const [viewport, setViewport] = useState<MapViewport | null>(null);
+  //loading stay when choosing the surrounding area
   const [isConfirming, setIsConfirming] = useState(false);
+  //Description modal that pops up after selections are made
   const [description, setDescription] = useState<string | null>("");
+  //Checks to see if the user has stop typing - allows button to show when false;
   const [isTyping, setIsTyping] = useState<boolean>(false);
 
+  //gets user's geolocated current position
   useEffect(() => {
     if (!navigator.geolocation) return;
 
@@ -42,6 +63,7 @@ export default function MomentConfirmation() {
           position.coords.latitude,
         ];
 
+        //always gets the current position
         setCoordinates(coords);
 
         // initialize viewport ONLY here
@@ -60,38 +82,73 @@ export default function MomentConfirmation() {
   }, []);
 
   console.log("selected area", selectedArea);
-  console.log("set", coordinates);
+  console.log("selected venue", venue);
 
-  const publicAccessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+  //public access token needed to run this
+  const publicAccessToken = process.env.NEXT_PUBLIC_MAPBOXGL_PUBLIC_TOKEN;
 
-  //Get location Name
+  //Get location Name from reverse geolocation
   const getLocationName = async (coordinates: [number, number]) => {
-    const response = await fetch(
-      `https://api.mapbox.com/geocoding/v5/mapbox.places/${coordinates[0]},${coordinates[1]}.json?access_token=${publicAccessToken}`,
-    );
+    try {
+      const response = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${coordinates[0]},${coordinates[1]}.json?access_token=${publicAccessToken}`,
+      );
 
-    if (!response.ok) {
-      throw new Error(`Http error! state: ${response.status}`);
+      if (!response.ok) {
+        throw new Error(`Http error! state: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      const cityPlace = data.features[1].place_name;
+      const addressPlace = data.features[0].place_name;
+
+      const city = cityPlace.split(",").slice(0, -1).join(",");
+      const address = addressPlace.split(",").slice(0, -1).join(",");
+
+      setNear(address);
+      setAroundLocation(city);
+    } catch (error) {
+      console.error("Error Getting location", error);
     }
-
-    const data = await response.json();
-
-    console.log("response", data);
-
-    const cityPlace = data.features[1].place_name;
-    const addressPlace = data.features[0].place_name;
-
-    const city = cityPlace.split(",").slice(0, -1).join(",");
-    const address = addressPlace.split(",").slice(0, -1).join(",");
-
-    setNear(address);
-    setAroundLocation(city);
   };
 
+  //when you change the area setSelectedArea
+  //and loading state are null & false
+  const handleChangeArea = () => {
+    setSelectedArea(null);
+    setIsConfirming(false);
+  };
+
+  //Changing location intent
   const locationChange = (location: LocationIntent) => {
     setSelectedLocation(location);
+
+    if (location !== "area" && coordinates) {
+      // Reset map position
+      setViewport({
+        center: coordinates,
+        zoom: 11,
+        bearing: 0,
+        pitch: 0,
+      });
+
+      getLocationName(coordinates);
+      handleChangeArea();
+    }
+
+    if (location !== "venue" && venue) {
+      setVenue(null);
+    }
   };
 
+  //if requirements are set then it shows a modal
+  const isLocationSet =
+    (selectedLocation === "near" && near != null) ||
+    (selectedLocation === "area" && selectedArea != null) ||
+    (selectedLocation === "venue" && venue != null);
+
+  //Gets the location name everytime the viewport changes
   useEffect(() => {
     if (!viewport) return;
     getLocationName(viewport.center);
@@ -112,16 +169,6 @@ export default function MomentConfirmation() {
     return;
   }
 
-  const handleChangeArea = () => {
-    setSelectedArea(null);
-    setIsConfirming(false);
-  };
-
-  const isLocationSet =
-    (selectedLocation === "near" && near != null) ||
-    (selectedLocation === "area" && selectedArea != null) ||
-    (selectedLocation === "venue" && venue != null);
-
   return (
     <div className=" text-white p-4 flex items-center justify-center">
       <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
@@ -141,8 +188,6 @@ export default function MomentConfirmation() {
                 <ChooseAreaPanel
                   onAreaSelected={(center, zoom) => {
                     setSelectedArea({ center, zoom });
-                    setSelectedLocation("area");
-                    console.log("Area selected:", center, zoom);
                   }}
                   onLocation={() => getLocationName(coordinates!)}
                   viewport={viewport}
@@ -157,7 +202,11 @@ export default function MomentConfirmation() {
                 />
               )}{" "}
               {selectedLocation === "venue" && (
-                <Venue viewport={viewport.center} />
+                <Venue
+                  viewport={viewport.center}
+                  selectedVenue={venue}
+                  setSelectedVenue={setVenue}
+                />
               )}
             </div>
           </div>

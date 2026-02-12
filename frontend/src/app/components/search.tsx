@@ -2,6 +2,7 @@
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { SearchIcon } from "./icons";
+import useDebounce from "../hooks/useDebounce";
 
 interface SearchMapProps {
   placeholder?: string;
@@ -30,6 +31,8 @@ export default function SearchMap({
       onChange(e.target.value);
     }
   };
+
+  const debouncedQuery = useDebounce(value, 300);
 
   return (
     <motion.section
