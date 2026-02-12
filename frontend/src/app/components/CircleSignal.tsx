@@ -2,32 +2,32 @@ import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 
-interface Signal {
-  circle: string;
-  people: string[];
-  time: string;
+interface Circle {
+  id: string;
+  name: string;
+  members: string[]; // or User[]
   image: string;
 }
 
 interface CircleSignalProp {
-  signals: Signal[];
+  circles: Circle[];
   activeIndex: number;
 }
 
 export default function CircleSignal({
-  signals,
+  circles,
   activeIndex,
 }: CircleSignalProp) {
   return (
     <motion.div
-      className="absolute right-0 transform -translate-y-1/2 top-1/2 rounded-md p-8"
+      className="absolute right-0 transform -translate-y-1/2  top-1/2 rounded-md "
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, y: 50 }}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
     >
-      <ul className="mt-4 flex flex-col gap-y-8">
-        {signals.map((signal, i) => (
+      <ul className="flex flex-col gap-y-8">
+        {circles.map((circle, i) => (
           <motion.li
             key={i}
             className={`flex gap-x-8 justify-between items-center z-20 text-sm relative`}
@@ -65,28 +65,28 @@ export default function CircleSignal({
               />
             )}
             <div className="flex gap-2 items-center flex-wrap w-fit">
-              {signal.people.slice(0, 3).map((_, i) => (
+              {circle.members.slice(0, 3).map((_, i) => (
                 <div
                   key={i}
                   className="px-3 py-1 text-xs rounded-full bg-white/10 relative text-white/80 overflow-hidden border border-white/15 w-12 h-12"
                   style={{
                     position: "relative",
                     left: `${i * -26}px`,
-                    zIndex: signal.people.length - i,
+                    zIndex: circle.members.length - i,
                   }}
                 >
                   <Image
-                    src={signal.image}
-                    alt={signal.people[i]}
+                    src={circle.image}
+                    alt={circle.members[i]}
                     fill
                     className="absolute w-full h-full inset-0"
                   />
                 </div>
               ))}
 
-              {signal.people.length > 3 && (
-                <div className="px-3 py-1 text-sm rounded-full">
-                  +{signal.people.length - 3}
+              {circle.members.length > 3 && (
+                <div className="px-3 py-1 text-sm border rounded-full">
+                  +{circle.members.length - 3}
                 </div>
               )}
             </div>
