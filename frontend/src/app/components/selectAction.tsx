@@ -32,7 +32,7 @@ export default function SelectAction({
       variants={dotVariants}
       whileTap="pressed"
       initial="idle"
-      className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center"
+      className=" mx-auto mt-8 mb-4 flex flex-col items-center"
     >
       <motion.button
         onClick={isSelected ? onContinue : onSelect}

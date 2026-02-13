@@ -154,7 +154,7 @@ export default function CircleScene({
     <>
       <motion.section
         ref={container}
-        className=" mx-auto max-w-4xl relative flex shrink-0 justify-center  items-center"
+        className=" mx-auto max-w-md   relative flex shrink-0 justify-center  items-center"
       >
         {!selectedCircle && (
           <div className="absolute w-fit font-medium z-10 mx-auto">

@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import SearchMap from "./search";
 import useDebounce from "../hooks/useDebounce";
 
+type MomentSelectionProp = "start" | "circle" | "people" | "nearby" | "confirm";
+
 interface VenueResult {
   id: string;
   name: string;
@@ -16,6 +18,7 @@ interface VenueProp {
   viewport: [number, number];
   selectedVenue: VenueResult | null;
   setSelectedVenue: (selectedVenue: VenueResult | null) => void;
+  selectedModal: MomentSelectionProp;
 }
 
 interface MapBoxSuggestion {
@@ -32,6 +35,7 @@ export default function Venue({
   viewport,
   selectedVenue,
   setSelectedVenue,
+  selectedModal,
 }: VenueProp) {
   const [query, setQuery] = useState(""); //query for search
   const [results, setResults] = useState<VenueResult[]>([]); // search results compiled
@@ -129,9 +133,9 @@ export default function Venue({
   };
 
   //debounce logic
-  const debouncedQuery = useDebounce(query, 300);
+  const debouncedQuery = useDebounce(query, 500);
   useEffect(() => {
-    if (debouncedQuery.length >= 2) {
+    if (debouncedQuery.length >= 3) {
       searchVenues(debouncedQuery);
     }
   }, [debouncedQuery]);
@@ -200,6 +204,7 @@ export default function Venue({
       {/* Search input using your SearchMap component */}
       <div className="rounded-md overflow-hidden border border-white/8 ">
         <SearchMap
+          selectedModal={selectedModal}
           placeholder="Search for a venue"
           value={query}
           onChange={handleSearchChange}
