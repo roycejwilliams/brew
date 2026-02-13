@@ -5,13 +5,11 @@ import { TimeInput } from "@heroui/react";
 import { CalendarDate, Time } from "@internationalized/date";
 import { AnimatePresence, motion } from "motion/react";
 import { ChevronLeftIcon, InformationIcon, SendIcon } from "./icons";
-import CircleScene from "./CircleScene";
-import CircleSignal from "./CircleSignal";
-import CircleControls from "./circleControls";
-import SelectAction from "./selectAction";
+import Circle from "./circle";
 import MomentConfirmation from "./momentConfirmation";
+import People from "./people";
 
-type MomentSelectionProp = "start" | "circle" | "people" | "nearby" | "confirm";
+type CreateMomentStage = "start" | "circle" | "people" | "nearby" | "confirm";
 type WhoSelectionProp = "circle" | "people" | "nearby" | null;
 
 interface Moment {
@@ -31,17 +29,22 @@ interface Circle {
   image: string;
 }
 
-interface GoBackProp {
+interface MomentProp {
   chooser: "circle" | "people" | "nearby";
-  setChooser: (value: "circle" | "people" | "nearby") => void;
+  setChooser: (value: "circle" | "people" | "nearby" | null) => void;
   onGoBack?: () => void;
+  onContinue?: () => void;
+  selectedModal: CreateMomentStage;
+  setSelectedModal: (selectedModal: CreateMomentStage) => void;
 }
 
 export default function StartMoment({
   chooser,
   setChooser,
   onGoBack,
-}: GoBackProp) {
+  selectedModal,
+  setSelectedModal,
+}: MomentProp) {
   //Chips for time selection
   const timeChips = [
     {
@@ -108,15 +111,14 @@ export default function StartMoment({
   const [selectedWho, setSelectedWho] = useState<WhoSelectionProp>();
   //Allows you to show submit button once Invite intent is selected
   const [showSubmit, setShowSubmit] = useState<boolean>(false);
-  //Allows you to switch between each modal depending on selection
-  const [selectedModal, setSelectedModal] =
-    useState<MomentSelectionProp>("start");
+
   //Allows you to select the circle of friends you want invited
   const [selectedCircleProp, setSelectedCircleProp] = useState<Circle | null>(
     null,
   );
-  //Points to the Active Circle ultimately for selection
   const [activeCircle, setActiveCircle] = useState<number>(0);
+
+  //Points to the Active Circle ultimately for selection
 
   //allows the pick later dropdown to show
   const onSelectionTime = (value: string) => {
@@ -153,29 +155,6 @@ export default function StartMoment({
     setCreateMoment(e.target.value);
   };
 
-  const circles: Circle[] = [
-    {
-      id: "first-pour",
-      name: "First Pour",
-      members: ["Ava", "Marcus", "Elijah"],
-      image: "/ex1.jpg",
-    },
-    {
-      id: "hermes",
-      name: "Hermes Rooftop Session",
-      members: ["Lina", "Theo", "Isabella"],
-      image: "/ex2.jpg",
-    },
-  ];
-
-  const nextSignal = () => {
-    setActiveCircle((i) => (i + 1) % circles.length);
-  };
-
-  const prevSignal = () => {
-    setActiveCircle((i) => (i - 1 + circles.length) % circles.length);
-  };
-
   //function to cycleback
   const goBack = () => {
     if (selectedModal === "confirm") {
@@ -193,6 +172,23 @@ export default function StartMoment({
       setChooser(selectedWho);
     }
   }, [selectedWho, setChooser]);
+
+  const circles: Circle[] = [
+    {
+      id: "first-pour",
+      name: "First Pour",
+      members: ["Ava", "Marcus", "Elijah"],
+      image: "/ex1.jpg",
+    },
+    {
+      id: "hermes",
+      name: "Hermes Rooftop Session",
+      members: ["Lina", "Theo", "Isabella"],
+      image: "/ex2.jpg",
+    },
+  ];
+
+  console.log("selected modal", selectedModal);
 
   return (
     <>
@@ -228,7 +224,7 @@ export default function StartMoment({
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -6 }}
-        className={`mx-auto ${selectedModal !== "confirm" ? "max-w-md" : "max-w-7xl"}  text-[#cecece]/75`}
+        className={`mx-auto ${selectedModal !== "confirm" ? "max-w-lg" : "max-w-7xl"}  text-[#cecece]/75`}
       >
         <AnimatePresence mode="wait">
           {selectedModal === "start" && (
@@ -246,10 +242,9 @@ export default function StartMoment({
                   type="text"
                   id="move"
                   placeholder={`"Ramen Tonight"`}
-                  disabled
                   required
-                  className="mt-4 border py-2 px-4 rounded-md bg-[#636363]/20 border-white/30 backdrop-blur-2xl 
-                focus:outline-none focus:border-white/60 
+                  className="w-full px-5 py-3.5 mt-4 bg-[#1c1c1c] backdrop-blur-xl rounded-lg border border-white/8  mx-auto flex items-center gap-3 shadow shadow-black/20
+                focus:outline-none 
                 text-white/90 placeholder:text-white/30 placeholder:text-sm
                 transition-colors duration-150"
                 />
@@ -445,7 +440,9 @@ export default function StartMoment({
                   transition={{ duration: 0.25, ease: "easeOut" }}
                 >
                   <motion.button
-                    onClick={() => setSelectedModal(selectedWho!)}
+                    onClick={() => {
+                      setSelectedModal(selectedWho!);
+                    }}
                     whileHover={{ scale: 1.04 }}
                     whileTap={{ scale: 0.96 }}
                     className="text-sm cursor-pointer px-4 py-2 bg-[#636363]/20 backdrop-blur-2xl 
@@ -460,87 +457,24 @@ export default function StartMoment({
           )}
 
           {selectedModal === "circle" && (
-            <motion.section
-              key="circle"
-              layout
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              className="overflow-hidden text-center"
-            >
-              <AnimatePresence mode="wait">
-                <div className="mb-4">
-                  {selectedCircleProp ? (
-                    <motion.h2
-                      key="selected-title"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                    >
-                      Inviting
-                      <br />
-                      <span className="text-white font-medium text-xl">
-                        {selectedCircleProp.name}
-                      </span>
-                    </motion.h2>
-                  ) : (
-                    <motion.h2
-                      key="browse-title"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                    >
-                      Who should see this event?
-                    </motion.h2>
-                  )}
-                </div>
-              </AnimatePresence>
-
-              {/* MIDDLE — persistent */}
-              <CircleScene
-                circles={circles}
-                activeIndex={activeCircle}
-                selectedCircle={selectedCircleProp}
-              />
-
-              {/* CONTROLS — presence */}
-              <AnimatePresence mode="wait">
-                {selectedCircleProp === null && (
-                  <motion.div
-                    key="controls"
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -6 }}
-                    transition={{ duration: 0.2, ease: "easeOut" }}
-                  >
-                    <CircleSignal
-                      circles={circles}
-                      activeIndex={activeCircle}
-                    />
-                    <CircleControls
-                      nextMarker={nextSignal}
-                      prevMarker={prevSignal}
-                    />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* CTA — persistent */}
-            </motion.section>
+            <Circle
+              activeCircle={activeCircle}
+              setActiveCircle={setActiveCircle}
+              circles={circles}
+              selectedCircleProp={selectedCircleProp}
+              setSelectedCircleProp={setSelectedCircleProp}
+              setSelectedModal={setSelectedModal}
+            />
           )}
 
-          {selectedModal === "people" && <motion.section></motion.section>}
+          {selectedModal === "people" && (
+            <People selectedModal={selectedModal} circles={circles} />
+          )}
           {selectedModal === "nearby" && <motion.section></motion.section>}
-          {selectedModal === "people" ||
-            selectedModal === "nearby" ||
-            (selectedModal === "circle" && (
-              <SelectAction
-                selectedSignal={selectedCircleProp}
-                onSelect={() => setSelectedCircleProp(circles[activeCircle])}
-                onContinue={() => setSelectedModal("confirm")}
-              />
-            ))}
-          {selectedModal === "confirm" && <MomentConfirmation />}
+
+          {selectedModal === "confirm" && (
+            <MomentConfirmation selectedModal={selectedModal} />
+          )}
         </AnimatePresence>
       </motion.section>
     </>

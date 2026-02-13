@@ -5,7 +5,8 @@ import ChooseAreaPanel from "./chooseAreaPanel";
 import NearYou from "./nearYou";
 import Venue from "./Venue";
 import ImageDrop from "./imageDrop";
-import { error } from "console";
+
+type MomentSelectionProp = "start" | "circle" | "people" | "nearby" | "confirm";
 
 type MapViewport = {
   center: [number, number];
@@ -22,9 +23,13 @@ interface VenueResult {
   coordinates: { lat: number; lng: number };
 }
 
+interface SelectModal {
+  selectedModal: MomentSelectionProp;
+}
+
 type LocationIntent = "near" | "area" | "venue";
 
-export default function MomentConfirmation() {
+export default function MomentConfirmation({ selectedModal }: SelectModal) {
   //Selects the Location Intent
   const [selectedLocation, setSelectedLocation] =
     useState<LocationIntent>("near");
@@ -203,6 +208,7 @@ export default function MomentConfirmation() {
               )}{" "}
               {selectedLocation === "venue" && (
                 <Venue
+                  selectedModal={selectedModal}
                   viewport={viewport.center}
                   selectedVenue={venue}
                   setSelectedVenue={setVenue}

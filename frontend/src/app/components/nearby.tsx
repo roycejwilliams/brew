@@ -9,7 +9,7 @@ import { WheelGesturesPlugin } from "embla-carousel-wheel-gestures";
 export default function Nearby() {
   const [emblaRef, emblaApi] = useEmblaCarousel(
     { loop: false, skipSnaps: true },
-    [WheelGesturesPlugin()]
+    [WheelGesturesPlugin()],
   );
   const {
     prevBtnDisabled,
@@ -63,7 +63,7 @@ export default function Nearby() {
                 key={i}
                 className={`${styles.embla__slide} gap-x-4 rounded-md w-[65%] cursor-pointer hover:-translate-y-4  bg-[#2b2b2b]/50 overflow-hidden duration-200 ease-in-out transition duration-300 relative shadow-xl border border-white/10`}
               >
-                <div className="w-full h-[150px] pb-2  relative ">
+                <div className="w-full h-37.5 pb-2  relative ">
                   <Image
                     src={nearby.image}
                     alt={nearby.event}

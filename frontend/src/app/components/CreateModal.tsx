@@ -8,6 +8,7 @@ import StartMoment from "./startMoment";
 import Asterisk from "./icons/AsterikIcon";
 import { CloseIcon } from "./icons";
 
+type CreateMomentStage = "start" | "circle" | "people" | "nearby" | "confirm";
 interface CreateModalProp {
   onClose: () => void;
 }
@@ -43,8 +44,6 @@ function CreateModal({ onClose }: CreateModalProp) {
 
   const cardActionRef = useRef<HTMLDivElement>(null);
 
-  useOutsideAlerter(cardActionRef, onClose);
-
   const [cardAction, setCardAction] = useState<"create" | "invite" | null>(
     null,
   );
@@ -55,6 +54,12 @@ function CreateModal({ onClose }: CreateModalProp) {
   const [chooser, setChooser] = useState<"circle" | "people" | "nearby" | null>(
     null,
   );
+
+  //Allows you to switch between each modal depending on selection
+  const [selectedModal, setSelectedModal] =
+    useState<CreateMomentStage>("start");
+
+  useOutsideAlerter(cardActionRef, onClose);
 
   return (
     <motion.section
@@ -98,13 +103,17 @@ function CreateModal({ onClose }: CreateModalProp) {
         >
           <Asterisk size={48} color="white" />
         </motion.div>
-        <h1 className="text-3xl font-normal mt-8">
-          {cardAction === "create"
-            ? "Start a moment"
-            : cardAction === "invite"
-              ? "Invite"
-              : "Create a moment."}
-        </h1>
+        {selectedModal === "start" && (
+          <h1 className="text-3xl font-normal mt-8">
+            <>
+              {cardAction === "create"
+                ? "Start a moment"
+                : cardAction === "invite"
+                  ? "Invite"
+                  : "Create a moment."}
+            </>
+          </h1>
+        )}
         <h3 className="text-lg mt-2 font-light">
           {cardAction === null && "Turn a passing idea into a real plan."}
         </h3>
@@ -115,15 +124,19 @@ function CreateModal({ onClose }: CreateModalProp) {
       </div>
 
       <div
-        className={`w-full h-full mx-auto ${cardAction === "create" || cardAction === "invite" ? "mt-4" : "mt-24"}`}
+        className={`w-full h-full mx-auto ${cardAction === "create" || cardAction === "invite" ? "mt-2" : "mt-24"}`}
       >
         <AnimatePresence mode="popLayout">
           {cardAction === "create" ? (
             //start moment
             <StartMoment
+              setSelectedModal={setSelectedModal}
+              selectedModal={selectedModal}
               chooser={chooser!}
               setChooser={setChooser}
-              onGoBack={() => setCardAction(null)}
+              onGoBack={() => {
+                setCardAction(null);
+              }}
             /> //invite
           ) : cardAction === "invite" ? (
             ""

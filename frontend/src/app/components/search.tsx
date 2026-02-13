@@ -4,12 +4,15 @@ import { motion } from "framer-motion";
 import { SearchIcon } from "./icons";
 import useDebounce from "../hooks/useDebounce";
 
+type MomentSelectionProp = "start" | "circle" | "people" | "nearby" | "confirm";
+
 interface SearchMapProps {
   placeholder?: string;
   value?: string;
   onChange?: (value: string) => void;
   onFocus?: () => void;
   autoFocus?: boolean;
+  selectedModal: MomentSelectionProp;
 }
 
 export default function SearchMap({
@@ -18,21 +21,22 @@ export default function SearchMap({
   onChange,
   onFocus,
   autoFocus = false,
-}: SearchMapProps = {}) {
+  selectedModal,
+}: SearchMapProps) {
   const path = usePathname();
 
   const defaultPlaceholder =
-    path === "/circle"
-      ? "Search Users, Groups, & Collectives"
-      : "Search a city or area";
+    selectedModal === "circle"
+      ? "Set the scene"
+      : selectedModal === "people"
+        ? "Curate the room"
+        : "Find a vibe...";
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (onChange) {
       onChange(e.target.value);
     }
   };
-
-  const debouncedQuery = useDebounce(value, 300);
 
   return (
     <motion.section
@@ -62,8 +66,8 @@ export default function SearchMap({
           onChange={handleChange}
           onFocus={onFocus}
           autoFocus={autoFocus}
-          className="text-white/90 flex-1 text-sm placeholder:text-xs block p-0 bg-transparent placeholder:text-white/30 focus:outline-none transition-all"
-          placeholder={placeholder || defaultPlaceholder}
+          className="text-white/90 flex-1 text-sm placeholder:text-sm block p-0 bg-transparent placeholder:text-white/30 focus:outline-none transition-all"
+          placeholder={defaultPlaceholder}
           required
         />
       </motion.div>
