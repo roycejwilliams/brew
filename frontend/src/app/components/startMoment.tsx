@@ -316,8 +316,8 @@ export default function StartMoment({
                             {/* Time input */}
                             <motion.div
                               className="flex-1"
-                              whileFocus={{ scale: 1.01 }}
-                              transition={{ duration: 0.15 }}
+                              whileFocus={{ scale: 1.005 }}
+                              transition={{ duration: 0.2 }}
                             >
                               <TimeInput
                                 onChange={(t) => onTimeChange(t)}
@@ -328,16 +328,21 @@ export default function StartMoment({
                                 classNames={{
                                   label: "text-sm text-white/40 mb-2",
                                   inputWrapper:
-                                    "bg-[#636363]/20 backdrop-blur-2xl rounded-md border border-white/30 focus-within:border-white/60 transition-colors",
-                                  segment: "text-base",
+                                    "bg-[#1c1c1c] rounded-md border border-white/8 hover:border-white/12 focus-within:border-white/20 transition-all duration-200",
+                                  segment: "text-base text-white/90",
                                   input: "font-normal [--foreground:white]/40",
                                 }}
                                 startContent={
-                                  <ClockCircleLinearIcon className="text-xl text-default-400 pointer-events-none shrink-0" />
+                                  <motion.div
+                                    initial={{ opacity: 0.4 }}
+                                    whileHover={{ opacity: 0.6 }}
+                                    transition={{ duration: 0.2 }}
+                                  >
+                                    <ClockCircleLinearIcon className="text-xl text-white/40 pointer-events-none shrink-0" />
+                                  </motion.div>
                                 }
                               />
                             </motion.div>
-
                             {/* Commit button */}
                             <motion.button
                               onClick={() => setReveal(true)}
@@ -445,7 +450,7 @@ export default function StartMoment({
                     }}
                     whileHover={{ scale: 1.04 }}
                     whileTap={{ scale: 0.96 }}
-                    className="text-sm cursor-pointer px-4 py-2 bg-[#636363]/20 backdrop-blur-2xl 
+                    className="text-sm cursor-pointer px-5 py-3.5 bg-[#636363]/20 backdrop-blur-2xl 
                             text-white/90 border border-white/50 rounded-md 
                             transition-colors duration-150"
                   >

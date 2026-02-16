@@ -259,7 +259,7 @@ export default function MomentConfirmation({ selectedModal }: SelectModal) {
               transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.97 }}
-              className="w-fit mt-auto px-5 py-2.5 rounded-md text-sm font-medium text-white/90 bg-[#1c1c1c] backdrop-blur-xl border border-white/8 shadow-2xl shadow-black/20 cursor-pointer"
+              className="w-fit mt-auto px-5 py-3.5 rounded-md text-sm font-medium text-white/90 bg-[#1c1c1c] backdrop-blur-xl border border-white/8 shadow-2xl shadow-black/20 cursor-pointer"
             >
               <span>Generate Moment</span>
             </motion.button>

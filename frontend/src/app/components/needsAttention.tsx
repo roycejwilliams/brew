@@ -60,10 +60,10 @@ export default function NeedsAttention({ id }: NeedsAttentionProp) {
               Awaiting your response
             </span>
             <div className="flex mt-4 justify-between gap-x-4 w-full h-fit">
-              <button className="px-4 py-2 text-xs border  border-white/10 shadow-lg bg-black w-full cursor-pointer rounded-md">
+              <button className="px-5 py-2.5 text-xs border  border-white/10 shadow-lg bg-black w-full cursor-pointer rounded-md">
                 Accept
               </button>
-              <button className="px-4 py-2 text-xs border border-white/10 shadow-lg w-full cursor-pointer rounded-md">
+              <button className="px-5 py-2.5 text-xs border border-white/10 shadow-lg w-full cursor-pointer rounded-md">
                 Suggest Time
               </button>
             </div>

@@ -47,7 +47,7 @@ export default function CircleControls({
 
       <motion.button
         onClick={nextMarker}
-        className="relative w-24 h-24 border cursor-pointer border-white/20 shadow-2xl rounded-full bg-gradient-to-br from-[#1a1a1a] to-[#0a0a0a] flex justify-center items-center group overflow-hidden backdrop-blur-sm"
+        className="relative w-24 h-24 border cursor-pointer border-white/20 shadow-2xl rounded-full bg-linear-to-br from-[#1a1a1a] to-[#0a0a0a] flex justify-center items-center group overflow-hidden backdrop-blur-sm"
         whileHover={{ scale: 1.05, borderColor: "rgba(255,255,255,0.3)" }}
         whileTap={{ scale: 0.95 }}
         initial={{ opacity: 0, x: 20 }}
@@ -56,7 +56,7 @@ export default function CircleControls({
         transition={{ duration: 0.4, delay: 0.1 }}
       >
         <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/10 to-blue-500/0 opacity-0 group-hover:opacity-100"
+          className="absolute inset-0 bg-linear-to-r from-blue-500/0 via-blue-500/10 to-blue-500/0 opacity-0 group-hover:opacity-100"
           initial={false}
           animate={{ x: ["-100%", "100%"] }}
           transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}

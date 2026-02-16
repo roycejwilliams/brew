@@ -196,7 +196,7 @@ export default function ChooseAreaPanel({
             whileTap={{ scale: 0.95 }}
             onClick={handleConfirm}
             disabled={isAreaConfirmed}
-            className="group flex items-center gap-x-2 w-fit mt-2 cursor-pointer px-4 py-2 rounded-md text-sm font-medium bg-[#2b2b2b]/75 backdrop-blur-xl border border-white/20 text-white shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+            className="group flex items-center gap-x-2 w-fit mt-2 cursor-pointer px-5 py-3.5 rounded-md text-sm font-medium bg-[#2b2b2b]/75 backdrop-blur-xl border border-white/20 text-white shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
           >
             <AnimatePresence mode="wait">
               {isAreaConfirmed ? (
