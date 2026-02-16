@@ -6,7 +6,7 @@ interface SpotlightProp {
 
 function Spotlight({ id }: SpotlightProp) {
   return (
-    <section className=" w-full h-[400px] px-24">
+    <section className=" w-full h-100 px-24">
       <div className=" w-full border border-white/20 h-full rounded-lg"></div>
     </section>
   );

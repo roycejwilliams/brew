@@ -1,11 +1,5 @@
 import { AnimatePresence, motion } from "motion/react";
-import React, {
-  ChangeEvent,
-  InputEvent,
-  InputEventHandler,
-  useEffect,
-  useState,
-} from "react";
+import React, { useEffect, useState } from "react";
 import SearchMap from "./search";
 import { CloseIcon, PlusIcon } from "./icons";
 import Image from "next/image";
@@ -23,6 +17,7 @@ interface Circle {
 
 interface selectedModalProp {
   selectedModal: MomentSelectionProp;
+  setSelectedModal: (selectedModal: MomentSelectionProp) => void;
   circles: Circle[];
 }
 
@@ -38,12 +33,16 @@ interface UserProp {
   };
 }
 
-export default function People({ selectedModal, circles }: selectedModalProp) {
+export default function People({
+  selectedModal,
+  circles,
+  setSelectedModal,
+}: selectedModalProp) {
   const [userQuery, setUserQuery] = useState("");
-  const [allPeople, setAllPeople] = useState<UserProp[]>();
   //users returned from an actual search / database query
   //Will need it's own API call
   const [isSearchingUser, setIsSearchingUser] = useState<boolean>(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
   //Mock Data
   const mockSuggestedUsers: UserProp[] = [
@@ -197,6 +196,8 @@ export default function People({ selectedModal, circles }: selectedModalProp) {
   //Search Database function
   const userSearch = (query: string) => {
     try {
+      setIsSearchingUser(true);
+
       setPeopleResults((prev) => {
         //Query will be lower case no matter what's entered
         const normalizeQuery = query.trim().toLowerCase();
@@ -205,13 +206,15 @@ export default function People({ selectedModal, circles }: selectedModalProp) {
           return mockPeopleResults; // returns original list
         }
 
-        //returns the filter list with the query params
+        //returns the filter list with names matching what's in the query
         return prev.filter((user: UserProp) =>
           user.profile.fullname.toLowerCase().includes(normalizeQuery),
         );
       });
     } catch (error) {
       console.error("Failed to filter people results", query, error);
+    } finally {
+      setIsSearchingUser(false);
     }
   };
 
@@ -228,25 +231,153 @@ export default function People({ selectedModal, circles }: selectedModalProp) {
     }
   }, [debouneQuery]);
 
-  return (
-    <motion.section className="text-center space-y-4">
-      <motion.h2
-        key="browse-title"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.3 }}
-        className="mb-4 text-lg"
+  const handleContinue = () => {
+    setShowConfirmation(true);
+  };
+
+  const handleGoBack = () => {
+    setShowConfirmation(false);
+  };
+
+  // Confirmation View - ENHANCED
+  if (showConfirmation) {
+    return (
+      <motion.section
+        key="confirmation"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+        className="text-center space-y-6"
       >
-        Who feels right for this?{" "}
-      </motion.h2>
+        <motion.div
+          initial={{ opacity: 0, y: -4 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          className="space-y-1"
+        >
+          <h2 className="text-lg font-medium text-white/90">Ready to send</h2>
+          <p className="text-sm text-white/40">
+            {selectedUsers.length}{" "}
+            {selectedUsers.length === 1 ? "person" : "people"} selected
+          </p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          className="bg-[#1c1c1c] rounded-lg border border-white/8 overflow-hidden shadow-2xl shadow-black/20"
+        >
+          <div className="p-5 space-y-1">
+            {selectedUsers.map((user, index) => (
+              <motion.div
+                key={user.id}
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{
+                  delay: 0.2 + index * 0.04,
+                  duration: 0.25,
+                  ease: [0.16, 1, 0.3, 1],
+                }}
+                whileHover={{ x: 2 }}
+                className="flex items-center gap-x-4 p-3 rounded-md hover:bg-white/4 transition-all duration-200 group"
+              >
+                <motion.div
+                  className="w-12 h-12 rounded-md overflow-hidden border border-white/8 shadow-lg relative shrink-0"
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <Image
+                    src={user.profile.avatarUrl}
+                    alt={user.profile.fullname}
+                    fill
+                    className="w-full h-full object-cover"
+                  />
+                </motion.div>
+                <div className="text-left flex-1 min-w-0">
+                  <div className="font-medium text-white/90 text-sm truncate">
+                    {user.profile.fullname}
+                  </div>
+                  <div className="text-xs text-white/40 truncate">
+                    @{user.username}
+                  </div>
+                </div>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 0 }}
+                  whileHover={{ opacity: 1 }}
+                  className="w-1.5 h-1.5 rounded-full bg-white/60 shrink-0"
+                />
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          className="flex gap-x-3 justify-center pt-2"
+        >
+          <motion.button
+            onClick={handleGoBack}
+            whileHover={{ scale: 1.02, y: -1 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="text-sm font-medium cursor-pointer px-6 py-3.5 bg-white/5 backdrop-blur-2xl 
+                      text-white/60 border border-white/10 rounded-md 
+                      hover:bg-white/8 hover:text-white/90 hover:border-white/20
+                      transition-all duration-200"
+          >
+            Go back
+          </motion.button>
+          <motion.button
+            onClick={() => {
+              console.log("Proceeding with:", selectedUsers);
+              setSelectedModal("confirm");
+            }}
+            whileHover={{ scale: 1.02, y: -1 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="text-sm font-medium cursor-pointer px-6 py-3.5 bg-white/90 backdrop-blur-2xl 
+                      text-black border border-white/20 rounded-md 
+                      hover:bg-white shadow-lg shadow-white/10
+                      transition-all duration-200"
+          >
+            Confirm selection
+          </motion.button>
+        </motion.div>
+      </motion.section>
+    );
+  }
+
+  // Main Selection View - ENHANCED
+  return (
+    <motion.section className="text-center space-y-5">
+      <motion.div
+        key="browse-header"
+        initial={{ opacity: 0, y: -4 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+        className="space-y-1"
+      >
+        <h2 className="text-lg font-medium text-white/90">
+          Who feels right for this?
+        </h2>
+        <p className="text-sm text-white/40">
+          Search or select from your circles
+        </p>
+      </motion.div>
+
       <motion.div
         key="people"
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -6 }}
-        transition={{ duration: 0.3 }}
-        className="overflow-hidden text-center rounded-md border border-white/8"
+        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+        className="overflow-hidden text-center rounded-lg border border-white/8"
       >
         <SearchMap
           selectedModal={selectedModal}
@@ -255,6 +386,7 @@ export default function People({ selectedModal, circles }: selectedModalProp) {
           autoFocus={false}
         />
       </motion.div>
+
       <AnimatePresence mode="popLayout">
         {/* Active Result Selection */}
         {!isSearchingUser && (userQuery === "" || peopleResults.length > 0) && (
@@ -264,8 +396,8 @@ export default function People({ selectedModal, circles }: selectedModalProp) {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.3 }}
-            className="bg-[#1c1c1c] rounded-md border border-white/8 p-6 overflow-hidden shadow-2xl shadow-black/20"
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="bg-[#1c1c1c] rounded-lg border border-white/8 overflow-hidden shadow-2xl shadow-black/20"
           >
             {/* Show this only when there are no results and the user is not actively searching. */}
             {userQuery === "" && (
@@ -274,140 +406,174 @@ export default function People({ selectedModal, circles }: selectedModalProp) {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
+                transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                className="p-5"
               >
                 {/* Circles */}
-                <div className="space-y-4 ">
-                  <motion.h2
+                <div className="space-y-5">
+                  <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.05, duration: 0.2 }}
-                    className="text-left text-white/30 text-sm"
+                    className="space-y-3"
                   >
-                    Inside your circles
-                  </motion.h2>
-                  <div className="flex items-start gap-x-2">
-                    {circles.map((circle, index) => (
+                    <h3 className="text-left text-white/40 text-xs font-medium uppercase tracking-wide">
+                      Inside your circles
+                    </h3>
+                    <div className="flex items-start gap-x-3">
+                      {circles.map((circle, index) => (
+                        <motion.button
+                          key={circle.id}
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{
+                            delay: 0.1 + index * 0.03,
+                            duration: 0.25,
+                            ease: [0.16, 1, 0.3, 1],
+                          }}
+                          whileHover={{ scale: 1.05, y: -2 }}
+                          whileTap={{ scale: 0.98 }}
+                          className="cursor-pointer flex flex-col justify-center items-center gap-y-2"
+                        >
+                          <motion.div
+                            className="w-14 h-14 rounded-full border border-white/10 relative overflow-hidden shadow-lg"
+                            whileHover={{
+                              borderColor: "rgba(255, 255, 255, 0.25)",
+                              transition: {
+                                duration: 0.2,
+                                ease: [0.16, 1, 0.3, 1],
+                              },
+                            }}
+                          >
+                            <Image
+                              src={circle.image}
+                              fill
+                              alt={circle.name}
+                              className="w-full h-full object-cover"
+                            />
+                          </motion.div>
+                          <motion.span
+                            className="text-xs text-white/70"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{
+                              delay: 0.2 + index * 0.03,
+                              duration: 0.2,
+                            }}
+                          >
+                            {circle.name.split(" ")[0]}
+                          </motion.span>
+                        </motion.button>
+                      ))}
                       <motion.button
-                        key={circle.id}
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{
-                          delay: 0.1 + index * 0.03,
+                          delay: 0.1 + circles.length * 0.03,
                           duration: 0.25,
+                          ease: [0.16, 1, 0.3, 1],
                         }}
-                        whileHover={{ scale: 1.05, y: -2 }}
+                        whileHover={{
+                          scale: 1.05,
+                          y: -2,
+                          borderColor: "rgba(255, 255, 255, 0.25)",
+                          transition: {
+                            duration: 0.2,
+                            ease: [0.16, 1, 0.3, 1],
+                          },
+                        }}
                         whileTap={{ scale: 0.98 }}
-                        className="cursor-pointer flex flex-col justify-center gap-y-2"
+                        className="w-14 h-14 cursor-pointer border border-white/10 rounded-full flex justify-center items-center hover:bg-white/5 transition-colors duration-200"
                       >
                         <motion.div
-                          className="w-12 h-12 rounded-full border border-dashed relative overflow-hidden"
-                          whileHover={{
-                            borderColor: "rgba(255, 255, 255, 0.3)",
-                            transition: { duration: 0.2 },
-                          }}
-                        >
-                          <Image
-                            src={circle.image}
-                            fill
-                            alt={circle.name}
-                            className="w-full h-full object-cover"
-                          />
-                        </motion.div>
-                        <motion.span
-                          className="text-xs"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
+                          whileHover={{ rotate: 90 }}
                           transition={{
-                            delay: 0.2 + index * 0.03,
                             duration: 0.2,
+                            ease: [0.16, 1, 0.3, 1],
                           }}
                         >
-                          {circle.name.split(" ")[0]}
-                        </motion.span>
+                          <PlusIcon size={18} color="currentColor" />
+                        </motion.div>
                       </motion.button>
-                    ))}
-                    <motion.button
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{
-                        delay: 0.1 + circles.length * 0.03,
-                        duration: 0.25,
-                      }}
-                      whileHover={{
-                        scale: 1.05,
-                        y: -2,
-                        borderColor: "rgba(255, 255, 255, 0.3)",
-                        transition: { duration: 0.2 },
-                      }}
-                      whileTap={{ scale: 0.98 }}
-                      className="w-12 h-12 cursor-pointer border border-dashed rounded-full flex justify-center items-center"
-                    >
-                      <motion.div
-                        whileHover={{ rotate: 90 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <PlusIcon size={20} color="currentColor" />
-                      </motion.div>
-                    </motion.button>
-                  </div>
-                  {/* Suggest AI search */}
+                    </div>
+                  </motion.div>
 
-                  <motion.h2
+                  {/* Suggested Users */}
+                  <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.15, duration: 0.2 }}
-                    className="text-left text-white/30 text-sm"
+                    className="space-y-3"
                   >
-                    Suggested for this vibe
-                  </motion.h2>
-                  <div
-                    className={`${selectedUsers.length > 0 ? "max-h-55" : "max-h-75"} overflow-hidden overflow-y-auto`}
-                  >
-                    <AnimatePresence mode="popLayout">
-                      {suggestedUsers.slice(0, 5).map((suggest, index) => (
-                        <motion.button
-                          key={suggest.id}
-                          layout
-                          initial={{ opacity: 0, x: -8 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{
-                            opacity: 0,
-                            transition: { duration: 0.2 },
-                          }}
-                          transition={{
-                            delay: 0.2 + index * 0.04,
-                            duration: 0.25,
-                            layout: { duration: 0.25 },
-                          }}
-                          whileTap={{ scale: 0.99 }}
-                          onClick={() => handleSelectionUsers(suggest)}
-                          className={`w-full px-2 py-4 text-left shrink-0 hover:bg-white/4 ease-in-out duration-300 transition-colors cursor-pointer flex gap-x-5 border-b border-white/5 last:border-b-0 ${
-                            selectedUsers.some((u) => u.id === suggest.id)
-                              ? "hidden"
-                              : "block"
-                          }`}
-                        >
-                          <motion.div className="w-10 h-10 rounded-sm relative overflow-hidden shadow-xl">
-                            <Image
-                              src={suggest.profile.avatarUrl}
-                              alt={suggest.profile.fullname}
-                              fill
-                              className="w-full h-full object-cover "
-                            />
-                          </motion.div>
-                          <div>
-                            <div className="font-medium text-white/90 text-sm mb-1">
-                              {suggest.profile.fullname}
-                            </div>
-                            <div className="text-xs text-white/40">
-                              @{suggest.username}
-                            </div>
-                          </div>
-                        </motion.button>
-                      ))}
-                    </AnimatePresence>
-                  </div>
+                    <h3 className="text-left text-white/40 text-xs font-medium uppercase tracking-wide">
+                      Suggested for this vibe
+                    </h3>
+                    <div
+                      className={`${
+                        selectedUsers.length > 0 ? "max-h-40" : "max-h-70"
+                      } overflow-hidden overflow-y-auto`}
+                    >
+                      <div className="space-y-1">
+                        <AnimatePresence mode="popLayout">
+                          {suggestedUsers.slice(0, 5).map((suggest, index) => (
+                            <motion.button
+                              key={suggest.id}
+                              layout
+                              initial={{ opacity: 0, x: -8 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              exit={{
+                                opacity: 0,
+                                x: -8,
+                                transition: {
+                                  duration: 0.2,
+                                  ease: [0.16, 1, 0.3, 1],
+                                },
+                              }}
+                              transition={{
+                                delay: 0.2 + index * 0.04,
+                                duration: 0.25,
+                                ease: [0.16, 1, 0.3, 1],
+                                layout: {
+                                  duration: 0.25,
+                                  ease: [0.16, 1, 0.3, 1],
+                                },
+                              }}
+                              whileHover={{ x: 2 }}
+                              whileTap={{ scale: 0.99 }}
+                              onClick={() => handleSelectionUsers(suggest)}
+                              className={`w-full p-3 text-left hover:bg-white/4 rounded-md transition-all duration-200 cursor-pointer flex items-center gap-x-4 ${
+                                selectedUsers.some((u) => u.id === suggest.id)
+                                  ? "hidden"
+                                  : "flex"
+                              }`}
+                            >
+                              <motion.div className="w-11 h-11 rounded-md relative overflow-hidden shadow-lg shrink-0 border border-white/8">
+                                <Image
+                                  src={suggest.profile.avatarUrl}
+                                  alt={suggest.profile.fullname}
+                                  fill
+                                  className="w-full h-full object-cover"
+                                />
+                              </motion.div>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-medium text-white/90 text-sm truncate">
+                                  {suggest.profile.fullname}
+                                </div>
+                                <div className="text-xs text-white/40 truncate">
+                                  @{suggest.username}
+                                </div>
+                              </div>
+                              <motion.div
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                whileHover={{ opacity: 1, scale: 1 }}
+                                className="w-1.5 h-1.5 rounded-full bg-white/50 shrink-0"
+                              />
+                            </motion.button>
+                          ))}
+                        </AnimatePresence>
+                      </div>
+                    </div>
+                  </motion.div>
                 </div>
               </motion.div>
             )}
@@ -421,62 +587,81 @@ export default function People({ selectedModal, circles }: selectedModalProp) {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
+                  transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                  className="p-5"
                 >
                   <div
-                    className={`${selectedUsers.length > 0 ? "max-h-55" : "max-h-75"} overflow-hidden overflow-y-auto`}
+                    className={`${
+                      selectedUsers.length > 0 ? "max-h-60" : "max-h-80"
+                    } overflow-hidden overflow-y-auto`}
                   >
-                    <AnimatePresence mode="popLayout">
-                      {peopleResults.slice(0, 5).map((people, index) => (
-                        <motion.button
-                          key={people.id}
-                          layout
-                          initial={{ opacity: 0, x: -8 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{
-                            opacity: 0,
-                            transition: { duration: 0.2 },
-                          }}
-                          transition={{
-                            delay: 0.2 + index * 0.04,
-                            duration: 0.25,
-                            layout: { duration: 0.25 },
-                          }}
-                          whileTap={{ scale: 0.99 }}
-                          onClick={() => handleSelectionUsers(people)}
-                          className={`w-full px-2 py-4 text-left shrink-0 hover:bg-white/4 ease-in-out duration-300 transition-colors cursor-pointer flex gap-x-5 border-b border-white/5 last:border-b-0 ${
-                            selectedUsers.some((u) => u.id === people.id)
-                              ? "hidden"
-                              : "block"
-                          }`}
-                        >
-                          <motion.div className="w-10 h-10 rounded-sm relative overflow-hidden shadow-xl">
-                            <Image
-                              src={people.profile.avatarUrl}
-                              alt={people.profile.fullname}
-                              fill
-                              className="w-full h-full object-cover "
+                    <div className="space-y-1">
+                      <AnimatePresence mode="popLayout">
+                        {peopleResults.slice(0, 5).map((people, index) => (
+                          <motion.button
+                            key={people.id}
+                            layout
+                            initial={{ opacity: 0, x: -8 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{
+                              opacity: 0,
+                              x: -8,
+                              transition: {
+                                duration: 0.2,
+                                ease: [0.16, 1, 0.3, 1],
+                              },
+                            }}
+                            transition={{
+                              delay: 0.1 + index * 0.04,
+                              duration: 0.25,
+                              ease: [0.16, 1, 0.3, 1],
+                              layout: {
+                                duration: 0.25,
+                                ease: [0.16, 1, 0.3, 1],
+                              },
+                            }}
+                            whileHover={{ x: 2 }}
+                            whileTap={{ scale: 0.99 }}
+                            onClick={() => handleSelectionUsers(people)}
+                            className={`w-full p-3 text-left hover:bg-white/4 rounded-md transition-all duration-200 cursor-pointer flex items-center gap-x-4 ${
+                              selectedUsers.some((u) => u.id === people.id)
+                                ? "hidden"
+                                : "flex"
+                            }`}
+                          >
+                            <motion.div className="w-11 h-11 rounded-md relative overflow-hidden shadow-lg shrink-0 border border-white/8">
+                              <Image
+                                src={people.profile.avatarUrl}
+                                alt={people.profile.fullname}
+                                fill
+                                className="w-full h-full object-cover"
+                              />
+                            </motion.div>
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium text-white/90 text-sm truncate">
+                                {people.profile.fullname}
+                              </div>
+                              <div className="text-xs text-white/40 truncate">
+                                @{people.username}
+                              </div>
+                            </div>
+                            <motion.div
+                              initial={{ opacity: 0, scale: 0.8 }}
+                              whileHover={{ opacity: 1, scale: 1 }}
+                              className="w-1.5 h-1.5 rounded-full bg-white/50 shrink-0"
                             />
-                          </motion.div>
-                          <div>
-                            <div className="font-medium text-white/90 text-sm mb-1">
-                              {people.profile.fullname}
-                            </div>
-                            <div className="text-xs text-white/40">
-                              @{people.username}
-                            </div>
-                          </div>
-                        </motion.button>
-                      ))}
-                    </AnimatePresence>
-                  </div>{" "}
+                          </motion.button>
+                        ))}
+                      </AnimatePresence>
+                    </div>
+                  </div>
                 </motion.div>
               )}
           </motion.div>
         )}
 
         <AnimatePresence mode="wait">
-          {/* WHen selected user array is over 0 it shows the section */}
+          {/* Selected Users Display */}
           {selectedUsers.length > 0 && (
             <motion.div
               key="user-selection"
@@ -486,91 +671,132 @@ export default function People({ selectedModal, circles }: selectedModalProp) {
               exit={{ opacity: 0, y: -8 }}
               transition={{
                 duration: 0.25,
-                layout: { duration: 0.3 },
+                ease: [0.16, 1, 0.3, 1],
+                layout: { duration: 0.3, ease: [0.16, 1, 0.3, 1] },
               }}
-              className="flex gap-x-4"
+              className="space-y-4"
             >
-              {selectedUsers.map((selectedUser, index) => (
-                <motion.div
-                  key={selectedUser.id}
-                  layout
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ duration: 0.2 }}
-                  whileHover={{ y: -2 }}
-                  className="flex flex-col items-center gap-y-2 relative"
-                >
-                  <motion.button
-                    onClick={() => handleRemoveUser(selectedUser)}
-                    initial={{ opacity: 0, scale: 0 }}
-                    animate={{
-                      opacity: 1,
-                      scale: 1,
-                      transition: {
-                        delay: 0.1 + index * 0.05,
-                        duration: 0.2,
-                      },
+              <div className="flex gap-x-3 flex-wrap justify-center">
+                {selectedUsers.map((selectedUser, index) => (
+                  <motion.div
+                    key={selectedUser.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{
+                      duration: 0.2,
+                      ease: [0.16, 1, 0.3, 1],
                     }}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="w-4 h-4 rounded-full border absolute z-20 -right-2 -top-2 cursor-pointer flex justify-center items-center bg-white"
+                    whileHover={{ y: -2 }}
+                    className="flex flex-col items-center gap-y-2 relative"
                   >
-                    <CloseIcon size={14} color="#000" />
-                  </motion.button>
-                  <motion.div className="w-14 h-14 rounded-md overflow-hidden border border-white/8 shadow-xl relative ">
-                    <Image
-                      src={selectedUser.profile.avatarUrl}
-                      alt={selectedUser.profile.fullname}
-                      fill
-                      className="w-full h-full object-cover absolute inset-0"
-                    />
+                    <motion.button
+                      onClick={() => handleRemoveUser(selectedUser)}
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{
+                        opacity: 1,
+                        scale: 1,
+                        transition: {
+                          delay: 0.1 + index * 0.05,
+                          duration: 0.2,
+                          ease: [0.16, 1, 0.3, 1],
+                        },
+                      }}
+                      whileHover={{ scale: 1.15 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="w-5 h-5 rounded-full border border-white/20 absolute z-20 -right-1.5 -top-1.5 cursor-pointer flex justify-center items-center bg-white shadow-lg"
+                    >
+                      <CloseIcon size={12} color="#000" />
+                    </motion.button>
+                    <motion.div className="w-16 h-16 rounded-lg overflow-hidden border border-white/10 shadow-xl relative">
+                      <Image
+                        src={selectedUser.profile.avatarUrl}
+                        alt={selectedUser.profile.fullname}
+                        fill
+                        className="w-full h-full object-cover absolute inset-0"
+                      />
+                    </motion.div>
+                    <motion.span
+                      initial={{ opacity: 0 }}
+                      animate={{
+                        opacity: 1,
+                        transition: {
+                          delay: 0.15 + index * 0.05,
+                          duration: 0.2,
+                        },
+                      }}
+                      className="text-xs text-white/60 max-w-17.5 truncate"
+                    >
+                      {selectedUser.profile.fullname.split(" ")[0]}
+                    </motion.span>
                   </motion.div>
-                </motion.div>
-              ))}
-            </motion.div>
-          )}
-          {selectedUsers.length > 0 && (
-            <div className=" w-fit ">
-              <motion.button
-                key="continue"
-                initial={{ opacity: 0, scale: 0.9 }}
+                ))}
+              </div>
+
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                className="text-sm cursor-pointer px-5 py-3.5 bg-[#636363]/20 backdrop-blur-2xl 
-                            text-white/90 border border-white/50 rounded-md 
-                            transition-colors duration-150"
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                className="flex justify-center"
               >
-                Continue
-              </motion.button>
-            </div>
+                <motion.button
+                  onClick={handleContinue}
+                  whileHover={{ scale: 1.02, y: -1 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                  className="text-sm font-medium cursor-pointer px-6 py-3.5 bg-white/90 backdrop-blur-2xl 
+                            text-black border border-white/20 rounded-md 
+                            hover:bg-white shadow-lg shadow-white/10
+                            transition-all duration-200"
+                >
+                  Continue with {selectedUsers.length}{" "}
+                  {selectedUsers.length === 1 ? "person" : "people"}
+                </motion.button>
+              </motion.div>
+            </motion.div>
           )}
         </AnimatePresence>
 
+        {/* Empty State */}
         {!isSearchingUser &&
           userQuery.length >= 3 &&
           peopleResults.length === 0 && (
             <motion.div
               key="empty"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="text-center py-12 text-white/30 text-xs"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="bg-[#1c1c1c] rounded-lg border border-white/8 p-12 text-center"
             >
-              No name found matching "{userQuery}"
+              <motion.div
+                initial={{ scale: 0.9 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.1, duration: 0.3 }}
+                className="space-y-2"
+              >
+                <div className="text-white/20 text-2xl">👤</div>
+                <p className="text-white/40 text-sm">
+                  No results for "{userQuery}"
+                </p>
+                <p className="text-white/30 text-xs">
+                  Try searching for a different name
+                </p>
+              </motion.div>
             </motion.div>
           )}
 
-        {/* Shows the loading state */}
+        {/* Loading State */}
         {isSearchingUser && (
           <motion.div
             key="loading"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="text-center py-12"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="bg-[#1c1c1c] rounded-lg border border-white/8 p-12 text-center"
           >
             <motion.div
               animate={{ rotate: 360 }}
@@ -579,13 +805,13 @@ export default function People({ selectedModal, circles }: selectedModalProp) {
                 repeat: Infinity,
                 ease: "linear",
               }}
-              className="w-5 h-5 border-2 border-white/20 border-t-white/60 rounded-full mx-auto"
+              className="w-6 h-6 border-2 border-white/10 border-t-white/60 rounded-full mx-auto"
             />
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.1, duration: 0.2 }}
-              className="text-xs text-white/30 mt-3"
+              className="text-xs text-white/40 mt-4"
             >
               Searching...
             </motion.p>
