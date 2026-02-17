@@ -23,9 +23,7 @@ export default function SearchMap({
   autoFocus = false,
   selectedModal,
 }: SearchMapProps) {
-  const path = usePathname();
-
-  const defaultPlaceholder =
+  placeholder =
     selectedModal === "circle"
       ? "Set the scene"
       : selectedModal === "people"
@@ -34,6 +32,7 @@ export default function SearchMap({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (onChange) {
+      //this becomes a string because of our interface definition
       onChange(e.target.value);
     }
   };
@@ -67,7 +66,7 @@ export default function SearchMap({
           onFocus={onFocus}
           autoFocus={autoFocus}
           className="text-white/90 flex-1 text-sm placeholder:text-sm block p-0 bg-transparent placeholder:text-white/30 focus:outline-none transition-all"
-          placeholder={defaultPlaceholder}
+          placeholder={placeholder}
           required
         />
       </motion.div>

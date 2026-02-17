@@ -40,41 +40,38 @@ export default function Circle({
   };
 
   return (
-    <motion.section
-      key="circle"
-      layout
-      initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -6 }}
-      className="overflow-hidden text-center "
-    >
-      <AnimatePresence mode="wait">
-        <div className="mb-4 text-lg">
-          {selectedCircleProp ? (
-            <motion.h2
-              key="selected-title"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              Inviting
-              <br />
-              <span className="text-white font-medium text-xl">
+    <motion.section layout key="circle" className=" text-center space-y-5">
+      <motion.div
+        key={selectedCircleProp ? "selected-header" : "browse-header"}
+        initial={{ opacity: 0, y: -4 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 4 }}
+        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+        className="mb-6 space-y-1"
+      >
+        {selectedCircleProp ? (
+          <>
+            <h2 className="text-lg font-medium text-white/90">
+              Inviting your circle
+            </h2>
+            <p className="text-sm text-white/40">
+              Sending to{" "}
+              <span className="text-white/70 font-medium">
                 {selectedCircleProp.name}
               </span>
-            </motion.h2>
-          ) : (
-            <motion.h2
-              key="browse-title"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              Who should see this event?
-            </motion.h2>
-          )}
-        </div>
-      </AnimatePresence>
+            </p>
+          </>
+        ) : (
+          <>
+            <h2 className="text-lg font-medium text-white/90">
+              Share with your circle
+            </h2>
+            <p className="text-sm text-white/40">
+              Invite people you already trust
+            </p>
+          </>
+        )}
+      </motion.div>
 
       {/* MIDDLE — persistent */}
       <CircleScene
@@ -84,23 +81,15 @@ export default function Circle({
       />
 
       {/* CONTROLS — presence */}
-      <AnimatePresence mode="wait">
-        {selectedCircleProp === null && (
-          <motion.div
-            key="controls"
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-          >
-            <CircleSignal circles={circles} activeIndex={activeCircle} />
-            <CircleControls nextMarker={nextSignal} prevMarker={prevSignal} />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {selectedCircleProp === null && (
+        <>
+          <CircleSignal circles={circles} activeIndex={activeCircle} />
+          <CircleControls nextMarker={nextSignal} prevMarker={prevSignal} />
+        </>
+      )}
 
       <SelectAction
-        selectedSignal={selectedCircleProp}
+        selectedCircle={selectedCircleProp}
         onSelect={() => setSelectedCircleProp(circles[activeCircle])}
         onContinue={() => setSelectedModal("confirm")}
       />

@@ -238,7 +238,7 @@ export default function Venue({
                 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => handleSelectVenue(venue)}
-                className="w-full px-5 py-4 text-left transition-colors cursor-pointer border-b border-white/5 last:border-b-0"
+                className="w-full px-5 py-3.5 text-left transition-colors cursor-pointer border-b border-white/5 last:border-b-0"
               >
                 <div className="font-medium text-white/90 text-sm mb-1">
                   {venue.name}
@@ -253,7 +253,7 @@ export default function Venue({
         )}
 
         {/* Empty state */}
-        {query.length >= 2 && results.length === 0 && !isSearching && (
+        {query.length >= 3 && results.length === 0 && !isSearching && (
           <motion.div
             key="empty"
             initial={{ opacity: 0 }}

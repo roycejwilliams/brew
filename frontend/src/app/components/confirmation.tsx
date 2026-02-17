@@ -39,10 +39,10 @@ export default function Confirmation() {
             </p>
           </div>
           <div className="w-full flex items-center justify-between mt">
-            <span className="text-sm">
+            <span className="text-xs">
               <span className="font-medium">{c.event}</span>
             </span>
-            <button className="px-4 py-2 border border-white/10 rounded-md text-sm bg-black">
+            <button className="px-5 py-2.5 border border-white/10 rounded-md text-sm bg-black">
               View
             </button>
           </div>

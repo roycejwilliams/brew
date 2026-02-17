@@ -16,13 +16,13 @@ export default function CustomRadio({
       classNames={{
         base: `
       flex gap-4 cursor-pointer 
-      rounded-md border border-white/10 px-4 py-2
-      hover:opacity-75 transition
-      data-[selected=true]:bg-[#98473E]/50 data-[selected=true]:text-white
+      rounded-md border border-white/8 px-4 py-3
+      hover:border-white/12 hover:bg-white/[0.02] transition-all duration-200
+      data-[selected=true]:bg-[#98473E]/10 data-[selected=true]:border-[#98473E]/30 data-[selected=true]:text-white
     `,
-        control: "relative", // completely hides the blue dot
-        wrapper: "hidden", // optional: hide wrapper too
-        label: "text-xs text-white",
+        control: "relative",
+        wrapper: "hidden",
+        label: "text-sm text-white/90 data-[selected=true]:text-white",
       }}
     >
       {children}

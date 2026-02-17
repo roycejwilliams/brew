@@ -40,7 +40,7 @@ export default function Events({ openModal, id }: OpenModal) {
               <BellIcon size={16} color="currentColor" />
             </div>
             <span className="text-xs opacity-0 group-hover:opacity-100 ease-in-out duration-500">
-              Moments
+              Signals
             </span>
           </button>
         </div>
