@@ -1,11 +1,12 @@
 import React, { ChangeEvent, useEffect, useState } from "react";
-import { CalendarDate, Time } from "@internationalized/date";
+import { CalendarDate } from "@internationalized/date";
 import { AnimatePresence, motion } from "motion/react";
-import { ChevronLeftIcon, InformationIcon, SendIcon } from "./icons";
+import { ChevronLeftIcon } from "./icons";
 import Circle from "./circle";
 import MomentConfirmation from "./momentConfirmation";
 import People from "./people";
 import Start from "./start";
+import AroundYou from "./aroundYou";
 
 type CreateMomentStage = "start" | "circle" | "people" | "nearby" | "confirm";
 type WhoSelectionProp = "circle" | "people" | "nearby" | null;
@@ -43,13 +44,6 @@ export default function StartMoment({
   selectedModal,
   setSelectedModal,
 }: MomentProp) {
-  //Chips for time selection
-
-  //Triggers showTimeInput, allows the whoSelectionIntent to show
-  //sets the moment name
-
-  //Captures the Invite intent
-
   //Allows you to select the circle of friends you want invited
   const [selectedCircleProp, setSelectedCircleProp] = useState<Circle | null>(
     null,
@@ -79,7 +73,9 @@ export default function StartMoment({
       // Go back to parent's two-card view
       onGoBack?.();
     } else {
+      setSelectedWho(null);
       setSelectedModal("start");
+      setShowSubmit(false);
     }
   };
 
@@ -175,7 +171,13 @@ export default function StartMoment({
               setSelectedModal={setSelectedModal}
             />
           )}
-          {selectedModal === "nearby" && <motion.section></motion.section>}
+          {selectedModal === "nearby" && (
+            <AroundYou
+              goback={goBack}
+              selectedModal={selectedModal}
+              setSelectedModal={setSelectedModal}
+            />
+          )}
 
           {selectedModal === "confirm" && (
             <MomentConfirmation selectedModal={selectedModal} />

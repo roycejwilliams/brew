@@ -777,7 +777,6 @@ export default function People({
                 transition={{ delay: 0.1, duration: 0.3 }}
                 className="space-y-2"
               >
-                <div className="text-white/20 text-2xl">👤</div>
                 <p className="text-white/40 text-sm">
                   No results for "{userQuery}"
                 </p>

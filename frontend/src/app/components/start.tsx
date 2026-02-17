@@ -84,7 +84,7 @@ export default function Start({
     },
     {
       value: "nearby",
-      type: "Anyone Nearby",
+      type: "Around You",
     },
   ];
 
@@ -126,7 +126,9 @@ export default function Start({
         animate={{ opacity: 1 }}
         className="flex flex-col"
       >
-        <label className="text-lg">What&apos;s the move?</label>
+        <label className="text-md font-medium text-white/75">
+          What&apos;s the move?
+        </label>
         <input
           onChange={onChange}
           value={createMoment}
@@ -134,7 +136,7 @@ export default function Start({
           id="move"
           placeholder={`"Ramen Tonight"`}
           required
-          className="w-full px-5 py-3.5 mt-4 bg-[#1c1c1c] backdrop-blur-xl rounded-lg border border-white/8  mx-auto flex items-center gap-3 shadow shadow-black/20
+          className="w-full px-5 py-3.5  mt-4 bg-[#1c1c1c] backdrop-blur-xl rounded-lg border border-white/8  mx-auto flex items-center gap-3 shadow shadow-black/20
                 focus:outline-none 
                 text-white/90 placeholder:text-white/30 placeholder:text-sm
                 transition-colors duration-150"
@@ -149,7 +151,7 @@ export default function Start({
           onValueChange={onSelectionTime}
           size="lg"
           classNames={{
-            label: "mb-2 text-base",
+            label: "mb-2 text-md font-medium text-white/75",
             wrapper: "flex gap-6 mt-4 ml-4 text-white",
           }}
         >
@@ -293,7 +295,7 @@ export default function Start({
             label="Who?"
             size="lg"
             classNames={{
-              label: "mb-2 text-base",
+              label: "mb-2 text-md font-medium text-white/75",
               wrapper: "flex gap-6 mt-4 ml-4  text-white",
             }}
           >
@@ -334,9 +336,10 @@ export default function Start({
             }}
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.96 }}
-            className="text-sm cursor-pointer px-5 py-3.5 bg-[#636363]/20 backdrop-blur-2xl 
-                            text-white/90 border border-white/50 rounded-md 
-                            transition-colors duration-150"
+            className="ttext-sm font-medium cursor-pointer px-6 py-3.5 bg-white/90 backdrop-blur-2xl 
+                      text-black border border-white/20 rounded-md 
+                      hover:bg-white shadow-lg shadow-white/10
+                      transition-all duration-200"
           >
             Continue
           </motion.button>
