@@ -36,7 +36,7 @@ time
 place
 
 openness
-
+----------------------------
 Circles
 
 Circles are pre-trusted groups you control.
@@ -53,12 +53,15 @@ They can request to join
 The host always decides
 
 No public feeds. No follower counts. No noise.
+-----------------------------
 
 Pulse & Signals
 
 Pulse is the live map of what’s happening now
 
 Signals are meaningful updates — not notifications
+
+-----------------------------
 
 Design Philosophy
 
