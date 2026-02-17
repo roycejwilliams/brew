@@ -1,6 +1,3 @@
-Here is your content clearly separated into structured sections without changing any wording:
-
----
 
 # Brew
 
