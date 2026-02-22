@@ -13,7 +13,8 @@ export default function CircleControls({
 }: CircleControlProp) {
   return (
     <motion.div
-      className="max-w-[45%] w-full mx-auto mt-4 absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 flex justify-between items-center gap-4 px-4"
+      key="circle-controls"
+      className="max-w-2xl  w-full  mx-auto absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 flex justify-between items-center gap-4 px-4"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}

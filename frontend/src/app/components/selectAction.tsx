@@ -29,6 +29,7 @@ export default function SelectAction({
 
   return (
     <motion.div
+      key="select-circle"
       variants={dotVariants}
       whileTap="pressed"
       initial="idle"

@@ -181,223 +181,220 @@ export default function CircleScene({
   };
 
   return (
-    <>
-      <motion.section
-        ref={container}
-        className="mx-auto max-w-md relative flex shrink-0 justify-center items-center"
+    <motion.section
+      key="circle-scene"
+      ref={container}
+      className="mx-auto max-w-md relative flex shrink-0 justify-center items-center"
+    >
+      {!selectedCircle && (
+        <div className="absolute w-fit font-medium z-10 mx-auto pointer-events-none">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeIndex}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+              className="text-center my-auto text-[#ececec]/75"
+            >
+              <h1 className="text-lg">{circle.name}</h1>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      )}
+
+      <motion.svg
+        width="625"
+        height="625"
+        viewBox="-50 -50 602.5 602.5"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="w-full xl:max-w-150 max-w-100 h-auto"
+        preserveAspectRatio="xMidYMid meet"
+        initial={{ opacity: 0, rotate: -5 }}
+        animate={{ opacity: 1, rotate: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
       >
-        {!selectedCircle && (
-          <div className="absolute w-fit font-medium z-10 mx-auto pointer-events-none">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeIndex}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.25, ease: "easeOut" }}
-                className="text-center my-auto text-[#ececec]/75"
+        <g filter="url(#filter0_d_652_266)">
+          <motion.circle
+            id="outerCircle"
+            cx={cx}
+            cy={cy}
+            r={markerRadius}
+            stroke="white"
+            strokeOpacity={0.15}
+            strokeWidth={1}
+            strokeLinecap="round"
+            strokeDasharray="10 10"
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: 1, opacity: 1 }}
+            transition={{ duration: 1.2, ease: "easeInOut", delay: 0.2 }}
+          />
+        </g>
+        <g filter="url(#filter1_d_652_266)">
+          <motion.circle
+            id="innerCircle"
+            cx={cx}
+            cy={cy}
+            r="212.5"
+            stroke="white"
+            strokeOpacity={0.15}
+            strokeWidth={1}
+            strokeLinecap="round"
+            strokeDasharray="5 10"
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: 1, opacity: 1 }}
+            transition={{ duration: 1.2, ease: "easeInOut", delay: 0.4 }}
+          />
+        </g>
+        <g filter="url(#filter1_d_652_266)">
+          <defs>
+            <clipPath id="center-clip">
+              <circle cx={cx} cy={cy} r={175} />
+            </clipPath>
+          </defs>
+
+          <motion.image
+            key={circle.image}
+            href={circle.image}
+            x={cx - 175}
+            y={cy - 175}
+            width={350}
+            height={350}
+            clipPath="url(#center-clip)"
+            preserveAspectRatio="xMidYMid slice"
+            className="brightness-110"
+            initial={{ opacity: 0, scale: 1.1 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{
+              duration: 0.6,
+              ease: [0.25, 0.1, 0.25, 1],
+            }}
+          />
+
+          <motion.circle
+            cx={cx}
+            cy={cy}
+            r={175}
+            fill="none"
+            stroke="#3A3A3A"
+            strokeWidth="1"
+            strokeOpacity={0.3}
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+          />
+        </g>
+        <g className="markers">
+          {markerData.map((_, i) => (
+            <g
+              key={i}
+              className="circle-marker"
+              // REMOVED: inline styles that conflict with GSAP
+            >
+              <circle cx="24" cy="24" r="24" fill="#1c1c1c" opacity={0.8} />
+              <text
+                x={24}
+                y={24}
+                fill="white"
+                fontSize="14"
+                fontWeight="600"
+                textAnchor="middle"
+                dominantBaseline="middle"
+                opacity={0.9}
               >
-                <h1 className="text-lg">{circle.name}</h1>
-              </motion.div>
-            </AnimatePresence>
-          </div>
-        )}
-
-        <motion.svg
-          width="625"
-          height="625"
-          viewBox="-50 -50 602.5 602.5"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className="w-full xl:max-w-150 max-w-100 h-auto"
-          preserveAspectRatio="xMidYMid meet"
-          initial={{ opacity: 0, rotate: -5 }}
-          animate={{ opacity: 1, rotate: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-        >
-          <g filter="url(#filter0_d_652_266)">
-            <motion.circle
-              id="outerCircle"
-              cx={cx}
-              cy={cy}
-              r={markerRadius}
-              stroke="white"
-              strokeOpacity={0.15}
-              strokeWidth={1}
-              strokeLinecap="round"
-              strokeDasharray="10 10"
-              initial={{ pathLength: 0, opacity: 0 }}
-              animate={{ pathLength: 1, opacity: 1 }}
-              transition={{ duration: 1.2, ease: "easeInOut", delay: 0.2 }}
-            />
-          </g>
-          <g filter="url(#filter1_d_652_266)">
-            <motion.circle
-              id="innerCircle"
-              cx={cx}
-              cy={cy}
-              r="212.5"
-              stroke="white"
-              strokeOpacity={0.15}
-              strokeWidth={1}
-              strokeLinecap="round"
-              strokeDasharray="5 10"
-              initial={{ pathLength: 0, opacity: 0 }}
-              animate={{ pathLength: 1, opacity: 1 }}
-              transition={{ duration: 1.2, ease: "easeInOut", delay: 0.4 }}
-            />
-          </g>
-          <g filter="url(#filter1_d_652_266)">
-            <defs>
-              <clipPath id="center-clip">
-                <circle cx={cx} cy={cy} r={175} />
-              </clipPath>
-            </defs>
-
-            <AnimatePresence mode="wait">
-              <motion.image
-                key={circle.image}
-                href={circle.image}
-                x={cx - 175}
-                y={cy - 175}
-                width={350}
-                height={350}
-                clipPath="url(#center-clip)"
-                preserveAspectRatio="xMidYMid slice"
-                className="brightness-110"
-                initial={{ opacity: 0, scale: 1.1 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{
-                  duration: 0.6,
-                  ease: [0.25, 0.1, 0.25, 1],
-                }}
-              />
-            </AnimatePresence>
-
-            <motion.circle
-              cx={cx}
-              cy={cy}
-              r={175}
-              fill="none"
-              stroke="#3A3A3A"
-              strokeWidth="1"
-              strokeOpacity={0.3}
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.6 }}
-            />
-          </g>
-          <g className="markers">
-            {markerData.map((_, i) => (
-              <g
-                key={i}
-                className="circle-marker"
-                // REMOVED: inline styles that conflict with GSAP
-              >
-                <circle cx="24" cy="24" r="24" fill="#1c1c1c" opacity={0.8} />
-                <text
-                  x={24}
-                  y={24}
-                  fill="white"
-                  fontSize="14"
-                  fontWeight="600"
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  opacity={0.9}
-                >
-                  {i + 1}
-                </text>
-                <path
-                  d="M24 48V76
+                {i + 1}
+              </text>
+              <path
+                d="M24 48V76
        M48 24
        C48 37.2548 37.2548 48 24 48
        C10.7452 48 0 37.2548 0 24
        C0 10.7452 10.7452 0 24 0
        C37.2548 0 48 10.7452 48 24Z"
-                  stroke="white"
-                  strokeWidth="1.5"
-                  fill="none"
-                  strokeLinecap="round"
-                  strokeOpacity={0.6}
-                />
-              </g>
-            ))}
-          </g>
-          <defs>
-            <filter
-              id="filter0_d_652_266"
-              x="0"
-              y="0"
-              width="509"
-              height="509"
-              filterUnits="userSpaceOnUse"
-              colorInterpolationFilters="sRGB"
-            >
-              <feFlood floodOpacity="0" result="BackgroundImageFix" />
-              <feColorMatrix
-                in="SourceAlpha"
-                type="matrix"
-                values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-                result="hardAlpha"
+                stroke="white"
+                strokeWidth="1.5"
+                fill="none"
+                strokeLinecap="round"
+                strokeOpacity={0.6}
               />
-              <feOffset dy="4" />
-              <feGaussianBlur stdDeviation="2" />
-              <feComposite in2="hardAlpha" operator="out" />
-              <feColorMatrix
-                type="matrix"
-                values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"
-              />
-              <feBlend
-                mode="normal"
-                in2="BackgroundImageFix"
-                result="effect1_dropShadow_652_266"
-              />
-              <feBlend
-                mode="normal"
-                in="SourceGraphic"
-                in2="effect1_dropShadow_652_266"
-                result="shape"
-              />
-            </filter>
-            <filter
-              id="filter1_d_652_266"
-              x="37"
-              y="37"
-              width="434"
-              height="434"
-              filterUnits="userSpaceOnUse"
-              colorInterpolationFilters="sRGB"
-            >
-              <feFlood floodOpacity="0" result="BackgroundImageFix" />
-              <feColorMatrix
-                in="SourceAlpha"
-                type="matrix"
-                values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-                result="hardAlpha"
-              />
-              <feOffset dy="4" />
-              <feGaussianBlur stdDeviation="2" />
-              <feComposite in2="hardAlpha" operator="out" />
-              <feColorMatrix
-                type="matrix"
-                values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"
-              />
-              <feBlend
-                mode="normal"
-                in2="BackgroundImageFix"
-                result="effect1_dropShadow_652_266"
-              />
-              <feBlend
-                mode="normal"
-                in="SourceGraphic"
-                in2="effect1_dropShadow_652_266"
-                result="shape"
-              />
-            </filter>
-          </defs>
-        </motion.svg>
-      </motion.section>
-    </>
+            </g>
+          ))}
+        </g>
+        <defs>
+          <filter
+            id="filter0_d_652_266"
+            x="0"
+            y="0"
+            width="509"
+            height="509"
+            filterUnits="userSpaceOnUse"
+            colorInterpolationFilters="sRGB"
+          >
+            <feFlood floodOpacity="0" result="BackgroundImageFix" />
+            <feColorMatrix
+              in="SourceAlpha"
+              type="matrix"
+              values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+              result="hardAlpha"
+            />
+            <feOffset dy="4" />
+            <feGaussianBlur stdDeviation="2" />
+            <feComposite in2="hardAlpha" operator="out" />
+            <feColorMatrix
+              type="matrix"
+              values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"
+            />
+            <feBlend
+              mode="normal"
+              in2="BackgroundImageFix"
+              result="effect1_dropShadow_652_266"
+            />
+            <feBlend
+              mode="normal"
+              in="SourceGraphic"
+              in2="effect1_dropShadow_652_266"
+              result="shape"
+            />
+          </filter>
+          <filter
+            id="filter1_d_652_266"
+            x="37"
+            y="37"
+            width="434"
+            height="434"
+            filterUnits="userSpaceOnUse"
+            colorInterpolationFilters="sRGB"
+          >
+            <feFlood floodOpacity="0" result="BackgroundImageFix" />
+            <feColorMatrix
+              in="SourceAlpha"
+              type="matrix"
+              values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+              result="hardAlpha"
+            />
+            <feOffset dy="4" />
+            <feGaussianBlur stdDeviation="2" />
+            <feComposite in2="hardAlpha" operator="out" />
+            <feColorMatrix
+              type="matrix"
+              values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"
+            />
+            <feBlend
+              mode="normal"
+              in2="BackgroundImageFix"
+              result="effect1_dropShadow_652_266"
+            />
+            <feBlend
+              mode="normal"
+              in="SourceGraphic"
+              in2="effect1_dropShadow_652_266"
+              result="shape"
+            />
+          </filter>
+        </defs>
+      </motion.svg>
+    </motion.section>
   );
 }

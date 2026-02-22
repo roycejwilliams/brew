@@ -29,17 +29,21 @@ interface Circle {
 }
 
 interface MomentProp {
-  chooser: "circle" | "people" | "nearby";
-  setChooser: (value: "circle" | "people" | "nearby" | null) => void;
   onGoBack?: () => void;
   onContinue?: () => void;
   selectedModal: CreateMomentStage;
   setSelectedModal: (selectedModal: CreateMomentStage) => void;
 }
 
+const startMomentProp: CreateMomentStage[] = [
+  "start",
+  "circle",
+  "people",
+  "nearby",
+  "confirm",
+];
+
 export default function StartMoment({
-  chooser,
-  setChooser,
   onGoBack,
   selectedModal,
   setSelectedModal,
@@ -66,24 +70,42 @@ export default function StartMoment({
   };
 
   //function to cycleback
-  const goBack = () => {
-    if (selectedModal === "confirm") {
-      setSelectedModal(chooser!);
-    } else if (selectedModal === "start") {
-      // Go back to parent's two-card view
+  const goBack = (steps: CreateMomentStage[]) => {
+    if (!steps.includes(selectedModal)) return;
+
+    const position = steps.indexOf(selectedModal);
+
+    if (position === 0) {
       onGoBack?.();
-    } else {
+      return;
+    }
+
+    const previousStep = steps[position - 1];
+
+    if (selectedModal === "circle" && selectedCircleProp) {
+      setSelectedCircleProp(null);
+      return;
+    }
+
+    if (selectedModal === "confirm") {
+      setSelectedModal(selectedWho!);
+      return;
+    }
+
+    if (selectedModal === "circle") {
       setSelectedWho(null);
       setSelectedModal("start");
-      setShowSubmit(false);
+      return;
     }
-  };
 
-  useEffect(() => {
-    if (selectedWho) {
-      setChooser(selectedWho);
+    if (selectedModal === "nearby" || selectedModal === "people") {
+      setSelectedWho(null);
+      setSelectedModal("start");
+      return;
     }
-  }, [selectedWho, setChooser]);
+
+    setSelectedModal(previousStep);
+  };
 
   const circles: Circle[] = [
     {
@@ -100,12 +122,10 @@ export default function StartMoment({
     },
   ];
 
-  console.log("selected modal", selectedModal);
-
   return (
     <>
       <motion.button
-        onClick={goBack}
+        onClick={() => goBack(startMomentProp)}
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: -20 }}
@@ -136,7 +156,7 @@ export default function StartMoment({
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -6 }}
-        className={`mx-auto ${selectedModal !== "confirm" ? "max-w-lg" : "max-w-7xl"}  text-[#cecece]/75`}
+        className={`mx-auto ${selectedModal !== "confirm" ? "max-w-full" : "max-w-7xl"} text-[#cecece]/75`}
       >
         <AnimatePresence mode="wait">
           {selectedModal === "start" && (
@@ -145,9 +165,6 @@ export default function StartMoment({
               onChange={handleInputChange}
               onWho={onSelectionWho}
               selectedWho={selectedWho!}
-              chooser={chooser}
-              setChooser={setChooser}
-              selectedModal={selectedModal}
               setSelectedModal={setSelectedModal}
               showSubmit={showSubmit}
             />
@@ -173,7 +190,7 @@ export default function StartMoment({
           )}
           {selectedModal === "nearby" && (
             <AroundYou
-              goback={goBack}
+              goback={() => goBack(startMomentProp)}
               selectedModal={selectedModal}
               setSelectedModal={setSelectedModal}
             />
@@ -187,29 +204,3 @@ export default function StartMoment({
     </>
   );
 }
-
-interface ClockCircleLinearIconProps extends React.SVGProps<SVGSVGElement> {}
-
-export const ClockCircleLinearIcon = (props: ClockCircleLinearIconProps) => {
-  return (
-    <svg
-      aria-hidden="true"
-      fill="none"
-      focusable="false"
-      height="0.8em"
-      role="presentation"
-      viewBox="0 0 24 24"
-      width="0.8em"
-      {...props}
-    >
-      <g fill="none" stroke="currentColor" strokeWidth="1.5">
-        <circle cx="12" cy="12" r="10" />
-        <path
-          d="M12 8v4l2.5 2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </g>
-    </svg>
-  );
-};

@@ -4,23 +4,18 @@ import { RadioGroup } from "@heroui/radio";
 import CustomRadio from "./customRadio";
 import { TimeInput } from "@heroui/react";
 import { Time } from "@internationalized/date";
-import { ClockCircleLinearIcon } from "./startMoment";
 import { InformationIcon, SendIcon } from "./icons";
+import { ClockCircleLinearIcon } from "./icons/LinearClock";
 
 type WhoSelectionProp = "circle" | "people" | "nearby" | null;
 type CreateMomentStage = "start" | "circle" | "people" | "nearby" | "confirm";
 
 interface MomentProp {
-  chooser: "circle" | "people" | "nearby";
-  setChooser: (value: "circle" | "people" | "nearby" | null) => void;
-  onGoBack?: () => void;
-  onContinue?: () => void;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
   onWho: (value: WhoSelectionProp) => void;
   selectedWho: WhoSelectionProp;
   showSubmit: boolean;
   createMoment: string;
-  selectedModal: CreateMomentStage;
   setSelectedModal: (selectedModal: CreateMomentStage) => void;
 }
 
@@ -119,7 +114,7 @@ export default function Start({
   };
 
   return (
-    <motion.section key="start">
+    <motion.section key="start" className="max-w-lg mx-auto">
       <motion.div
         layout
         initial={{ opacity: 0.8 }}
