@@ -4,13 +4,9 @@ import ChevronLeftIcon from "./icons/ChevronLeftIcon";
 import { StaticImport } from "next/dist/shared/lib/get-img-props";
 import InvitePeople from "./InvitePeople";
 import InvitePurpose from "./InvitePurpose";
+import GenerateQrCode from "./GenerateQrCode";
 
-type InviteSelection =
-  | "people"
-  | "purpose"
-  | "context"
-  | "confirm"
-  | "complete";
+type InviteSelection = "people" | "where" | "share";
 
 interface InviteProp {
   onGoBack?: () => void;
@@ -30,13 +26,7 @@ interface UserProp {
   };
 }
 
-const inviteProp: InviteSelection[] = [
-  "people",
-  "purpose",
-  "context",
-  "confirm",
-  "complete",
-];
+const inviteProp: InviteSelection[] = ["people", "where", "share"];
 
 export default function Invite({
   onGoBack,
@@ -50,17 +40,16 @@ export default function Invite({
   );
 
   const goBack = (steps: InviteSelection[]) => {
-    const exist = steps.includes(inviteSelection);
+    if (!steps.includes(inviteSelection)) return;
 
-    if (exist) {
-      const position = steps.indexOf(inviteSelection);
-      if (position > 0) {
-        setInviteSelection(steps[position - 1]);
-      }
-      if (inviteSelection === "people") {
-        onGoBack?.();
-      }
+    const position = steps.indexOf(inviteSelection);
+
+    if (position === 0) {
+      onGoBack?.();
+      return;
     }
+
+    setInviteSelection(steps[position - 1]);
   };
 
   return (
@@ -100,8 +89,15 @@ export default function Invite({
         />
       )}
 
-      {inviteSelection === "purpose" && (
-        <InvitePurpose selectedPeople={selectedInvitedUser} />
+      {inviteSelection === "where" && (
+        <InvitePurpose
+          selectedPeople={selectedInvitedUser}
+          setInviteSelection={setInviteSelection}
+        />
+      )}
+
+      {inviteSelection === "share" && (
+        <GenerateQrCode setInvitedSelection={setInviteSelection} />
       )}
     </motion.section>
   );

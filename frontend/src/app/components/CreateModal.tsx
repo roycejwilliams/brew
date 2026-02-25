@@ -8,12 +8,7 @@ import Invite from "./invite";
 import CreateMoment from "./CreateMoment";
 
 type CreateMomentStage = "start" | "circle" | "people" | "nearby" | "confirm";
-type InviteSelection =
-  | "people"
-  | "purpose"
-  | "context"
-  | "confirm"
-  | "complete";
+type InviteSelection = "people" | "where" | "share";
 
 interface CreateModalProp {
   onClose: () => void;

@@ -92,13 +92,11 @@ export default function StartMoment({
       return;
     }
 
-    if (selectedModal === "circle") {
-      setSelectedWho(null);
-      setSelectedModal("start");
-      return;
-    }
-
-    if (selectedModal === "nearby" || selectedModal === "people") {
+    if (
+      selectedModal === "circle" ||
+      selectedModal === "nearby" ||
+      selectedModal === "people"
+    ) {
       setSelectedWho(null);
       setSelectedModal("start");
       return;

@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 import Attended from "./attended";
 import Hosted from "./hosted";
-import Spotlight from "./spotlight";
+// import Spotlight from "./spotlight";
 import Suggested from "./suggested";
 
 interface FeedProp {
@@ -22,7 +22,7 @@ function Feed({ id }: FeedProp) {
           <div className="flex flex-col gap-y-20 w-full ">
             <Attended id={id} />
             <Hosted id={id} />
-            <Spotlight id={id} />
+            {/* <Spotlight id={id} /> */}
             <Suggested id={id} />
           </div>
         </>

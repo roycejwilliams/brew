@@ -6,12 +6,7 @@ import useDebounce from "../hooks/useDebounce";
 import Image from "next/image";
 import CloseIcon from "./icons/CloseIcon";
 
-type InviteSelection =
-  | "people"
-  | "purpose"
-  | "context"
-  | "confirm"
-  | "complete";
+type InviteSelection = "people" | "where" | "share";
 
 interface UserProp {
   id: string;
@@ -317,7 +312,7 @@ export default function InvitePeople({
           <motion.button
             onClick={() => {
               console.log("Proceeding with:", selectedInvitedUser);
-              setInviteSelection("purpose");
+              setInviteSelection("where");
             }}
             whileHover={{ scale: 1.02, y: -1 }}
             whileTap={{ scale: 0.98 }}

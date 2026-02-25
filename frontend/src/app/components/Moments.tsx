@@ -4,6 +4,8 @@ import { CalendarDate } from "@internationalized/date";
 import Image from "next/image";
 import { StaticImport } from "next/dist/shared/lib/get-img-props";
 
+type InviteSelection = "people" | "where" | "share";
+
 interface Moment {
   id: string;
   circleId: string;
@@ -28,6 +30,7 @@ interface UserProp {
 
 interface InviteMomentSelection {
   selectedPeople: UserProp[];
+  setInviteSelection: (inviteSelection: InviteSelection) => void;
 }
 
 const formatDate = (date: CalendarDate, time: string) => {
@@ -67,7 +70,10 @@ const formatDate = (date: CalendarDate, time: string) => {
   return `${label} · ${time}`;
 };
 
-export default function Moments({ selectedPeople }: InviteMomentSelection) {
+export default function Moments({
+  selectedPeople,
+  setInviteSelection,
+}: InviteMomentSelection) {
   const mockMoments: Moment[] = [
     {
       id: "moment_1",
@@ -119,6 +125,8 @@ export default function Moments({ selectedPeople }: InviteMomentSelection) {
     (name) => name.profile.fullname.split(" ")[0],
   );
 
+  console.log(fullname);
+
   return (
     <motion.section
       key="moment"
@@ -139,7 +147,11 @@ export default function Moments({ selectedPeople }: InviteMomentSelection) {
           className="text-white/50 text-center tracking-wide"
         >
           {selectedId
-            ? `Inviting ${fullname?.join(" & ") ?? "them"} to...`
+            ? `Inviting ${
+                fullname.length > 3
+                  ? `${fullname.slice(0, 3).join(", ")} , +${fullname.length - 3} more`
+                  : fullname.join(", ")
+              } to...`
             : "Bring them into something specific."}
         </motion.h2>
       </AnimatePresence>
@@ -254,10 +266,11 @@ export default function Moments({ selectedPeople }: InviteMomentSelection) {
             className="flex flex-col items-center gap-2 pt-1"
           >
             <motion.button
+              onClick={() => setInviteSelection("share")}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.97 }}
               transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="bg-white text-black text-sm font-medium px-8 py-3 rounded-full cursor-pointer"
+              className="bg-white text-black text-sm font-medium px-8 py-3 rounded-md cursor-pointer"
             >
               Invite them.
             </motion.button>

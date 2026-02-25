@@ -18,8 +18,11 @@ interface UserProp {
   };
 }
 
+type InviteSelection = "people" | "where" | "share";
+
 interface InviteMomentSelection {
   selectedPeople: UserProp[];
+  setInviteSelection: (inviteSelection: InviteSelection) => void;
 }
 
 const purposes = [
@@ -45,6 +48,7 @@ const purposes = [
 
 export default function InvitePurpose({
   selectedPeople,
+  setInviteSelection,
 }: InviteMomentSelection) {
   const [selectPurpose, setSelectedPurpose] = useState<PurposeSelection | null>(
     null,
@@ -124,7 +128,12 @@ export default function InvitePurpose({
   }
 
   if (selectPurpose === "moment") {
-    return <Moments selectedPeople={selectedPeople} />;
+    return (
+      <Moments
+        selectedPeople={selectedPeople}
+        setInviteSelection={setInviteSelection}
+      />
+    );
   }
 
   if (selectPurpose === "circle") {
