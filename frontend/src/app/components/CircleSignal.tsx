@@ -20,7 +20,8 @@ export default function CircleSignal({
 }: CircleSignalProp) {
   return (
     <motion.div
-      className="absolute right-0 transform  top-1/5  rounded-md "
+      key="circle-signal"
+      className="absolute right-0 transform  top-0 rounded-md "
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, y: 50 }}

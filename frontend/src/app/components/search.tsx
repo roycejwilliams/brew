@@ -12,7 +12,8 @@ interface SearchMapProps {
   onChange?: (value: string) => void;
   onFocus?: () => void;
   autoFocus?: boolean;
-  selectedModal: MomentSelectionProp;
+  selectedModal?: MomentSelectionProp;
+  reactIntent?: "username" | "phone" | "email" | null;
 }
 
 export default function SearchMap({
@@ -23,7 +24,7 @@ export default function SearchMap({
   autoFocus = false,
   selectedModal,
 }: SearchMapProps) {
-  placeholder =
+  const defaultPlaceholder =
     selectedModal === "circle"
       ? "Set the scene"
       : selectedModal === "people"
@@ -66,7 +67,7 @@ export default function SearchMap({
           onFocus={onFocus}
           autoFocus={autoFocus}
           className="text-white/90 flex-1 text-sm placeholder:text-sm block p-0 bg-transparent placeholder:text-white/30 focus:outline-none transition-all"
-          placeholder={placeholder}
+          placeholder={placeholder || defaultPlaceholder}
           required
         />
       </motion.div>

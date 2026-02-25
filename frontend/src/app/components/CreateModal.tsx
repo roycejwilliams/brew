@@ -1,63 +1,32 @@
-import { AnimatePresence, motion, Variants } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import React, { useRef, useState } from "react";
 import { useOutsideAlerter } from "../utils/outsideAlert";
-import { RadialGradientBackground } from "./radialNoiseBackground";
-import FingerprintIcon from "./icons/fingerPrint";
-import SlashIcon from "./icons/slashIcon";
 import StartMoment from "./startMoment";
 import Asterisk from "./icons/AsterikIcon";
 import { CloseIcon } from "./icons";
+import Invite from "./invite";
+import CreateMoment from "./CreateMoment";
 
 type CreateMomentStage = "start" | "circle" | "people" | "nearby" | "confirm";
+type InviteSelection = "people" | "where" | "share";
+
 interface CreateModalProp {
   onClose: () => void;
 }
 
 function CreateModal({ onClose }: CreateModalProp) {
-  const scaleVariants: Variants = {
-    rest: { scale: 1 },
-    active: { scale: 1.15, transition: { duration: 0.3, ease: "easeInOut" } },
-  };
-
-  const glowVariants: Variants = {
-    rest: {
-      boxShadow: "0px 0px 0px rgba(0,0,0,0)",
-      opacity: 0.6,
-    },
-    active: {
-      boxShadow: "0px 0px 24px rgba(255,255,255,0.4)",
-      opacity: 1,
-      transition: { duration: 0.5, ease: "easeInOut" },
-    },
-  };
-
-  const textVariants: Variants = {
-    rest: {
-      opacity: 0.6,
-    },
-    active: {
-      opacity: 1,
-      transition: { duration: 0.5, ease: "easeInOut" },
-      fontWeight: 500,
-    },
-  };
-
   const cardActionRef = useRef<HTMLDivElement>(null);
 
   const [cardAction, setCardAction] = useState<"create" | "invite" | null>(
-    null,
-  );
-  const [hoveredAction, setHoveredAction] = useState<
-    "create" | "invite" | null
-  >("create");
-
-  const [chooser, setChooser] = useState<"circle" | "people" | "nearby" | null>(
     null,
   );
 
   //Allows you to switch between each modal depending on selection
   const [selectedModal, setSelectedModal] =
     useState<CreateMomentStage>("start");
+
+  const [inviteSelection, setInviteSelection] =
+    useState<InviteSelection>("people");
 
   useOutsideAlerter(cardActionRef, onClose);
 
@@ -95,124 +64,85 @@ function CreateModal({ onClose }: CreateModalProp) {
 
       <div className="mx-auto text-center mt-10 mb-4 flex flex-col justify-center items-center">
         <motion.div
-          initial={{ rotate: 0 }}
           animate={{ rotate: 360 }}
-          exit={{ rotate: 0 }}
           transition={{ duration: 0.75, ease: "easeInOut" }}
           className="mx-auto text-center text-6xl"
         >
           <Asterisk size={48} color="white" />
         </motion.div>
-        {selectedModal === "start" && (
-          <h1 className="text-3xl font-normal mt-8">
-            <>
-              {cardAction === "create"
-                ? "Start a moment"
-                : cardAction === "invite"
-                  ? "Invite"
-                  : "Create a moment."}
-            </>
-          </h1>
-        )}
-        <h3 className="text-lg mt-2 font-light">
+
+        <motion.h1
+          key={cardAction ?? "default"}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -4 }}
+          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+          className="text-3xl font-normal mt-2"
+        >
+          {cardAction === "create"
+            ? "Start a moment"
+            : cardAction === "invite"
+              ? "Invite"
+              : "Create a moment."}
+        </motion.h1>
+
+        <motion.h3
+          key={`${cardAction === "create" && `sub-${cardAction}-${selectedModal}`}
+          ${cardAction === "invite" && `sub-${cardAction}-${inviteSelection}`}`}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -4 }}
+          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+          className="text-base mt-0 font-light"
+        >
+          {cardAction === "create" &&
+            selectedModal === "start" &&
+            "Set something in motion."}
+          {cardAction === "invite" &&
+            "Start with people. We’ll figure out the rest."}
           {cardAction === null && "Turn a passing idea into a real plan."}
-        </h3>
-        <p className="text-base mt-2 ">
-          {cardAction === null &&
-            "Invite people, set the tone, and see what happens."}
-        </p>
+        </motion.h3>
+
+        {cardAction === null && (
+          <motion.p
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            className="text-base mt-2"
+          >
+            Invite people, set the tone, and see what happens.
+          </motion.p>
+        )}
       </div>
 
-      <div
-        className={`w-full h-full mx-auto ${cardAction === "create" || cardAction === "invite" ? "mt-2" : "mt-24"}`}
+      <motion.div
+        className={`w-full h-fit mx-auto ${cardAction === "create" || cardAction === "invite" ? "mt-2" : "mt-24"}`}
       >
-        <AnimatePresence mode="popLayout">
+        <AnimatePresence mode="sync">
           {cardAction === "create" ? (
             //start moment
             <StartMoment
               setSelectedModal={setSelectedModal}
               selectedModal={selectedModal}
-              chooser={chooser!}
-              setChooser={setChooser}
               onGoBack={() => {
                 setCardAction(null);
               }}
             /> //invite
           ) : cardAction === "invite" ? (
-            ""
+            <Invite
+              onGoBack={() => {
+                setCardAction(null);
+              }}
+              inviteSelection={inviteSelection}
+              setInviteSelection={setInviteSelection}
+            />
           ) : (
             //Create moment
-            <div className="flex gap-x-20 justify-center items-center mx-auto max-w-xl">
-              <button
-                onMouseEnter={() => setHoveredAction("create")}
-                onClick={() => setCardAction("create")}
-                className="cursor-pointer"
-              >
-                <motion.div
-                  animate={hoveredAction === "create" ? "active" : "rest"}
-                  variants={scaleVariants}
-                  className="text-center"
-                >
-                  <motion.div
-                    animate={hoveredAction === "create" ? "active" : "rest"}
-                    variants={glowVariants}
-                    className="w-64 h-64 border border-white/15 rounded-md shadow-lg relative overflow-hidden flex justify-center items-center"
-                  >
-                    <RadialGradientBackground
-                      centerColor="rgba(140,120,255,0.85)" // purple core
-                      midColor="rgba(255,180,200,0.75)" // soft pink
-                      edgeColor="rgba(255,200,170,0.9)" // peach edge
-                    />
-                    <SlashIcon width={75} height={75} />
-                  </motion.div>
-                  <motion.p
-                    animate={hoveredAction === "create" ? "active" : "rest"}
-                    variants={textVariants}
-                    className="mt-6 text-sm"
-                  >
-                    Start a moment
-                  </motion.p>
-                </motion.div>
-              </button>
-
-              <button
-                onMouseEnter={() => setHoveredAction("invite")}
-                onClick={() => setCardAction("invite")}
-                className="cursor-pointer"
-              >
-                <motion.div
-                  animate={hoveredAction === "invite" ? "active" : "rest"}
-                  variants={scaleVariants}
-                  className="text-center"
-                >
-                  <motion.div
-                    animate={hoveredAction === "invite" ? "active" : "rest"}
-                    variants={glowVariants}
-                    className="w-64 h-64 border border-white/15 rounded-md shadow-lg relative overflow-hidden  flex justify-center items-center"
-                  >
-                    <div>
-                      <RadialGradientBackground
-                        centerColor="rgba(60, 160, 255, 0.9)" // bright cyan-blue core
-                        midColor="rgba(120, 200, 255, 0.75)" // soft sky blue
-                        edgeColor="rgba(190, 200, 255, 0.85)" // light lavender edge
-                        noiseOpacity={0.12}
-                      />
-                    </div>
-                    <FingerprintIcon width={65} height={103} />
-                  </motion.div>
-                  <motion.p
-                    animate={hoveredAction === "invite" ? "active" : "rest"}
-                    variants={textVariants}
-                    className="mt-6 text-sm"
-                  >
-                    Invite People
-                  </motion.p>
-                </motion.div>
-              </button>
-            </div>
+            <CreateMoment setCardAction={setCardAction} />
           )}
         </AnimatePresence>
-      </div>
+      </motion.div>
     </motion.section>
   );
 }
