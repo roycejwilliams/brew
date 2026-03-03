@@ -79,7 +79,7 @@ export default function Nav() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        className="absolute left-20 top-0 flex items-center mt-8 z-40"
+        className="absolute left-8 top-0 flex items-center mt-8 z-40"
       >
         {/* Main Nav Container */}
         <motion.div
@@ -178,34 +178,6 @@ export default function Nav() {
                       )}
                     </Link>
                   </motion.li>
-
-                  {/* <motion.li variants={itemVariants}>
-                    <div
-                      className={`group relative flex items-center gap-x-4 px-4 py-3.5 rounded-md cursor-pointer transition-all duration-200 ${
-                        path !== "/manage" && path !== "/pulse"
-                          ? "bg-white/10 text-white"
-                          : "text-white/60 hover:bg-white/5 hover:text-white/90"
-                      }`}
-                    >
-                      <motion.div
-                        whileHover={{ scale: 1.1, rotate: 5 }}
-                        transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                      >
-                        <UsersPlusIcon size={22} color="currentColor" />
-                      </motion.div>
-                      <span className="text-sm font-medium">Create</span>
-                      {path !== "/manage" && path !== "/pulse" && (
-                        <motion.div
-                          layoutId="activeNav"
-                          className="absolute inset-0 bg-white/5 rounded-md border border-white/10"
-                          transition={{
-                            duration: 0.3,
-                            ease: [0.16, 1, 0.3, 1],
-                          }}
-                        />
-                      )}
-                    </div>
-                  </motion.li> */}
 
                   <motion.li variants={itemVariants}>
                     <Link

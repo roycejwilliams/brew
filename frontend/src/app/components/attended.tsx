@@ -8,11 +8,9 @@ interface AttendedProp {
 function Attended({ id }: AttendedProp) {
   return (
     <section className="w-full relative">
-      <div className="px-24">
-        <h1 className="border-b border-white/10 pb-4 text-xl font-light">
-          Presence{" "}
-        </h1>
-      </div>
+      <h1 className="border-b border-white/10 pb-4 text-xl font-light">
+        Presence{" "}
+      </h1>
       <Carousel id={id} width={250} height={250} />
     </section>
   );

@@ -2,7 +2,7 @@ import React, { ChangeEvent, useEffect, useState } from "react";
 import { CalendarDate } from "@internationalized/date";
 import { AnimatePresence, motion } from "motion/react";
 import { ChevronLeftIcon } from "./icons";
-import Circle from "./circle";
+import Circle from "./Circle";
 import MomentConfirmation from "./momentConfirmation";
 import People from "./people";
 import Start from "./start";

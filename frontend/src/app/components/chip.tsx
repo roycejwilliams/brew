@@ -1,25 +1,35 @@
 import React from "react";
+import { motion } from "motion/react";
 
-export default function Chip() {
-  const vibe = [
-    "Cocktails",
-    "Underground",
-    "Artistic",
-    "Tech",
-    "Private",
-    "Invite Only",
-  ];
+const EASE = [0.16, 1, 0.3, 1] as const;
 
+const vibes = [
+  "Cocktails",
+  "Underground",
+  "Artistic",
+  "Tech",
+  "Private",
+  "Invite Only",
+];
+
+function Chip({ label, index }: { label: string; index: number }) {
   return (
-    <>
-      {vibe.map((v, i) => (
-        <button
-          key={i}
-          className="py-2 px-4 w-fit max-w-sm bg-black rounded-full cursor-pointer transform hover:-translate-y-2 tracking-wider ease-in-out duration-200 text-sm font-light shadow-md border border-white/20 inset-shadow-xs inset-shadow-[#98473E]/75 shadow-[#98473E]/50"
-        >
-          {v}
-        </button>
-      ))}
-    </>
+    <motion.button
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: index * 0.05 }}
+      whileHover={{ y: -2 }}
+      whileTap={{ scale: 0.96 }}
+      className="py-1.5 px-4 rounded-full text-xs font-medium tracking-[-0.1px] cursor-pointer transition-all duration-200"
+      style={{
+        background: "rgba(255,255,255,0.05)",
+        border: "1px solid rgba(255,255,255,0.08)",
+        color: "rgba(255,255,255,0.5)",
+      }}
+    >
+      {label}
+    </motion.button>
   );
 }
+
+export default Chip;

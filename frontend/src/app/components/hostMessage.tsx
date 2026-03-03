@@ -1,4 +1,5 @@
 import React from "react";
+import { motion } from "motion/react";
 
 interface HostMessageProp {
   hostMessage: string | null;
@@ -9,19 +10,44 @@ export default function HostMessage({
   hostMessage,
   hostTime,
 }: HostMessageProp) {
-  return (
-    <>
-      <div className="max-w-4xl mx-auto mt-8 hover:scale-105 ease-in-out duration-500 transform transition-all">
-        <div className="w-full bg-linear-to-b from-[#2b2b2b]/75 to-black/20 backdrop-blur-3xl shadow-lg shadow-[#98473E] border border-white/10 mx-auto p-6 text-left rounded-xl">
-          <span className="text-sm">{hostMessage}</span>
-        </div>
+  if (!hostMessage) return null;
 
-        <div className="w-full mt-4 flex justify-end">
-          <span className="text-right  text-sm font-light ml-auto">
-            {hostTime.toString()}
+  return (
+    <motion.div
+      whileHover={{ y: -2 }}
+      transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+      className="w-full"
+      style={{
+        padding: "20px 24px",
+        borderRadius: 14,
+        background: "rgba(255,255,255,0.03)",
+        border: "1px solid rgba(255,255,255,0.07)",
+        boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+      }}
+    >
+      {/* Message body */}
+      <p className="text-white/60 text-sm tracking-[-0.1px] leading-relaxed">
+        {hostMessage}
+      </p>
+
+      {/* Footer */}
+      <div
+        className="flex items-center justify-between mt-4 pt-3"
+        style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}
+      >
+        <div className="flex items-center gap-1.5">
+          <span
+            className="w-1 h-1 rounded-full"
+            style={{ background: "rgba(74,222,128,0.6)" }}
+          />
+          <span className="text-white/20 text-[10px] tracking-widest uppercase font-medium">
+            Host
           </span>
         </div>
+        <span className="text-white/20 text-xs tracking-[-0.1px]">
+          {hostTime.toString()}
+        </span>
       </div>
-    </>
+    </motion.div>
   );
 }
