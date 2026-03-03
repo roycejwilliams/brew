@@ -10,76 +10,187 @@ import {
 import Link from "next/link";
 import Feed from "./feed";
 import Image from "next/image";
+import { motion } from "motion/react";
 
 interface DashboardProp {
   userId: string;
 }
 
+const COMPLETION = 3;
+const EASE = [0.16, 1, 0.3, 1] as const;
+
+const stagger = (i: number) => ({
+  initial: { opacity: 0, y: 10 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.4, delay: i * 0.07, ease: EASE },
+});
+
 function Dashboard({ userId }: DashboardProp) {
   return (
-    <section className=" h-auto bg-linear-to-b py-8 from-[#2b2b2b] to-black ">
-      {/* Profile */}
-      <div className="flex justify-between px-24">
-        {/* UserName */}
-        <div className="w-full h-1/4  flex gap-x-4 ml-40">
-          <div className="w-32 h-32 border border-white/20 rounded-md relative overflow-hidden">
-            <Image
-              src="/profile_1.png"
-              fill
-              priority
-              alt="Profile"
-              className="object-cover w-full h-full"
-            />
-          </div>
-          <div className="flex flex-col text-white/75">
-            {/* Username/Name */}
-            <div>
-              <h1 className="text-xl ">@username</h1>
-              <h2 className="text-sm">Lorem Ipsum</h2>
+    <section className="min-h-screen bg-[#111111] relative overflow-hidden">
+      {/* Ambient glow */}
+      <div
+        className="absolute top-0 left-1/2 -translate-x-1/2 pointer-events-none"
+        style={{
+          width: 900,
+          height: 500,
+          background:
+            "radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.04) 35%, transparent 65%)",
+        }}
+      />
+
+      <div className="relative max-w-5xl mx-auto p-4 mt-4  pb-20">
+        {/* Profile header */}
+        <div className="flex items-start justify-between gap-8">
+          {/* Left — avatar + info */}
+          <div className="flex gap-6 items-start">
+            {/* Avatar */}
+            <motion.div {...stagger(0)} className="relative shrink-0">
+              <div
+                className="w-24 h-24 rounded-xl overflow-hidden relative"
+                style={{
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+                }}
+              >
+                <Image
+                  src="/profile_4.png"
+                  fill
+                  priority
+                  alt="Profile"
+                  className="object-cover w-full h-full"
+                />
+              </div>
+              {/* Online dot */}
+              <div
+                className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full"
+                style={{
+                  background: "#4ade80",
+                  border: "2px solid #111111",
+                  boxShadow: "0 0 8px rgba(74,222,128,0.5)",
+                }}
+              />
+            </motion.div>
+
+            {/* Info */}
+            <div className="flex flex-col gap-3 pt-1">
+              <motion.div {...stagger(1)}>
+                <h1
+                  className="text-white font-semibold leading-none"
+                  style={{ fontSize: 22, letterSpacing: "-0.5px" }}
+                >
+                  Lorem Ipsum
+                </h1>
+                <p className="text-white/40 text-sm mt-0.5 tracking-[-0.1px]">
+                  @username
+                </p>
+              </motion.div>
+
+              {/* Location */}
+              <motion.div
+                {...stagger(2)}
+                className="flex items-center gap-1.5 text-white/30 text-xs tracking-[-0.1px]"
+              >
+                <FontAwesomeIcon icon={faMapPin} className="text-[10px]" />
+                Los Angeles, California
+              </motion.div>
+
+              {/* Bio */}
+              <motion.p
+                {...stagger(3)}
+                className="text-white/50 text-sm tracking-[-0.1px] leading-relaxed max-w-xs"
+              >
+                Notes about me go here.
+              </motion.p>
+
+              {/* Socials */}
+              <motion.div {...stagger(4)} className="flex items-center gap-3">
+                {[
+                  { icon: faInstagram, href: "/" },
+                  { icon: faXTwitter, href: "/" },
+                  { icon: faLinkedin, href: "/" },
+                ].map(({ icon, href }, i) => (
+                  <Link
+                    key={i}
+                    href={href}
+                    className="text-white/25 hover:text-white/70 transition-colors duration-200 text-base"
+                  >
+                    <FontAwesomeIcon icon={icon} />
+                  </Link>
+                ))}
+              </motion.div>
             </div>
-            {/* Location */}
-            <div
-              className="mt-4 flex items-center gap-x-1 text-sm
-            "
+          </div>
+
+          {/* Right — connections + completion */}
+          <div className="flex flex-col items-end gap-4 pt-1 shrink-0">
+            {/* Profile completion */}
+            <motion.div
+              {...stagger(1)}
+              className="flex flex-col items-end gap-2"
             >
-              <div className="w-fit h-fit  ">
-                <FontAwesomeIcon icon={faMapPin}></FontAwesomeIcon>{" "}
+              <div className="flex items-center gap-2">
+                <span className="text-white/25 text-xs tracking-[-0.1px]">
+                  Profile
+                </span>
+                <span className="text-white/60 text-xs font-medium tracking-[-0.2px]">
+                  {COMPLETION}%
+                </span>
               </div>
-              Los Angeles, California
-            </div>
-            {/* Social Media */}
-            <div className="flex gap-x-2 text-lg mt-4">
-              <Link href="/">
-                <FontAwesomeIcon icon={faInstagram}></FontAwesomeIcon>
-              </Link>
-              <Link href="/">
-                <FontAwesomeIcon icon={faXTwitter}></FontAwesomeIcon>
-              </Link>
-              <Link href="/">
-                <FontAwesomeIcon icon={faLinkedin}></FontAwesomeIcon>
-              </Link>
-            </div>
-            {/* Bio */}
-            <div className="mt-4 text-sm text-white/75">Notes </div>
-            {/* Circle */}
-            <div className="mt-4 flex items-center gap-x-4">
-              <span>0 Active connections</span>
-              <div className="flex relative gap-x-1">
-                <div className="border w-8 h-8 rounded-full relative right-0 shadow-lg"></div>
-                <div className="border w-8 h-8 rounded-full relative right-4 shadow-lg"></div>
-                <div className="border w-8 h-8 rounded-full relative right-8 shadow-lg"></div>
-                <div className="border w-8 h-8 rounded-full relative right-12 shadow-lg"></div>
+              <div
+                className="w-28 h-[3px] rounded-full overflow-hidden"
+                style={{ background: "rgba(255,255,255,0.08)" }}
+              >
+                <motion.div
+                  className="h-full rounded-full"
+                  style={{ background: "rgba(255,255,255,0.55)" }}
+                  initial={{ width: 0 }}
+                  animate={{ width: `${COMPLETION}%` }}
+                  transition={{ duration: 0.8, delay: 0.4, ease: EASE }}
+                />
               </div>
-            </div>
+            </motion.div>
+
+            {/* Active connections */}
+            <motion.div
+              {...stagger(2)}
+              className="flex flex-col items-end gap-2"
+            >
+              <span className="text-white/25 text-xs tracking-[-0.1px]">
+                Active connections
+              </span>
+              <div className="flex items-center gap-2">
+                <div className="flex">
+                  {[0, 1, 2, 3].map((i) => (
+                    <div
+                      key={i}
+                      className="w-7 h-7 rounded-full"
+                      style={{
+                        background: `rgba(255,255,255,${0.05 + i * 0.03})`,
+                        border: "1.5px solid #111111",
+                        marginLeft: i === 0 ? 0 : -10,
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.4)",
+                      }}
+                    />
+                  ))}
+                </div>
+                <span className="text-white/40 text-sm font-medium tracking-[-0.2px]">
+                  0
+                </span>
+              </div>
+            </motion.div>
           </div>
         </div>
-        <div className=" border border-white/30 text-sm rounded-full text-center w-1/8 p-2 bg-black shadow h-fit">
-          <p className="text-sm">0% completed</p>
-        </div>
+
+        {/* Feed */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.45, ease: EASE }}
+        >
+          <Feed id={userId} />
+        </motion.div>
       </div>
-      {/* Feed */}
-      <Feed id={userId} />
-      {/* Event Card */}
     </section>
   );
 }

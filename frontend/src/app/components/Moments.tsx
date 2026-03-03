@@ -134,7 +134,7 @@ export default function Moments({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-      className="space-y-5 mx-auto w-full"
+      className="flex flex-col items-center w-full px-6 py-10 gap-y-8"
     >
       {/* Header */}
       <AnimatePresence mode="wait">
@@ -144,7 +144,7 @@ export default function Moments({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 4 }}
           transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-          className="text-white/50 text-center tracking-wide"
+          className="text-white text-xl font-medium tracking-[-0.3px] leading-tight"
         >
           {selectedId
             ? `Inviting ${
@@ -263,14 +263,20 @@ export default function Moments({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 6 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="flex flex-col items-center gap-2 pt-1"
+            className="flex flex-col items-center gap-2 pt-1 w-full"
           >
             <motion.button
               onClick={() => setInviteSelection("share")}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.97 }}
+              whileTap={{ scale: selectedId ? 0.97 : 1 }}
+              disabled={!selectedId}
               transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="bg-white text-black text-sm font-medium px-8 py-3 rounded-md cursor-pointer"
+              className="w-full py-4 rounded-md  text-sm font-medium tracking-[-0.2px] transition-opacity duration-200 hover:opacity-90"
+              style={{
+                background: "#ffffff",
+                color: "#111111",
+                opacity: selectedId ? 1 : 0.3,
+                cursor: selectedId ? "pointer" : "default",
+              }}
             >
               Invite them.
             </motion.button>

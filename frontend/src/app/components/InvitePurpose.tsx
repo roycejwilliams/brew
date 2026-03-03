@@ -4,8 +4,12 @@ import Image from "next/image";
 import { useState } from "react";
 import Moments from "./Moments";
 import { StaticImport } from "next/dist/shared/lib/get-img-props";
+import CircleDestination from "./CircleDestination";
+import Referral from "./Referral";
 
-type PurposeSelection = "moment" | "circle" | "brew";
+type PurposeSelection = "moment" | "circle" | "brew" | null;
+type InviteSelection = "people" | "where" | "share" | "refer";
+type Destination = "destination" | "expectation";
 
 interface UserProp {
   id: string;
@@ -18,11 +22,13 @@ interface UserProp {
   };
 }
 
-type InviteSelection = "people" | "where" | "share";
-
 interface InviteMomentSelection {
   selectedPeople: UserProp[];
   setInviteSelection: (inviteSelection: InviteSelection) => void;
+  selectPurpose: PurposeSelection;
+  setSelectedPurpose: (selectPurpose: PurposeSelection) => void;
+  step: Destination;
+  setStep: (step: Destination) => void;
 }
 
 const purposes = [
@@ -49,13 +55,11 @@ const purposes = [
 export default function InvitePurpose({
   selectedPeople,
   setInviteSelection,
+  selectPurpose,
+  setSelectedPurpose,
+  step,
+  setStep,
 }: InviteMomentSelection) {
-  const [selectPurpose, setSelectedPurpose] = useState<PurposeSelection | null>(
-    null,
-  );
-
-  console.log(selectPurpose);
-
   if (selectPurpose === null) {
     return (
       <motion.section
@@ -137,10 +141,16 @@ export default function InvitePurpose({
   }
 
   if (selectPurpose === "circle") {
-    return <div>circle works</div>;
+    return (
+      <CircleDestination
+        setInviteSelection={setInviteSelection}
+        step={step}
+        setStep={setStep}
+      />
+    );
   }
 
   if (selectPurpose === "brew") {
-    return <div>brew works</div>;
+    return <Referral setInvitedSelection={setInviteSelection} />;
   }
 }

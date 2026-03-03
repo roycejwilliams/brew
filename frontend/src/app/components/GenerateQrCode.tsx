@@ -3,13 +3,13 @@ import React, { useState, useEffect } from "react";
 import { useQRCode } from "next-qrcode";
 import OrbitDots from "./icons/OrbitDots";
 
-type InviteSelection = "people" | "where" | "share";
+type InviteSelection = "people" | "where" | "share" | "refer";
 
 interface ShareProp {
-  setInvitedSelection: (inviteSelection: InviteSelection) => void;
+  onClose: () => void;
 }
 
-function GenerateQrCode({ setInvitedSelection }: ShareProp) {
+function GenerateQrCode({ onClose }: ShareProp) {
   const { Canvas } = useQRCode();
   const [copied, setCopied] = useState(false);
   const [phase, setPhase] = useState<"generating" | "ready">("generating");
@@ -147,7 +147,7 @@ function GenerateQrCode({ setInvitedSelection }: ShareProp) {
         </div>
 
         <motion.button
-          // onClick={() => setInvitedSelection("complete")}
+          onClick={onClose}
           whileTap={{ scale: 0.97 }}
           className="w-full py-4 rounded-xl cursor-pointer text-[15px] font-semibold tracking-[-0.2px] transition-opacity duration-200 hover:opacity-90 active:opacity-80"
           style={{

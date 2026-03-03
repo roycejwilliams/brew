@@ -1,172 +1,255 @@
 "use client";
 import React, { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import CanvasQRcode from "./canvasQRcode";
-import { TicketIcon, BroadcastIcon, RefreshIcon, MailIcon, ChevronLeftIcon, SendIcon, ArrowRightIcon } from "./icons";
+import {
+  TicketIcon,
+  BroadcastIcon,
+  RefreshIcon,
+  MailIcon,
+  ChevronLeftIcon,
+  SendIcon,
+  ArrowRightIcon,
+} from "./icons";
+
+type TransferModal = "transfer" | "invite" | "connect" | null;
+
+const EASE = [0.16, 1, 0.3, 1] as const;
+
+const MODAL_CONTENT: Record<
+  NonNullable<TransferModal> | "default",
+  { title: string; sub: string; placeholder: string }
+> = {
+  transfer: {
+    title: "Transfer your pass",
+    sub: "Pass your access on to someone you trust.",
+    placeholder: "Username, email, or phone…",
+  },
+  invite: {
+    title: "Send an invite",
+    sub: "Extend the night to someone who should be here.",
+    placeholder: "Username, email, or phone…",
+  },
+  connect: {
+    title: "Contact the host",
+    sub: "Reach out and keep the experience seamless.",
+    placeholder: "Send a message…",
+  },
+  default: {
+    title: "Your night begins here",
+    sub: "A quiet moment before the night unfolds.",
+    placeholder: "",
+  },
+};
+
+const ACTIONS: { key: NonNullable<TransferModal>; label: string; Icon: any }[] =
+  [
+    { key: "transfer", label: "Transfer", Icon: ArrowRightIcon },
+    { key: "invite", label: "Invite", Icon: MailIcon },
+    { key: "connect", label: "Contact", Icon: BroadcastIcon },
+  ];
 
 function Transfer() {
-  const [activeTransferModal, setTransferActiveModal] = useState<
-    "transfer" | "invite" | "connect" | null
-  >(null);
+  const [activeTransferModal, setTransferActiveModal] =
+    useState<TransferModal>(null);
+  const contentKey = activeTransferModal ?? "default";
+  const content = MODAL_CONTENT[contentKey];
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
   }
 
   return (
-    <div className="h-2/3 w-full overflow-hidden inset-0 grid xl:grid-cols-2 grid-cols-1 xl:grid-rows-1 grid-rows-2 rounded-lg shadow-lg bg-[#2b2b2b]/50 border border-white/20">
-      <div className="xl:col-span-1 place-content-center place-items-center  xl:border-r  border-white/25">
-        <div className="overflow-hidden rounded-xl w-fit mt-4 mx-auto">
-          <CanvasQRcode qrWidth={250} />
+    <div
+      className="w-full overflow-hidden grid xl:grid-cols-2 grid-cols-1 xl:grid-rows-1 grid-rows-2"
+      style={{
+        borderRadius: 18,
+        border: "1px solid rgba(255,255,255,0.07)",
+        background: "rgba(255,255,255,0.03)",
+        boxShadow: "0 24px 60px rgba(0,0,0,0.4)",
+      }}
+    >
+      {/* LEFT — QR */}
+      <div
+        className="flex flex-col items-center justify-center py-12 px-8 gap-5"
+        style={{ borderRight: "1px solid rgba(255,255,255,0.06)" }}
+      >
+        <div
+          className="overflow-hidden"
+          style={{
+            borderRadius: 14,
+            background: "#f0efed",
+            boxShadow: "0 16px 40px rgba(0,0,0,0.5)",
+          }}
+        >
+          <CanvasQRcode qrWidth={200} />
         </div>
-        <p className="mt-6 text-white/50 text-sm">Scan for entry</p>
+        <div className="flex items-center gap-2">
+          <span
+            className="w-1.5 h-1.5 rounded-full"
+            style={{ background: "rgba(255,255,255,0.2)" }}
+          />
+          <p className="text-white/30 text-xs tracking-[-0.1px]">
+            Scan for entry
+          </p>
+        </div>
       </div>
 
-      <div className="xl:col-span-1 place-content-center place-items-center relative">
-        {/* OPTION STATES */}
+      {/* RIGHT — Actions */}
+      <div className="flex flex-col items-center justify-center py-12 px-8 gap-8">
+        {/* Icon */}
         <AnimatePresence mode="wait">
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
-            key={activeTransferModal ?? "default"}
-            className={`mb-8 w-20 h-20 bg-linear-to-b from-[#2f1613] to-[#00000084] border border-white/10  shadow-lg relative rounded-full  flex justify-center items-center mx-auto `}
+            key={contentKey + "-icon"}
+            initial={{ opacity: 0, scale: 0.85, y: 6 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.85, y: -6 }}
+            transition={{ duration: 0.25, ease: EASE }}
+            className="flex items-center justify-center"
+            style={{
+              width: 64,
+              height: 64,
+              borderRadius: "50%",
+              background: "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              boxShadow: "0 8px 24px rgba(0,0,0,0.3)",
+            }}
           >
             {activeTransferModal === "transfer" && (
-              <RefreshIcon size={44}  color="#fff" />
+              <RefreshIcon size={26} color="#B3B3B3" />
             )}
             {activeTransferModal === "invite" && (
-              <MailIcon size={44}  color="#fff" />
+              <MailIcon size={26} color="#B3B3B3" />
             )}
             {activeTransferModal === "connect" && (
-              <BroadcastIcon size={44}  color="#fff" />
+              <BroadcastIcon size={26} color="#B3B3B3" />
             )}
             {activeTransferModal === null && (
-              <div className="transform rotate-45">
-              <TicketIcon size={44}  color="#fff" />
+              <div style={{ transform: "rotate(45deg)" }}>
+                <TicketIcon size={26} color="#B3B3B3" />
               </div>
             )}
           </motion.div>
         </AnimatePresence>
+
+        {/* Title + sub */}
         <AnimatePresence mode="wait">
           <motion.div
-            key={activeTransferModal ?? "default-title"}
-            className="text-center"
-            initial={{ opacity: 0, y: 10 }}
+            key={contentKey + "-title"}
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.25, ease: EASE }}
+            className="text-center flex flex-col gap-1"
           >
-            <h2 className="text-xl font-medium">
-              {activeTransferModal === "transfer"
-                ? "Transfer Your Pass"
-                : activeTransferModal === "invite"
-                ? "Send an Invite"
-                : activeTransferModal === "connect"
-                ? "Contact the Host"
-                : "Your night begins here"}
+            <h2
+              className="text-white font-medium tracking-[-0.3px]"
+              style={{ fontSize: 17 }}
+            >
+              {content.title}
             </h2>
-
-            <p className="text-white/75 text-sm mt-1">
-              {activeTransferModal === "transfer"
-                ? "Pass your access on to someone you trust."
-                : activeTransferModal === "invite"
-                ? "Extend the night to someone who should be here."
-                : activeTransferModal === "connect"
-                ? "Reach out and keep the experience seamless."
-                : "A quiet moment before the night unfolds."}
+            <p className="text-white/35 text-sm tracking-[-0.1px]">
+              {content.sub}
             </p>
           </motion.div>
         </AnimatePresence>
+
+        {/* Form or action buttons */}
         <AnimatePresence mode="wait">
           {activeTransferModal ? (
             <motion.form
               key="form"
-              initial={{ opacity: 0, y: 10, width: "0%" }}
-              animate={{ opacity: 1, y: 0, width: "100%" }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.25, ease: "easeInOut" }}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.25, ease: EASE }}
               onSubmit={handleSubmit}
-              className="mt-8 flex px-16 gap-x-2  items-center justify-center text-xs text-white/75  mx-auto"
+              className="flex items-center gap-2 w-full"
             >
-              <button
+              {/* Back */}
+              <motion.button
                 type="button"
+                whileTap={{ scale: 0.95 }}
                 onClick={() => setTransferActiveModal(null)}
-                className={` border-[0.5px] rounded-full w-10 h-10 bg-[#2b2b2b] cursor-pointer shadow-xl border-black flex justify-center items-center ${
-                  activeTransferModal ? "block" : "hidden"
-                }`}
+                className="shrink-0 flex items-center justify-center cursor-pointer transition-all duration-200"
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: "50%",
+                  background: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                }}
               >
-                <ChevronLeftIcon size={36}  color="#fff" />
-              </button>
+                <ChevronLeftIcon size={20} color="#fff" />
+              </motion.button>
+
+              {/* Input */}
               <input
                 type="text"
                 id={activeTransferModal}
-                className="border text-white flex-1 px-4 border-gray-300/30 text-sm rounded-full placeholder:text-xs block mx-auto p-2.5 bg-transparent placeholder:text-white/50 focus:outline-none"
-                placeholder={
-                  activeTransferModal === "transfer"
-                    ? "Transfer to.."
-                    : activeTransferModal === "invite"
-                    ? "Invite.."
-                    : activeTransferModal === "connect"
-                    ? "Send Message.."
-                    : ""
-                }
+                className="flex-1 bg-transparent text-white text-sm tracking-[-0.1px] placeholder-white/20 outline-none px-4 py-2.5 rounded-xl transition-all duration-200"
+                style={{
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  background: "rgba(255,255,255,0.04)",
+                }}
+                placeholder={content.placeholder}
                 required
-              />{" "}
-              <button
+              />
+
+              {/* Send */}
+              <motion.button
                 type="submit"
-                className={` border-[0.5px] rounded-full w-10 h-10 bg-[#e7e7e7] cursor-pointer shadow-xl border-black flex justify-center items-center ${
-                  activeTransferModal ? "block" : "hidden"
-                }`}
+                whileTap={{ scale: 0.95 }}
+                className="shrink-0 flex items-center justify-center cursor-pointer"
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: "50%",
+                  background: "#ffffff",
+                  boxShadow: "0 4px 14px rgba(0,0,0,0.3)",
+                }}
               >
-                <SendIcon size={20}  color="#000" />
-              </button>
+                <SendIcon size={16} color="#111111" />
+              </motion.button>
             </motion.form>
           ) : (
             <motion.div
               key="options"
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.25, ease: "easeOut" }}
-              className="mt-8 flex px-16 gap-x-12 w-full items-center justify-center text-xs text-white/75  mx-auto"
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.25, ease: EASE }}
+              className="flex items-center gap-8"
             >
-              {/* Transfer */}
-              <button
-                role="transfer"
-                onClick={() => setTransferActiveModal("transfer")}
-                className="cursor-pointer group hover:text-white duration-300 ease-in-out transition "
-              >
-                <div className=" w-20 h-20 rounded-full group-hover:scale-110 duration-300 ease-in-out transition   shadow-xl backdrop-blur-3xl flex justify-center items-center  border border-white/10 bg-linear-to-r from-black/25 to-[#2b2b2b]/20">
-                  <ArrowRightIcon size={28}  color="currentColor" />
-                </div>
-                <p className="mt-4 mx-auto text-center">Transfer</p>
-              </button>
-              {/* Invite  */}
-              <button
-                role="invite"
-                onClick={() => setTransferActiveModal("invite")}
-                className="cursor-pointer group hover:text-white duration-300 ease-in-out transition "
-              >
-                <div className=" w-20 h-20 rounded-full group-hover:scale-110 duration-300 ease-in-out transition   shadow-xl backdrop-blur-3xl flex justify-center items-center  border border-white/10 bg-linear-to-r from-black/25 to-[#2b2b2b]/20">
-                    <MailIcon size={44}  color="#fff" />
-                </div>
-                <p className="mt-4 mx-auto text-center">Invite</p>
-              </button>
-              {/* Connect */}
-              <button
-                role="connect"
-                onClick={() => setTransferActiveModal("connect")}
-                className="cursor-pointer group hover:text-white duration-300 ease-in-out transition "
-              >
-                <div className=" w-20 h-20 rounded-full group-hover:scale-110 duration-300 ease-in-out transition   shadow-xl backdrop-blur-3xl flex justify-center items-center  border border-white/10 bg-linear-to-r from-black/25 to-[#2b2b2b]/20">
-                  {activeTransferModal === "connect" && (
-                    <BroadcastIcon size={44}  color="#fff" />
-                  )}
-                </div>
-                <p className="mt-4 mx-auto text-center">Contact</p>
-              </button>
+              {ACTIONS.map(({ key, label, Icon }, i) => (
+                <motion.button
+                  key={key}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: i * 0.06, ease: EASE }}
+                  whileHover={{ y: -3 }}
+                  whileTap={{ scale: 0.96 }}
+                  onClick={() => setTransferActiveModal(key)}
+                  className="flex flex-col items-center gap-3 cursor-pointer group"
+                >
+                  <div
+                    className="flex items-center justify-center transition-all duration-200"
+                    style={{
+                      width: 56,
+                      height: 56,
+                      borderRadius: "50%",
+                      background: "rgba(255,255,255,0.05)",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                      boxShadow: "0 4px 16px rgba(0,0,0,0.3)",
+                    }}
+                  >
+                    <Icon size={22} color="rgba(255,255,255,0.5)" />
+                  </div>
+                  <span className="text-white/30 text-xs tracking-[-0.1px] group-hover:text-white/60 transition-colors duration-200">
+                    {label}
+                  </span>
+                </motion.button>
+              ))}
             </motion.div>
           )}
         </AnimatePresence>
