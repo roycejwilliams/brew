@@ -1,14 +1,16 @@
-from typing import Union
+from typing import Annotated
 from contextlib import asynccontextmanager
-import bcrypt
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from jwt.exceptions import InvalidTokenError
+from pwdlib import PasswordHash
 from generated.prisma import Prisma
 from prisma.errors import PrismaError
 from pydantic import BaseModel
-import uuid 
-import random
+import uuid, random, bcrypt, jwt, os
+from datetime import datetime, timedelta, timezone
+from dotenv import load_dotenv
 
-from datetime import datetime
 
 db = Prisma()
 
@@ -52,6 +54,43 @@ class UserRegistration(BaseModel):
     email: str
     phoneNumber: str
 
+class OTPVerify(BaseModel):
+    phoneNumber: str
+    otp: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+password_hash = PasswordHash.recommended()
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+otp_secret_key = os.getenv("OTP_SECRET_KEY")
+otp_algorithm = os.getenv("ALGORITHM")
+access_token = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES")
+
+
+def hash_code(password: str):
+        password_bytes = password.encode('utf-8')
+
+        salt = bcrypt.gensalt()
+
+        hashed_password = bcrypt.hashpw(password_bytes, salt)
+        return hashed_password.decode('utf-8')
+
+def create_access_token(data: dict, expires_delta: timedelta | None = None):
+    to_encode = data.copy() #making copy of the incoming directory so you can safetly modify it
+    if expires_delta:
+        expire = datetime.now(timezone.utc) + expires_delta
+    else:
+        expire = datetime.now(timezone.utc) + timedelta(minutes=2)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, f"SECRET KEY: {otp_secret_key}", f"OTP CODE: {otp_algorithm}")
+    return encoded_jwt
+
+
+
 
 @app.get("/users") 
 async def get_users():
@@ -78,13 +117,7 @@ async def get_user(id: str):
             raise HTTPException(status_code=404, detail="User Not Found")
         raise HTTPException(status_code=400, detail=f"Database Error {e.code}")
 
-def hash_code(password: str):
-        password_bytes = password.encode('utf-8')
 
-        salt = bcrypt.gensalt()
-
-        hashed_password = bcrypt.hashpw(password_bytes, salt)
-        return hashed_password.decode('utf-8')
 
 #Create Profile after user sign in
 @app.post("/users")
@@ -129,6 +162,19 @@ async def create_user(user: UserRegistration):
     
     except PrismaError:
         raise HTTPException(status_code=500, detail="Unable to create profile after sign-in")
+
+#verifying otp
+@app.post("/verify-otp")
+async def verify_user(otp_request: OTPVerify):
+        
+        user = await db.user.find_unique(where={"phoneNumber": otp_request.phoneNumber})
+        if not user: 
+            raise HTTPException(status_code=404, detail="User not found")
+        #verify's otp
+        if not bcrypt.checkpw( otp_request.otp.encode("utf-8"), user.otp.encode("utf-8")):
+            raise HTTPException(status_code= 401, detail="Invalid OTP")
+        token = create_access_token({"token": user.id})
+        return {"access token": token}
 
 #Getting Attendee by userId and eventId
 #Find exactly one record in the Attendee table where both the userId and eventId match this pair.
