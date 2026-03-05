@@ -13,11 +13,11 @@ const EASE = [0.16, 1, 0.3, 1] as const;
 // Mock data — replace with real data from store/props
 const MOCK = {
   title: "Late Night Session",
-  location: "Silver Lake, LA",
+  location: "Sliver Lake, Los Angeles, California",
   date: "Fri, Jan 24",
   time: "10 PM",
   attendees: 12,
-  tag: "Circle",
+  tag: "Moment",
 };
 
 function Card({ width, height, id }: CardProp) {
@@ -127,7 +127,10 @@ function Card({ width, height, id }: CardProp) {
           {MOCK.title}
         </h3>
 
-        <div className="flex items-center justify-between mt-1">
+        <div className="flex flex-col items-start justify-between mt-1">
+          <span className="text-white/25 text-[10px] tracking-[-0.1px]">
+            {MOCK.date} · {MOCK.time}
+          </span>
           <div className="flex items-center gap-1 text-white/35 text-xs tracking-[-0.1px]">
             <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
               <path
@@ -137,9 +140,6 @@ function Card({ width, height, id }: CardProp) {
             </svg>
             {MOCK.location}
           </div>
-          <span className="text-white/25 text-[10px] tracking-[-0.1px]">
-            {MOCK.date} · {MOCK.time}
-          </span>
         </div>
       </div>
     </motion.div>

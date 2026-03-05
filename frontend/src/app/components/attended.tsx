@@ -11,7 +11,7 @@ function Attended({ id }: AttendedProp) {
       <h1 className="border-b border-white/10 pb-4 text-xl font-light">
         Presence{" "}
       </h1>
-      <Carousel id={id} width={250} height={250} />
+      <Carousel id={id} width={300} height={300} />
     </section>
   );
 }

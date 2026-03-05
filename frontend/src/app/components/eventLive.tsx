@@ -134,20 +134,30 @@ export default function EventLive({ activeModal }: EventLiveProp) {
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, delay: 0.1, ease: EASE }}
-        className="w-full relative overflow-hidden"
+        transition={{ duration: 0.5, delay: 0.1, ease: EASE }}
+        className="w-1/2 h-125 mx-auto relative overflow-hidden"
         style={{
-          height: 380,
           borderRadius: 16,
           border: "1px solid rgba(255,255,255,0.07)",
           boxShadow: "0 24px 60px rgba(0,0,0,0.5)",
           opacity: 0.88,
         }}
       >
-        <Map center={[-122.42285, 37.73393]} zoom={11} dragPan={false} />
+        <Map
+          center={[-122.42285, 37.73393]}
+          zoom={11}
+          dragPan={false}
+          scrollZoom={false}
+          doubleClickZoom={false}
+          touchZoomRotate={false}
+        />
+
+        {/* Map vignette */}
         <div
-          className="absolute inset-0 pointer-events-none rounded-2xl"
-          style={{ boxShadow: "inset 0 0 60px rgba(0,0,0,0.4)" }}
+          className="absolute inset-0 pointer-events-none rounded-md"
+          style={{
+            boxShadow: "inset 0 0 60px rgba(0,0,0,0.4)",
+          }}
         />
       </motion.div>
 
