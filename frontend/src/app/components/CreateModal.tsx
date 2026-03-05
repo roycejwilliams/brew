@@ -14,6 +14,8 @@ interface CreateModalProp {
   onClose: () => void;
 }
 
+const EASE = [0.16, 1, 0.3, 1] as const;
+
 function CreateModal({ onClose }: CreateModalProp) {
   const cardActionRef = useRef<HTMLDivElement>(null);
 
@@ -40,25 +42,28 @@ function CreateModal({ onClose }: CreateModalProp) {
       {cardAction === null && (
         <motion.button
           onClick={onClose}
-          initial={{ opacity: 0, x: -20 }}
+          initial={{ opacity: 0, x: -8 }}
           animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          whileTap={{ scale: 0.95 }}
-          transition={{
-            type: "spring",
-            stiffness: 300,
-            damping: 25,
-          }}
-          className="absolute left-0 top-0 m-8 cursor-pointer flex gap-x-1 items-center text-white/80 hover:text-white transition-colors group"
+          transition={{ duration: 0.3, ease: EASE }}
+          whileHover={{ x: -2 }}
+          whileTap={{ scale: 0.94 }}
+          className="fixed top-0 left-0 m-6 z-50 flex items-center gap-2 cursor-pointer group"
         >
-          <motion.span
-            className="inline-block"
-            whileHover={{ rotate: 90 }}
-            transition={{ duration: 0.2 }}
+          <div
+            className="flex items-center justify-center transition-all duration-200"
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: "50%",
+              background: "rgba(255,255,255,0.06)",
+              border: "1px solid rgba(255,255,255,0.1)",
+            }}
           >
-            <CloseIcon size={18} />
-          </motion.span>
-          close
+            <CloseIcon color="#fff" size={14} />
+          </div>
+          <span className="text-white/30 text-xs tracking-[-0.1px] opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            Close
+          </span>
         </motion.button>
       )}
 

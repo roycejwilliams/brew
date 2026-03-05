@@ -61,7 +61,7 @@ function Transfer() {
 
   return (
     <div
-      className="w-full overflow-hidden grid xl:grid-cols-2 grid-cols-1 xl:grid-rows-1 grid-rows-2"
+      className="w-1/2 mx-auto overflow-hidden grid grid-cols-1  xl:grid-rows-1 grid-rows-2"
       style={{
         borderRadius: 18,
         border: "1px solid rgba(255,255,255,0.07)",
@@ -71,7 +71,7 @@ function Transfer() {
     >
       {/* LEFT — QR */}
       <div
-        className="flex flex-col items-center justify-center py-12 px-8 gap-5"
+        className="flex flex-col items-center justify-center pt-12 px-8 gap-5"
         style={{ borderRight: "1px solid rgba(255,255,255,0.06)" }}
       >
         <div
@@ -96,7 +96,7 @@ function Transfer() {
       </div>
 
       {/* RIGHT — Actions */}
-      <div className="flex flex-col items-center justify-center py-12 px-8 gap-8">
+      <div className="flex flex-col items-center justify-center pt-4 pb-12 px-8 gap-8">
         {/* Icon */}
         <AnimatePresence mode="wait">
           <motion.div
