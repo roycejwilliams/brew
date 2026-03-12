@@ -1,5 +1,4 @@
 import { AnimatePresence, motion } from "motion/react";
-import React, { useState } from "react";
 import CircleScene from "./CircleScene";
 import CircleSignal from "./CircleSignal";
 import CircleControls from "./circleControls";
