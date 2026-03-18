@@ -1,7 +1,7 @@
 "use client";
-import CircleView from "@/app/components/Manage";
+import ManageGroup from "@/app/components/ManageGroup";
 import React from "react";
 
-export default function Circle() {
-  return <CircleView />;
+export default function Manage() {
+  return <ManageGroup />;
 }
