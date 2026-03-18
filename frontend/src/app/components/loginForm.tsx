@@ -42,7 +42,7 @@ function LoginForm({ state, setState }: Phase) {
   const handleKeyDown = (
     // enables certain buttons to be clicked during completion
     e: React.KeyboardEvent<HTMLInputElement>,
-    index: number
+    index: number,
   ) => {
     if (
       !/^[0-9]?$/.test(e.key) &&
@@ -65,8 +65,8 @@ function LoginForm({ state, setState }: Phase) {
 
     setOtp((prev) =>
       prev.map((_, i) =>
-        paste[i] && /^[0-9]?$/.test(paste[i]) ? paste[i] : ""
-      )
+        paste[i] && /^[0-9]?$/.test(paste[i]) ? paste[i] : "",
+      ),
     );
   };
 
@@ -77,18 +77,16 @@ function LoginForm({ state, setState }: Phase) {
       setState("success");
 
       const timeout = setTimeout(() => {
-        router.push("/circle");
+        router.push("/pulse");
       }, 3000);
 
       return () => clearTimeout(timeout);
     }
-  }, [otp]); // ✅ only depends on otp
+  }, [otp]); // only depends on otp
 
   const openPhone = () => {
     setIsPhone((e) => !e);
   };
-
-  console.log("LoginForm phase:", state);
 
   return (
     <>
