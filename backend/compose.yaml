@@ -1,7 +1,15 @@
 services:
   db:
     image: postgres:15-alpine
+    container_name: brew-db
     environment:
+      POSTGRES_USER: brew
       POSTGRES_PASSWORD: brew1026!
+      POSTGRES_DB: brew_dev
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
