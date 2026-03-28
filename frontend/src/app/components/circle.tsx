@@ -3,8 +3,7 @@ import CircleScene from "./CircleScene";
 import CircleSignal from "./CircleSignal";
 import CircleControls from "./circleControls";
 import SelectAction from "./selectAction";
-
-type CreateMomentStage = "start" | "circle" | "people" | "nearby" | "confirm";
+import { useState } from "react";
 
 interface Circle {
   id: string;
@@ -13,43 +12,94 @@ interface Circle {
   image: string;
 }
 
-interface CircleProp {
-  selectedCircleProp: Circle | null;
-  setSelectedCircleProp: (selectedCircleProp: Circle | null) => void;
-  activeCircle: number;
-  setActiveCircle: React.Dispatch<React.SetStateAction<number>>;
+interface CircleSceneProp {
   circles: Circle[];
-  setSelectedModal: (modal: CreateMomentStage) => void;
+  selectedCircle: Circle | null;
+  circleIndex: number;
+}
+
+interface CircleSelection {
+  activeIndex: number;
+  setActiveCircle: React.Dispatch<React.SetStateAction<number>>;
+  selectedCircle: Circle | null;
+  setSelectedCircleProp: (selectedCircle: Circle | null) => void;
+  setSelectedModal: (selectedModal: "confirm") => void;
 }
 
 export default function Circle({
-  selectedCircleProp,
-  activeCircle,
+  activeIndex,
+  selectedCircle,
   setActiveCircle,
   setSelectedCircleProp,
-  circles,
   setSelectedModal,
-}: CircleProp) {
+}: CircleSelection) {
+  const markerData: number[] = Array.from({ length: 28 });
+
+  const mockCircles: Circle[] = [
+    {
+      id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      name: "The Usual Suspects",
+      members: ["Jordan Miles", "Ava Chen", "Marcus Webb", "Priya Nair"],
+      image: "/EventRecap-5.jpg",
+    },
+    {
+      id: "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+      name: "Bay Nights",
+      members: ["Tyler Ross", "Simone Park", "Devon Kale", "Mia Torres"],
+      image: "/EventRecap-2.jpg",
+    },
+    {
+      id: "c3d4e5f6-a7b8-9012-cdef-123456789012",
+      name: "Studio Crew",
+      members: ["Kai Lennox", "Zara Moon", "Felix Osei"],
+      image: "/EventRecap-3.jpg",
+    },
+    {
+      id: "d4e5f6a7-b8c9-0123-defa-234567890123",
+      name: "Rooftop Regulars",
+      members: [
+        "Nadia Voss",
+        "Chris Endo",
+        "Lena Park",
+        "Sam Diallo",
+        "Omar Reyes",
+      ],
+      image: "/EventRecap-4.jpg",
+    },
+  ];
+
+  const mockCircleScene: CircleSceneProp = {
+    circles: mockCircles,
+    selectedCircle: selectedCircle,
+    circleIndex: 0,
+  };
+
   const nextSignal = () => {
-    setActiveCircle((i: number) => (i + 1) % circles.length);
+    setActiveCircle((i) => (i + 1) % mockCircleScene.circles.length);
   };
 
   const prevSignal = () => {
-    setActiveCircle((i: number) => (i - 1 + circles.length) % circles.length);
+    setActiveCircle(
+      (i) =>
+        (i - 1 + mockCircleScene.circles.length) %
+        mockCircleScene.circles.length,
+    );
   };
+
+  console.log(mockCircleScene.circles[activeIndex]);
 
   return (
     <AnimatePresence mode="sync">
       <motion.section key="circle" className=" text-center space-y-5 relative">
         <motion.div
-          key={selectedCircleProp ? "selected-header" : "browse-header"}
+          key={selectedCircle ? "selected-header" : "browse-header"}
           initial={{ opacity: 0, y: -4 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 4 }}
           transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
           className="mb-6 space-y-1"
         >
-          {selectedCircleProp ? (
+          {selectedCircle ? (
             <>
               <h2 className="text-lg font-medium text-white/90">
                 Inviting your circle
@@ -57,7 +107,7 @@ export default function Circle({
               <p className="text-sm text-white/40">
                 Sending to{" "}
                 <span className="text-white/70 font-medium">
-                  {selectedCircleProp.name}
+                  {selectedCircle.name}
                 </span>
               </p>
             </>
@@ -75,24 +125,30 @@ export default function Circle({
 
         {/* MIDDLE — persistent */}
         <CircleScene
-          circles={circles}
-          activeIndex={activeCircle}
-          selectedCircle={selectedCircleProp}
+          circles={mockCircleScene.circles}
+          circleIndex={activeIndex}
+          selectedCircle={mockCircleScene.selectedCircle}
+          markerData={markerData}
         />
 
         <AnimatePresence mode="wait">
           {/* CONTROLS — presence */}
-          {selectedCircleProp === null && (
+          {selectedCircle === null && (
             <>
-              <CircleSignal circles={circles} activeIndex={activeCircle} />
+              <CircleSignal
+                circles={mockCircleScene.circles}
+                activeIndex={activeIndex}
+              />
               <CircleControls nextMarker={nextSignal} prevMarker={prevSignal} />
             </>
           )}
         </AnimatePresence>
 
         <SelectAction
-          selectedCircle={selectedCircleProp}
-          onSelect={() => setSelectedCircleProp(circles[activeCircle])}
+          selectedCircle={selectedCircle}
+          onSelect={() =>
+            setSelectedCircleProp(mockCircleScene.circles[activeIndex])
+          }
           onContinue={() => setSelectedModal("confirm")}
         />
 

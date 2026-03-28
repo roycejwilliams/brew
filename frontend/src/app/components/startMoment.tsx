@@ -170,10 +170,9 @@ export default function StartMoment({
 
           {selectedModal === "circle" && (
             <Circle
-              activeCircle={activeCircle}
+              activeIndex={activeCircle}
+              selectedCircle={selectedCircleProp}
               setActiveCircle={setActiveCircle}
-              circles={circles}
-              selectedCircleProp={selectedCircleProp}
               setSelectedCircleProp={setSelectedCircleProp}
               setSelectedModal={setSelectedModal}
             />
