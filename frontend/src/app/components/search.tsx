@@ -2,7 +2,6 @@
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { SearchIcon } from "./icons";
-import useDebounce from "../hooks/useDebounce";
 
 type MomentSelectionProp = "start" | "circle" | "people" | "nearby" | "confirm";
 
@@ -24,12 +23,18 @@ export default function SearchMap({
   autoFocus = false,
   selectedModal,
 }: SearchMapProps) {
+  const pathname = usePathname();
+
   const defaultPlaceholder =
-    selectedModal === "circle"
-      ? "Set the scene"
-      : selectedModal === "people"
+    pathname === "/pulse"
+      ? selectedModal === "people"
         ? "Curate the room"
-        : "Find a vibe...";
+        : selectedModal === "circle"
+          ? "Set the scene"
+          : "Find a vibe.."
+      : pathname === "/manage"
+        ? "Search members"
+        : "Search";
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (onChange) {
@@ -66,7 +71,7 @@ export default function SearchMap({
           onChange={handleChange}
           onFocus={onFocus}
           autoFocus={autoFocus}
-          className="text-white/90 flex-1 text-sm placeholder:text-sm block p-0 bg-transparent placeholder:text-white/30 focus:outline-none transition-all"
+          className="text-white/90 flex-1 text-sm placeholder:text-xs block p-0 bg-transparent placeholder:text-white/30 focus:outline-none transition-all"
           placeholder={placeholder || defaultPlaceholder}
           required
         />

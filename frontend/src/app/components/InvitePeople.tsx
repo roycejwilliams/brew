@@ -627,7 +627,7 @@ export default function InvitePeople({
                         </svg>
                       )}
                     </div>
-                    <span className="text-xs text-white/60 max-w-[70px] truncate">
+                    <span className="text-xs text-white/60 max-w-17.5 truncate">
                       {selectedUser.isExternal
                         ? selectedUser.profile.fullname.split("@")[0]
                         : selectedUser.profile.fullname.split(" ")[0]}

@@ -18,7 +18,7 @@ function Feed({ id }: FeedProp) {
 
   return (
     <section className="w-full mt-8 h-full flex justify-center items-center">
-      {!completedProfile ? (
+      {completedProfile ? (
         <div className="flex flex-col gap-y-16 w-full">
           <Attended id={id} />
           <Hosted id={id} />

@@ -2,7 +2,6 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
-import { CalendarDate } from "@internationalized/date";
 import { AnimatePresence, motion } from "motion/react";
 
 interface Circle {
@@ -15,7 +14,8 @@ interface Circle {
 interface CircleSceneProp {
   circles: Circle[];
   selectedCircle: Circle | null;
-  activeIndex: number;
+  circleIndex?: number; // controls circle index
+  markerIndex?: number; // controls marker index
 }
 
 type MarkerGeometry = {
@@ -27,17 +27,14 @@ type MarkerGeometry = {
 };
 
 export default function CircleScene({
-  circles,
-  activeIndex,
+  circleIndex,
   selectedCircle,
+  markerIndex,
 }: CircleSceneProp) {
-  const circle = circles[activeIndex];
-  const [markerIndex, setMarkerIndex] = useState<number>(0);
   const markerRadius = 250;
-  const windowSize = 24;
+  const windowSize = selectedCircle?.members.length!;
   const cadence = Math.round(360 / windowSize); // angular spacing between pins
-  const markerOffset = 50; // tweak until it matches Figma
-  const markerData = Array.from({ length: 28 });
+  const markerOffset = 25; // tweak until it matches Figma
 
   const cx = 250;
   const cy = 250;
@@ -47,93 +44,147 @@ export default function CircleScene({
 
   const container = useRef<HTMLElement>(null);
   const rotation = useRef({ value: 0 });
-  const markersRef = useRef<SVGGElement[]>([]);
+  const prevIndexRef = useRef(markerIndex);
 
   const getMarkerGeometry = (
     i: number,
     rotationValue: number,
     activeIndex: number,
   ): MarkerGeometry => {
+    //Place the markers in their relative positions
     const relativePosition =
-      (i - rotationValue + markerData.length) % markerData.length;
+      (i - rotationValue + selectedCircle?.members.length!) %
+      selectedCircle?.members.length!;
 
+    //Calculations for degree
     const angleDeg = relativePosition * cadence - 90;
+
+    //Calculations for radians
     const angleRad = (Math.PI * angleDeg) / 180;
 
-    const x = cx + Math.cos(angleRad) * (markerRadius + markerOffset);
-    const y = cy + Math.sin(angleRad) * (markerRadius + markerOffset);
+    //creates the position
+    const x = cx + Math.cos(angleRad) * (markerRadius + markerOffset) - 24;
+    const y = cy + Math.sin(angleRad) * (markerRadius + markerOffset) - 24;
 
     const visible =
-      (i - activeIndex + markerData.length) % markerData.length < windowSize;
+      (i - rotationValue + selectedCircle?.members.length!) %
+        selectedCircle?.members.length! <
+      windowSize!;
 
     return {
       x,
       y,
       rotate: angleDeg + 90,
-      scale: i === activeIndex ? 0.65 : 0.5,
+      scale: i === activeIndex ? 0.8 : 0.5,
       visible,
     };
   };
 
+  //Don't need to be debugged - only paints the picture beforehand.
+  useLayoutEffect(() => {
+    if (!container.current || !selectedCircle) return;
+
+    // Reset rotation state for the new circle
+    rotation.current.value = 0;
+    prevIndexRef.current = markerIndex ?? 0;
+
+    // Kill any in-flight tweens so they don't fight the reset
+    gsap.killTweensOf(rotation.current);
+
+    const markers = gsap.utils.toArray<SVGGElement>(".circle-marker");
+
+    markers.forEach((marker, i) => {
+      const g = getMarkerGeometry(i, 0, markerIndex ?? 0);
+
+      gsap.set(marker, {
+        transformOrigin: "24px 24px",
+        x: g.x,
+        y: g.y,
+        rotate: g.rotate,
+        scale: g.scale,
+        opacity: g.visible ? (i === (markerIndex ?? 0) ? 1 : 0.6) : 0,
+      });
+    });
+  }, [selectedCircle?.id]); // fires when you switch circles
+
   //GSAP - FIXED: Removed inline style conflicts, proper DOM selection
   useGSAP(
     () => {
-      // Wait for DOM to be ready
       if (!container.current) return;
 
       const markers = gsap.utils.toArray<SVGGElement>(".circle-marker");
 
-      // Store refs for cleanup
-      markersRef.current = markers;
+      const prev = prevIndexRef.current; //holds the last marker index value
+      const next = markerIndex; //holds the next marker value
+      let target = next; //the point at which we want to go
 
-      // Kill any existing tweens to prevent conflicts
-      gsap.killTweensOf([
-        markers,
-        "#outerCircle",
-        "#innerCircle",
-        rotation.current,
-      ]);
+      console.log("prev:", prev, "next:", next, "target:", target);
+
+      const halfLength = selectedCircle?.members.length! / 2;
+      // shortest path between prev and next accounting for wrap
+      let diff = (next ?? 0) - (prev ?? 0);
+
+      // normalize diff to always take the shortest path
+      if (diff > halfLength) diff -= selectedCircle?.members.length!;
+      if (diff < -halfLength) diff += selectedCircle?.members.length!;
+
+      // offset from current interpolated value instead of jumping to absolute index
+
+      target = rotation.current.value + diff;
+
+      //this is what keeps the old value referenced
+      prevIndexRef.current = next;
+
+      gsap.killTweensOf(["#outerCircle", "#innerCircle", rotation.current]);
 
       gsap.to("#outerCircle", {
-        rotate: markerIndex * cadence + 360,
+        rotate: markerIndex ?? 0 * cadence + 360,
         transformOrigin: "50% 50%",
         duration: 0.6,
         ease: "power1.inOut",
       });
 
       gsap.to("#innerCircle", {
-        rotate: -markerIndex * cadence + 180,
+        rotate: -(markerIndex ?? 0) * cadence + 180,
         transformOrigin: "50% 50%",
         duration: 0.6,
         ease: "power1.inOut",
       });
 
       gsap.to(rotation.current, {
-        value: markerIndex,
+        value: target,
         duration: 0.6,
         ease: "power1.inOut",
         onUpdate: () => {
           markers.forEach((marker, i) => {
-            if (!marker) return; // Safety check
+            if (!marker) return;
 
-            const g = getMarkerGeometry(i, rotation.current.value, markerIndex);
+            //marker get repositioned each time
+            const g = getMarkerGeometry(
+              i,
+              rotation.current.value,
+              markerIndex ?? 0,
+            );
 
             if (g.visible) {
-              gsap.to(marker, {
+              gsap.set(marker, {
                 x: g.x,
                 y: g.y,
                 rotate: g.rotate,
+              });
+              gsap.to(marker, {
                 scale: g.scale,
-                opacity: i === markerIndex ? 1 : 0.6,
-                duration: 0.6,
-                ease: "power1.inOut",
-                overwrite: "auto", // Prevent animation conflicts
+                opacity: i === markerIndex ? 1.5 : 0.6,
+                duration: 0.5,
+                ease: "back.out(1.7)",
+                overwrite: "auto",
               });
             } else {
               gsap.to(marker, {
+                scale: 0.3,
                 opacity: 0,
-                duration: 0.6,
-                ease: "power1.inOut",
+                duration: 0.3,
+                ease: "power2.in",
                 overwrite: "auto",
               });
             }
@@ -144,41 +195,8 @@ export default function CircleScene({
     {
       scope: container,
       dependencies: [markerIndex],
-      revertOnUpdate: true, // Clean up old animations
     },
   );
-
-  // Initialize marker positions on mount
-  // runs synchronously after DOM mutation
-  //use it if I am setting up a style and transformation before it's painted
-  useLayoutEffect(() => {
-    if (!container.current) return;
-
-    const markers = gsap.utils.toArray<SVGGElement>(".circle-marker");
-
-    markers.forEach((marker, i) => {
-      const g = getMarkerGeometry(i, 0, markerIndex);
-
-      // Set initial position without animation
-      gsap.set(marker, {
-        x: g.x,
-        y: g.y,
-        rotate: g.rotate,
-        scale: g.scale,
-        opacity: g.visible ? (i === markerIndex ? 1 : 0.6) : 0,
-      });
-    });
-  }, []); // Run once on mount
-
-  //NEXT MARKER
-  const nextMarker = () => {
-    setMarkerIndex((i) => (i + 1) % markerData.length);
-  };
-
-  //PREV MARKER
-  const prevMarker = () => {
-    setMarkerIndex((i) => (i - 1 + markerData.length) % markerData.length);
-  };
 
   return (
     <motion.section
@@ -186,18 +204,18 @@ export default function CircleScene({
       ref={container}
       className="mx-auto max-w-md relative flex shrink-0 justify-center items-center"
     >
-      {!selectedCircle && (
+      {selectedCircle && (
         <div className="absolute w-fit font-medium z-10 mx-auto pointer-events-none">
           <AnimatePresence mode="wait">
             <motion.div
-              key={activeIndex}
+              key={circleIndex}
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.25, ease: "easeOut" }}
               className="text-center my-auto text-[#ececec]/75"
             >
-              <h1 className="text-lg">{circle.name}</h1>
+              <h1 className="text-lg">{selectedCircle?.name}</h1>
             </motion.div>
           </AnimatePresence>
         </div>
@@ -222,12 +240,12 @@ export default function CircleScene({
             cy={cy}
             r={markerRadius}
             stroke="white"
-            strokeOpacity={0.15}
+            strokeOpacity={0.9}
             strokeWidth={1}
             strokeLinecap="round"
             strokeDasharray="10 10"
-            initial={{ pathLength: 0, opacity: 0 }}
-            animate={{ pathLength: 1, opacity: 1 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
             transition={{ duration: 1.2, ease: "easeInOut", delay: 0.2 }}
           />
         </g>
@@ -238,13 +256,13 @@ export default function CircleScene({
             cy={cy}
             r="212.5"
             stroke="white"
-            strokeOpacity={0.15}
+            strokeOpacity={0.75}
             strokeWidth={1}
             strokeLinecap="round"
             strokeDasharray="5 10"
-            initial={{ pathLength: 0, opacity: 0 }}
-            animate={{ pathLength: 1, opacity: 1 }}
-            transition={{ duration: 1.2, ease: "easeInOut", delay: 0.4 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1.2, ease: "easeInOut", delay: 0.2 }}
           />
         </g>
         <g filter="url(#filter1_d_652_266)">
@@ -255,15 +273,15 @@ export default function CircleScene({
           </defs>
 
           <motion.image
-            key={circle.image}
-            href={circle.image}
+            key={selectedCircle?.id}
+            href={selectedCircle?.image}
             x={cx - 175}
             y={cy - 175}
             width={350}
             height={350}
             clipPath="url(#center-clip)"
             preserveAspectRatio="xMidYMid slice"
-            className="brightness-110"
+            className="brightness-75"
             initial={{ opacity: 0, scale: 1.1 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
@@ -287,7 +305,7 @@ export default function CircleScene({
           />
         </g>
         <g className="markers">
-          {markerData.map((_, i) => (
+          {selectedCircle?.members.map((_, i) => (
             <g
               key={i}
               className="circle-marker"

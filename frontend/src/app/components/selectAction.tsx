@@ -27,6 +27,9 @@ export default function SelectAction({
 }: SelectedCircleSignalProp) {
   const isSelected = selectedCircle !== null;
 
+  console.log(selectedCircle);
+  console.log(isSelected);
+
   return (
     <motion.div
       key="select-circle"

@@ -6,13 +6,7 @@ import { ToggleState } from "../utils/toggleState";
 import { useOutsideAlerter } from "../utils/outsideAlert";
 import { ScrollLock } from "../utils/scrollLock";
 import { motion, AnimatePresence, Variants } from "motion/react";
-import {
-  CloseIcon,
-  MenuIcon,
-  PinIcon,
-  UsersPlusIcon,
-  SpinnerIcon,
-} from "./icons";
+import { CloseIcon, MenuIcon, PinIcon, SpinnerIcon } from "./icons";
 
 export default function Nav() {
   const path = usePathname();
@@ -91,11 +85,11 @@ export default function Nav() {
             duration: 0.2,
             ease: [0.16, 1, 0.3, 1],
           }}
-          className="flex items-center shadow-lg px-4 py-2.5 backdrop-blur-2xl bg-[#2b2b2b]/25 rounded-md border border-white/10 gap-x-4"
+          className="flex items-center shadow-sm px-4 py-2.5 backdrop-blur-2xl bg-[#2b2b2b]/25 rounded-md border border-white/10 gap-x-4"
         >
           <Link
             href="/pulse"
-            className="text-2xl font-normal text-white/90 hover:text-white transition-colors duration-200"
+            className="text-2xl font-normal text-white/90 hover:text-white transition-colors tracking-wider duration-200"
           >
             brew
           </Link>
@@ -146,7 +140,7 @@ export default function Nav() {
               initial="hidden"
               animate="visible"
               exit="exit"
-              className="absolute z-50 top-0 left-0 mt-18 border border-white/10 backdrop-blur-3xl bg-[#1c1c1c]/95 rounded-lg w-64 shadow-2xl shadow-black/40 overflow-hidden"
+              className="absolute z-50 top-0 left-0 mt-18 border border-white/10 backdrop-blur-3xl bg-[#1c1c1c]/95 rounded-lg w-64 shadow-sm shadow-black/40 overflow-hidden"
             >
               <div className="p-4">
                 <motion.ul className="flex flex-col gap-y-1">

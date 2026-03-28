@@ -76,7 +76,7 @@ export default function CircleControls({
       </motion.button>
 
       {/* Center Indicator Dots */}
-      <motion.div
+      {/* <motion.div
         className="flex gap-x-2"
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -103,7 +103,7 @@ export default function CircleControls({
             }}
           />
         ))}
-      </motion.div>
+      </motion.div> */}
 
       {/* Right Button */}
       <motion.button
