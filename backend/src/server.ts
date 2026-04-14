@@ -88,6 +88,24 @@ interface MomentProp {
   visibility_type: "nearby" | "circle" | "people";
 }
 
+interface InviteMembersProp {
+  member_id: string;
+  circle_id: string;
+  create_at: Date;
+  accepted_at: Date;
+  invite_by: string;
+  status: "pending" | "accepted" | "rejected";
+}
+
+interface InviteAttendeesProp {
+  attendee_id: string;
+  moment_id: string;
+  created_at: Date;
+  accepted_at: Date;
+  invited_by: string;
+  status: "pending" | "accepted" | "rejected";
+}
+
 declare global {
   namespace Express {
     interface Request {
@@ -132,7 +150,8 @@ const userRole = (role: string) => {
   };
 };
 
-//Create Appplication
+// APPLICATION FLOW
+// Create an application
 app.post(
   "/applications",
   async (req: Request<ApplicationProp>, res: Response, next: NextFunction) => {
@@ -180,15 +199,15 @@ app.post(
   },
 );
 
-//get all applications
+// Get all applications (admin only)
 app.get(
   "/applications",
   authenticateToken,
   userRole("admin"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const applications = pool.query("SELECT * FROM applications");
-      const allApplications = (await applications).rows;
+      const applications = await pool.query("SELECT * FROM applications");
+      const allApplications = applications.rows;
       return res.status(200).send({ success: true, data: allApplications });
     } catch (error) {
       next(error);
@@ -240,7 +259,7 @@ const otpMerge = (status: string) => {
           status,
         });
 
-        return res.status(200).send({
+        return res.status(201).send({
           success: true,
           data: acceptedUser,
         });
@@ -257,7 +276,9 @@ const otpMerge = (status: string) => {
         await sendSMS({ phone_number: rejectedUser.phone_number, status });
         await sendEmail({ email: rejectedUser.email, status });
 
-        return res.status(200).send("Application rejected");
+        return res
+          .status(200)
+          .send({ success: true, message: "Application rejected" });
       }
     } catch (error) {
       next(error);
@@ -265,7 +286,7 @@ const otpMerge = (status: string) => {
   };
 };
 
-//Update status applications based on id
+// Update application status by id (admin only)
 app.put(
   "/applications/:id",
   authenticateToken,
@@ -306,7 +327,8 @@ app.put(
   },
 );
 
-//get users by id
+// USER FLOW
+// Get user by id
 app.get(
   "/users/:id",
   authenticateToken,
@@ -344,7 +366,7 @@ app.get(
   },
 );
 
-//verify user from otp login
+// Verify user OTP to log in
 app.post(
   "/auth/verify/",
   limiter,
@@ -394,7 +416,7 @@ app.post(
           [id],
         );
 
-        return res.status(201).send({
+        return res.status(200).send({
           success: true,
           data: authorize,
         });
@@ -432,7 +454,7 @@ app.post(
   },
 );
 
-//resend OTP request if expired or didn't recieve
+// Resend OTP if expired or not received
 app.put(
   "/auth/resend/:id",
   limiter,
@@ -475,6 +497,7 @@ app.put(
         });
         return res.status(200).send({
           success: true,
+          message: "OTP resent successfully",
         });
       }
 
@@ -487,7 +510,7 @@ app.put(
   },
 );
 
-//update user information by id
+// Update user information by id
 app.put(
   "/users/:id",
   authenticateToken,
@@ -545,7 +568,7 @@ app.put(
   },
 );
 
-//delete user by id
+// Delete user by id
 app.delete(
   "/users/:id",
   authenticateToken,
@@ -567,7 +590,6 @@ app.delete(
       if (deleteUser) {
         return res.status(200).send({
           success: true,
-          data: deleteUser,
           message: `User Deleted: ${req.params.id}`,
         });
       }
@@ -582,7 +604,8 @@ app.delete(
   },
 );
 
-//Creating a Circle based on User id
+// CIRCLE FLOW
+// Create a circle by user id
 app.post(
   "/circles/:id",
   authenticateToken,
@@ -592,7 +615,7 @@ app.post(
     const { circle_name } = req.body;
 
     if (!circle_name) {
-      return res.status(400).send(`${circle_name} is required.`);
+      return res.status(400).send(`"circle_name" is required.`);
     }
 
     try {
@@ -609,7 +632,7 @@ app.post(
       const createCircle: CircleProp = await insertCircle.rows[0];
 
       if (createCircle) {
-        return res.status(200).send({
+        return res.status(201).send({
           success: true,
           data: createCircle,
         });
@@ -622,7 +645,7 @@ app.post(
   },
 );
 
-//Retrieving all Circles based on User id
+// Get all circles owned by user
 app.get(
   "/circles/:id",
   authenticateToken,
@@ -655,7 +678,42 @@ app.get(
   },
 );
 
-//Updating circles based on id and cirle
+// Get all circles user is a member of
+app.get(
+  "/circles/:id/member",
+  authenticateToken,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (req.user?.id !== req.params.id) {
+        return res
+          .status(400)
+          .send("Unauthorized: You can only access your own account");
+      }
+
+      const retrieveCirclebyMember = await pool.query(
+        `SELECT * FROM circles INNER JOIN 
+        circle_members ON circles.id = circle_members.circle_id 
+        WHERE circle_members.member_id = $1`,
+        [req.params.id],
+      );
+
+      const getCircle: CircleProp[] = retrieveCirclebyMember.rows;
+
+      if (getCircle) {
+        return res.status(200).send({
+          success: true,
+          data: getCircle,
+        });
+      }
+
+      return res.status(400).send("Unable to Retrive request");
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+// Update a circle by owner
 app.put(
   "/circles/:id/:circle_id",
   authenticateToken,
@@ -707,7 +765,7 @@ app.put(
   },
 );
 
-//Deleting circles based on id and cirle
+// Delete a circle by owner
 app.delete(
   "/circles/:id/:circle_id",
   authenticateToken,
@@ -740,7 +798,50 @@ app.delete(
   },
 );
 
-//Creating a Moment based on User id
+// Remove a member from a circle (owner or self)
+app.delete(
+  "/circles/:circle_id/members/:member_id",
+  authenticateToken,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      //Selects Owner of Circle
+      const selectOwnerOfCircle = await pool.query(
+        `SELECT owner_id FROM circles WHERE circle_id = $1`,
+        [req.params.circle_id],
+      );
+
+      const ownerOfCircle: CircleProp = selectOwnerOfCircle.rows[0];
+
+      if (
+        req.user?.id !== ownerOfCircle.owner_id &&
+        req.user?.id !== req.params.member_id
+      ) {
+        return res.status(403).send("Unauthorized");
+      }
+
+      const removeMemberFromCircle = await pool.query(
+        `DELETE FROM circle_members WHERE circle_id = $1 AND member_id = $2 RETURNING *`,
+        [req.params.circle_id, req.params.member_id],
+      );
+
+      const removeMember = removeMemberFromCircle.rows[0];
+
+      if (removeMember) {
+        return res.status(200).send({
+          success: true,
+          message: `Removed ${removeMember.member_id}`,
+        });
+      }
+
+      return res.status(400).send("Unable to delete user");
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+// MOMENT FLOW
+// Create a moment by user id
 app.post(
   "/moments/:id",
   authenticateToken,
@@ -753,7 +854,7 @@ app.post(
       const missing = [
         "moments_name",
         "location",
-        "moment_starts",
+        "moment_start",
         "visibility_type",
       ].find((key) => !req.body[key]);
 
@@ -775,13 +876,560 @@ app.post(
       const createMoment: MomentProp = createMomentsById.rows[0];
 
       if (createMoment) {
-        return res.status(200).send({
+        return res.status(201).send({
           success: true,
-          createMoment: createMoment,
+          data: createMoment,
         });
       }
 
       return res.status(400).send("Unable to Create Moment");
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+// Get all moments created by user
+app.get(
+  "/moments/:id",
+  authenticateToken,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (req.user?.id !== req.params.id) {
+        return res
+          .status(400)
+          .send("Unauthorized: You can only access your own account");
+      }
+
+      const getMomentbyId = await pool.query(
+        `SELECT * FROM moments WHERE creator_id = $1`,
+        [req.params.id],
+      );
+
+      const getMoments: MomentProp[] = getMomentbyId.rows;
+
+      if (getMoments) {
+        return res.status(200).send({
+          success: true,
+          data: getMoments,
+        });
+      }
+
+      return res.status(400).send("Unable to retrieve moments");
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+// Get all moments user is a member of
+app.get(
+  "/moments/:id/member",
+  authenticateToken,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (req.user?.id !== req.params.id) {
+        return res
+          .status(400)
+          .send("Unauthorized: You can only access your own account");
+      }
+
+      const retrieveMomentsforMember = await pool.query(
+        `SELECT * FROM moments 
+        INNER JOIN moment_attendees 
+        ON moments.id = moment_attendees.moment_id WHERE moment_attendees.attendee_id = $1`,
+        [req.params.id],
+      );
+
+      const getMoment: MomentProp[] = retrieveMomentsforMember.rows;
+
+      if (getMoment) {
+        return res.status(200).send({
+          success: true,
+          data: getMoment,
+        });
+      }
+
+      return res.status(400).send("Unable to Retrive request");
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+// Update moment details by user id
+app.put(
+  "/moments/:id/:moment_id",
+  authenticateToken,
+  async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.body) return res.status(400).send("Request body cannot be empty");
+
+    const allowed = [
+      "image",
+      "moments_name",
+      "moment_start",
+      "moment_end",
+      "description",
+      "location",
+      "cap_attendance",
+      "close_moment",
+      "visibility_type",
+    ];
+
+    //returns the desired keys
+    const filteredKeys = Object.keys(req.body).filter((key) => {
+      return allowed.includes(key);
+    });
+
+    //returns the desired values based on filtered keys.. goes in the dependency
+    const valueOfKeys = filteredKeys.map((value) => req.body[value]);
+
+    //numerical order of how each desired change with be in
+    const momentKeys = filteredKeys
+      .map((key, index) => {
+        return `${key} = $${index + 3}`;
+      })
+      .join(", ");
+
+    try {
+      if (req.user?.id !== req.params.id) {
+        return res
+          .status(400)
+          .send("Unauthorized: You can only access your own account");
+      }
+
+      const updateMoment = await pool.query(
+        `UPDATE moments SET ${momentKeys} WHERE creator_id = $1 and id = $2 RETURNING *`,
+        [req.params.id, req.params.moment_id, ...valueOfKeys],
+      );
+
+      const momentUpdated: MomentProp = updateMoment.rows[0];
+
+      if (momentUpdated) {
+        return res.status(200).send({
+          success: true,
+          data: momentUpdated,
+        });
+      }
+
+      return res.status(400).send("Unable to update moment");
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+// Delete a moment by owner
+app.delete(
+  "/moments/:id/:moment_id",
+  authenticateToken,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (req.user?.id !== req.params.id) {
+        return res
+          .status(403)
+          .send("Unauthorized: You can only delete your own circle");
+      }
+      const deleteMomentbyOwner = await pool.query(
+        `DELETE FROM moments WHERE creator_id = $1 AND id = $2 RETURNING *`,
+        [req.params.id, req.params.moment_id],
+      );
+
+      const deletedMoment: MomentProp = await deleteMomentbyOwner.rows[0];
+
+      if (deletedMoment) {
+        return res.status(200).send({
+          success: true,
+          message: `Moment ${deletedMoment.moments_name} was deleted`,
+        });
+      }
+
+      return res.status(404).send("Moment doesn't exist");
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+// Remove an attendee from a moment (owner or self)
+app.delete(
+  "/moments/:moment_id/attendees/:attendee_id",
+  authenticateToken,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const selectOwnerOfMoment = await pool.query(
+        "SELECT creator_id FROM moments WHERE id = $1",
+        [req.params.moment_id],
+      );
+
+      const ownerOfMoment: MomentProp = selectOwnerOfMoment.rows[0];
+
+      if (
+        req.user?.id !== ownerOfMoment.creator_id &&
+        req.user?.id !== req.params.attendee_id
+      ) {
+        return res.status(403).send("Unauthorized");
+      }
+
+      const removeAttendeeFromMoment = await pool.query(
+        `DELETE FROM moment_attendees WHERE moment_id = $1 AND attendee_id = $2 RETURNING *`,
+        [req.params.moment_id, req.params.attendee_id],
+      );
+
+      const removeAttendee = removeAttendeeFromMoment.rows[0];
+
+      if (removeAttendee) {
+        return res.status(200).send({
+          success: true,
+          message: `Removed ${removeAttendee.attendee_id}`,
+        });
+      }
+
+      return res.status(404).send("Attendee doesn't exist");
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+//INVITE CIRCLE FLOW
+// Owner invites a member to a circle
+app.post(
+  "/circles/:id/invite/:member_id",
+  authenticateToken,
+  async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.body) return res.status(400).send("Request body cannot be empty.");
+
+    try {
+      const invitedBy = await pool.query(
+        "SELECT owner_id FROM circles WHERE id = $1",
+        [req.params.id],
+      );
+
+      const owner: CircleProp = invitedBy.rows[0];
+
+      if (req.user?.id !== owner.owner_id) {
+        return res
+          .status(403)
+          .send("Unauthorized: You can only access your own account");
+      }
+
+      const inviteMemberToCircle = await pool.query(
+        "INSERT INTO invite_members (circle_id, member_id, invited_by) VALUES ($1, $2, $3) RETURNING *",
+        [req.params.id, req.params.member_id, owner.owner_id],
+      );
+
+      const invitedMember: UserProp = inviteMemberToCircle.rows[0];
+
+      if (invitedMember) {
+        return res.status(201).send({
+          success: true,
+          data: invitedMember,
+        });
+      }
+
+      return res.status(404).send("User not found");
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+// User views their circle invites
+app.get(
+  "/invites/members/:member_id",
+  authenticateToken,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (req.user?.id !== req.params.member_id) {
+        return res
+          .status(403)
+          .send("Unauthorized: You can only access your own account");
+      }
+
+      const getAllInvitesByUser = await pool.query(
+        "SELECT * FROM invite_members WHERE member_id = $1",
+        [req.params.member_id],
+      );
+
+      const invitesForUser: InviteMembersProp[] = getAllInvitesByUser.rows;
+
+      if (invitesForUser) {
+        return res.status(200).send({
+          success: true,
+          data: invitesForUser,
+        });
+      }
+
+      return res.status(404).send("Cannot find user");
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+// Owner views sent circle invites
+app.get(
+  "/invites/members/:invited_by",
+  authenticateToken,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (req.user?.id !== req.params.invited_by) {
+        return res
+          .status(403)
+          .send("Unauthorized: You can only access your own account");
+      }
+
+      const getAllInvitesByOwner = await pool.query(
+        "SELECT * FROM invite_members WHERE invited_by = $1",
+        [req.params.invited_by],
+      );
+
+      const invitesFromOwner: InviteMembersProp[] = getAllInvitesByOwner.rows;
+
+      if (invitesFromOwner) {
+        return res.status(200).send({
+          success: true,
+          data: invitesFromOwner,
+        });
+      }
+
+      return res.status(404).send("Cannot find user");
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+//User Accept or Reject Circle Invite
+app.put(
+  "/invites/members/:id",
+  authenticateToken,
+  async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.body) return res.status(400).send("Request body cannot be empty.");
+
+    const { status } = req.body;
+
+    try {
+      const getMemberId = await pool.query(
+        "SELECT member_id, circle_id FROM invite_members WHERE id = $1",
+        [req.params.id],
+      );
+
+      const memberId: InviteMembersProp = getMemberId.rows[0];
+
+      if (req.user?.id !== memberId.member_id) {
+        return res
+          .status(403)
+          .send("Unauthorized: You can only access your own account");
+      }
+
+      const now = status === "accepted" ? new Date().toISOString() : null;
+
+      const statusDecision = await pool.query(
+        `UPDATE invite_members SET status = $2, accepted_at = $3 WHERE id = $1 RETURNING *`,
+        [req.params.id, status, now],
+      );
+
+      const decision: InviteMembersProp = statusDecision.rows[0];
+
+      if (decision.status === "accepted") {
+        const addToCircleQuery = await pool.query(
+          `INSERT INTO circle_members (member_id, circle_id) VALUES ($1, $2) RETURNING *`,
+          [memberId.member_id, memberId.circle_id],
+        );
+
+        const path: InviteMembersProp = addToCircleQuery.rows[0];
+
+        if (path) {
+          return res.status(201).send({
+            success: true,
+            data: path,
+            message: `${path.member_id} added to ${path.circle_id}`,
+          });
+        }
+      }
+
+      if (decision.status === "rejected") {
+        return res.status(200).send({
+          failed: true,
+          message: `${decision.member_id} rejected by ${decision.circle_id}`,
+        });
+      }
+
+      return res.status(400).send("Unable to handle request");
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+//INVITE MOMENT FLOW
+// Owner invites a member to a moment
+app.post(
+  "/moment/:id/invite/:attendee_id",
+  authenticateToken,
+  async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.body) return res.status(400).send("Request body cannot be empty.");
+
+    try {
+      const invitedBy = await pool.query(
+        `SELECT creator_id FROM moments WHERE id = $1`,
+        [req.params.id],
+      );
+
+      const ownerOfMoment: MomentProp = invitedBy.rows[0];
+
+      if (req.user?.id !== ownerOfMoment.creator_id) {
+        return res
+          .status(403)
+          .send("Unauthorized: You can only access your own account");
+      }
+
+      const inviteAttendeeToMoment = await pool.query(
+        "INSERT INTO invite_attendees (moment_id, attendee_id, invited_by) VALUES ($1, $2, $3) RETURNING *",
+        [req.params.id, req.params.attendee_id, ownerOfMoment.creator_id],
+      );
+
+      const invitedAttendee: UserProp = inviteAttendeeToMoment.rows[0];
+
+      if (invitedAttendee) {
+        return res.status(201).send({
+          success: true,
+          data: invitedAttendee,
+        });
+      }
+
+      return res.status(404).send("User not found");
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+// User views their moment invites
+app.get(
+  "/invites/attendees/:attendee_id",
+  authenticateToken,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (req.user?.id !== req.params.attendee_id) {
+        return res
+          .status(403)
+          .send("Unauthorized: You can only access your own account");
+      }
+
+      const getAllInvitesByUser = await pool.query(
+        "SELECT * FROM invite_attendees WHERE attendee_id = $1",
+        [req.params.attendee_id],
+      );
+
+      const invitesForUser: InviteAttendeesProp[] = getAllInvitesByUser.rows;
+
+      if (invitesForUser) {
+        return res.status(200).send({
+          success: true,
+          data: invitesForUser,
+        });
+      }
+
+      return res.status(404).send("Cannot find user");
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+// Owner views sent moment invites
+app.get(
+  "/invites/attendees/sent/:invited_by",
+  authenticateToken,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (req.user?.id !== req.params.invited_by) {
+        return res
+          .status(403)
+          .send("Unauthorized: You can only access your own account");
+      }
+
+      const getAllInvitesByOwner = await pool.query(
+        "SELECT * FROM invite_attendees WHERE invited_by = $1",
+        [req.params.invited_by],
+      );
+
+      const invitesFromOwner: InviteAttendeesProp[] = getAllInvitesByOwner.rows;
+
+      if (invitesFromOwner) {
+        return res.status(200).send({
+          success: true,
+          data: invitesFromOwner,
+        });
+      }
+
+      return res.status(404).send("Cannot find user");
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+//User Accept or Reject Moment Invite
+app.put(
+  "/invites/attendees/:id",
+  authenticateToken,
+  async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.body) return res.status(400).send("Request body cannot be empty.");
+
+    const { status } = req.body;
+
+    try {
+      const getAttendeeId = await pool.query(
+        "SELECT attendee_id, moment_id FROM invite_attendees WHERE id = $1",
+        [req.params.id],
+      );
+
+      const attendeeId: InviteAttendeesProp = getAttendeeId.rows[0];
+
+      if (req.user?.id !== attendeeId.attendee_id) {
+        return res
+          .status(403)
+          .send("Unauthorized: You can only access your own account");
+      }
+
+      const now = status === "accepted" ? new Date().toISOString() : null;
+
+      const statusDecision = await pool.query(
+        `UPDATE invite_attendees SET status = $2, accepted_at = $3 WHERE id = $1 RETURNING *`,
+        [req.params.id, status, now],
+      );
+
+      const decision: InviteAttendeesProp = statusDecision.rows[0];
+
+      if (decision.status === "accepted") {
+        const addToCircleQuery = await pool.query(
+          `INSERT INTO moment_attendees (attendee_id, moment_id) VALUES ($1, $2) RETURNING *`,
+          [attendeeId.attendee_id, attendeeId.moment_id],
+        );
+
+        const path: InviteAttendeesProp = addToCircleQuery.rows[0];
+
+        if (path) {
+          return res.status(201).send({
+            success: true,
+            data: path,
+            message: `${path.attendee_id} added to ${path.moment_id}`,
+          });
+        }
+      }
+
+      if (decision.status === "rejected") {
+        return res.status(200).send({
+          failed: true,
+          message: `${decision.attendee_id} rejected by ${decision.invited_by}`,
+        });
+      }
+
+      return res.status(400).send("Unable to handle request");
     } catch (error) {
       next(error);
     }
