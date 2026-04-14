@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import Tools from "./Tools";
-import ManageMoments from "./ManageMoments";
-import ManageCircle from "./ManageCircle";
-import ManageReferral from "./ManageReferral";
+import ManageMoments from "./manageMoments";
+import ManageCircle from "./manageCircle";
+import ManageReferral from "./manageReferral";
 
 type ManageView = "moments" | "circle" | "referral" | null;
 
