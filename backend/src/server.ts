@@ -848,9 +848,9 @@ app.post(
   async (req: Request, res: Response, next: NextFunction) => {
     if (!req.body) return res.status(400).send("Request body cannot be empty.");
 
-    const { moments_name, location, moment_starts, visibility_type } = req.body;
+    const { moments_name, location, moment_start, visibility_type } = req.body;
 
-    if (!moments_name || !location || !moment_starts || !visibility_type) {
+    if (!moments_name || !location || !moment_start || !visibility_type) {
       const missing = [
         "moments_name",
         "location",
@@ -869,8 +869,8 @@ app.post(
       }
 
       const createMomentsById = await pool.query(
-        "INSERT INTO moments (creator_id, moments_name, location, moment_starts, visibility_type) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-        [req.params.id, moments_name, location, moment_starts, visibility_type],
+        "INSERT INTO moments (creator_id, moments_name, location, moment_start, visibility_type) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+        [req.params.id, moments_name, location, moment_start, visibility_type],
       );
 
       const createMoment: MomentProp = createMomentsById.rows[0];
@@ -1098,8 +1098,6 @@ app.post(
   "/circles/:id/invite/:member_id",
   authenticateToken,
   async (req: Request, res: Response, next: NextFunction) => {
-    if (!req.body) return res.status(400).send("Request body cannot be empty.");
-
     try {
       const invitedBy = await pool.query(
         "SELECT owner_id FROM circles WHERE id = $1",
@@ -1170,7 +1168,7 @@ app.get(
 
 // Owner views sent circle invites
 app.get(
-  "/invites/members/:invited_by",
+  "/invites/members/sent/:invited_by",
   authenticateToken,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -1270,8 +1268,6 @@ app.post(
   "/moment/:id/invite/:attendee_id",
   authenticateToken,
   async (req: Request, res: Response, next: NextFunction) => {
-    if (!req.body) return res.status(400).send("Request body cannot be empty.");
-
     try {
       const invitedBy = await pool.query(
         `SELECT creator_id FROM moments WHERE id = $1`,
