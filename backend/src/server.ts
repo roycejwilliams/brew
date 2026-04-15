@@ -93,7 +93,7 @@ interface InviteMembersProp {
   circle_id: string;
   create_at: Date;
   accepted_at: Date;
-  invite_by: string;
+  invited_by: string;
   status: "pending" | "accepted" | "rejected";
 }
 
@@ -806,7 +806,7 @@ app.delete(
     try {
       //Selects Owner of Circle
       const selectOwnerOfCircle = await pool.query(
-        `SELECT owner_id FROM circles WHERE circle_id = $1`,
+        `SELECT owner_id FROM circles WHERE id = $1`,
         [req.params.circle_id],
       );
 
@@ -1117,9 +1117,26 @@ app.post(
         [req.params.id, req.params.member_id, owner.owner_id],
       );
 
-      const invitedMember: UserProp = inviteMemberToCircle.rows[0];
+      const invitedMember: InviteMembersProp = inviteMemberToCircle.rows[0];
 
       if (invitedMember) {
+        const getInvitedUser = await pool.query(
+          `SELECT email, phone_number FROM users WHERE id = $1`,
+          [req.params.member_id],
+        );
+
+        const invitedUser: UserProp = getInvitedUser.rows[0];
+
+        await sendEmail({
+          email: invitedUser.email,
+          invite_type: "received",
+          invite_target: "circle",
+        });
+        await sendSMS({
+          phone_number: invitedUser.phone_number,
+          invite_type: "received",
+          invite_target: "circle",
+        });
         return res.status(201).send({
           success: true,
           data: invitedMember,
@@ -1231,7 +1248,26 @@ app.put(
 
       const decision: InviteMembersProp = statusDecision.rows[0];
 
+      const getOwner = await pool.query(
+        `SELECT email, phone_number FROM users WHERE id = $1`,
+        [decision.invited_by],
+      );
+
+      const owner: UserProp = getOwner.rows[0];
+
       if (decision.status === "accepted") {
+        if (owner) {
+          await sendEmail({
+            email: owner.email,
+            invite_type: "accepted",
+            invite_target: "circle",
+          });
+          await sendSMS({
+            phone_number: owner.phone_number,
+            invite_type: "accepted",
+            invite_target: "circle",
+          });
+        }
         const addToCircleQuery = await pool.query(
           `INSERT INTO circle_members (member_id, circle_id) VALUES ($1, $2) RETURNING *`,
           [memberId.member_id, memberId.circle_id],
@@ -1249,6 +1285,18 @@ app.put(
       }
 
       if (decision.status === "rejected") {
+        if (owner) {
+          await sendEmail({
+            email: owner.email,
+            invite_type: "rejected",
+            invite_target: "circle",
+          });
+          await sendSMS({
+            phone_number: owner.phone_number,
+            invite_type: "rejected",
+            invite_target: "circle",
+          });
+        }
         return res.status(200).send({
           failed: true,
           message: `${decision.member_id} rejected by ${decision.circle_id}`,
@@ -1287,9 +1335,27 @@ app.post(
         [req.params.id, req.params.attendee_id, ownerOfMoment.creator_id],
       );
 
-      const invitedAttendee: UserProp = inviteAttendeeToMoment.rows[0];
+      const invitedAttendee: InviteAttendeesProp =
+        inviteAttendeeToMoment.rows[0];
 
       if (invitedAttendee) {
+        const getInvitedUser = await pool.query(
+          `SELECT email, phone_number FROM users WHERE id = $1`,
+          [req.params.attendee_id],
+        );
+
+        const invitedUser: UserProp = getInvitedUser.rows[0];
+
+        await sendEmail({
+          email: invitedUser.email,
+          invite_type: "received",
+          invite_target: "moment",
+        });
+        await sendSMS({
+          phone_number: invitedUser.phone_number,
+          invite_type: "received",
+          invite_target: "moment",
+        });
         return res.status(201).send({
           success: true,
           data: invitedAttendee,
@@ -1401,7 +1467,26 @@ app.put(
 
       const decision: InviteAttendeesProp = statusDecision.rows[0];
 
+      const getOwner = await pool.query(
+        `SELECT email, phone_number FROM users WHERE id = $1`,
+        [decision.invited_by],
+      );
+
+      const owner: UserProp = getOwner.rows[0];
+
       if (decision.status === "accepted") {
+        if (owner) {
+          await sendEmail({
+            email: owner.email,
+            invite_type: "accepted",
+            invite_target: "moment",
+          });
+          await sendSMS({
+            phone_number: owner.phone_number,
+            invite_type: "accepted",
+            invite_target: "moment",
+          });
+        }
         const addToCircleQuery = await pool.query(
           `INSERT INTO moment_attendees (attendee_id, moment_id) VALUES ($1, $2) RETURNING *`,
           [attendeeId.attendee_id, attendeeId.moment_id],
@@ -1419,6 +1504,18 @@ app.put(
       }
 
       if (decision.status === "rejected") {
+        if (owner) {
+          await sendEmail({
+            email: owner.email,
+            invite_type: "rejected",
+            invite_target: "moment",
+          });
+          await sendSMS({
+            phone_number: owner.phone_number,
+            invite_type: "rejected",
+            invite_target: "moment",
+          });
+        }
         return res.status(200).send({
           failed: true,
           message: `${decision.attendee_id} rejected by ${decision.invited_by}`,
