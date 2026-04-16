@@ -368,20 +368,18 @@ app.get(
 
 // Verify user OTP to log in
 app.post(
-  "/auth/verify/",
+  "/auth/verify/:id",
   limiter,
   async (req: Request, res: Response, next: NextFunction) => {
     if (!req.query)
       return res.status(400).send("Request query cannot be empty");
-
-    const { id } = req.query;
 
     const { otp_code } = req.body;
 
     try {
       const isUserLocked = await pool.query(
         `SELECT locked FROM users WHERE id = $1`,
-        [id],
+        [req.params.id],
       );
 
       const lockedUser: UserProp = isUserLocked.rows[0];
@@ -392,7 +390,7 @@ app.post(
 
       const authUser = await pool.query(
         `SELECT email, otp_code, otp_expiry, username, id, created_at, role FROM users WHERE id = $1 AND otp_code = $2 AND otp_expiry > NOW()`,
-        [id, otp_code],
+        [req.params.id, otp_code],
       );
 
       const UserAuthorize: UserProp = authUser.rows[0];
@@ -413,7 +411,7 @@ app.post(
 
         await pool.query(
           `UPDATE users SET otp_code = null, otp_expiry = null, otp_attempts = 0 WHERE id = $1 RETURNING *`,
-          [id],
+          [req.params.id],
         );
 
         return res.status(200).send({
@@ -429,7 +427,7 @@ app.post(
            WHEN otp_attempts + 1 >= 5 THEN true ELSE false END
          WHERE id = $1
          RETURNING otp_attempts, locked`,
-        [id],
+        [req.params.id],
       );
 
       const lockAttempts: UserProp = attempts.rows[0];
