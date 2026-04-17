@@ -10,7 +10,7 @@ import jwt from "jsonwebtoken";
 import rateLimit from "express-rate-limit"; //restricts how many request an IP or user can make in a window time
 
 const app = express();
-const port = "3000";
+const port = "8080";
 
 //Used to control the rate of traffic sent or received by a network interface or service
 const limiter = rateLimit({
