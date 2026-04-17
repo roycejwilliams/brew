@@ -7,6 +7,7 @@ interface EmailProp {
   email: string;
   otp_code?: string;
   resent?: boolean;
+  login?: boolean;
   invite_type?: "received" | "accepted" | "rejected";
   invite_target?: "circle" | "moment";
 }
@@ -16,6 +17,7 @@ interface MessageProp {
   phone_number: string;
   otp_code?: string;
   resent?: boolean;
+  login?: boolean;
   invite_type?: "received" | "accepted" | "rejected";
   invite_target?: "circle" | "moment";
 }
@@ -28,6 +30,7 @@ export const sendSMS = async ({
   resent,
   invite_type,
   invite_target,
+  login,
 }: MessageProp) => {
   const client = twilio(
     process.env.TWILIO_TEST_SID,
@@ -53,6 +56,14 @@ export const sendSMS = async ({
     if (resent) {
       await client.messages.create({
         body: `Here's your new verification code for BR3W. Use the code below to verify your account.\n${otp_code}`,
+        to: `${phone_number}`,
+        from: `${process.env.TWILIO_PHONE_NUMBER}`,
+      });
+    }
+
+    if (login) {
+      await client.messages.create({
+        body: `Your BR3W login code is below. It expires in 5 minutes.\n${otp_code}`,
         to: `${phone_number}`,
         from: `${process.env.TWILIO_PHONE_NUMBER}`,
       });
@@ -96,6 +107,7 @@ export const sendEmail = async ({
   resent,
   invite_type,
   invite_target,
+  login,
 }: EmailProp) => {
   const resend = new Resend(process.env.RESEND_API_KEY);
   try {
@@ -149,6 +161,24 @@ export const sendEmail = async ({
           <p style="font-size: 32px; font-weight: 700; letter-spacing: 8px; color: #fff; margin: 0 0 48px 0;">${otp_code}</p>
           <p style="font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #333; margin-top: 32px;">This code expires in 5 minutes.</p>
         </div>`,
+      });
+    }
+
+    if (login) {
+      await resend.emails.send({
+        from: "BR3W <hello@br3w.app>",
+        to: `${email}`,
+        subject: `Your BR3W login code.`,
+        html: `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto; padding: 48px 32px; background: #000; color: #fff;">
+      <p style="font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: #444; margin: 0 0 48px 0;">br3w</p>
+      <h1 style="font-size: 28px; font-weight: 600; letter-spacing: -0.5px; margin: 0 0 16px 0;">Welcome back.</h1>
+      <p style="font-size: 15px; color: #666; line-height: 1.6; margin: 0 0 48px 0;">Use the code below to sign in. It expires in 5 minutes.</p>
+      <div style="border: 1px solid #222; border-radius: 4px; padding: 28px; text-align: center; letter-spacing: 12px; font-size: 28px; font-weight: 700; color: #fff;">
+        ${otp_code}
+      </div>
+      <p style="font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #333; margin-top: 32px;">Do not share this code.</p>
+    </div>`,
       });
     }
 

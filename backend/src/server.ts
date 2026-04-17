@@ -452,6 +452,51 @@ app.post(
   },
 );
 
+//verify email to log in
+app.get(
+  "/auth/lookup/:email",
+  async (req: Request, res: Response, next: NextFunction) => {
+    const updatedGeneratedOTP = generateOTP();
+    const updatedExpiryAt = Date.now() + 300000;
+    const updatedExpiryTimeStamp = new Date(updatedExpiryAt).toISOString();
+    try {
+      const verifyEmail = await pool.query(
+        `SELECT id FROM users INNER JOIN applications ON users.application_id = applications.id WHERE applications.email = $1`,
+        [req.params.email],
+      );
+
+      const email: UserProp = verifyEmail.rows[0];
+
+      if (email) {
+        const updateOTP = await pool.query(
+          "UPDATE users SET otp_code = $2, otp_expiry = $3 WHERE id = $1 RETURNING *",
+          [email.id, updatedGeneratedOTP, updatedExpiryTimeStamp],
+        );
+
+        const updatedOTP: UserProp = updateOTP.rows[0];
+        await sendSMS({
+          phone_number: updatedOTP.phone_number,
+          otp_code: updatedOTP.otp_code,
+          login: true,
+        });
+        await sendEmail({
+          email: updatedOTP.email,
+          otp_code: updatedOTP.otp_code,
+          login: true,
+        });
+        return res.status(200).send({
+          success: true,
+          data: { id: updatedOTP.id },
+        });
+      }
+
+      res.status(404).send("User not found.");
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
 // Resend OTP if expired or not received
 app.put(
   "/auth/resend/:id",
@@ -479,8 +524,6 @@ app.put(
       );
 
       const updatedOTP: UserProp = updateOTP.rows[0];
-
-      console.log(updatedOTP);
 
       if (updatedOTP) {
         await sendSMS({
