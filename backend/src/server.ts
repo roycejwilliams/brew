@@ -453,24 +453,26 @@ app.post(
 );
 
 //verify email to log in
-app.get(
+app.post(
   "/auth/lookup/:email",
   async (req: Request, res: Response, next: NextFunction) => {
     const updatedGeneratedOTP = generateOTP();
     const updatedExpiryAt = Date.now() + 300000;
     const updatedExpiryTimeStamp = new Date(updatedExpiryAt).toISOString();
+
+    const { email } = req.body;
     try {
       const verifyEmail = await pool.query(
         `SELECT id FROM users INNER JOIN applications ON users.application_id = applications.id WHERE applications.email = $1`,
-        [req.params.email],
+        [email],
       );
 
-      const email: UserProp = verifyEmail.rows[0];
+      const userEmail: UserProp = verifyEmail.rows[0];
 
-      if (email) {
+      if (userEmail) {
         const updateOTP = await pool.query(
           "UPDATE users SET otp_code = $2, otp_expiry = $3 WHERE id = $1 RETURNING *",
-          [email.id, updatedGeneratedOTP, updatedExpiryTimeStamp],
+          [userEmail.id, updatedGeneratedOTP, updatedExpiryTimeStamp],
         );
 
         const updatedOTP: UserProp = updateOTP.rows[0];
