@@ -1,16 +1,16 @@
 interface ApplicationProp {
-  id: string;
+  id?: string;
   first_name: string;
   last_name: string;
   email: string;
   phone_number: string;
   work_link: string;
   reason: string;
-  status: "pending" | "accepted" | "rejected";
+  status?: "pending" | "accepted" | "rejected";
 }
 
 interface UserProp {
-  id: string;
+  id?: string;
   first_name: string;
   last_name: string;
   phone_number: string;
@@ -28,7 +28,7 @@ interface UserProp {
 }
 
 interface CircleProp {
-  id: string;
+  id?: string;
   owner_id: string;
   circle_name: string;
   circle_image: string;
@@ -37,7 +37,7 @@ interface CircleProp {
 }
 
 interface MomentProp {
-  id: string;
+  id?: string;
   creator_id: string;
   circle_id: CircleProp;
   image: string;
@@ -50,7 +50,7 @@ interface MomentProp {
   location: Point;
   cap_attendance: number;
   close_moment: boolean;
-  visibility_type: "nearby" | "circle" | "people";
+  visibility_type?: "nearby" | "circle" | "people";
 }
 
 interface Point {
@@ -59,21 +59,21 @@ interface Point {
 }
 
 interface InviteMembersProp {
-  id: string;
+  id?: string;
   member_id: string;
   circle_id: string;
   create_at: Date;
   accepted_at: Date;
   invited_by: string;
-  status: "pending" | "accepted" | "rejected";
+  status?: "pending" | "accepted" | "rejected";
 }
 
 interface InviteAttendeesProp {
-  id: string;
+  id?: string;
   attendee_id: string;
   moment_id: string;
   created_at: Date;
   accepted_at: Date;
   invited_by: string;
-  status: "pending" | "accepted" | "rejected";
+  status?: "pending" | "accepted" | "rejected";
 }

@@ -1,187 +1,187 @@
 import { motion } from "motion/react";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faArrowAltCircleRight,
-  faCheck,
-} from "@fortawesome/free-solid-svg-icons";
-import { useRouter } from "next/navigation";
+import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
+import { useCreateApplication } from "@/hooks/useApplications";
+import Loading from "./loading";
 
 interface Phase {
-  state: "form" | "verify" | "success";
-  setState: (state: "form" | "verify" | "success") => void;
+  state: "form" | "pending";
+  setState: (state: "form" | "pending") => void;
+  setIsLoading: (loading: boolean) => void;
 }
 
-const serverOtp: string[] = ["1", "2", "3", "4", "5", "6"];
-
 function InviteForm({ state, setState }: Phase) {
-  //handle keydowns
-  const inputsRef = useRef<Array<HTMLInputElement | null>>([]); // holds the group of inputs
-  const [otp, setOtp] = useState<string[]>(Array(6).fill("")); //
+  const [form, setForm] = useState({
+    first_name: "",
+    last_name: "",
+    email: "",
+    phone_number: "",
+    work_link: "",
+    reason: "",
+  });
 
-  const handleChange = (value: string, index: number) => {
-    if (!/^[0-9]?$/.test(value)) return;
-
-    const newOtp = [...otp];
-    newOtp[index] = value;
-    setOtp(newOtp);
-
-    if (value && index < otp.length - 1) {
-      // this is saying if the value is valid
-      inputsRef.current[index + 1]?.focus(); // and the index < otp.length then just go to the next inputRef.
-    }
-  };
-
-  const handleKeyDown = (
-    // enables certain buttons to be clicked during completion
-    e: React.KeyboardEvent<HTMLInputElement>,
-    index: number
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
-    if (
-      !/^[0-9]?$/.test(e.key) &&
-      e.key != "Backspace" &&
-      e.key != "Tab" &&
-      e.key != "Delete"
-    ) {
-      e.preventDefault();
-    }
-
-    if (e.key === "Backspace" && !otp[index] && index > 0) {
-      inputsRef.current[index - 1]?.focus();
-    }
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
-    e.preventDefault();
+  const { mutate: createApplication, isPending } = useCreateApplication();
 
-    const paste = e.clipboardData.getData("text").slice(0, 6).split("");
-
-    setOtp((prev) =>
-      prev.map((_, i) =>
-        paste[i] && /^[0-9]?$/.test(paste[i]) ? paste[i] : ""
-      )
-    );
-  };
-
-  const router = useRouter();
-
-  //basically now to activate the success look we need to take the e.target.value;
-
-  if (otp === serverOtp) setState("success");
-
-  useEffect(() => {
-    if (otp.join("") === serverOtp.join("")) {
-      setState("success");
-
-      const timeout = setTimeout(() => {
-        router.push("/discover");
-      }, 3000);
-
-      return () => clearTimeout(timeout);
-    }
-  }, [otp]);
+  const inputClass =
+    "w-full px-3 py-2.5 border border-white/10 text-sm rounded-md bg-white/5 text-white placeholder:text-white/25 focus:outline-none focus:border-white/30 focus:bg-white/8 transition-all";
 
   return (
     <>
-      {state === "form" && (
+      {isPending && (
         <motion.div
-          key="form"
-          layout
+          key="loading"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{
-            duration: 0.4,
-            ease: "easeInOut",
-          }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
+          className="flex flex-col items-center py-10"
         >
-          <h2 className="text-center mt-8 text-lg">Verify your number</h2>
-          <p className="text-center mt-4 text-sm">
-            We take privacy very seriously and will never share your phone
-            number with anyone.
+          <Loading />
+          <p className="text-sm text-white/40 mt-4 text-center">
+            Submitting your application...
           </p>
-          <div className="flex gap-x-4 items-center mt-8 ">
+        </motion.div>
+      )}
+
+      {state === "form" && (
+        <motion.div
+          key="form"
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -6 }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
+          className="mt-5"
+        >
+          <h2 className="text-lg font-light tracking-wide text-center">
+            Request Access.
+          </h2>
+          <p className="mt-1 text-sm text-white/40 text-center">
+            BR3W is invite-only. Tell us who you are.
+          </p>
+
+          <div className="flex gap-x-2 mt-5">
             <input
+              name="first_name"
               type="text"
-              id="phone_number"
-              className="border text-white w-5/6 px-4 border-gray-300/30 text-sm rounded-full placeholder:text-xs block mx-auto p-2.5 bg-transparent placeholder:text-white/50 focus:outline-none"
-              placeholder="enter phone number"
+              value={form.first_name}
+              onChange={handleChange}
+              className={inputClass}
+              placeholder="First name"
               required
             />
-            <button
-              onClick={() => setState("verify")}
-              className="w-10 h-10 flex justify-center items-center border border-gray-300/30 cursor-pointer shadow rounded-full"
-            >
-              <FontAwesomeIcon icon={faArrowAltCircleRight} />
-            </button>
+            <input
+              name="last_name"
+              type="text"
+              value={form.last_name}
+              onChange={handleChange}
+              className={inputClass}
+              placeholder="Last name"
+              required
+            />
           </div>
 
-          <p className="text-xs w-full mt-8 text-center flex-1">
+          <div className="flex flex-col gap-y-2 mt-2">
+            <input
+              name="email"
+              type="email"
+              value={form.email}
+              onChange={handleChange}
+              className={inputClass}
+              placeholder="Email"
+              required
+            />
+            <input
+              name="phone_number"
+              type="tel"
+              value={form.phone_number}
+              onChange={handleChange}
+              className={inputClass}
+              placeholder="Phone number"
+              required
+            />
+            <input
+              name="work_link"
+              type="url"
+              value={form.work_link}
+              onChange={handleChange}
+              className={inputClass}
+              placeholder="Portfolio or work link"
+              required
+            />
+            <textarea
+              name="reason"
+              value={form.reason}
+              onChange={handleChange}
+              rows={2}
+              className={`${inputClass} resize-none`}
+              placeholder="Why do you want access?"
+              required
+            />
+          </div>
+
+          <button
+            onClick={() => {
+              createApplication(form, {
+                onSuccess: () => setState("pending"),
+                onError: () => setState("form"),
+              });
+            }}
+            className="w-full mt-3 flex justify-between items-center px-3 py-2.5 bg-white/5 border border-white/10 rounded-md hover:bg-white/10 hover:border-white/20 transition-all cursor-pointer text-sm text-white/60 hover:text-white group"
+          >
+            <span>Submit application</span>
+            <FontAwesomeIcon
+              icon={faArrowRight}
+              size="xs"
+              className="group-hover:translate-x-0.5 transition-transform"
+            />
+          </button>
+
+          <p className="text-xs mt-3 text-center text-white/20">
             By continuing, you agree to Brew&apos;s Terms & Privacy Policy.
           </p>
         </motion.div>
       )}
 
-      {state === "verify" && (
+      {state === "pending" && (
         <motion.div
-          key="verify"
-          layout
+          key="pending"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{
-            duration: 0.4,
-            ease: "easeInOut",
-          }}
+          transition={{ duration: 0.6, ease: "easeInOut" }}
+          className="flex flex-col items-center py-10"
         >
-          <h2 className="text-center mb-4 mt-8 text-lg">
-            Enter the 6-digit verification code
-          </h2>
-          {/* One time password UI */}
-          <form className="flex justify-around items-center">
-            {otp.map((digit, i) => (
-              <input
-                key={i}
-                ref={(el) => {
-                  inputsRef.current[i] = el;
-                }}
-                type="text"
-                inputMode="numeric"
-                value={digit}
-                maxLength={1}
-                onChange={(e) => handleChange(e.target.value, i)}
-                onKeyDown={(e) => handleKeyDown(e, i)}
-                onPaste={(e) => handlePaste(e)}
-                required
-                className="w-8 h-14 text-3xl focus:outline text-white flex text-center justify-center items-center border-b-[0.2px]"
-              ></input>
-            ))}
-          </form>
-          <div className="flex items-center gap-x-4 mt-4">
-            <p className="text-xs  text-center flex-1">
-              By continuing, you agree to Brew&apos;s Terms & Privacy Policy.
-            </p>
-          </div>
-        </motion.div>
-      )}
-
-      {state === "success" && (
-        <motion.div
-          key="success"
-          layout
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{
-            duration: 0.4,
-            ease: "easeInOut",
-          }}
-          className="z-10"
-        >
-          <h2 className="text-center relative mb-4 mt-8 text-lg">Success</h2>
-          <div className="w-32 h-32 bg-linear-to-b from-[#98473E] to-[#19535F]  shadow relative rounded-full border-white/15 flex justify-center items-center mx-auto">
-            <FontAwesomeIcon icon={faCheck} />{" "}
-          </div>
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
+            className="w-12 h-12 rounded-full border border-white/15 flex justify-center items-center mb-4"
+          >
+            <div className="w-2 h-2 rounded-full bg-white/40" />
+          </motion.div>
+          <motion.h2
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.35, ease: "easeOut" }}
+            className="text-lg font-light"
+          >
+            Application submitted.
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.5, ease: "easeOut" }}
+            className="text-sm text-white/40 mt-1 text-center max-w-50"
+          >
+            We&apos;ll review it and get back to you.
+          </motion.p>
         </motion.div>
       )}
     </>

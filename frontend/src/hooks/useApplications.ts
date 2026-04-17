@@ -20,6 +20,12 @@ export const useGetAllApplications = () => {
   });
 };
 
+export const useLookUpUser = () => {
+  return useMutation({
+    mutationFn: (email: string) => api.post(`/auth/lookup/`, { email }),
+  });
+};
+
 //Create an application (User)
 export const useCreateApplication = () => {
   return useMutation({
