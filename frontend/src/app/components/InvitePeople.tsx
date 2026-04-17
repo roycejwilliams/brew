@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from "motion/react";
 import React, { useEffect, useState } from "react";
 import SearchMap from "./search";
 import { StaticImport } from "next/dist/shared/lib/get-img-props";
-import useDebounce from "../hooks/useDebounce";
+import useDebounce from "../../hooks/useDebounce";
 import Image from "next/image";
 import CloseIcon from "./icons/CloseIcon";
 

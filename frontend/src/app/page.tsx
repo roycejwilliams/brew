@@ -6,20 +6,34 @@ import { motion, AnimatePresence } from "motion/react";
 
 export default function Login() {
   const [transition, setTransition] = useState<boolean>(false);
+  const [active, setActive] = useState<"login" | "invite">("login");
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setTransition(true);
-    }, 3000);
+    //the delay for the branding to show.
+    const minDelay = new Promise((res) => setTimeout(res, 2000));
+    //loads the branding until readyState is complete
+    const pageLoad = new Promise((res) => {
+      if (document.readyState === "complete") res(true);
+      else window.addEventListener("load", () => res(true));
+    });
 
-    return () => clearTimeout(timer);
+    //take a array of promises and wait for all of them to resolve
+    Promise.all([minDelay, pageLoad]).then(() => setTransition(true));
   }, []);
 
   return (
-    <section className="relative min-h-screen flex justify-center items-center transition-colors duration-500 bg-linear-to-b from-[#19535F] to-[#98473E] overflow-hidden">
+    <section
+      className={`relative min-h-screen flex justify-center items-center transition-colors duration-500 bg-linear-to-b ${active === "login" && "to-[#19535F]"} ${active === "invite" && "to-[#98473E]"}  from-black overflow-hidden`}
+    >
       <div
-        className="absolute inset-0  before:absolute before:left-[20%] before:h-[50%] before:w-[50%] before:origin-[60%] before:animate-blob before:rounded-3xl before:bg-linear-to-br before:from-[#19535F] before:to-[#98473E] before:blur-[50px] before:brightness-125 
-                      after:absolute after:left-[40%] after:top-[30%] after:h-[80%] after:w-[70%] after:origin-[60%] after:animate-blob-reverse after:rounded-3xl after:bg-linear-to-br after:from-[#19535F] after:to-[#98473E] after:blur-[50px] after:brightness-125"
+        className={`absolute top-[10%] left-[15%] w-[40%] h-[40%] rounded-full  ${active === "login" && "bg-[#19535F]"} ${active === "invite" && "bg-[#98473E]"} opacity-40 blur-[80px] pointer-events-none   animate-blob`}
+      />
+      <div
+        className={`absolute top-[40%] left-[50%] w-[50%] h-[50%] rounded-full ${active === "login" && "bg-[#19535F]"} ${active === "invite" && "bg-[#98473E]"} opacity-30 blur-[100px] pointer-events-none   animate-blob-reverse`}
+      />
+      <div
+        className={`absolute top-[60%] left-[10%] w-[35%] h-[35%] rounded-full ${active === "login" && "bg-[#19535F]"} ${active === "invite" && "bg-[#98473E]"} opacity-25 blur-[80px] pointer-events-none   animate-blob`}
+        style={{ animationDelay: "2s" }}
       />
       <AnimatePresence mode="wait">
         {transition ? (
@@ -33,7 +47,7 @@ export default function Login() {
               ease: "easeInOut",
             }}
           >
-            <LoginState />
+            <LoginState active={active} setActive={setActive} />
           </motion.div>
         ) : (
           <motion.div
@@ -45,10 +59,10 @@ export default function Login() {
               duration: 0.4,
               ease: "easeInOut",
             }}
-            className={`text-center z-10`}
+            className={`text-center z-10 space-y-4`}
           >
-            <h1 className="text-6xl font-normal">brew</h1>
-            <p className="text-xs font-medium">If you know, you know.</p>
+            <h1 className="text-[35px] font-medium uppercase">br3w</h1>
+            <p className="text-xs font-light">If you know, you know.</p>
             <Loading />
           </motion.div>
         )}

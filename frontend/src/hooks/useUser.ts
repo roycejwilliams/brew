@@ -30,7 +30,7 @@ export const useDeleteUserById = () => {
 //Verify user OTP when logging in
 export const useVerifyUser = () => {
   return useMutation({
-    mutationFn: (data: UserProp) => {
+    mutationFn: (data: { id: string; otp_code: string }) => {
       return api.post(`/auth/verify/${data.id}`, { otp_code: data.otp_code });
     },
   });

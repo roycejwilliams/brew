@@ -4,7 +4,7 @@ import SearchMap from "./search";
 import { CloseIcon, PlusIcon } from "./icons";
 import Image from "next/image";
 import { StaticImport } from "next/dist/shared/lib/get-img-props";
-import useDebounce from "../hooks/useDebounce";
+import useDebounce from "../../hooks/useDebounce";
 
 type MomentSelectionProp = "start" | "circle" | "people" | "nearby" | "confirm";
 
