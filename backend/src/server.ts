@@ -454,7 +454,7 @@ app.post(
 
 //verify email to log in
 app.post(
-  "/auth/lookup/:email",
+  "/auth/lookup",
   async (req: Request, res: Response, next: NextFunction) => {
     const updatedGeneratedOTP = generateOTP();
     const updatedExpiryAt = Date.now() + 300000;
