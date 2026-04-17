@@ -8,6 +8,7 @@ import { randomInt } from "crypto";
 import { sendSMS, sendEmail } from "./otpActions.js";
 import jwt from "jsonwebtoken";
 import rateLimit from "express-rate-limit"; //restricts how many request an IP or user can make in a window time
+import cors from "cors";
 
 const app = express();
 const port = "8080";
@@ -24,6 +25,13 @@ const limiter = rateLimit({
 });
 
 app.use(express.json());
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  }),
+);
 
 // function to geneate a 6 digit verifcation code between 100000 to 999999
 function generateOTP() {
