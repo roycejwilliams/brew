@@ -1,45 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import api from "@/lib/axios";
 
-interface CircleProp {
-  owner_id: string;
-  circle_name: string;
-  circle_image: string;
-  created_at: Date;
-  updated_at: Date;
-}
-
-interface MomentProp {
-  id: string;
-  creator_id: string;
-  circle_id: CircleProp;
-  image: string;
-  moments_name: string;
-  created_at: Date;
-  update_at: Date;
-  moment_starts: Date;
-  moment_ends: Date;
-  description: string;
-  location: Point;
-  cap_attendance: number;
-  close_moment: boolean;
-  visibility_type: "nearby" | "circle" | "people";
-}
-
-interface Point {
-  latitude: number;
-  longitude: number;
-}
-
-interface InviteAttendeesProp {
-  attendee_id: string;
-  moment_id: string;
-  created_at: Date;
-  accepted_at: Date;
-  invited_by: string;
-  status: "pending" | "accepted" | "rejected";
-}
-
 //Creating Moment by User
 export const useCreateMoment = () => {
   return useMutation({

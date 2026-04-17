@@ -1,24 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import api from "@/lib/axios";
 
-interface CircleProp {
-  id: string;
-  owner_id: string;
-  circle_name: string;
-  circle_image: string;
-  created_at: Date;
-  updated_at: Date;
-}
-
-interface InviteMembersProp {
-  member_id: string;
-  circle_id: string;
-  create_at: Date;
-  accepted_at: Date;
-  invited_by: string;
-  status: "pending" | "accepted" | "rejected";
-}
-
 //Creating Circle by User
 export const useCreateCircle = () => {
   return useMutation({

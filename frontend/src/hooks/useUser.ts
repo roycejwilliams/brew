@@ -1,35 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import api from "@/lib/axios";
 
-interface ApplicationProp {
-  id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone_number: string;
-  work_link: string;
-  reason: string;
-  status: "pending" | "accepted" | "rejected";
-}
-
-interface UserProp {
-  id: string;
-  first_name: string;
-  last_name: string;
-  phone_number: string;
-  email: string;
-  description: string;
-  username: string;
-  profile_image: string;
-  otp_code: string;
-  otp_expiry: Date;
-  created_at: Date;
-  application_id: ApplicationProp;
-  otp_attempts: number;
-  locked: boolean;
-  role: string;
-}
-
 //Get user by id
 export const useGetUser = (id: string) => {
   return useQuery({

@@ -1,17 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import api from "@/lib/axios";
 
-interface ApplicationProp {
-  id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone_number: string;
-  work_link: string;
-  reason: string;
-  status: "pending" | "accepted" | "rejected";
-}
-
 //Axios gives cleaner syntax
 //automatic json parsing
 // built-in request/response
