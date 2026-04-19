@@ -9,6 +9,7 @@ import { sendSMS, sendEmail } from "./otpActions.js";
 import jwt from "jsonwebtoken";
 import rateLimit from "express-rate-limit"; //restricts how many request an IP or user can make in a window time
 import cors from "cors";
+import cookieParser from "cookie-parser";
 
 const app = express();
 const port = "8080";
@@ -30,8 +31,10 @@ app.use(
     origin: "http://localhost:3000",
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
   }),
 );
+app.use(cookieParser());
 
 // function to geneate a 6 digit verifcation code between 100000 to 999999
 function generateOTP() {
@@ -127,17 +130,20 @@ declare global {
 //a valid token before granting access to protected routes.
 //what actually enforces security
 const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
+  const token = req.cookies.token;
 
   if (!token) return res.status(401).send("No token provided");
 
-  jwt.verify(token, process.env.JWT_SECRET_KEY!, (err, user) => {
-    if (err) return res.status(403).send("Invalid or expired token");
+  jwt.verify(
+    token,
+    process.env.JWT_SECRET_KEY!,
+    (err: Error | null, user: any) => {
+      if (err) return res.status(403).send("Invalid or expired token");
 
-    req.user = user as UserProp;
-    next();
-  });
+      req.user = user as UserProp;
+      next();
+    },
+  );
 };
 
 // Defining user role
@@ -379,9 +385,6 @@ app.post(
   "/auth/verify/:id",
   limiter,
   async (req: Request, res: Response, next: NextFunction) => {
-    if (!req.query)
-      return res.status(400).send("Request query cannot be empty");
-
     const { otp_code } = req.body;
 
     try {
@@ -422,9 +425,15 @@ app.post(
           [req.params.id],
         );
 
+        res.cookie("token", authorize, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "strict",
+          maxAge: 365 * 24 * 60 * 60 * 1000,
+        });
+
         return res.status(200).send({
           success: true,
-          data: authorize,
         });
       }
 
