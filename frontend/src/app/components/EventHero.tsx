@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { motion } from "motion/react";
+import { openEventCard } from "@/stores/store";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -9,9 +10,13 @@ const stagger = (i: number) => ({
   transition: { duration: 0.45, delay: i * 0.07, ease: EASE },
 });
 
-export default function EventHero() {
+interface EventHeroProp {
+  eventCard: MomentProp | null;
+}
+
+export default function EventHero({ eventCard }: EventHeroProp) {
   return (
-    <section className="w-full grid grid-cols-1 xl:grid-cols-2 gap-8 py-16 min-h-[85vh] items-end">
+    <section className="w-full grid grid-cols-1 xl:grid-cols-2 gap-8 py-16 items-end">
       {/* LEFT — Big title pinned to bottom */}
       <motion.div
         {...stagger(0)}
@@ -22,22 +27,22 @@ export default function EventHero() {
           Tonight's Event
         </p>
 
-        <h1
-          className="text-white font-semibold leading-none"
-          style={{
-            fontSize: "clamp(64px, 10vw, 108px)",
-            letterSpacing: "-4px",
-          }}
-        >
-          Lorem
-          <br />
-          Ipsum
-        </h1>
+        {eventCard?.moments_name.split("\n").map((text, index) => (
+          <h1
+            key={index}
+            className="text-white font-semibold leading-none"
+            style={{
+              fontSize: "clamp(64px, 10vw, 108px)",
+              letterSpacing: "-4px",
+            }}
+          >
+            <span>{text}</span>
+          </h1>
+        ))}
 
         {/* Subtitle */}
         <p className="text-white/35 text-sm tracking-[-0.1px] max-w-xs leading-relaxed">
-          Curabitur tempor quis eros tempus lacinia. Nam bibendum pellentesque
-          quam a convallis. Sed ut vulputate nisi.
+          {eventCard?.description}
         </p>
       </motion.div>
 
@@ -55,9 +60,10 @@ export default function EventHero() {
           }}
         >
           <Image
-            src="/image-test-brew.jpg"
-            alt=""
+            src={eventCard?.image || "/image-test-brew.jpg"}
+            alt={eventCard?.moments_name as string}
             fill
+            priority
             className="object-cover"
             style={{ filter: "brightness(0.65)" }}
           />
@@ -86,15 +92,42 @@ export default function EventHero() {
               className="text-white font-medium tracking-[-0.5px]"
               style={{ fontSize: 20 }}
             >
-              Sat, Oct 25
+              {eventCard?.moment_start
+                ? new Date(eventCard.moment_start).toLocaleDateString("en-US", {
+                    weekday: "short",
+                    month: "short",
+                    day: "numeric",
+                  })
+                : "Date TBD"}
             </p>
           </div>
 
           {/* Time row */}
           <div className="grid grid-cols-2 gap-4">
             {[
-              { label: "Opening", time: "8:00 pm" },
-              { label: "Close", time: "1:00 am" },
+              {
+                label: "Opening",
+                time: eventCard?.moment_start
+                  ? new Date(eventCard.moment_start).toLocaleTimeString(
+                      "en-US",
+                      {
+                        hour: "numeric",
+                        minute: "2-digit",
+                        hour12: true,
+                      },
+                    )
+                  : "TBD",
+              },
+              {
+                label: "Close",
+                time: eventCard?.moment_end
+                  ? new Date(eventCard.moment_end).toLocaleTimeString("en-US", {
+                      hour: "numeric",
+                      minute: "2-digit",
+                      hour12: true,
+                    })
+                  : "TBD",
+              },
             ].map(({ label, time }, i) => (
               <motion.div
                 key={label}

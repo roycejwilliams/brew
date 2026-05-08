@@ -8,9 +8,11 @@ interface SuggestedProp {
 function Suggested({ id }: SuggestedProp) {
   return (
     <section>
-      <h1 className="border-b border-white/10 pb-4 text-xl font-light">
-        Our Picks
-      </h1>
+      <div className="flex items-center gap-2 border-b border-white/8 pb-4 mb-4">
+        <p className="text-xs tracking-[3px] uppercase text-white/20">
+          Our picks
+        </p>
+      </div>
       <Carousel id={id} width={400} height={250} />
     </section>
   );

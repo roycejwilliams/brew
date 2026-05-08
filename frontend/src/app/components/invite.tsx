@@ -1,15 +1,12 @@
 import { motion } from "motion/react";
 import React, { useState } from "react";
 import ChevronLeftIcon from "./icons/ChevronLeftIcon";
-import { StaticImport } from "next/dist/shared/lib/get-img-props";
 import InvitePeople from "./InvitePeople";
 import InvitePurpose from "./InvitePurpose";
 import GenerateQrCode from "./GenerateQrCode";
-import InviteConfirm from "./InviteConfirm";
 
-type InviteSelection = "people" | "where" | "share" | "refer";
-
-type PurposeSelection = "moment" | "circle" | "brew" | null;
+type InviteSelection = "people" | "where" | "share";
+type PurposeSelection = "moment" | "circle" | null;
 
 interface InviteProp {
   onGoBack?: () => void;
@@ -19,14 +16,18 @@ interface InviteProp {
   onClose: () => void;
 }
 
-interface UserProp {
+interface InviteUserProp {
   id: string;
   username: string;
   phonenumber: string;
   email: string;
+  isExternal?: boolean;
+  first_name?: string;
+  last_name?: string;
+  profile_image?: string;
   profile: {
     fullname: string;
-    avatarUrl: string | StaticImport;
+    avatarUrl: string;
   };
 }
 
@@ -36,19 +37,19 @@ export default function Invite({
   setInviteSelection,
   onClose,
 }: InviteProp) {
-  //holds the previous selections
-
-  const [selectedInvitedUser, setSelectedInvitedUser] = useState<UserProp[]>(
-    [],
-  );
-
+  const [selectedInvitedUser, setSelectedInvitedUser] = useState<
+    InviteUserProp[]
+  >([]);
   const [selectPurpose, setSelectedPurpose] = useState<PurposeSelection | null>(
     null,
   );
-
   const [step, setStep] = useState<"destination" | "expectation">(
     "destination",
   );
+  const [inviteType, setInviteType] = useState<
+    "moment" | "circle" | "referral"
+  >("moment");
+  const [inviteId, setInviteId] = useState<string>("");
 
   const inviteProp: InviteSelection[] = ["people", "where", "share"];
 
@@ -57,8 +58,6 @@ export default function Invite({
 
     const position = steps.indexOf(inviteSelection);
 
-    console.log("steps:", position);
-
     if (position === 0) {
       onGoBack?.();
       return;
@@ -66,9 +65,7 @@ export default function Invite({
 
     if (
       inviteSelection === "where" &&
-      (selectPurpose === "moment" ||
-        selectPurpose === "circle" ||
-        selectPurpose === "brew")
+      (selectPurpose === "moment" || selectPurpose === "circle")
     ) {
       if (selectPurpose === "circle" && step === "expectation") {
         setStep("destination");
@@ -81,7 +78,7 @@ export default function Invite({
   };
 
   return (
-    <motion.section className="max-w-2xl  mx-auto my-a space-y-5 px-4">
+    <motion.section className="max-w-2xl mx-auto space-y-5 px-4">
       <motion.button
         onClick={() => goBack(inviteProp)}
         initial={{ opacity: 0, x: -20 }}
@@ -93,7 +90,9 @@ export default function Invite({
           opacity: { duration: 0.2 },
           x: { type: "spring", stiffness: 300, damping: 25 },
         }}
-        className={`absolute left-0 top-0 m-8 cursor-pointer flex gap-x-1 ${inviteSelection === "share" || inviteSelection === "refer" ? "hidden" : "block"} items-center text-white/80 hover:text-white transition-colors`}
+        className={`absolute left-0 top-0 m-8 cursor-pointer flex gap-x-1 ${
+          inviteSelection === "share" ? "hidden" : "block"
+        } items-center text-white/80 hover:text-white transition-colors`}
       >
         <motion.div
           animate={{ x: [0, -3, 0] }}
@@ -125,12 +124,18 @@ export default function Invite({
           setSelectedPurpose={setSelectedPurpose}
           step={step}
           setStep={setStep}
+          setInviteType={setInviteType}
+          setInviteId={setInviteId}
         />
       )}
 
-      {inviteSelection === "share" && <GenerateQrCode onClose={onClose} />}
-
-      {inviteSelection === "refer" && <InviteConfirm onClose={onClose} />}
+      {inviteSelection === "share" && (
+        <GenerateQrCode
+          onClose={onClose}
+          inviteType={inviteType}
+          inviteId={inviteId}
+        />
+      )}
     </motion.section>
   );
 }

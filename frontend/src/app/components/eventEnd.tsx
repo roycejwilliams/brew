@@ -2,17 +2,26 @@ import React from "react";
 import { motion } from "motion/react";
 import AttendeeDetails from "./attendeeDetails";
 import EventRecap from "./eventRecap";
-import NightCap from "./nightCap";
+import { useGenerateRecap } from "@/hooks/useMoments";
 
 interface EventEndProp {
   activeModal: "end";
+  eventCard: MomentProp | null;
 }
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
-export default function EventEnd({ activeModal }: EventEndProp) {
+const stagger = (i: number) => ({
+  initial: { opacity: 0, y: 12 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.45, delay: i * 0.08, ease: EASE },
+});
+
+export default function EventEnd({ activeModal, eventCard }: EventEndProp) {
+  const { data: recap, isLoading: recapLoading } = useGenerateRecap(eventCard);
+
   return (
-    <div className="flex flex-col gap-y-20">
+    <div className="flex flex-col gap-y-20 pb-8">
       {/* Ended indicator */}
       <motion.div
         initial={{ opacity: 0, y: -4 }}
@@ -26,9 +35,9 @@ export default function EventEnd({ activeModal }: EventEndProp) {
       >
         <div
           className="w-2.5 h-2.5 rounded-full"
-          style={{ background: "rgba(255,255,255,0.2)" }}
+          style={{ background: "rgba(255,255,255,0.15)" }}
         />
-        <span className="text-white/40 text-sm font-medium tracking-[-0.1px]">
+        <span className="text-white/35 text-sm font-medium tracking-[-0.1px]">
           Event Ended
         </span>
       </motion.div>
@@ -51,45 +60,59 @@ export default function EventEnd({ activeModal }: EventEndProp) {
         </p>
       </motion.div>
 
+      {/* AI Recap */}
+      <motion.div
+        {...stagger(1)}
+        className="flex flex-col gap-3"
+        style={{
+          borderLeft: "1px solid rgba(255,255,255,0.08)",
+          paddingLeft: 20,
+        }}
+      >
+        <p className="text-white/20 text-[10px] tracking-widest uppercase font-medium">
+          Tonight's Recap
+        </p>
+        {recapLoading ? (
+          <div className="flex flex-col gap-2">
+            {[80, 60, 70].map((w, i) => (
+              <div
+                key={i}
+                className="h-3 rounded-full animate-pulse"
+                style={{
+                  width: `${w}%`,
+                  background: "rgba(255,255,255,0.06)",
+                }}
+              />
+            ))}
+          </div>
+        ) : recap ? (
+          <p className="text-white/55 text-sm tracking-[-0.1px] leading-relaxed max-w-lg">
+            {recap}
+          </p>
+        ) : null}
+      </motion.div>
+
       {/* Divider */}
       <motion.div
         initial={{ opacity: 0, scaleX: 0 }}
         animate={{ opacity: 1, scaleX: 1 }}
-        transition={{ duration: 0.5, delay: 0.1, ease: EASE }}
-        className="origin-right"
+        transition={{ duration: 0.5, delay: 0.2, ease: EASE }}
+        className="origin-left"
         style={{
           height: 1,
           background:
-            "linear-gradient(270deg, rgba(255,255,255,0.07) 0%, transparent 80%)",
-          marginTop: -8,
+            "linear-gradient(90deg, rgba(255,255,255,0.07) 0%, transparent 80%)",
         }}
       />
 
       {/* Attendees */}
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.1, ease: EASE }}
-      >
+      <motion.div {...stagger(2)}>
         <AttendeeDetails activeEvent={activeModal} />
       </motion.div>
 
       {/* Photo recap */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, delay: 0.14, ease: EASE }}
-      >
+      <motion.div {...stagger(3)}>
         <EventRecap />
-      </motion.div>
-
-      {/* Night cap */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, delay: 0.18, ease: EASE }}
-      >
-        <NightCap />
       </motion.div>
     </div>
   );

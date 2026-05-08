@@ -7,15 +7,8 @@ const dotVariants = {
   pressed: { opacity: 1, scale: 1.1 },
 };
 
-interface Circle {
-  id: string;
-  name: string;
-  members: string[]; // or User[]
-  image: string;
-}
-
 interface SelectedCircleSignalProp {
-  selectedCircle: Circle | null;
+  selectedCircle: CircleProp | null;
   onSelect: () => void;
   onContinue: () => void;
 }
@@ -26,9 +19,6 @@ export default function SelectAction({
   onContinue,
 }: SelectedCircleSignalProp) {
   const isSelected = selectedCircle !== null;
-
-  console.log(selectedCircle);
-  console.log(isSelected);
 
   return (
     <motion.div

@@ -8,7 +8,7 @@ import Invite from "./invite";
 import CreateMoment from "./CreateMoment";
 
 type CreateMomentStage = "start" | "circle" | "people" | "nearby" | "confirm";
-type InviteSelection = "people" | "where" | "share" | "refer";
+type InviteSelection = "people" | "where" | "share";
 
 interface CreateModalProp {
   onClose: () => void;
@@ -124,7 +124,7 @@ function CreateModal({ onClose }: CreateModalProp) {
       <motion.div
         className={`w-full h-fit mx-auto ${cardAction === "create" || cardAction === "invite" ? "mt-2" : "mt-24"}`}
       >
-        <AnimatePresence mode="sync">
+        <AnimatePresence mode="wait">
           {cardAction === "create" ? (
             //start moment
             <StartMoment
@@ -133,6 +133,7 @@ function CreateModal({ onClose }: CreateModalProp) {
               onGoBack={() => {
                 setCardAction(null);
               }}
+              onClose={onClose}
             /> //invite
           ) : cardAction === "invite" ? (
             <Invite

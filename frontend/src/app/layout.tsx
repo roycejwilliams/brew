@@ -3,10 +3,10 @@ import { chillax } from "../../public/fonts/chillax";
 import "@heroui/styles";
 import "./globals.css";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { Providers } from "@/app/providers";
+import { Providers } from "@/providers/providers";
 
 export const metadata: Metadata = {
-  title: "Brew",
+  title: "B R 3 W",
   description: "If you know, you know.",
 };
 

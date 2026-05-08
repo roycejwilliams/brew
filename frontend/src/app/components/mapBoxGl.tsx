@@ -1,49 +1,210 @@
 import { useRef, useEffect, useState } from "react";
 import mapboxgl, { LngLatLike } from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import SearchMap from "./search";
+import { openEventCard } from "@/stores/store";
+import { motion } from "motion/react";
+import { useRouter } from "next/navigation";
 
-function MapBoxGl() {
+interface MapBoxProp {
+  zoom: number;
+  center: LngLatLike;
+  onMove?: (center: [number, number], zoom: number) => void;
+  userCoordinates?: [number, number] | null;
+  scrollZoom?: boolean;
+  dragPan?: boolean;
+  dragRotate?: boolean;
+  moments?: MomentProp[];
+}
+
+function MapBoxGl({
+  zoom,
+  center,
+  onMove,
+  userCoordinates,
+  scrollZoom,
+  dragPan,
+  dragRotate,
+  moments,
+}: MapBoxProp) {
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
-
-  const [center, setCenter] = useState<LngLatLike>([-122.42285, 37.73393]);
-  const [zoom, setZoom] = useState<number>(10.21);
+  const markersRef = useRef<mapboxgl.Marker[]>([]);
+  const selectedMarkerRef = useRef<string | null>(null);
+  const [mapReady, setMapReady] = useState(false);
+  const eventCard = openEventCard((state) => state.moment);
+  const openCard = openEventCard((state) => state.openEvent);
+  const router = useRouter();
 
   useEffect(() => {
-    mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+    mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOXGL_PUBLIC_TOKEN!;
     if (!mapContainerRef.current) return;
+
     mapRef.current = new mapboxgl.Map({
       container: mapContainerRef.current,
       center: center,
       zoom: zoom,
       bearing: 0,
+      scrollZoom: scrollZoom,
+      dragPan: dragPan,
+      dragRotate: dragRotate,
       pitch: 0,
-      style: "mapbox://styles/mapbox/dark-v11",
+      style: eventCard
+        ? "mapbox://styles/mapbox/dark-v11"
+        : "mapbox://styles/roycwilliams/cmh2r2dac003j01rfhgc38cft/draft",
+    });
+
+    mapRef.current.on("load", () => {
+      setMapReady(true);
     });
 
     mapRef.current.on("move", () => {
-      if (!mapRef.current) return;
-
-      // get the current center coordinates and zoom level from the map
-      const mapCenter = mapRef.current.getCenter();
-      const mapZoom = mapRef.current.getZoom();
-
-      // update state
-      setCenter([mapCenter.lng, mapCenter.lat]);
-      setZoom(mapZoom);
+      if (!mapRef.current || !onMove) return;
+      const c = mapRef.current.getCenter();
+      const z = mapRef.current.getZoom();
+      onMove([c.lng, c.lat], z);
     });
 
     return () => {
+      markersRef.current.forEach((m) => m.remove());
       mapRef.current?.remove();
     };
   }, []);
 
+  useEffect(() => {
+    if (!mapRef.current || !mapReady || !moments?.length) return;
+
+    // Clear existing markers
+    markersRef.current.forEach((m) => m.remove());
+    markersRef.current = [];
+
+    moments.forEach((moment) => {
+      const lng = (moment.location as any)?.x;
+      const lat = (moment.location as any)?.y;
+      if (lng == null || lat == null) return;
+
+      // Wrapper — stable 44px hit target
+      const wrapper = document.createElement("div");
+      wrapper.style.cssText = `
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+      `;
+
+      // Inner circle — visual only, pointer-events off
+      const inner = document.createElement("div");
+      inner.style.cssText = `
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: rgba(10,10,10,0.9);
+        border: 1.5px solid rgba(255,255,255,0.25);
+        backdrop-filter: blur(8px);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+        overflow: hidden;
+        transition: transform 0.2s ease, border-color 0.2s ease;
+        transform-origin: center center;
+        will-change: transform;
+        pointer-events: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      `;
+
+      if (moment.image) {
+        const img = document.createElement("img");
+        img.src = moment.image;
+        img.style.cssText = `
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          border-radius: 50%;
+          filter: brightness(0.75);
+        `;
+        inner.appendChild(img);
+      } else {
+        const dot = document.createElement("div");
+        dot.style.cssText = `
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: rgba(255,255,255,0.6);
+        `;
+        inner.appendChild(dot);
+      }
+
+      wrapper.appendChild(inner);
+
+      // Hover
+      wrapper.addEventListener("mouseenter", () => {
+        inner.style.transform = "scale(1.1)";
+        inner.style.borderColor = "rgba(255,255,255,0.5)";
+      });
+
+      wrapper.addEventListener("mouseleave", () => {
+        if (selectedMarkerRef.current !== moment.id) {
+          inner.style.transform = "scale(1)";
+          inner.style.borderColor = "rgba(255,255,255,0.25)";
+        }
+      });
+
+      // Two-step click
+      // first zoom in,
+      // second open event
+      wrapper.addEventListener("click", () => {
+        const map = mapRef.current;
+        if (!map) return;
+
+        const currentZoom = map.getZoom();
+
+        if (selectedMarkerRef.current !== moment.id || currentZoom < 13) {
+          // First click
+          // zoom in and select
+          selectedMarkerRef.current = moment.id as string;
+          inner.style.transform = "scale(1.2)";
+          inner.style.borderColor = "rgba(255,255,255,0.8)";
+          map.flyTo({
+            center: [lng, lat],
+            zoom: 14,
+            duration: 800,
+            essential: true,
+          });
+        } else {
+          // Second click
+          // open event card
+          openCard(moment);
+          router.push(`/moments/${moment.id}`, { scroll: false });
+          selectedMarkerRef.current = null;
+        }
+      });
+
+      const marker = new mapboxgl.Marker({ element: wrapper })
+        .setLngLat([lng, lat])
+        .addTo(mapRef.current!);
+
+      markersRef.current.push(marker);
+    });
+  }, [mapReady, moments]);
+
+  useEffect(() => {
+    if (!userCoordinates || !mapRef.current) return;
+    mapRef.current.flyTo({
+      center: [userCoordinates[0], userCoordinates[1]],
+      zoom: zoom,
+      duration: 2000,
+    });
+  }, [userCoordinates]);
+
   return (
-    <div
+    <motion.div
       ref={mapContainerRef}
-      className="absolute w-full h-full inset-0 "
-    ></div>
+      className="absolute w-full h-full inset-0 brightness-85 contrast-110"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: mapReady ? 1 : 0 }}
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+    />
   );
 }
 

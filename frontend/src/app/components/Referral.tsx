@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { useUserStore } from "@/stores/useUserStore";
+import { useCreateReferral } from "@/hooks/useInvites";
+import { useGetUser } from "@/hooks/useUser";
 
 type InviteSelection = "people" | "where" | "share" | "refer";
 
@@ -9,10 +12,25 @@ interface ReferProp {
 
 export default function Referral({ setInvitedSelection }: ReferProp) {
   const [reason, setReason] = useState("");
+  const [recipient, setRecipient] = useState("");
 
-  const canSend = reason.trim().length > 0;
+  const { user } = useUserStore();
+  const { data: userData } = useGetUser(user?.id as string);
+  const { mutate: createReferral, isPending } = useCreateReferral();
 
-  const REFERRALS_AVAILABLE = 3;
+  const referralsAvailable = userData?.data.data.referrals_available ?? 3;
+  const canSend =
+    reason.trim().length > 0 &&
+    recipient.trim().length > 0 &&
+    referralsAvailable > 0;
+
+  const handleSend = () => {
+    if (!canSend) return;
+    createReferral(
+      { recipient, reason },
+      { onSuccess: () => setInvitedSelection("refer") },
+    );
+  };
 
   return (
     <motion.section
@@ -23,7 +41,6 @@ export default function Referral({ setInvitedSelection }: ReferProp) {
       className="flex flex-col items-center w-full px-6 py-10 gap-y-8"
     >
       <AnimatePresence mode="wait">
-        {/* FORM STATE */}
         <motion.div
           key="form"
           initial={{ opacity: 0 }}
@@ -40,52 +57,68 @@ export default function Referral({ setInvitedSelection }: ReferProp) {
             className="flex flex-col items-center gap-2"
           >
             <h2 className="text-white text-xl font-medium tracking-[-0.3px] leading-tight">
-              Refer to <span className="text-4xl tracking-[-1px]">brew</span>
+              Refer to <span className="text-4xl tracking-[4px]">BR3W</span>
             </h2>
             <p className="text-white/40 text-sm tracking-[-0.1px] text-center">
               Brew is curated. Referrals are reviewed to maintain quality.
             </p>
 
+            {/* Referrals counter */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{
-                delay: 0.1,
-                duration: 0.3,
-                ease: [0.16, 1, 0.3, 1],
-              }}
-              className="flex items-center gap-3 mt-2 px-5 py-3 rounded-xl"
+              className="flex items-center gap-3 mt-2 px-4 py-2.5 rounded-md"
               style={{
-                background: "rgba(255,255,255,0.06)",
-                border: "1px solid rgba(255,255,255,0.1)",
+                background: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(255,255,255,0.08)",
               }}
             >
-              <span
-                className="text-white font-semibold tracking-[-0.5px]"
-                style={{ fontSize: 28, lineHeight: 1 }}
-              >
-                {REFERRALS_AVAILABLE}
+              <span className="text-white font-medium tracking-[-0.5px] text-2xl">
+                {referralsAvailable}
               </span>
               <div className="flex flex-col">
-                <span className="text-white/70 text-sm font-medium tracking-[-0.1px] leading-tight">
+                <span className="text-white/60 text-xs font-medium tracking-widest uppercase">
                   referrals left
                 </span>
-                <span className="text-white/25 text-xs tracking-[-0.1px]">
+                <span className="text-white/20 text-xs tracking-[-0.1px]">
                   use them wisely
                 </span>
               </div>
             </motion.div>
           </motion.div>
 
-          {/* Form */}
+          {/* Recipient */}
           <motion.div
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{
-              delay: 0.08,
-              duration: 0.3,
-              ease: [0.16, 1, 0.3, 1],
-            }}
+            transition={{ delay: 0.06, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="w-full flex flex-col gap-3"
+          >
+            <p className="text-white/25 text-xs tracking-wide uppercase font-medium">
+              Their email or phone
+            </p>
+            <div
+              className="w-full rounded-md transition-all duration-200"
+              style={{
+                background: "rgba(255,255,255,0.04)",
+                border: recipient.trim()
+                  ? "1px solid rgba(255,255,255,0.18)"
+                  : "1px solid rgba(255,255,255,0.08)",
+              }}
+            >
+              <input
+                type="text"
+                value={recipient}
+                onChange={(e) => setRecipient(e.target.value)}
+                placeholder="email or phone number"
+                className="w-full bg-transparent text-white placeholder-white/20 text-sm tracking-[-0.2px] outline-none px-4 py-4"
+              />
+            </div>
+          </motion.div>
+
+          {/* Reason */}
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.08, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             className="w-full flex flex-col gap-3"
           >
             <p className="text-white/25 text-xs tracking-wide uppercase font-medium">
@@ -118,17 +151,13 @@ export default function Referral({ setInvitedSelection }: ReferProp) {
           <motion.div
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{
-              delay: 0.14,
-              duration: 0.3,
-              ease: [0.16, 1, 0.3, 1],
-            }}
+            transition={{ delay: 0.14, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             className="w-full"
           >
             <motion.button
               whileTap={{ scale: canSend ? 0.97 : 1 }}
-              onClick={() => setInvitedSelection("refer")}
-              disabled={!canSend}
+              onClick={handleSend}
+              disabled={!canSend || isPending}
               className="w-full py-4 rounded-md text-sm font-medium tracking-[-0.2px] transition-opacity duration-200 hover:opacity-90"
               style={{
                 background: "#ffffff",
@@ -137,7 +166,7 @@ export default function Referral({ setInvitedSelection }: ReferProp) {
                 cursor: canSend ? "pointer" : "default",
               }}
             >
-              Send Referral
+              {isPending ? "Sending..." : "Send Referral"}
             </motion.button>
           </motion.div>
         </motion.div>

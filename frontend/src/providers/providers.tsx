@@ -1,17 +1,17 @@
 "use client";
 
-import { SessionProvider } from "next-auth/react";
 import { HeroUIProvider } from "@heroui/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import AuthHandler from "./AuthHandler";
+
+const queryClient = new QueryClient();
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  const queryClient = new QueryClient();
-
   return (
     <QueryClientProvider client={queryClient}>
-      <SessionProvider>
+      <AuthHandler>
         <HeroUIProvider>{children}</HeroUIProvider>
-      </SessionProvider>
+      </AuthHandler>
     </QueryClientProvider>
   );
 }

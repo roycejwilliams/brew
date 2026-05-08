@@ -2,25 +2,35 @@ import React, { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
 import Expectation from "./Expectation";
+import { useGetAllCirclesOwnedByUser } from "@/hooks/useCircles";
+import { useCreateCircle } from "@/hooks/useCircles";
+import { useInviteMemberToCircle } from "@/hooks/useInvites";
+import { useUserStore } from "@/stores/useUserStore";
 
 type InviteSelection = "people" | "where" | "share";
 type Destination = "destination" | "expectation";
+
 interface InviteSelectionProp {
   setInviteSelection: (inviteSelection: InviteSelection) => void;
   step: Destination;
-  setStep: (step: Destination) => void;
+  selectedPeople: {
+    id: string;
+    username: string;
+    phonenumber: string;
+    email: string;
+    isExternal?: boolean;
+    profile: { fullname: string; avatarUrl: string };
+  }[];
+  setInviteType: (inviteType: "moment" | "circle" | "referral") => void;
+  setInviteId: (inviteId: string) => void;
 }
-
-const existingCircles = [
-  { id: "1", name: "Close Friends", count: 8, image: "/profile_4.png" },
-  { id: "2", name: "Work Crew", count: 5, image: "/profile_2.png" },
-  { id: "3", name: "Family", count: 12, image: "/profile_3.png" },
-];
 
 export default function CircleDestination({
   setInviteSelection,
   step,
-  setStep,
+  selectedPeople,
+  setInviteType,
+  setInviteId,
 }: InviteSelectionProp) {
   const [circleOption, setCircleOption] = useState<"new" | "existing" | null>(
     null,
@@ -28,12 +38,64 @@ export default function CircleDestination({
   const [selectedCircle, setSelectedCircle] = useState<string | null>(null);
   const [newCircleName, setNewCircleName] = useState("");
 
+  const { user } = useUserStore();
+  const { data: circlesData, isLoading } = useGetAllCirclesOwnedByUser(
+    user?.id as string,
+  );
+  const { mutate: createCircle, isPending: isCreating } = useCreateCircle();
+  const { mutate: inviteMember } = useInviteMemberToCircle();
+
+  const circles: CircleProp[] = circlesData?.data.data || [];
+
   const canContinue =
     circleOption === "new"
       ? newCircleName.trim().length > 0
       : circleOption === "existing"
         ? selectedCircle !== null
         : false;
+
+  console.log();
+
+  const handleContinue = () => {
+    if (circleOption === "new") {
+      createCircle(
+        {
+          circle_name: newCircleName,
+          owner_id: user?.id,
+        } as any,
+        {
+          onSuccess: (data) => {
+            const newCircle = data.data.data;
+            selectedPeople.forEach((person) => {
+              inviteMember({
+                circle: newCircle,
+                invite_member: { member_id: person.id } as any,
+              });
+            });
+            //later feature
+            // setStep("expectation");
+            setInviteId(newCircle?.id);
+            setInviteType("circle");
+            setInviteSelection("share");
+          },
+        },
+      );
+    } else if (circleOption === "existing" && selectedCircle) {
+      const circle = circles.find((c) => c.id === selectedCircle);
+      if (!circle) return;
+      selectedPeople.forEach((person) => {
+        inviteMember({
+          circle,
+          invite_member: { member_id: person.id } as any,
+        });
+      });
+      //later feature
+      // setStep("expectation");
+      setInviteId(circle?.id as string);
+      setInviteType("circle");
+      setInviteSelection("share");
+    }
+  };
 
   if (step === "destination") {
     return (
@@ -45,7 +107,6 @@ export default function CircleDestination({
         transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
         className="flex flex-col gap-y-8 mx-auto w-full px-6 py-8"
       >
-        {/* Headline */}
         <motion.div
           initial={{ opacity: 0, y: -4 }}
           animate={{ opacity: 1, y: 0 }}
@@ -60,9 +121,7 @@ export default function CircleDestination({
           </p>
         </motion.div>
 
-        {/* Two cards */}
         <div className="grid grid-cols-2 gap-3">
-          {/* New Circle */}
           <motion.button
             onClick={() => {
               setCircleOption("new");
@@ -137,7 +196,6 @@ export default function CircleDestination({
             </div>
           </motion.button>
 
-          {/* Existing Circle */}
           <motion.button
             onClick={() => {
               setCircleOption("existing");
@@ -224,7 +282,6 @@ export default function CircleDestination({
           </motion.button>
         </div>
 
-        {/* Expanded content */}
         <AnimatePresence mode="popLayout">
           {circleOption === "new" && (
             <motion.div
@@ -253,7 +310,7 @@ export default function CircleDestination({
                   onChange={(e) => setNewCircleName(e.target.value)}
                   placeholder="e.g. Inner Circle, NYC crew…"
                   autoFocus
-                  className="w-full bg-transparent text-white placeholder-white/20 text-sm  placeholder:text-sm tracking-[-0.3px] outline-none"
+                  className="w-full bg-transparent text-white placeholder-white/20 text-sm tracking-[-0.3px] outline-none"
                 />
               </div>
               <p className="text-white/20 text-xs tracking-[-0.1px] mt-1 px-1">
@@ -274,79 +331,100 @@ export default function CircleDestination({
               <p className="text-white/25 text-xs tracking-wide uppercase font-medium mb-2">
                 Your circles
               </p>
-              {existingCircles.map((circle, i) => (
-                <motion.button
-                  key={circle.id}
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    duration: 0.22,
-                    delay: i * 0.05,
-                    ease: [0.16, 1, 0.3, 1],
-                  }}
-                  whileTap={{ scale: 0.99 }}
-                  onClick={() => setSelectedCircle(circle.id)}
-                  className="flex items-center justify-between w-full px-4 py-3.5 rounded-md cursor-pointer transition-all duration-200"
-                  style={{
-                    background:
-                      selectedCircle === circle.id
-                        ? "rgba(255,255,255,0.09)"
-                        : "rgba(255,255,255,0.03)",
-                    border:
-                      selectedCircle === circle.id
-                        ? "1px solid rgba(255,255,255,0.2)"
-                        : "1px solid rgba(255,255,255,0.05)",
-                  }}
-                >
-                  <div className="flex gap-x-4 items-center">
-                    <div className="w-8 h-8 rounded-sm relative overflow-hidden">
-                      <Image
-                        src={circle.image}
-                        alt={circle.name}
-                        fill
-                        className="w-full h-full "
-                      />
+              {isLoading ? (
+                [0, 1, 2].map((i) => (
+                  <motion.div
+                    key={i}
+                    className="w-full h-14 rounded-md bg-white/3 border border-white/5"
+                    animate={{ opacity: [0.3, 0.6, 0.3] }}
+                    transition={{
+                      duration: 1.5,
+                      repeat: Infinity,
+                      delay: i * 0.2,
+                      ease: "easeInOut",
+                    }}
+                  />
+                ))
+              ) : circles.length === 0 ? (
+                <p className="text-white/30 text-sm text-center py-4">
+                  No circles yet.
+                </p>
+              ) : (
+                circles.map((circle, i) => (
+                  <motion.button
+                    key={circle.id}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      duration: 0.22,
+                      delay: i * 0.05,
+                      ease: [0.16, 1, 0.3, 1],
+                    }}
+                    whileTap={{ scale: 0.99 }}
+                    onClick={() => setSelectedCircle(circle.id as string)}
+                    className="flex items-center justify-between w-full px-4 py-3.5 rounded-md cursor-pointer transition-all duration-200"
+                    style={{
+                      background:
+                        selectedCircle === circle.id
+                          ? "rgba(255,255,255,0.09)"
+                          : "rgba(255,255,255,0.03)",
+                      border:
+                        selectedCircle === circle.id
+                          ? "1px solid rgba(255,255,255,0.2)"
+                          : "1px solid rgba(255,255,255,0.05)",
+                    }}
+                  >
+                    <div className="flex gap-x-4 items-center">
+                      <div className="w-8 h-8 rounded-sm relative overflow-hidden bg-white/5">
+                        {circle.circle_image && (
+                          <Image
+                            src={circle.circle_image}
+                            alt={circle.circle_name}
+                            fill
+                            className="object-cover"
+                          />
+                        )}
+                      </div>
+                      <span
+                        className="text-sm font-medium tracking-[-0.1px] transition-colors duration-200"
+                        style={{
+                          color:
+                            selectedCircle === circle.id
+                              ? "rgba(255,255,255,0.95)"
+                              : "rgba(255,255,255,0.5)",
+                        }}
+                      >
+                        {circle.circle_name}
+                      </span>
                     </div>
                     <span
-                      className="text-sm font-medium tracking-[-0.1px] transition-colors duration-200"
+                      className="text-xs transition-colors duration-200"
                       style={{
                         color:
                           selectedCircle === circle.id
-                            ? "rgba(255,255,255,0.95)"
-                            : "rgba(255,255,255,0.5)",
+                            ? "rgba(255,255,255,0.35)"
+                            : "rgba(255,255,255,0.18)",
                       }}
                     >
-                      {circle.name}
+                      {circle.members?.length ?? 0} people
                     </span>
-                  </div>
-                  <span
-                    className="text-xs transition-colors duration-200"
-                    style={{
-                      color:
-                        selectedCircle === circle.id
-                          ? "rgba(255,255,255,0.35)"
-                          : "rgba(255,255,255,0.18)",
-                    }}
-                  >
-                    {circle.count} people
-                  </span>
-                </motion.button>
-              ))}
+                  </motion.button>
+                ))
+              )}
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Continue */}
         <AnimatePresence>
           {circleOption && (
             <motion.button
-              onClick={() => setStep("expectation")}
+              onClick={handleContinue}
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: canContinue ? 1 : 0.3, y: 0 }}
               exit={{ opacity: 0, y: 6 }}
               whileTap={{ scale: canContinue ? 0.97 : 1 }}
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              disabled={!canContinue}
+              disabled={!canContinue || isCreating}
               className="w-full py-4 rounded-md text-sm font-medium tracking-[-0.2px] transition-opacity duration-200 hover:opacity-90"
               style={{
                 background: "#ffffff",
@@ -354,7 +432,7 @@ export default function CircleDestination({
                 cursor: canContinue ? "pointer" : "default",
               }}
             >
-              Continue
+              {isCreating ? "Creating..." : "Continue"}
             </motion.button>
           )}
         </AnimatePresence>

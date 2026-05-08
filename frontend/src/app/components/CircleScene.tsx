@@ -4,16 +4,9 @@ import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import { AnimatePresence, motion } from "motion/react";
 
-interface Circle {
-  id: string;
-  name: string;
-  members: string[]; // or User[]
-  image: string;
-}
-
 interface CircleSceneProp {
-  circles: Circle[];
-  selectedCircle: Circle | null;
+  circles: CircleProp[];
+  selectedCircle: CircleProp | null;
   circleIndex?: number; // controls circle index
   markerIndex?: number; // controls marker index
 }
@@ -26,7 +19,10 @@ type MarkerGeometry = {
   visible: boolean;
 };
 
+gsap.registerPlugin(useGSAP);
+
 export default function CircleScene({
+  circles,
   circleIndex,
   selectedCircle,
   markerIndex,
@@ -40,7 +36,6 @@ export default function CircleScene({
   const cy = 250;
 
   //gsap configuration
-  gsap.registerPlugin(useGSAP);
 
   const container = useRef<HTMLElement>(null);
   const rotation = useRef({ value: 0 });
@@ -198,6 +193,99 @@ export default function CircleScene({
     },
   );
 
+  console.log("circles", circles);
+
+  if (!selectedCircle)
+    return (
+      <motion.section
+        key="circle-scene"
+        ref={container}
+        className="mx-auto max-w-md relative flex shrink-0 justify-center items-center"
+      >
+        <motion.svg
+          width="625"
+          height="625"
+          viewBox="-50 -50 602.5 602.5"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="w-full xl:max-w-150 max-w-100 h-auto"
+        >
+          <defs>
+            <clipPath id="center-clip">
+              <circle cx={cx} cy={cy} r={175} />
+            </clipPath>
+          </defs>
+
+          <circle
+            cx={250}
+            cy={250}
+            r={250}
+            stroke="white"
+            strokeOpacity={0.1}
+            strokeWidth={1}
+            strokeDasharray="10 10"
+          />
+          <circle
+            cx={250}
+            cy={250}
+            r={212.5}
+            stroke="white"
+            strokeOpacity={0.08}
+            strokeWidth={1}
+            strokeDasharray="5 10"
+          />
+
+          <g filter="url(#filter1_d_652_266)">
+            <motion.image
+              key={circles?.[circleIndex ?? 0]?.id}
+              href={
+                circles?.[circleIndex ?? 0]?.circle_image || "/EventRecap-2.jpg"
+              }
+              x={cx - 175}
+              y={cy - 175}
+              width={350}
+              height={350}
+              clipPath="url(#center-clip)"
+              preserveAspectRatio="xMidYMid slice"
+              className="brightness-60"
+              initial={{ opacity: 0, scale: 1.1 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+            />
+            <motion.circle
+              cx={cx}
+              cy={cy}
+              r={175}
+              fill="none"
+              stroke="#3A3A3A"
+              strokeWidth="1"
+              strokeOpacity={0.3}
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.6 }}
+            />
+          </g>
+        </motion.svg>
+        <div className="absolute w-fit font-medium z-10 mx-auto pointer-events-none">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={circleIndex}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+              className="text-center my-auto text-[#ececec]/75"
+            >
+              <h1 className="text-lg">
+                {circles?.[circleIndex ?? 0]?.circle_name}
+              </h1>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </motion.section>
+    );
+
   return (
     <motion.section
       key="circle-scene"
@@ -215,7 +303,7 @@ export default function CircleScene({
               transition={{ duration: 0.25, ease: "easeOut" }}
               className="text-center my-auto text-[#ececec]/75"
             >
-              <h1 className="text-lg">{selectedCircle?.name}</h1>
+              <h1 className="text-lg">{selectedCircle?.circle_name}</h1>
             </motion.div>
           </AnimatePresence>
         </div>
@@ -266,15 +354,9 @@ export default function CircleScene({
           />
         </g>
         <g filter="url(#filter1_d_652_266)">
-          <defs>
-            <clipPath id="center-clip">
-              <circle cx={cx} cy={cy} r={175} />
-            </clipPath>
-          </defs>
-
           <motion.image
             key={selectedCircle?.id}
-            href={selectedCircle?.image}
+            href={selectedCircle?.circle_image || "/EventRecap-2.jpg"}
             x={cx - 175}
             y={cy - 175}
             width={350}
@@ -305,32 +387,36 @@ export default function CircleScene({
           />
         </g>
         <g className="markers">
-          {selectedCircle?.members.map((_, i) => (
-            <g
-              key={i}
-              className="circle-marker"
-              // REMOVED: inline styles that conflict with GSAP
-            >
+          {selectedCircle.members?.map((member, i) => (
+            <g key={i} className="circle-marker">
               <circle cx="24" cy="24" r="24" fill="#1c1c1c" opacity={0.8} />
-              <text
-                x={24}
-                y={24}
-                fill="white"
-                fontSize="14"
-                fontWeight="600"
-                textAnchor="middle"
-                dominantBaseline="middle"
-                opacity={0.9}
-              >
-                {i + 1}
-              </text>
+              {member.profile_image ? (
+                <image
+                  href={member.profile_image}
+                  x="0"
+                  y="0"
+                  width="48"
+                  height="48"
+                  clipPath={`url(#marker-clip-${i})`}
+                  preserveAspectRatio="xMidYMid slice"
+                />
+              ) : (
+                <text
+                  x={24}
+                  y={24}
+                  fill="white"
+                  fontSize="12"
+                  fontWeight="600"
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  opacity={0.9}
+                >
+                  {member.first_name?.[0]}
+                  {member.last_name?.[0]}
+                </text>
+              )}
               <path
-                d="M24 48V76
-       M48 24
-       C48 37.2548 37.2548 48 24 48
-       C10.7452 48 0 37.2548 0 24
-       C0 10.7452 10.7452 0 24 0
-       C37.2548 0 48 10.7452 48 24Z"
+                d="M24 48V76 M48 24 C48 37.2548 37.2548 48 24 48 C10.7452 48 0 37.2548 0 24 C0 10.7452 10.7452 0 24 0 C37.2548 0 48 10.7452 48 24Z"
                 stroke="white"
                 strokeWidth="1.5"
                 fill="none"
@@ -341,6 +427,14 @@ export default function CircleScene({
           ))}
         </g>
         <defs>
+          <clipPath id="center-clip">
+            <circle cx={cx} cy={cy} r={175} />
+          </clipPath>
+          {selectedCircle?.members.map((_, i) => (
+            <clipPath key={i} id={`marker-clip-${i}`}>
+              <circle cx="24" cy="24" r="24" />
+            </clipPath>
+          ))}
           <filter
             id="filter0_d_652_266"
             x="0"

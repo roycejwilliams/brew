@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PinIcon, SendIcon } from "./icons";
-import { Map } from "./map";
+import MapBoxGl from "./mapBoxGl";
 
 type MapViewport = {
   center: [number, number];
@@ -13,7 +13,6 @@ type MapViewport = {
 interface ChooseAreaPanelProps {
   onAreaSelected: (center: [number, number], zoom: number) => void;
   onCancel: () => void;
-  onLocation: () => Promise<void>;
   viewport: MapViewport;
   setViewport: (viewport: MapViewport) => void;
   place: string | null;
@@ -31,11 +30,8 @@ export default function ChooseAreaPanel({
   onAreaCleared,
   isAreaConfirmed,
 }: ChooseAreaPanelProps) {
-  const handleConfirm = async () => {
-    isAreaConfirmed;
-    await new Promise((r) => setTimeout(r, 250));
+  const handleConfirm = () => {
     onAreaSelected(viewport.center, viewport.zoom);
-    console.log(onAreaSelected);
   };
 
   return (
@@ -45,158 +41,165 @@ export default function ChooseAreaPanel({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-      className="flex flex-col gap-4"
+      className="flex flex-col gap-3"
     >
-      {/* Instructions */}
-      <motion.div
-        initial={{ opacity: 0, x: -10 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.1, duration: 0.3 }}
-        className="px-1"
-      >
-        <p className="text-xs text-neutral-400">
-          This moment will be visible nearby
-        </p>
-      </motion.div>
-
-      <AnimatePresence mode="wait">
-        {selectedArea === null && (
+      <AnimatePresence mode="popLayout">
+        {selectedArea === null ? (
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
+            key="map"
+            initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.15, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="relative h-70 rounded-xl overflow-hidden"
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className="relative h-64 rounded-xl overflow-hidden"
+            style={{ border: "1px solid rgba(255,255,255,0.07)" }}
           >
-            {/* Map Container */}
+            {/* Map */}
+            <MapBoxGl
+              zoom={16}
+              dragPan={true}
+              dragRotate={true}
+              scrollZoom={true}
+              center={viewport.center}
+              onMove={(center, zoom) =>
+                setViewport({ ...viewport, center, zoom })
+              }
+            />
 
-            {/* Location Badge */}
+            {/* Grain overlay */}
+            <div
+              className="absolute inset-0 pointer-events-none opacity-15 z-10"
+              style={{
+                backgroundImage:
+                  "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E\")",
+                backgroundSize: "120px",
+              }}
+            />
+
+            {/* Location badge */}
             <motion.div
-              initial={{ opacity: 0, y: -20, scale: 0.9 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{
                 delay: 0.3,
                 duration: 0.4,
                 ease: [0.16, 1, 0.3, 1],
               }}
-              className="flex min-w-2/3 max-w-full text-center justify-center items-center gap-x-4 absolute top-4 z-50 left-1/2 p-2 rounded-lg text-xs -translate-x-1/2 bg-neutral-800/95 backdrop-blur-sm text-neutral-200 border border-neutral-700 shadow-lg"
+              className="absolute top-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 px-3 py-1.5 rounded-md"
+              style={{
+                background: "rgba(10,10,10,0.8)",
+                border: "1px solid rgba(255,255,255,0.08)",
+                backdropFilter: "blur(16px)",
+                boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+              }}
             >
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.4, type: "spring", stiffness: 200 }}
-                className="w-6 h-6 rounded-full bg-white flex justify-center items-center shadow-sm"
-              >
-                <PinIcon size={20} className="text-neutral-400" />
-              </motion.div>
-              <motion.span
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.45 }}
-                className="font-medium"
-              >
-                Around • {place}
-              </motion.span>
+              {/* Top gloss */}
+              <div className="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-white/10 to-transparent rounded-t-md" />
+
+              <PinIcon size={16} color="#fff" />
+              <span className="text-white/50 text-[11px] tracking-[-0.1px] whitespace-nowrap">
+                {place ?? "Locating..."}
+              </span>
             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute h-full w-full"
-            >
-              {/* Map */}
-              <Map viewport={viewport} onViewportChange={setViewport} />
-            </motion.div>
-            {/* Center Marker with Pulsing Effect */}
-            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-              {/* Pulsing outer ring */}
+            {/* Center crosshair */}
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center z-20">
               <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{
-                  scale: [1, 1.2, 1],
-                  opacity: [0.3, 0.1, 0.3],
-                }}
+                animate={{ scale: [1, 1.15, 1], opacity: [0.2, 0.08, 0.2] }}
                 transition={{
-                  duration: 2,
+                  duration: 2.5,
                   repeat: Infinity,
                   ease: "easeInOut",
                 }}
-                className="absolute w-24 h-24 rounded-full bg-blue-500/10"
+                className="absolute w-28 h-28 rounded-full"
+                style={{
+                  background: "rgba(255,255,255,0.06)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                }}
               />
-
-              {/* Static outer glow */}
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.2, duration: 0.5 }}
-                className="absolute w-20 h-20 rounded-full bg-blue-500/20 blur-xl"
-              />
-
-              {/* Main circle */}
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{
-                  delay: 0.25,
+                  delay: 0.3,
                   type: "spring",
                   stiffness: 200,
                   damping: 15,
                 }}
-                className="relative w-16 h-16 rounded-full bg-white/20 backdrop-blur-xs shadow-lg border border-white/30 flex items-center justify-center"
+                className="w-3 h-3 rounded-full bg-white/80 shadow-lg"
+                style={{
+                  boxShadow:
+                    "0 0 0 4px rgba(255,255,255,0.15), 0 0 20px rgba(255,255,255,0.1)",
+                }}
               />
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
-      {/* Confirm Button */}
-      <AnimatePresence mode="wait">
-        {selectedArea !== null ? (
+            {/* Instructions */}
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.3 }}
+              className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20"
+            >
+              <span
+                className="text-white/30 text-[10px] tracking-[1.5px] uppercase px-3 py-1.5 rounded-md"
+                style={{
+                  background: "rgba(0,0,0,0.5)",
+                  backdropFilter: "blur(8px)",
+                }}
+              >
+                Drag to set area
+              </span>
+            </motion.div>
+          </motion.div>
+        ) : (
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
+            key="confirmed"
+            initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
             className="bg-[#1c1c1c] rounded-xl border border-white/8 p-5 shadow-2xl shadow-black/20"
           >
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.1 }}
-                  className="text-[10px] uppercase tracking-wider text-white/40 mb-2 font-medium"
-                >
-                  Location
-                </motion.div>
-                <motion.div
-                  initial={{ opacity: 0, x: -5 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.15 }}
-                  className="text-sm font-medium text-white/95 mb-1"
-                >
-                  Around • {place}
-                </motion.div>
+                <div className="text-[10px] uppercase tracking-wider text-white/30 mb-2 font-medium">
+                  Around
+                </div>
+                <div className="text-sm  font-medium text-white/90 mb-1 tracking-[-0.1px]">
+                  {place ?? "Current area"}
+                </div>
               </div>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={onAreaCleared}
-                className="text-xs text-white/60 cursor-pointer hover:text-white/90 font-medium whitespace-nowrap ml-4 transition-colors duration-200"
+                className="text-xs text-white/40 cursor-pointer hover:text-white/70 font-medium whitespace-nowrap ml-4 transition-colors duration-200"
               >
                 Change
               </motion.button>
             </div>
           </motion.div>
-        ) : (
+        )}
+      </AnimatePresence>
+
+      {/* Confirm button */}
+      <AnimatePresence>
+        {selectedArea === null && (
           <motion.button
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35, duration: 0.3 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            exit={{ opacity: 0, y: 4 }}
+            transition={{ delay: 0.35, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            whileHover={{ scale: isAreaConfirmed ? 1 : 1.02 }}
+            whileTap={{ scale: isAreaConfirmed ? 1 : 0.97 }}
             onClick={handleConfirm}
             disabled={isAreaConfirmed}
-            className="group flex items-center gap-x-2 w-fit mt-2 cursor-pointer px-5 py-3.5 rounded-md text-sm font-medium bg-[#2b2b2b]/75 backdrop-blur-xl border border-white/20 text-white shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+            className="w-fit flex items-center gap-2 px-5 py-3 rounded-md text-sm font-medium text-white/70 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200"
+            style={{
+              background: "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(255,255,255,0.08)",
+            }}
           >
             <AnimatePresence mode="wait">
               {isAreaConfirmed ? (
@@ -205,7 +208,7 @@ export default function ChooseAreaPanel({
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="flex items-center gap-x-2"
+                  className="flex items-center gap-2"
                 >
                   <motion.div
                     animate={{ rotate: 360 }}
@@ -214,7 +217,7 @@ export default function ChooseAreaPanel({
                       repeat: Infinity,
                       ease: "linear",
                     }}
-                    className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full"
+                    className="w-3.5 h-3.5 border border-white/20 border-t-white/60 rounded-full"
                   />
                   <span>Setting area...</span>
                 </motion.div>
@@ -224,16 +227,10 @@ export default function ChooseAreaPanel({
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="flex items-center gap-x-2"
+                  className="flex items-center gap-2"
                 >
-                  <span>Set area</span>
-                  <motion.div
-                    whileHover={{ rotate: 90 }}
-                    transition={{ duration: 0.2 }}
-                    className="w-5 h-5 rounded-full bg-white/10 border border-white/20 rotate-45 flex justify-center items-center"
-                  >
-                    <SendIcon size={12} className="text-white" />
-                  </motion.div>
+                  <span>Set this area</span>
+                  <SendIcon size={12} color="#fff" className="rotate-45" />
                 </motion.div>
               )}
             </AnimatePresence>

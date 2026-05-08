@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCubesStacked,
   faRing,
-  faBeerMugEmpty,
+  // faBeerMugEmpty,
 } from "@fortawesome/free-solid-svg-icons";
 
 type ManageView = "moments" | "circle" | "referral" | null;
@@ -26,10 +26,10 @@ export default function Tools({ manage, setManage }: ManageTools) {
       icon: <FontAwesomeIcon icon={faRing} />,
       name: "circle",
     },
-    {
-      icon: <FontAwesomeIcon icon={faBeerMugEmpty} />,
-      name: "referral",
-    },
+    // {
+    //   icon: <FontAwesomeIcon icon={faBeerMugEmpty} />,
+    //   name: "referral",
+    // },
   ];
 
   return (

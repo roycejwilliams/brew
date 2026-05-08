@@ -2,17 +2,17 @@ import { create } from "zustand";
 
 interface OpenEventCard {
   isEventOpen: boolean;
-  activeEventId: string | null;
+  moment: MomentProp | null;
   scrollY: number;
-  openEvent: (id: string | null) => void;
+  openEvent: (moment: MomentProp | null) => void;
   closeEvent: () => void;
 }
 
 export const openEventCard = create<OpenEventCard>((set) => ({
   isEventOpen: false,
-  activeEventId: null,
+  moment: null,
   scrollY: 0,
-  openEvent: (id: string | null) =>
-    set({ isEventOpen: true, activeEventId: id, scrollY: window.scrollY }),
-  closeEvent: () => set({ isEventOpen: false, activeEventId: null }),
+  openEvent: (moment: MomentProp | null) =>
+    set({ isEventOpen: true, moment: moment, scrollY: window.scrollY }),
+  closeEvent: () => set({ isEventOpen: false, moment: null }),
 }));

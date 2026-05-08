@@ -24,7 +24,10 @@ export default function ManageReferral() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
         >
-          Refer to <span className="text-4xl font-normal">brew.</span>
+          Refer to{" "}
+          <span className="text-4xl tracking-[4px] uppercase font-normal">
+            br3w.
+          </span>
         </motion.h2>
         <motion.div
           initial={{ opacity: 0 }}
