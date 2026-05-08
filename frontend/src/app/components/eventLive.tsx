@@ -3,10 +3,12 @@ import { motion, AnimatePresence } from "motion/react";
 import CanvasQRcode from "./canvasQRcode";
 import AttendeeDetails from "./attendeeDetails";
 import HostMessage from "./hostMessage";
-import { Map } from "./map";
+import { openEventCard } from "@/stores/store";
+import MapBoxGl from "./mapBoxGl";
 
 interface EventLiveProp {
   activeModal: "live";
+  eventCard: MomentProp | null;
 }
 
 type HostMessageItem = {
@@ -16,22 +18,16 @@ type HostMessageItem = {
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
-export default function EventLive({ activeModal }: EventLiveProp) {
-  const [hostMessages, setHostMessages] = useState<HostMessageItem[]>([]);
+export default function EventLive({ activeModal, eventCard }: EventLiveProp) {
+  // const [hostMessages, setHostMessages] = useState<HostMessageItem[]>([]);
 
-  useEffect(() => {
-    const dummyData: HostMessageItem[] = [
-      {
-        text: "We're opening the first pour now. Take your time settling into the space — the room is filling with a steady energy, and the music is beginning to shape the atmosphere. Feel free to make your way to the bar when you're ready. Tonight is meant to unfold slowly and intentionally; we'll guide you through each moment as the experience builds.",
-        time: "8:17 PM",
-      },
-      {
-        text: "If you've just arrived, you can check in at the bar when you're ready. There's no rush — move at your own pace, the night is designed to breathe.",
-        time: "8:36 PM",
-      },
-    ];
-    setHostMessages(dummyData.reverse());
-  }, []);
+  console.log(eventCard);
+
+  if (!eventCard) return null;
+
+  const lng = (eventCard?.location as any)?.x;
+  const lat = (eventCard?.location as any)?.y;
+  const hasLocation = lng != null && lat != null;
 
   return (
     <div className="flex flex-col gap-y-20 pb-8">
@@ -46,7 +42,6 @@ export default function EventLive({ activeModal }: EventLiveProp) {
           paddingBottom: 16,
         }}
       >
-        {/* Pulsing rings */}
         <div className="relative flex items-center justify-center w-5 h-5">
           <motion.div
             animate={{ scale: [1, 1.9], opacity: [0.4, 0] }}
@@ -98,7 +93,11 @@ export default function EventLive({ activeModal }: EventLiveProp) {
             overflow: "hidden",
           }}
         >
-          <CanvasQRcode qrWidth={240} />
+          <CanvasQRcode
+            qrWidth={160}
+            type="checkin"
+            id={eventCard?.id as string}
+          />
         </motion.div>
 
         {/* Check in label */}
@@ -131,35 +130,69 @@ export default function EventLive({ activeModal }: EventLiveProp) {
       />
 
       {/* Map */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.1, ease: EASE }}
-        className="w-1/2 h-125 mx-auto relative overflow-hidden"
-        style={{
-          borderRadius: 16,
-          border: "1px solid rgba(255,255,255,0.07)",
-          boxShadow: "0 24px 60px rgba(0,0,0,0.5)",
-          opacity: 0.88,
-        }}
-      >
-        <Map
-          center={[-122.42285, 37.73393]}
-          zoom={11}
-          dragPan={false}
-          scrollZoom={false}
-          doubleClickZoom={false}
-          touchZoomRotate={false}
-        />
-
-        {/* Map vignette */}
-        <div
-          className="absolute inset-0 pointer-events-none rounded-md"
+      {hasLocation && (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1, ease: EASE }}
+          className="w-1/2 mx-auto relative" // remove overflow-hidden
           style={{
-            boxShadow: "inset 0 0 60px rgba(0,0,0,0.4)",
+            borderRadius: 16,
           }}
-        />
-      </motion.div>
+        >
+          {/* Map with its own opacity */}
+          <div
+            className="w-full h-125 overflow-hidden relative"
+            style={{
+              borderRadius: 16,
+              border: "1px solid rgba(255,255,255,0.07)",
+              boxShadow: "0 24px 60px rgba(0,0,0,0.5)",
+              opacity: 0.88,
+            }}
+          >
+            <MapBoxGl
+              center={[lng, lat]}
+              zoom={14}
+              dragPan={false}
+              scrollZoom={false}
+              dragRotate={false}
+            />
+            <div
+              className="absolute inset-0 pointer-events-none rounded-md"
+              style={{ boxShadow: "inset 0 0 60px rgba(0,0,0,0.4)" }}
+            />
+          </div>
+
+          {/* Directions button outside overflow-hidden */}
+          <motion.a
+            href={`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`}
+            target="_blank"
+            rel="noreferrer"
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.3, ease: EASE }}
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.96 }}
+            className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2 rounded-full cursor-pointer"
+            style={{
+              background: "rgba(10,10,10,0.85)",
+              border: "1px solid rgba(255,255,255,0.12)",
+              backdropFilter: "blur(16px)",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.4)",
+            }}
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
+                fill="rgba(255,255,255,0.6)"
+              />
+            </svg>
+            <span className="text-[11px] text-white/60 tracking-[-0.1px] whitespace-nowrap">
+              Get directions
+            </span>
+          </motion.a>
+        </motion.div>
+      )}
 
       {/* Attendees */}
       <motion.div
@@ -171,13 +204,12 @@ export default function EventLive({ activeModal }: EventLiveProp) {
       </motion.div>
 
       {/* Tonight's Signals */}
-      <motion.section
+      {/* <motion.section
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, delay: 0.15, ease: EASE }}
         className="flex flex-col gap-8 w-full"
       >
-        {/* Header */}
         <div
           className="flex flex-col gap-1 pb-5"
           style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}
@@ -196,7 +228,6 @@ export default function EventLive({ activeModal }: EventLiveProp) {
           </p>
         </div>
 
-        {/* Messages */}
         <div className="flex flex-col gap-3">
           <AnimatePresence>
             {hostMessages.map((msg, i) => (
@@ -211,7 +242,7 @@ export default function EventLive({ activeModal }: EventLiveProp) {
             ))}
           </AnimatePresence>
         </div>
-      </motion.section>
+      </motion.section> */}
     </div>
   );
 }

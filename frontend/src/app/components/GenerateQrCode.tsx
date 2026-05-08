@@ -1,20 +1,21 @@
 import { motion, AnimatePresence } from "motion/react";
 import React, { useState, useEffect } from "react";
-import { useQRCode } from "next-qrcode";
 import OrbitDots from "./icons/OrbitDots";
+import CanvasQRcode from "./canvasQRcode";
 
 type InviteSelection = "people" | "where" | "share" | "refer";
 
 interface ShareProp {
   onClose: () => void;
+  inviteType: "moment" | "circle" | "referral";
+  inviteId: string;
 }
 
-function GenerateQrCode({ onClose }: ShareProp) {
-  const { Canvas } = useQRCode();
+function GenerateQrCode({ onClose, inviteType, inviteId }: ShareProp) {
   const [copied, setCopied] = useState(false);
   const [phase, setPhase] = useState<"generating" | "ready">("generating");
 
-  const inviteLink = "https://brew.app/invite/abc123";
+  const inviteLink = `br3w://${inviteType}/${inviteId}`;
 
   useEffect(() => {
     const timer = setTimeout(() => setPhase("ready"), 2400);
@@ -36,7 +37,6 @@ function GenerateQrCode({ onClose }: ShareProp) {
       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
       className="flex flex-col items-center justify-between gap-y-8 w-full px-6 py-8"
     >
-      {/* QR Hero */}
       <div
         className="flex items-center justify-center w-full"
         style={{ minHeight: 280 }}
@@ -67,25 +67,22 @@ function GenerateQrCode({ onClose }: ShareProp) {
                   "0 0 0 1px rgba(255,255,255,0.04), 0 24px 48px rgba(0,0,0,0.4)",
               }}
             >
-              <Canvas
-                text={inviteLink}
-                options={{
-                  errorCorrectionLevel: "M",
-                  margin: 1,
-                  scale: 10,
-                  width: 240,
-                  color: {
-                    dark: "#1a1a1a",
-                    light: "#f0efed",
-                  },
-                }}
+              <CanvasQRcode
+                qrWidth={240}
+                type={
+                  inviteType === "moment"
+                    ? "checkin"
+                    : inviteType === "circle"
+                      ? "circle"
+                      : "referral"
+                }
+                id={inviteId}
               />
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-      {/* Headline */}
       <AnimatePresence mode="wait">
         {phase === "generating" ? (
           <motion.div
@@ -99,6 +96,13 @@ function GenerateQrCode({ onClose }: ShareProp) {
             <h2 className="text-white/50 text-xl font-medium tracking-[-0.1px]">
               Generating invite
             </h2>
+            <p className="text-white/20 text-sm mt-1 tracking-[-0.1px]">
+              {inviteType === "moment"
+                ? "Moment access"
+                : inviteType === "circle"
+                  ? "Circle invite"
+                  : "Brew referral"}
+            </p>
           </motion.div>
         ) : (
           <motion.div
@@ -113,13 +117,16 @@ function GenerateQrCode({ onClose }: ShareProp) {
               Ready to go.
             </h2>
             <p className="text-white/40 text-sm tracking-[-0.1px]">
-              Share this to bring people in
+              {inviteType === "moment"
+                ? "Share this to bring them to the moment"
+                : inviteType === "circle"
+                  ? "Share this to add them to your circle"
+                  : "Share this referral link"}
             </p>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Secondary actions + Done */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: phase === "ready" ? 1 : 0 }}
@@ -135,9 +142,7 @@ function GenerateQrCode({ onClose }: ShareProp) {
           >
             {copied ? "Copied" : "Copy link"}
           </motion.button>
-
           <span className="w-px h-3 bg-white/10" />
-
           <motion.button
             whileTap={{ scale: 0.96 }}
             className="text-white/40 text-[13px] cursor-pointer tracking-[-0.1px] transition-colors duration-200 hover:text-white/70 px-2 py-1"
@@ -150,10 +155,7 @@ function GenerateQrCode({ onClose }: ShareProp) {
           onClick={onClose}
           whileTap={{ scale: 0.97 }}
           className="w-full py-4 rounded-xl cursor-pointer text-[15px] font-semibold tracking-[-0.2px] transition-opacity duration-200 hover:opacity-90 active:opacity-80"
-          style={{
-            background: "#ffffff",
-            color: "#111111",
-          }}
+          style={{ background: "#ffffff", color: "#111111" }}
         >
           Done
         </motion.button>

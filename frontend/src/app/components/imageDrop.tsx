@@ -1,7 +1,12 @@
 import { AnimatePresence, motion } from "motion/react";
 import React, { useState, DragEvent, ChangeEvent, useEffect } from "react";
 
-export default function ImageDrop() {
+interface ImageProp {
+  setForm: React.Dispatch<React.SetStateAction<any>>;
+  onFileSelect: (file: File) => void;
+}
+
+export default function ImageDrop({ setForm, onFileSelect }: ImageProp) {
   const [image, setImage] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState<boolean>(false);
 
@@ -15,6 +20,10 @@ export default function ImageDrop() {
     setIsDragging(false);
   };
 
+  //base64 is instant, no upload wait
+  //but for storage no - base64 strings are huge
+  // and shouldnt go into postgres
+
   const handleDrop = (e: DragEvent<HTMLDivElement>): void => {
     e.preventDefault();
     setIsDragging(false);
@@ -22,7 +31,10 @@ export default function ImageDrop() {
     const files = e.dataTransfer.files;
     if (files && files[0]) {
       const file = files[0];
+      onFileSelect(file);
       if (file.type.startsWith("image/")) {
+        //whole goal here is the set the image here as a preview
+        //the purpose was to not upload every drop to supabase
         const reader = new FileReader();
         reader.onload = (e: ProgressEvent<FileReader>): void => {
           if (e.target?.result) {
@@ -34,9 +46,12 @@ export default function ImageDrop() {
     }
   };
 
-  const handleFileInput = (e: ChangeEvent<HTMLInputElement>): void => {
+  const handleFileInput = async (
+    e: ChangeEvent<HTMLInputElement>,
+  ): Promise<void> => {
     const file = e.target.files?.[0];
     if (file) {
+      onFileSelect(file); // add this
       const reader = new FileReader();
       reader.onload = (e: ProgressEvent<FileReader>): void => {
         if (e.target?.result) {
@@ -46,6 +61,7 @@ export default function ImageDrop() {
       reader.readAsDataURL(file);
     }
   };
+
   return (
     <div className="flex items-center justify-center rounded-2xl overflow-hidden">
       <motion.div
@@ -133,7 +149,7 @@ export default function ImageDrop() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="relative w-full h-full group"
+              className="relative w-full h-full group rounded-lg overflow-hidden"
             >
               <motion.img
                 initial={{ opacity: 0 }}

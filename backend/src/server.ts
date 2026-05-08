@@ -10,6 +10,7 @@ import jwt from "jsonwebtoken";
 import rateLimit from "express-rate-limit"; //restricts how many request an IP or user can make in a window time
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import cron from "node-cron";
 
 const app = express();
 const port = "8080";
@@ -34,87 +35,15 @@ app.use(
     credentials: true,
   }),
 );
+
+//Will parse the cookie header upon request and exposes the
+//cookies data property req.cookie
+//cookies - small text files containing unique data sent by a website to the web browser
 app.use(cookieParser());
 
 // function to geneate a 6 digit verifcation code between 100000 to 999999
 function generateOTP() {
   return randomInt(100000, 1000000);
-}
-
-interface ApplicationProp {
-  id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone_number: string;
-  work_link: string;
-  reason: string;
-  status: "pending" | "accepted" | "rejected";
-}
-
-interface UserProp {
-  id: string;
-  first_name: string;
-  last_name: string;
-  phone_number: string;
-  email: string;
-  description: string;
-  username: string;
-  profile_image: string;
-  otp_code: string;
-  otp_expiry: Date;
-  created_at: Date;
-  application_id: ApplicationProp;
-  otp_attempts: number;
-  locked: boolean;
-  role: string;
-}
-
-interface CircleProp {
-  owner_id: string;
-  circle_name: string;
-  circle_image: string;
-  created_at: Date;
-  updated_at: Date;
-}
-
-interface Point {
-  latitude: number;
-  longitude: number;
-}
-
-interface MomentProp {
-  creator_id: string;
-  circle_id: CircleProp;
-  image: string;
-  moments_name: string;
-  created_at: Date;
-  update_at: Date;
-  moment_starts: Date;
-  moment_ends: Date;
-  description: string;
-  location: Point;
-  cap_attendance: number;
-  close_moment: boolean;
-  visibility_type: "nearby" | "circle" | "people";
-}
-
-interface InviteMembersProp {
-  member_id: string;
-  circle_id: string;
-  create_at: Date;
-  accepted_at: Date;
-  invited_by: string;
-  status: "pending" | "accepted" | "rejected";
-}
-
-interface InviteAttendeesProp {
-  attendee_id: string;
-  moment_id: string;
-  created_at: Date;
-  accepted_at: Date;
-  invited_by: string;
-  status: "pending" | "accepted" | "rejected";
 }
 
 declare global {
@@ -130,27 +59,45 @@ declare global {
 //a valid token before granting access to protected routes.
 //what actually enforces security
 const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
+  //retrieve the value of a cookie named "token"
   const token = req.cookies.token;
 
-  if (!token) return res.status(401).send("No token provided");
+  //if not the token the redirect back to home
+  if (!token) return res.redirect("/");
 
+  //verifies the token
+  //along with your made JWT_SECRET_KEY
   jwt.verify(
     token,
     process.env.JWT_SECRET_KEY!,
     (err: Error | null, user: any) => {
+      //token expired
       if (err) return res.status(403).send("Invalid or expired token");
 
+      //its telling it to resemble the shape of the UserProp
       req.user = user as UserProp;
+      //goes to the next function
       next();
     },
   );
 };
 
+//Only valid users with a token can see this
+// app.get("/pulse", (req, res) => res.send("Welcome to Pulse!"));
+// app.get("/moment", (req, res) => res.send("Welcome to Moments!"));
+// app.get("/profile", (req, res) => res.send("Your Profile"));
+// app.get("/manage", (req, res) => res.send("Admin Management"));
+
 // Defining user role
+//used to allow certain access to certain url path or permission
+//insert role
 const userRole = (role: string) => {
   return async function (req: Request, res: Response, next: NextFunction) {
     try {
+      //retrieve current user role
       const userRole = req.user?.role;
+      //if the role placed doesnt eequal the actual
+      //role return a error
       if (role !== userRole) {
         return res
           .status(403)
@@ -328,7 +275,7 @@ app.put(
       const updateStatus: ApplicationProp = revealStatus.rows[0];
 
       if (updateStatus) {
-        otpMerge(updateStatus.status);
+        otpMerge(updateStatus.status as string);
         return;
       }
 
@@ -366,6 +313,16 @@ app.get(
             username: user.username,
             id: user.id,
             created_at: user.created_at,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            description: user.description,
+            email: user.email,
+            phone_number: user.phone_number,
+            location: user.location,
+            instagram: user.instagram,
+            twitter: user.twitter,
+            linkedin: user.linkedin,
+            role: user.role,
           },
         });
       }
@@ -381,6 +338,7 @@ app.get(
 );
 
 // Verify user OTP to log in
+//happens during login
 app.post(
   "/auth/verify/:id",
   limiter,
@@ -404,9 +362,12 @@ app.post(
         [req.params.id, otp_code],
       );
 
+      //get the authorized user information
       const UserAuthorize: UserProp = authUser.rows[0];
 
+      //if he exist
       if (UserAuthorize) {
+        //create a jwt signature for the cookie in this shape.
         const authorize = jwt.sign(
           {
             username: UserAuthorize.username,
@@ -420,11 +381,13 @@ app.post(
           },
         );
 
+        //set the authenication back to null
         await pool.query(
           `UPDATE users SET otp_code = null, otp_expiry = null, otp_attempts = 0 WHERE id = $1 RETURNING *`,
           [req.params.id],
         );
 
+        //creates the cookie token with the following rules
         res.cookie("token", authorize, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
@@ -480,7 +443,7 @@ app.post(
     const { email } = req.body;
     try {
       const verifyEmail = await pool.query(
-        `SELECT id FROM users INNER JOIN applications ON users.application_id = applications.id WHERE applications.email = $1`,
+        `SELECT users.id FROM users INNER JOIN applications ON users.application_id = applications.id WHERE applications.email = $1`,
         [email],
       );
 
@@ -584,6 +547,10 @@ app.put(
       "email",
       "description",
       "username",
+      "location",
+      "instagram",
+      "twitter",
+      "linkedin",
     ];
 
     const filterKeys = Object.keys(req.body).filter((key) => {
@@ -773,6 +740,47 @@ app.get(
   },
 );
 
+//specific circle members
+app.get(
+  "/circles/:user_id/with-members",
+  authenticateToken,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const getCirclesWithMembers = await pool.query(
+        `SELECT 
+  c.id,
+  c.circle_name,
+  c.circle_image,
+  COALESCE(
+    json_agg(
+      json_build_object(
+        'id', u.id,
+        'first_name', u.first_name,
+        'last_name', u.last_name,
+        'username', u.username,
+        'profile_image', u.profile_image
+      )
+    ) FILTER (WHERE u.id IS NOT NULL),
+    '[]'
+  ) AS members
+FROM circles c
+LEFT JOIN circle_members cm ON c.id = cm.circle_id
+LEFT JOIN users u ON cm.member_id = u.id
+WHERE c.owner_id = $1
+GROUP BY c.id`,
+        [req.params.user_id],
+      );
+
+      return res.status(200).send({
+        success: true,
+        data: getCirclesWithMembers.rows,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
 // Update a circle by owner
 app.put(
   "/circles/:id/:circle_id",
@@ -908,14 +916,36 @@ app.post(
   async (req: Request, res: Response, next: NextFunction) => {
     if (!req.body) return res.status(400).send("Request body cannot be empty.");
 
-    const { moments_name, location, moment_start, visibility_type } = req.body;
+    const {
+      moments_name,
+      location,
+      location_name,
+      moment_start,
+      visibility_type,
+      description,
+      circle_id,
+      image,
+      principles,
+      expectations,
+      faqs,
+      vibes,
+    } = req.body;
 
-    if (!moments_name || !location || !moment_start || !visibility_type) {
+    if (
+      !moments_name ||
+      !location ||
+      !location_name ||
+      !moment_start ||
+      !visibility_type ||
+      !description
+    ) {
       const missing = [
         "moments_name",
         "location",
+        "location_name",
         "moment_start",
         "visibility_type",
+        "description",
       ].find((key) => !req.body[key]);
 
       return res.status(400).send(`${missing} is required.`);
@@ -929,8 +959,25 @@ app.post(
       }
 
       const createMomentsById = await pool.query(
-        "INSERT INTO moments (creator_id, moments_name, location, moment_start, visibility_type) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-        [req.params.id, moments_name, location, moment_start, visibility_type],
+        `INSERT INTO moments 
+    (creator_id, moments_name, location, location_name, moment_start, visibility_type, description, circle_id, image, principles, expectations, faqs, vibes) 
+   VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) 
+   RETURNING *`,
+        [
+          req.params.id,
+          moments_name,
+          location,
+          location_name,
+          moment_start,
+          visibility_type,
+          description,
+          circle_id,
+          image,
+          principles,
+          expectations,
+          JSON.stringify(faqs),
+          vibes,
+        ],
       );
 
       const createMoment: MomentProp = createMomentsById.rows[0];
@@ -943,6 +990,134 @@ app.post(
       }
 
       return res.status(400).send("Unable to Create Moment");
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+//get specific moment
+app.get(
+  "/moments/moment/:moment_id",
+  authenticateToken,
+  async (req, res, next) => {
+    try {
+      const getMoment = await pool.query(
+        `SELECT * FROM moments WHERE id = $1`,
+        [req.params.moment_id],
+      );
+
+      const moment: MomentProp = getMoment.rows[0];
+      if (!moment) return res.status(404).send("Moment not found.");
+
+      const userId = req.user?.id;
+      const isCreator = moment.creator_id === userId;
+
+      if (isCreator)
+        return res.status(200).send({ success: true, data: moment });
+
+      if (moment.visibility_type === "nearby") {
+        return res.status(200).send({ success: true, data: moment });
+      }
+
+      if (moment.visibility_type === "circle") {
+        const memberCheck = await pool.query(
+          `SELECT 1 FROM circle_members WHERE circle_id = $1 AND member_id = $2`,
+          [moment.circle_id, userId],
+        );
+        if (!memberCheck.rows.length)
+          return res.status(403).send("Unauthorized.");
+        return res.status(200).send({ success: true, data: moment });
+      }
+
+      if (moment.visibility_type === "people") {
+        const inviteCheck = await pool.query(
+          `SELECT 1 FROM invite_attendees WHERE moment_id = $1 AND attendee_id = $2`,
+          [moment.id, userId],
+        );
+        if (!inviteCheck.rows.length)
+          return res.status(403).send("Unauthorized.");
+        return res.status(200).send({ success: true, data: moment });
+      }
+
+      return res.status(403).send("Unauthorized.");
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+//get a nearby moment
+app.get(
+  "/moments/nearby",
+  authenticateToken,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { lng, lat, radius = 10000, filter = "tonight" } = req.query;
+
+      const lngNum = parseFloat(lng as string);
+      const latNum = parseFloat(lat as string);
+      const radNum = parseFloat(radius as string);
+
+      if (isNaN(lngNum) || isNaN(latNum)) {
+        return res.status(400).send("Valid coordinates are required.");
+      }
+
+      let startTime: string;
+      let endTime: string;
+      const pad = (n: number) => String(n).padStart(2, "0");
+      const fmt = (d: Date) =>
+        `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}-07:00`;
+
+      const now = new Date();
+
+      if (filter === "tonight") {
+        startTime = fmt(now);
+        const end = new Date(now);
+        end.setDate(end.getDate() + 1);
+        end.setHours(4, 0, 0, 0);
+        endTime = fmt(end);
+      } else if (filter === "tomorrow") {
+        const start = new Date(now);
+        start.setDate(start.getDate() + 1);
+        start.setHours(0, 0, 0, 0);
+        const end = new Date(start);
+        end.setHours(23, 59, 59, 0);
+        startTime = fmt(start);
+        endTime = fmt(end);
+      } else {
+        startTime = fmt(now);
+        const end = new Date(now);
+        end.setDate(end.getDate() + 7);
+        end.setHours(23, 59, 59, 0);
+        endTime = fmt(end);
+      }
+      console.log("startTime:", startTime, "endTime:", endTime);
+
+      const result = await pool.query(
+        `SELECT m.*,
+          ST_Distance(
+            ST_SetSRID(ST_MakePoint(m.location[0], m.location[1]), 4326)::geography,
+            ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography
+          ) as distance
+        FROM moments m
+        WHERE 
+          m.location IS NOT NULL
+          AND m.visibility_type = 'nearby'
+          AND ST_DWithin(
+            ST_SetSRID(ST_MakePoint(m.location[0], m.location[1]), 4326)::geography,
+            ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography,
+            $3
+          )
+          AND m.moment_start >= $4
+          AND m.moment_start <= $5
+          AND m.close_moment IS NOT TRUE
+        ORDER BY distance ASC
+        LIMIT 20`,
+        [lngNum, latNum, radNum, startTime, endTime],
+      );
+
+      return res.status(200).send({ success: true, data: result.rows });
     } catch (error) {
       next(error);
     }
@@ -1017,12 +1192,86 @@ app.get(
   },
 );
 
+//fetch all users associated with the moment
+app.get(
+  "/moments/:moment_id/attendees/details",
+  authenticateToken,
+  async (req, res, next) => {
+    try {
+      const { moment_id } = req.params;
+      const result = await pool.query(
+        `SELECT 
+  u.id,
+  u.username,
+  u.first_name,
+  u.last_name,
+  u.profile_image,
+  COALESCE(ma.checked_in, false) as checked_in,
+  ma.checked_in_at,
+  CASE 
+    WHEN ma.attendee_id IS NOT NULL THEN 'attending'
+    ELSE ia.status
+  END as status
+FROM (
+  SELECT attendee_id FROM moment_attendees WHERE moment_id = $1
+  UNION
+  SELECT attendee_id FROM invite_attendees WHERE moment_id = $1
+) combined
+JOIN users u ON u.id = combined.attendee_id
+LEFT JOIN moment_attendees ma ON ma.attendee_id = u.id AND ma.moment_id = $1
+LEFT JOIN invite_attendees ia ON ia.attendee_id = u.id AND ia.moment_id = $1`,
+        [moment_id],
+      );
+      return res.status(200).send({ success: true, data: result.rows });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+//specific moment attendees
+app.get(
+  "/moments/:moment_id/attendees",
+  authenticateToken,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const getAttendees = await pool.query(
+        `SELECT u.id, u.first_name, u.last_name, u.username, u.profile_image
+        FROM moment_attendees ma
+        JOIN users u ON ma.attendee_id = u.id
+        WHERE ma.moment_id = $1`,
+        [req.params.moment_id],
+      );
+
+      const attendees = getAttendees.rows;
+
+      return res.status(200).send({
+        success: true,
+        data: attendees,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
 // Update moment details by user id
 app.put(
   "/moments/:id/:moment_id",
   authenticateToken,
   async (req: Request, res: Response, next: NextFunction) => {
     if (!req.body) return res.status(400).send("Request body cannot be empty");
+
+    //formats the location before making any updates
+    // transforms {} into ()
+    const formatLocation = (loc: any): string | null => {
+      if (!loc) return null;
+      if (typeof loc === "string") return loc; // already formatted
+      if (typeof loc === "object" && loc.x !== undefined) {
+        return `(${loc.x},${loc.y})`;
+      }
+      return null;
+    };
 
     const allowed = [
       "image",
@@ -1031,6 +1280,7 @@ app.put(
       "moment_end",
       "description",
       "location",
+      "location_name",
       "cap_attendance",
       "close_moment",
       "visibility_type",
@@ -1042,8 +1292,10 @@ app.put(
     });
 
     //returns the desired values based on filtered keys.. goes in the dependency
-    const valueOfKeys = filteredKeys.map((value) => req.body[value]);
-
+    const valueOfKeys = filteredKeys.map((key) => {
+      if (key === "location") return formatLocation(req.body[key]);
+      return req.body[key];
+    });
     //numerical order of how each desired change with be in
     const momentKeys = filteredKeys
       .map((key, index) => {
@@ -1146,6 +1398,105 @@ app.delete(
       }
 
       return res.status(404).send("Attendee doesn't exist");
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+// Get all photos for a moment
+app.get(
+  "/moments/:moment_id/photos",
+  authenticateToken,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await pool.query(
+        `SELECT mp.*, u.username, u.profile_image
+        FROM moment_photos mp
+        JOIN users u ON mp.uploader_id = u.id
+        WHERE mp.moment_id = $1
+        ORDER BY mp.created_at ASC`,
+        [req.params.moment_id],
+      );
+
+      // After inserting photo, notify the moment creator
+      const getMomentCreator = await pool.query(
+        `SELECT m.creator_id, m.moments_name, u.email, u.phone_number 
+  FROM moments m 
+  JOIN users u ON m.creator_id = u.id 
+  WHERE m.id = $1`,
+        [req.params.moment_id],
+      );
+      const creator = getMomentCreator.rows[0];
+
+      const getUploader = await pool.query(
+        `SELECT username FROM users WHERE id = $1`,
+        [req.user?.id],
+      );
+      const uploader = getUploader.rows[0];
+
+      // Don't notify if uploader is the creator
+      if (creator.creator_id !== req.user?.id) {
+        await sendEmail({
+          email: creator.email,
+          photo_uploaded: {
+            moments_name: creator.moments_name,
+            uploader_username: uploader.username,
+          },
+        });
+        await sendSMS({
+          phone_number: creator.phone_number,
+          photo_uploaded: {
+            moments_name: creator.moments_name,
+            uploader_username: uploader.username,
+          },
+        });
+      }
+      return res.status(200).send({ success: true, data: result.rows });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+// Upload a photo
+app.post(
+  "/moments/:moment_id/photos",
+  authenticateToken,
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { image_url } = req.body;
+    if (!image_url) return res.status(400).send("image_url is required.");
+    try {
+      const result = await pool.query(
+        `INSERT INTO moment_photos (moment_id, uploader_id, image_url)
+        VALUES ($1, $2, $3) RETURNING *`,
+        [req.params.moment_id, req.user?.id, image_url],
+      );
+      return res.status(201).send({ success: true, data: result.rows[0] });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+// Delete a photo — only uploader can delete
+app.delete(
+  "/moments/:moment_id/photos/:photo_id",
+  authenticateToken,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const check = await pool.query(
+        `SELECT uploader_id FROM moment_photos WHERE id = $1`,
+        [req.params.photo_id],
+      );
+      if (!check.rows.length) return res.status(404).send("Photo not found.");
+      if (check.rows[0].uploader_id !== req.user?.id)
+        return res.status(403).send("Unauthorized.");
+
+      await pool.query(`DELETE FROM moment_photos WHERE id = $1`, [
+        req.params.photo_id,
+      ]);
+      return res.status(200).send({ success: true });
     } catch (error) {
       next(error);
     }
@@ -1371,48 +1722,65 @@ app.put(
 );
 
 //INVITE MOMENT FLOW
-// Owner invites a member to a moment
+// Owner/User invites a member to a moment
 app.post(
-  "/moment/:id/invite/:attendee_id",
+  "/moment/:id/invite",
   authenticateToken,
   async (req: Request, res: Response, next: NextFunction) => {
+    const { recipient } = req.body;
+
     try {
-      const invitedBy = await pool.query(
-        `SELECT creator_id FROM moments WHERE id = $1`,
+      // Check if requester is owner or attendee + check close_moment
+      const ownerCheck = await pool.query(
+        `SELECT creator_id, close_moment FROM moments WHERE id = $1`,
         [req.params.id],
       );
 
-      const ownerOfMoment: MomentProp = invitedBy.rows[0];
+      const ownerOfMoment: MomentProp = ownerCheck.rows[0];
+      const isOwner = req.user?.id === ownerOfMoment.creator_id;
 
-      if (req.user?.id !== ownerOfMoment.creator_id) {
-        return res
-          .status(403)
-          .send("Unauthorized: You can only access your own account");
+      if (ownerOfMoment.close_moment) {
+        return res.status(403).send("This moment is closed.");
       }
 
+      const attendeeCheck = await pool.query(
+        `SELECT attendee_id FROM moment_attendees WHERE moment_id = $1 AND attendee_id = $2`,
+        [req.params.id, req.user?.id],
+      );
+
+      const isAttendee = attendeeCheck.rows[0];
+
+      if (!isOwner && !isAttendee) {
+        return res.status(403).send("Unauthorized");
+      }
+
+      // Find recipient
+      const findRecipient = await pool.query(
+        `SELECT id, email, phone_number FROM users WHERE username = $1 OR email = $1 OR phone_number = $1`,
+        [recipient],
+      );
+
+      const recipientUser: UserProp = findRecipient.rows[0];
+
+      if (!recipientUser) return res.status(404).send("Recipient not found.");
+
+      // Create invite
       const inviteAttendeeToMoment = await pool.query(
         "INSERT INTO invite_attendees (moment_id, attendee_id, invited_by) VALUES ($1, $2, $3) RETURNING *",
-        [req.params.id, req.params.attendee_id, ownerOfMoment.creator_id],
+        [req.params.id, recipientUser.id, req.user?.id],
       );
 
       const invitedAttendee: InviteAttendeesProp =
         inviteAttendeeToMoment.rows[0];
 
       if (invitedAttendee) {
-        const getInvitedUser = await pool.query(
-          `SELECT email, phone_number FROM users WHERE id = $1`,
-          [req.params.attendee_id],
-        );
-
-        const invitedUser: UserProp = getInvitedUser.rows[0];
-
         await sendEmail({
-          email: invitedUser.email,
+          email: recipientUser.email,
           invite_type: "received",
           invite_target: "moment",
         });
         await sendSMS({
-          phone_number: invitedUser.phone_number,
+          phone_number: recipientUser.phone_number,
           invite_type: "received",
           invite_target: "moment",
         });
@@ -1588,6 +1956,544 @@ app.put(
     }
   },
 );
+
+//Retrive Active Connection
+app.get(
+  "/users/:id/connections",
+  authenticateToken,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const getActiveConnections = await pool.query(
+        `SELECT DISTINCT 
+        u.id,
+        u.first_name,
+        u.last_name,
+        u.username,
+        u.profile_image,
+        c.id as circle_id,
+        c.circle_name
+      FROM circle_members cm1
+      JOIN circle_members cm2 ON cm1.circle_id = cm2.circle_id
+      JOIN users u ON cm2.member_id = u.id
+      JOIN circles c ON cm1.circle_id = c.id
+      WHERE cm1.member_id = $1 AND cm2.member_id != $1
+         `,
+        [req.params.id],
+      );
+
+      const activeConnections: UserProp[] = getActiveConnections.rows;
+
+      if (activeConnections) {
+        return res.status(200).send({
+          success: true,
+          data: activeConnections,
+        });
+      }
+
+      return res.status(404).send("User not found.");
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+//Transfer Ticket
+app.put(
+  "/attendee/:attendee_id/transfer/:moment_id",
+  authenticateToken,
+  async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.body) return res.status(400).send("Request body cannot be empty.");
+
+    const { recipient } = req.body; // username, email, or phone
+
+    try {
+      //owner of ticket
+      const getTicketOwner = await pool.query(
+        `SELECT * FROM invite_attendees 
+        WHERE attendee_id = $1 AND moment_id = $2 AND status = 'accepted'`,
+        [req.params.attendee_id, req.params.moment_id],
+      );
+
+      const owner: UserProp = getTicketOwner.rows[0];
+
+      if (!owner) {
+        return res.status(403).send("You do not own this ticket.");
+      }
+
+      if (req.user?.id !== req.params.attendee_id) {
+        return res.status(403).send("Unauthorized");
+      }
+
+      //Transfer ticket
+      const findRecipient = await pool.query(
+        `SELECT * FROM users WHERE username = $1 OR phone_number = $1 OR email = $1`,
+        [recipient],
+      );
+
+      const getRecipient: UserProp = findRecipient.rows[0];
+
+      if (getRecipient) {
+        const sendTicket = await pool.query(
+          //this replaces the current attendee_id
+          `UPDATE invite_attendees SET attendee_id = $1 WHERE attendee_id = $2 AND moment_id = $3 RETURNING *`,
+          [getRecipient.id, req.params.attendee_id, req.params.moment_id],
+        );
+
+        await sendEmail({ email: getRecipient.email, transfer_ticket: true });
+        await sendSMS({
+          phone_number: getRecipient.phone_number,
+          transfer_ticket: true,
+        });
+        return res.status(200).send({
+          success: true,
+          data: sendTicket.rows[0],
+        });
+      }
+      return res.status(404).send("Cannot find recipient");
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+//Anthropic Auto-generation
+app.post(
+  "/ai/generate",
+  authenticateToken,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { description } = req.body;
+
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": process.env.ANTHROPIC_API_KEY!,
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-5",
+          max_tokens: 1000,
+          messages: [
+            {
+              role: "user",
+              content: `Based on this event description: "${description}"
+                
+Return ONLY a JSON object with no preamble or markdown:
+{
+  "principles": [...],
+  "expectations": [...],
+  "faqs": [{ "question": "...", "answer": "..." }],
+  "vibes": ["vibe 1", "vibe 2"]
+}
+
+Generate between 3 and 6 items for each array. Vibes between 5 and 10 with 1 word describing the event.
+Keep each item to 1-2 sentences. Match the tone of the description.`,
+            },
+          ],
+        }),
+      });
+
+      const data = await response.json();
+      const text = data.content[0].text;
+      const parsed = JSON.parse(text.replace(/```json|```/g, "").trim());
+
+      return res.status(200).send({ success: true, data: parsed });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+//recap event endpoint
+app.post(
+  "/ai/recap",
+  authenticateToken,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const {
+        moment_id,
+        moments_name,
+        description,
+        location_name,
+        vibes,
+        principles,
+      } = req.body;
+
+      // Enrich with real event data
+      const [attendeeResult, photoResult, momentResult] = await Promise.all([
+        pool.query(
+          `SELECT COUNT(*) FROM moment_attendees WHERE moment_id = $1`,
+          [moment_id],
+        ),
+        pool.query(`SELECT COUNT(*) FROM moment_photos WHERE moment_id = $1`, [
+          moment_id,
+        ]),
+        pool.query(
+          `SELECT moment_start, moment_end FROM moments WHERE id = $1`,
+          [moment_id],
+        ),
+      ]);
+
+      const attendeeCount = parseInt(attendeeResult.rows[0].count);
+      const photoCount = parseInt(photoResult.rows[0].count);
+      const moment = momentResult.rows[0];
+
+      const endTime = moment?.moment_end;
+      const durationHours =
+        moment?.moment_start && endTime
+          ? Math.round(
+              ((new Date(endTime).getTime() -
+                new Date(moment.moment_start).getTime()) /
+                (1000 * 60 * 60)) *
+                10,
+            ) / 10
+          : null;
+
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": process.env.ANTHROPIC_API_KEY!,
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-5",
+          max_tokens: 300,
+          messages: [
+            {
+              role: "user",
+              content: `Write a short, evocative 2-3 sentence recap of this event. Make it feel like a memory — cinematic, sensory, present tense. Do not use clichés.
+
+Event: ${moments_name}
+Location: ${location_name}
+Description: ${description}
+Vibes: ${vibes?.join(", ")}
+Principles: ${principles?.join(", ")}
+Attendees: ${attendeeCount} people
+${durationHours ? `Duration: ${durationHours} hours` : ""}
+${photoCount > 0 ? `Photos captured: ${photoCount}` : ""}
+
+Return ONLY the recap text, no preamble, no quotes.`,
+            },
+          ],
+        }),
+      });
+
+      const data = await response.json();
+      const recap = data.content[0].text;
+
+      const getCreator = await pool.query(
+        `SELECT email, phone_number FROM users WHERE id = $1`,
+        [req.user?.id],
+      );
+      const creator = getCreator.rows[0];
+
+      await sendEmail({
+        email: creator.email,
+        moment_recap: {
+          moments_name,
+          recap,
+        },
+      });
+      await sendSMS({
+        phone_number: creator.phone_number,
+        moment_recap: { moments_name },
+      });
+
+      return res.status(200).send({ success: true, data: { recap } });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+//Referrals
+app.post(
+  "/referrals",
+  authenticateToken,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { recipient, reason } = req.body;
+      const referrer_id = req.user?.id;
+
+      if (!recipient || !reason) {
+        return res.status(400).send("recipient and reason are required.");
+      }
+
+      // Check referrals available
+      const userResult = await pool.query(
+        "SELECT referrals_available FROM users WHERE id = $1",
+        [referrer_id],
+      );
+
+      if (userResult.rows[0].referrals_available <= 0) {
+        return res.status(400).send("No referrals available.");
+      }
+
+      // Create referral + decrement count
+      await pool.query("BEGIN");
+
+      await pool.query(
+        "INSERT INTO referrals (referrer_id, recipient, reason) VALUES ($1, $2, $3)",
+        [referrer_id, recipient, reason],
+      );
+
+      await pool.query(
+        "UPDATE users SET referrals_available = referrals_available - 1 WHERE id = $1",
+        [referrer_id],
+      );
+
+      await pool.query("COMMIT");
+
+      return res.status(201).send({ success: true });
+    } catch (error) {
+      await pool.query("ROLLBACK");
+      next(error);
+    }
+  },
+);
+
+//check-in route
+app.post(
+  "/moments/:moment_id/checkin",
+  authenticateToken,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { moment_id } = req.params;
+      const { attendee_id } = req.body;
+
+      if (!attendee_id) {
+        return res.status(400).send("attendee_id is required.");
+      }
+
+      const momentResult = await pool.query(
+        "SELECT creator_id, close_moment, moments_name FROM moments WHERE id = $1",
+        [moment_id],
+      );
+
+      if (momentResult.rows.length === 0) {
+        return res.status(404).send("Moment not found.");
+      }
+
+      if (momentResult.rows[0].creator_id !== req.user?.id) {
+        return res.status(403).send("Only the creator can check people in.");
+      }
+
+      if (momentResult.rows[0].close_moment) {
+        return res.status(403).send("This moment is closed.");
+      }
+
+      const attendeeResult = await pool.query(
+        "SELECT * FROM moment_attendees WHERE moment_id = $1 AND attendee_id = $2",
+        [moment_id, attendee_id],
+      );
+
+      if (attendeeResult.rows.length === 0) {
+        return res.status(404).send("Attendee not found for this moment.");
+      }
+
+      if (attendeeResult.rows[0].checked_in) {
+        return res.status(400).send("Attendee already checked in.");
+      }
+
+      const result = await pool.query(
+        "UPDATE moment_attendees SET checked_in = TRUE, checked_in_at = NOW() WHERE moment_id = $1 AND attendee_id = $2 RETURNING *",
+        [moment_id, attendee_id],
+      );
+
+      const getAttendee = await pool.query(
+        `SELECT username, email, phone_number FROM users WHERE id = $1`,
+        [attendee_id],
+      );
+      const attendee = getAttendee.rows[0];
+
+      const getCreator = await pool.query(
+        `SELECT email, phone_number FROM users WHERE id = $1`,
+        [momentResult.rows[0].creator_id],
+      );
+      const creator = getCreator.rows[0];
+
+      await sendEmail({
+        email: creator.email,
+        check_in: {
+          moments_name: momentResult.rows[0].moments_name,
+          attendee_username: attendee.username,
+        },
+      });
+
+      await sendSMS({
+        phone_number: creator.phone_number,
+        check_in: {
+          moments_name: momentResult.rows[0].moments_name,
+          attendee_username: attendee.username,
+        },
+      });
+
+      return res.status(200).send({ success: true, data: result.rows[0] });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+//joining a circle
+app.post(
+  "/circles/:circle_id/join",
+  authenticateToken,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { circle_id } = req.params;
+
+      const result = await pool.query(
+        `UPDATE circle_invites 
+         SET status = 'accepted', accepted_at = NOW() 
+         WHERE circle_id = $1 AND member_id = $2 
+         RETURNING *`,
+        [circle_id, req.user?.id],
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).send("Invite not found.");
+      }
+
+      // Add to circle_members
+      await pool.query(
+        `INSERT INTO circle_members (circle_id, member_id) 
+         VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+        [circle_id, req.user?.id],
+      );
+
+      return res.status(200).send({ success: true, data: result.rows[0] });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+//Node-cron is a lightweight task scheduler for Node.js applications
+// that allows you to execute JavaScript code at specific intervals or times
+
+cron.schedule("*/15 * * * *", async () => {
+  try {
+    const windowStart = new Date(Date.now() + 45 * 60 * 1000).toISOString();
+    const windowEnd = new Date(Date.now() + 75 * 60 * 1000).toISOString();
+
+    const upcoming = await pool.query(
+      `SELECT m.moments_name, m.location_name, m.moment_start, ia.attendee_id
+      FROM moments m
+      JOIN invite_attendees ia ON m.id = ia.moment_id
+      WHERE m.moment_start >= $1
+      AND m.moment_start <= $2
+      AND ia.status = 'accepted'
+      AND m.close_moment IS NOT TRUE`,
+      [windowStart, windowEnd],
+    );
+
+    for (const row of upcoming.rows) {
+      const attendee = await pool.query(
+        `SELECT email, phone_number FROM users WHERE id = $1`,
+        [row.attendee_id],
+      );
+      if (!attendee.rows[0]) continue;
+
+      const time = new Date(row.moment_start).toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      });
+
+      await sendEmail({
+        email: attendee.rows[0].email,
+        moment_reminder: {
+          moments_name: row.moments_name,
+          location_name: row.location_name,
+          time,
+        },
+      });
+      await sendSMS({
+        phone_number: attendee.rows[0].phone_number,
+        moment_reminder: {
+          moments_name: row.moments_name,
+          location_name: row.location_name,
+          time,
+        },
+      });
+    }
+  } catch (error) {
+    console.error("Reminder cron error:", error);
+  }
+});
+
+// Runs daily at 10 AM — pending invite nudges
+cron.schedule("0 10 * * *", async () => {
+  try {
+    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
+    // Pending moment invites
+    const pendingMoments = await pool.query(
+      `SELECT ia.attendee_id, m.moments_name, m.moment_start
+      FROM invite_attendees ia
+      JOIN moments m ON ia.moment_id = m.id
+      WHERE ia.status = 'pending'
+      AND ia.created_at <= $1
+      AND m.moment_start > NOW()`,
+      [yesterday],
+    );
+
+    for (const row of pendingMoments.rows) {
+      const attendee = await pool.query(
+        `SELECT email, phone_number FROM users WHERE id = $1`,
+        [row.attendee_id],
+      );
+      if (!attendee.rows[0]) continue;
+
+      const time = new Date(row.moment_start).toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      });
+
+      await sendEmail({
+        email: attendee.rows[0].email,
+        moment_invite_reminder: { moments_name: row.moments_name, time },
+      });
+      await sendSMS({
+        phone_number: attendee.rows[0].phone_number,
+        moment_invite_reminder: { moments_name: row.moments_name, time },
+      });
+    }
+
+    // Pending circle invites
+    const pendingCircles = await pool.query(
+      `SELECT im.member_id, c.circle_name
+      FROM invite_members im
+      JOIN circles c ON im.circle_id = c.id
+      WHERE im.status = 'pending'
+      AND im.created_at <= $1`,
+      [yesterday],
+    );
+
+    for (const row of pendingCircles.rows) {
+      const member = await pool.query(
+        `SELECT email, phone_number FROM users WHERE id = $1`,
+        [row.member_id],
+      );
+      if (!member.rows[0]) continue;
+
+      await sendEmail({
+        email: member.rows[0].email,
+        circle_invite_reminder: { circle_name: row.circle_name },
+      });
+      await sendSMS({
+        phone_number: member.rows[0].phone_number,
+        circle_invite_reminder: { circle_name: row.circle_name },
+      });
+    }
+  } catch (error) {
+    console.error("Invite reminder cron error:", error);
+  }
+});
 
 app.listen(port, () => {
   console.log(`Listening on port: ${port}`);

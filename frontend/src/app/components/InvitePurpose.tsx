@@ -1,34 +1,37 @@
 import { ArrowUpRight } from "lucide-react";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import Image from "next/image";
-import { useState } from "react";
 import Moments from "./Moments";
-import { StaticImport } from "next/dist/shared/lib/get-img-props";
 import CircleDestination from "./CircleDestination";
-import Referral from "./Referral";
 
-type PurposeSelection = "moment" | "circle" | "brew" | null;
-type InviteSelection = "people" | "where" | "share" | "refer";
+type PurposeSelection = "moment" | "circle" | null;
+type InviteSelection = "people" | "where" | "share";
 type Destination = "destination" | "expectation";
 
-interface UserProp {
+interface InviteUserProp {
   id: string;
   username: string;
   phonenumber: string;
   email: string;
+  isExternal?: boolean;
+  first_name?: string;
+  last_name?: string;
+  profile_image?: string;
   profile: {
     fullname: string;
-    avatarUrl: string | StaticImport;
+    avatarUrl: string;
   };
 }
 
 interface InviteMomentSelection {
-  selectedPeople: UserProp[];
+  selectedPeople: InviteUserProp[];
   setInviteSelection: (inviteSelection: InviteSelection) => void;
   selectPurpose: PurposeSelection;
   setSelectedPurpose: (selectPurpose: PurposeSelection) => void;
   step: Destination;
   setStep: (step: Destination) => void;
+  setInviteType: (inviteType: "moment" | "circle" | "referral") => void;
+  setInviteId: (inviteId: string) => void; // <-- Updated this line
 }
 
 const purposes = [
@@ -44,12 +47,6 @@ const purposes = [
     description: "A group you trust.",
     image: "/circle.jpg",
   },
-  {
-    id: "brew",
-    title: "Brew",
-    description: "Bring them into the network.",
-    image: "/brew.jpg",
-  },
 ];
 
 export default function InvitePurpose({
@@ -59,6 +56,8 @@ export default function InvitePurpose({
   setSelectedPurpose,
   step,
   setStep,
+  setInviteId,
+  setInviteType,
 }: InviteMomentSelection) {
   if (selectPurpose === null) {
     return (
@@ -68,18 +67,23 @@ export default function InvitePurpose({
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -10 }}
         transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-        className="space-y-5 mx-auto my-auto w-full"
+        className="space-y-6 mx-auto my-auto w-full"
       >
-        <motion.h2
+        <motion.div
           initial={{ opacity: 0, y: -4 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          className=" text-white/50 text-center tracking-wide "
+          className="text-center space-y-1"
         >
-          What is this invitation for?
-        </motion.h2>
+          <h2 className="text-white/90 text-lg font-medium tracking-[-0.2px]">
+            What is this for?
+          </h2>
+          <p className="text-white/30 text-sm tracking-[-0.1px]">
+            Choose where you're bringing them.
+          </p>
+        </motion.div>
 
-        <div className="rounded-2xl overflow-hidden border h-100 border-white/[0.07] divide-y divide-white/[0.07] shadow-2xl">
+        <div className="rounded-xl overflow-hidden border border-white/[0.07] divide-y divide-white/[0.07] shadow-2xl shadow-black/40">
           {purposes.map((purpose, i) => (
             <motion.button
               onClick={() => setSelectedPurpose(purpose.id as PurposeSelection)}
@@ -91,39 +95,52 @@ export default function InvitePurpose({
                 duration: 0.4,
                 ease: [0.16, 1, 0.3, 1],
               }}
-              className="group relative text-left px-6 py-8 flex h-1/3 justify-between items-center cursor-pointer w-full overflow-hidden"
+              whileTap={{ scale: 0.99 }}
+              className="group relative text-left px-6 py-10 flex justify-between items-center cursor-pointer w-full overflow-hidden"
             >
               {/* Background image */}
               <Image
                 src={purpose.image}
                 alt={purpose.title}
                 fill
-                className="object-cover -z-20 brightness-[0.7] group-hover:brightness-[1] group-hover:scale-105 transition-all duration-700 ease-out"
+                className="object-cover -z-20 brightness-50 group-hover:brightness-75 group-hover:scale-105 transition-all duration-700 ease-out"
               />
 
-              {/* Left-anchored gradient so text is always legible */}
-              <div className="absolute inset-0 -z-10 bg-linear-to-r from-black/80 via-black/50 to-black/10" />
+              {/* Gradient overlays */}
+              <div className="absolute inset-0 -z-10 bg-linear-to-r from-black/90 via-black/60 to-black/20" />
+              <div className="absolute inset-0 -z-10 bg-linear-to-t from-black/50 to-transparent" />
 
-              {/* Bottom vignette for extra depth */}
-              <div className="absolute inset-0 -z-10 bg-linear-to-t from-black/40 to-transparent" />
+              {/* Grain */}
+              <div
+                className="absolute inset-0 -z-10 opacity-10"
+                style={{
+                  backgroundImage:
+                    "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E\")",
+                  backgroundSize: "120px",
+                }}
+              />
 
               {/* Text */}
-              <div className="space-y-1">
-                <h3 className="text-sm  text-white tracking-[-0.01em] leading-snug">
+              <div className="space-y-1.5">
+                <h3 className="text-sm font-medium text-white/90 tracking-[-0.1px] leading-snug">
                   {purpose.title}
                 </h3>
-                <p className="text-sm font-light text-white/50 group-hover:text-white/70 transition-colors duration-300">
+                <p className="text-xs text-white/40 group-hover:text-white/60 transition-colors duration-300 tracking-[-0.1px]">
                   {purpose.description}
                 </p>
               </div>
 
               {/* Arrow */}
-              <div className="ml-6 shrink-0 w-8 h-8 rounded-full border border-white/10 flex items-center justify-center bg-white/5 group-hover:bg-white/12 group-hover:border-white/20 transition-all duration-300">
+              <motion.div
+                whileHover={{ x: 2, y: -2 }}
+                transition={{ duration: 0.2 }}
+                className="ml-6 shrink-0 w-8 h-8 rounded-full border border-white/10 flex items-center justify-center bg-white/5 group-hover:bg-white/10 group-hover:border-white/20 transition-all duration-300"
+              >
                 <ArrowUpRight
-                  size={15}
-                  className="text-white/50 group-hover:text-white group-hover:translate-x-px group-hover:-translate-y-px transition-all duration-300"
+                  size={14}
+                  className="text-white/40 group-hover:text-white/80 transition-colors duration-300"
                 />
-              </div>
+              </motion.div>
             </motion.button>
           ))}
         </div>
@@ -136,6 +153,8 @@ export default function InvitePurpose({
       <Moments
         selectedPeople={selectedPeople}
         setInviteSelection={setInviteSelection}
+        setInviteId={setInviteId}
+        setInviteType={setInviteType}
       />
     );
   }
@@ -143,14 +162,12 @@ export default function InvitePurpose({
   if (selectPurpose === "circle") {
     return (
       <CircleDestination
+        selectedPeople={selectedPeople}
         setInviteSelection={setInviteSelection}
         step={step}
-        setStep={setStep}
+        setInviteId={setInviteId}
+        setInviteType={setInviteType}
       />
     );
-  }
-
-  if (selectPurpose === "brew") {
-    return <Referral setInvitedSelection={setInviteSelection} />;
   }
 }

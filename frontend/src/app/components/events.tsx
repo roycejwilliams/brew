@@ -1,3 +1,4 @@
+"use client";
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -6,92 +7,201 @@ import Confirmation from "./confirmation";
 import Nearby from "./nearby";
 import ScopeLocator from "./scopeLocator";
 import { ToggleState } from "../utils/toggleState";
-import { AnimatePresence } from "motion/react";
+import { AnimatePresence, motion, number } from "motion/react";
 import { PinIcon, BellIcon } from "./icons";
+import { useUserStore } from "@/stores/useUserStore";
+import { useGetCityName } from "@/hooks/useGetLocationName";
+import {
+  useInviteUserMomentView,
+  useInviteUserCircleView,
+} from "@/hooks/useInvites";
+
+type ScopeType = "here" | "nearby" | "area";
+type TimeFilter = "tonight" | "tomorrow" | "week";
 
 interface OpenModal {
   openModal: (type: "notifications") => void;
   id: string;
+  userCoordinates?: [number, number] | null;
+  setSelectedCoordinates: React.Dispatch<
+    React.SetStateAction<[number, number] | null>
+  >;
+  selectedCoordinates?: [number, number] | null;
 }
 
-export default function Events({ openModal, id }: OpenModal) {
+export default function Events({
+  openModal,
+  id,
+  userCoordinates,
+  setSelectedCoordinates,
+  selectedCoordinates,
+}: OpenModal) {
   const [openScope, setOpenScope] = useState<boolean>(false);
+  const openScopeLocator = () => ToggleState(setOpenScope);
+  const { user } = useUserStore();
 
-  const openScopeLocator = () => {
-    ToggleState(setOpenScope);
-  };
+  const { cityName } = useGetCityName(userCoordinates ?? null);
+  const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
+  const [filter, setFilter] = useState<TimeFilter>("tonight");
+
+  const { data: momentInvitesData } = useInviteUserMomentView(id);
+  const { data: circleInvitesData } = useInviteUserCircleView(
+    user?.id as string,
+  );
+  const [activeScope, setActiveScope] = useState<ScopeType>("nearby");
+
+  const pendingCount =
+    (momentInvitesData?.data?.data ?? []).filter(
+      (i: any) => i.status === "pending",
+    ).length +
+    (circleInvitesData?.data?.data ?? []).filter(
+      (i: any) => i.status === "pending",
+    ).length;
+
+  const timeLabel = {
+    tonight: "Tonight",
+    tomorrow: "Tomorrow",
+    week: "This Week",
+  }[filter];
 
   return (
-    <section className="absolute top-0 right-0 h-full overflow-y-hidden  max-w-lg  flex   shadow-lg   z-20">
-      {/* Actions */}
-      <div className=" mx-auto max-w-sm  h-full  border-l border-r border-white/10 backdrop-blur-xl  bg-linear-to-b from-black/30 to-black/10  text-white">
-        <div className="flex justify-between w-full h-fit  px-5 py-4  border-white/20">
-          <div className=" w-full">
-            <h2 className="text-lg mb-1">Pulse</h2>
-            <p className="text-xs">Here&apos;s what&apos;s next</p>
+    <section className="absolute top-0 right-0 h-full flex z-20">
+      {/* Main panel */}
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        className="relative w-80 h-full flex flex-col border-l border-white/6 text-white overflow-hidden"
+        style={{ background: "rgba(8,8,8,0.85)", backdropFilter: "blur(24px)" }}
+      >
+        {/* Top gradient */}
+        <div className="absolute top-0 left-0 right-0 h-32 bg-linear-to-b from-white/3 to-transparent pointer-events-none z-10" />
+
+        {/* Header */}
+        <div className="relative z-10 px-5 pt-6 pb-4 flex items-start justify-between border-b border-white/5">
+          <div className="space-y-0.5">
+            <p className="text-[10px] tracking-[3px] uppercase text-white/20 font-medium">
+              BR3W
+            </p>
+            <h2 className="text-base font-medium tracking-[-0.2px] text-white/90">
+              Pulse
+            </h2>
+            <p className="text-xs text-white/30 tracking-[-0.1px]">
+              Here's what's next
+            </p>
           </div>
 
-          <button
-            role="notifications"
+          <motion.button
             onClick={() => openModal("notifications")}
-            className="cursor-pointer group transform translate-y-0  hover:-translate-y-1 ease-in-out duration-500  flex flex-col items-center justify-center gap-y-1"
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.94 }}
+            className="relative flex items-center justify-center w-8 h-8 rounded-md cursor-pointer"
+            style={{
+              background: "rgba(255,255,255,0.06)",
+              border: "1px solid rgba(255,255,255,0.08)",
+            }}
           >
-            <div className="w-8 h-8 cursor-pointer   bg-white/10 transform translate-y-0 hover:-translate-y-1 ease-in-out duration-200 backdrop-blur-sm shadow-lg  flex flex-col items-center justify-center border border-white/10 rounded-md">
-              <BellIcon size={16} color="currentColor" />
-            </div>
-            <span className="text-xs opacity-0 group-hover:opacity-100 ease-in-out duration-500">
-              Signals
-            </span>
-          </button>
+            <BellIcon size={15} color="#fff" />
+            {pendingCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-[#98473E]/60" />
+            )}
+          </motion.button>
         </div>
-        {/* Location picker */}
-        <div className="w-full px-4">
-          <div className="px-4 py-1 bg-black rounded-md border border-white/20 shadow flex justify-between items-center">
-            <p className="text-xs">San Francisco</p>
-            <div className="flex gap-x-4 items-center">
-              <span className="text-xs">Tonight</span>
-              <button
-                role="filter"
-                onClick={openScopeLocator}
-                className="w-8 h-8 rounded-md cursor-pointer hover:scale-95 duration-300 ease-in-out transition-all bg-[#2b2b2b]/50 backdrop-blur-md shadow-lg border border-white/10 flex justify-center items-center"
-              >
-                <PinIcon size={16} color="currentColor" />
-              </button>
+
+        {/* Location strip */}
+        <div className="relative z-10 px-5 py-3 border-b border-white/5">
+          <motion.div
+            className="flex items-center justify-between px-3 py-2 rounded-md"
+            style={{
+              background: "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(255,255,255,0.07)",
+            }}
+          >
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <PinIcon size={12} color="#fff" className="shrink-0" />
+              <p className="text-[11px] text-white/50 tracking-[-0.1px] truncate">
+                {selectedLocation ?? cityName ?? "Locating..."}
+              </p>
             </div>
-          </div>
+            <div className="flex items-center gap-2 shrink-0 ml-2">
+              <div className="w-px h-3 bg-white/10" />
+              <span className="text-xs text-white/30 tracking-[-0.1px] whitespace-nowrap">
+                {timeLabel}
+              </span>
+              <motion.button
+                onClick={openScopeLocator}
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.94 }}
+                className="w-6 h-6 rounded-sm flex items-center justify-center cursor-pointer shrink-0"
+                style={{
+                  background: openScope
+                    ? "rgba(255,255,255,0.12)"
+                    : "rgba(255,255,255,0.06)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                }}
+              >
+                <PinIcon size={11} color="#fff" />
+              </motion.button>
+            </div>
+          </motion.div>
           <AnimatePresence mode="popLayout">
-            {openScope && <ScopeLocator onClose={openScopeLocator} />}
+            {openScope && (
+              <ScopeLocator
+                onClose={openScopeLocator}
+                activeScope={activeScope}
+                setActiveScope={setActiveScope}
+                selectedLocation={selectedLocation}
+                setSelectedLocation={setSelectedLocation}
+                userCoordinates={userCoordinates}
+                setSelectedCoordinates={setSelectedCoordinates}
+                filter={filter}
+                setFilter={setFilter}
+              />
+            )}
           </AnimatePresence>
         </div>
-        {/* Pulse */}
-        <section className="flex flex-col  gap-2  pb-32 pt-4 mt-1 px-4  border-white/20 relative w-full max-w-sm h-screen mx-auto overflow-auto customScroll">
-          <NeedsAttention id={id} />
-          <Confirmation />
-          <Nearby />
-        </section>
-      </div>
 
-      {/* Profile */}
-      <div className="w-[25%] bg-linear-to-b from-black/20 to-transparent/70 backdrop-blur-sm py-4">
-        <div className="cursor-pointer group transform  translate-y-0 hover:-translate-y-1 ease-in-out duration-500 shadow-lg px-4  flex  flex-col items-center gap-y-1">
-          <Link
-            href="/profile"
-            className="w-16 h-16 cursor-pointer bg-white/10 transform translate-y-0 hover:-translate-y-1 ease-in-out duration-200 backdrop-blur-sm shadow-lg overflow-hidden flex flex-col items-center justify-center border border-white/10 rounded-md"
+        {/* Feed */}
+        <div className="flex-1 overflow-y-auto no-scrollbar px-4 py-4 space-y-3">
+          <NeedsAttention />
+          <Confirmation />
+          <Nearby
+            filter={filter}
+            selectedCoordinates={selectedCoordinates}
+            activeScope={activeScope}
+            selectedLocation={selectedLocation}
+          />
+        </div>
+
+        {/* Bottom fade */}
+        <div className="absolute bottom-0 left-0 right-0 h-16 bg-linear-to-t from-black/60 to-transparent pointer-events-none" />
+      </motion.div>
+
+      {/* Profile column */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+        className="w-14 h-full flex flex-col items-center pt-6 gap-4"
+        style={{ background: "rgba(0,0,0,0.4)", backdropFilter: "blur(12px)" }}
+      >
+        <Link href={`/profile/${user?.id}`}>
+          <motion.div
+            whileHover={{ scale: 1.06, y: -2 }}
+            whileTap={{ scale: 0.96 }}
+            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="w-9 h-9 rounded-md overflow-hidden relative border cursor-pointer"
+            style={{ border: "1px solid rgba(255,255,255,0.1)" }}
           >
             <Image
-              src="/profile_1.png"
-              alt="test"
+              src={user?.profile_image || "/profile_4.png"}
+              alt="profile"
               fill
-              className="w-full h-full cursor-pointer"
+              className="object-cover"
             />
-          </Link>
-          <span className="text-xs opacity-0 group-hover:opacity-100 ease-in-out duration-500">
-            Profile
-          </span>
-        </div>
-      </div>
-
-      {/* Event Cards */}
+          </motion.div>
+        </Link>
+      </motion.div>
     </section>
   );
 }

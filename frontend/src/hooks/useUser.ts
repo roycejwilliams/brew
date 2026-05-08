@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/axios";
 
 //Get user by id
@@ -6,14 +6,65 @@ export const useGetUser = (id: string) => {
   return useQuery({
     queryKey: ["user", id],
     queryFn: () => api.get(`/users/${id}`),
+    enabled: !!id,
+    staleTime: Infinity,
   });
 };
 
 //Update User by id (User)
 export const useUpdateUserById = () => {
+  const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: UserProp) => {
-      return api.put(`/users/${data.id}`);
+    mutationFn: (data: {
+      id: string;
+      first_name: string;
+      last_name: string;
+      email: string;
+      description: string | null;
+      username: string;
+      location: string;
+      instagram: string;
+      twitter: string;
+      linkedin: string;
+    }) => {
+      return api.put(`/users/${data.id}`, {
+        first_name: data.first_name,
+        last_name: data.last_name,
+        email: data.email,
+        description: data.description,
+        username: data.username,
+        location: data.location,
+        instagram: data.instagram,
+        twitter: data.twitter,
+        linkedin: data.linkedin,
+      });
+    },
+
+    onMutate: async (data) => {
+      await queryClient.cancelQueries({ queryKey: ["user"] });
+
+      const previous = queryClient.getQueryData(["user"]);
+
+      queryClient.setQueryData(["user", data.id], (old: any) => ({
+        ...old,
+        data: {
+          ...old,
+          data: {
+            ...old.data.data,
+            first_name: data.first_name,
+            last_name: data.last_name,
+            email: data.email,
+            description: data.description,
+            username: data.username,
+            location: data.location,
+            instagram: data.instagram,
+            twitter: data.twitter,
+            linkedin: data.linkedin,
+          },
+        },
+      }));
+
+      return { previous };
     },
   });
 };
@@ -21,7 +72,7 @@ export const useUpdateUserById = () => {
 //Delete User by id
 export const useDeleteUserById = () => {
   return useMutation({
-    mutationFn: (data: UserProp) => {
+    mutationFn: (data: { id: string }) => {
       return api.delete(`/users/${data.id}`);
     },
   });
@@ -42,5 +93,14 @@ export const useResendOtpToUser = () => {
     mutationFn: (data: UserProp) => {
       return api.put(`/auth/resend/${data.id}`, data);
     },
+  });
+};
+
+//Get Active Connection
+export const useRetriveActiveConnection = (id: string) => {
+  return useQuery({
+    queryKey: ["active-connection", id],
+    queryFn: () => api.get(`/users/${id}/connections`),
+    enabled: !!id,
   });
 };

@@ -1,144 +1,58 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import SearchMap from "./search";
 import useDebounce from "../../hooks/useDebounce";
+import { useLocationSearch } from "@/hooks/useReverseGeolocateSearch";
 
 type MomentSelectionProp = "start" | "circle" | "people" | "nearby" | "confirm";
 
-interface VenueResult {
-  id: string;
-  name: string;
-  category: string[];
-  location: string;
-  coordinates: { lat: number; lng: number };
-}
+type MapViewport = {
+  center: [number, number];
+  zoom: number;
+  bearing?: number;
+  pitch?: number;
+};
 
 interface VenueProp {
-  viewport: [number, number];
-  selectedVenue: VenueResult | null;
-  setSelectedVenue: (selectedVenue: VenueResult | null) => void;
+  viewport: MapViewport;
+  selectedVenue: { label: string; center?: [number, number] } | null;
+  setSelectedVenue: (
+    selectedVenue: { label: string; center?: [number, number] } | null,
+  ) => void;
   selectedModal: MomentSelectionProp;
-}
-
-interface MapBoxSuggestion {
-  // it has to model the data returned to you from API
-  mapbox_id: string;
-  name: string;
-  name_preferred?: string;
-  full_address?: string;
-  place_formatted?: string;
-  poi_category?: string[];
+  setForm: React.Dispatch<React.SetStateAction<any>>;
 }
 
 export default function Venue({
-  viewport,
   selectedVenue,
   setSelectedVenue,
   selectedModal,
+  setForm,
 }: VenueProp) {
   const [query, setQuery] = useState(""); //query for search
-  const [results, setResults] = useState<VenueResult[]>([]); // search results compiled
-  const [isSearching, setIsSearching] = useState(false); //searching indicator
-  const [lng, lat] = viewport; // holds the view port center, which is lng + lat;
 
-  const sessionToken = crypto.randomUUID(); // built in method that generates secure, random version 4 UUID. Ideal for unique database keys
+  const { suggestions, isSearching } = useLocationSearch(query);
 
-  const publicAccessToken = process.env.NEXT_PUBLIC_MAPBOXGL_PUBLIC_TOKEN;
-  if (!publicAccessToken) {
-    throw new Error("Missing NEXT_PUBLIC_MAPBOXGL_PUBLIC_TOKEN");
-  }
-
-  // Search function - actual venue search API
-  const searchVenues = async (searchQuery: string) => {
-    try {
-      if (searchQuery.length < 2) {
-        // if the search query has less than 2 characters means
-        setResults([]);
-        return;
-      }
-
-      if (!publicAccessToken) {
-        return;
-      }
-
-      // using searchbox api
-      const response = await fetch(
-        `https://api.mapbox.com/search/searchbox/v1/suggest?` +
-          new URLSearchParams({
-            //built in browser API that converts an object of key-value pairs into a query string
-            //builds query string safely
-            //scales better
-            //params must have values lined up with what the API expects
-            q: searchQuery,
-            access_token: publicAccessToken,
-            session_token: sessionToken,
-            proximity: `${lng},${lat}`,
-            limit: "5",
-          }),
-      );
-
-      //if the request isn't valid.. usually used to catch param issues or overload request
-      if (!response.ok) {
-        throw new Error(`Http error! state: ${response.status}`);
-      }
-
-      //store json as a variable
-      const data = await response.json();
-      console.log("Venue Data", data);
-
-      const venueData = data.suggestions.map((v: MapBoxSuggestion) => {
-        const rawCategory = v.poi_category?.[2] || null;
-        return {
-          id: v.mapbox_id,
-          name: v.name_preferred || v.name,
-          location: v.full_address || v.place_formatted,
-          category: rawCategory
-            ? rawCategory.charAt(0).toUpperCase() + rawCategory.slice(1)
-            : null,
-        };
-      });
-
-      const filteredResults = venueData
-        .filter((venue: VenueResult) =>
-          venue.name.toLowerCase().includes(searchQuery.toLowerCase()),
-        )
-        .slice(0, 6);
-      setTimeout(() => {
-        setResults(filteredResults);
-        setIsSearching(false);
-      }, 300);
-    } catch (error) {
-      console.error("Error occured", error);
-    } finally {
-      setIsSearching(false);
-    }
-  };
-
-  const handleSearchChange = (value: string) => {
-    setQuery(value);
-    searchVenues(value);
-  };
-
-  const handleSelectVenue = (venue: VenueResult) => {
-    setSelectedVenue(venue);
+  const handleSelectVenue = (venue: {
+    label: string;
+    center?: [number, number];
+  }) => {
+    setSelectedVenue(venue as any);
     setQuery("");
-    setResults([]);
+    if (venue.center) {
+      setForm((prev: any) => ({
+        ...prev,
+        location: `(${venue.center![0]},${venue.center![1]})`,
+        location_name: venue.label,
+      }));
+    }
   };
 
   const handleChangeVenue = () => {
     setSelectedVenue(null);
     setQuery("");
-    setResults([]);
   };
-
-  //debounce logic
-  const debouncedQuery = useDebounce(query, 500);
-  useEffect(() => {
-    if (debouncedQuery.length >= 3) {
-      searchVenues(debouncedQuery);
-    }
-  }, [debouncedQuery]);
 
   // Collapsed state: venue selected
   if (selectedVenue) {
@@ -173,7 +87,7 @@ export default function Venue({
                 transition={{ delay: 0.15 }}
                 className="text-sm font-medium text-white/95 mb-1"
               >
-                {selectedVenue.name}
+                {(selectedVenue as any).label?.split(",")[0]}
               </motion.div>
               <motion.div
                 initial={{ opacity: 0 }}
@@ -181,7 +95,11 @@ export default function Venue({
                 transition={{ delay: 0.2 }}
                 className="text-xs text-white/40"
               >
-                {selectedVenue.category} · {selectedVenue.location}
+                {(selectedVenue as any).label
+                  ?.split(",")
+                  .slice(1)
+                  .join(",")
+                  .trim()}
               </motion.div>
             </div>
             <motion.button
@@ -207,14 +125,14 @@ export default function Venue({
           selectedModal={selectedModal}
           placeholder="Search for a venue"
           value={query}
-          onChange={handleSearchChange}
+          onChange={(e) => setQuery(e)}
           autoFocus={false}
         />
       </div>
 
       {/* Results list - rendered in parent */}
       <AnimatePresence mode="wait">
-        {results.length > 0 && (
+        {suggestions.length > 0 && (
           <motion.div
             key="result"
             initial={{ opacity: 0, y: 10 }}
@@ -223,9 +141,9 @@ export default function Venue({
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             className="bg-[#1c1c1c] rounded-md border border-white/8  overflow-hidden shadow-2xl shadow-black/20"
           >
-            {results.map((venue, index) => (
+            {suggestions.map((venue, index) => (
               <motion.button
-                key={venue.id}
+                key={venue.label}
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{
@@ -240,12 +158,13 @@ export default function Venue({
                 onClick={() => handleSelectVenue(venue)}
                 className="w-full px-5 py-3.5 text-left transition-colors cursor-pointer border-b border-white/5 last:border-b-0"
               >
-                <div className="font-medium text-white/90 text-sm mb-1">
-                  {venue.name}
+                <div className="font-medium text-white/90 text-sm">
+                  {venue.label}
                 </div>
                 <div className="text-xs text-white/40">
-                  {venue.category} {venue.category === null ? "" : "·"}{" "}
-                  <span className="text-white/30">{venue.location}</span>
+                  {venue.center
+                    ? `${venue.center[1].toFixed(4)}, ${venue.center[0].toFixed(4)}`
+                    : ""}
                 </div>
               </motion.button>
             ))}
@@ -253,7 +172,7 @@ export default function Venue({
         )}
 
         {/* Empty state */}
-        {query.length >= 3 && results.length === 0 && !isSearching && (
+        {query.length >= 3 && suggestions.length === 0 && !isSearching && (
           <motion.div
             key="empty"
             initial={{ opacity: 0 }}

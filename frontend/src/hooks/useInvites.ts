@@ -1,9 +1,8 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/axios";
 
-//INVITE CIRCLE FLOW
-// Owner invites a member to a circle
 export const useInviteMemberToCircle = () => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: {
       circle: CircleProp;
@@ -14,82 +13,90 @@ export const useInviteMemberToCircle = () => {
         data,
       );
     },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["invite-owner-view"] });
+    },
   });
 };
 
-// User views their circle invites
 export const useInviteUserCircleView = (member_id: string) => {
   return useQuery({
     queryKey: ["invite-circle-view", member_id],
-    queryFn: () => {
-      return api.get(`/invites/members/${member_id}`);
-    },
+    queryFn: () => api.get(`/invites/members/${member_id}`),
   });
 };
 
-//Owner views sent circle invites
 export const useOwnerViewCircleInvites = (invite_by: string) => {
   return useQuery({
     queryKey: ["invite-owner-view", invite_by],
-    queryFn: () => {
-      return api.get(`/invites/members/sent/${invite_by}`);
-    },
+    queryFn: () => api.get(`/invites/members/sent/${invite_by}`),
   });
 };
 
-////User Accept or Reject Circle Invite
 export const useInviteMemberDecision = () => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (member_decision: InviteMembersProp) => {
       return api.put(`/invites/members/${member_decision.id}`, member_decision);
     },
-  });
-};
-
-//INVITE MOMENT FLOW
-// Owner invites a member to a moment
-export const useInviteAttendeeToMoment = () => {
-  return useMutation({
-    mutationFn: (data: {
-      moment: MomentProp;
-      invite_attendee: InviteAttendeesProp;
-    }) => {
-      return api.post(
-        `/moment/${data.moment.id}/invite/${data.invite_attendee.attendee_id}`,
-        data,
-      );
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["invite-circle-view"] });
+      queryClient.invalidateQueries({ queryKey: ["invite-owner-view"] });
     },
   });
 };
 
-//User views their moment invites
+export const useInviteAttendeeToMoment = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { moment_id: string; recipient: string }) => {
+      return api.post(`/moment/${data.moment_id}/invite`, {
+        recipient: data.recipient,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["invite-owner-view-moment"] });
+      queryClient.invalidateQueries({
+        queryKey: ["moment-attendees-with-details"],
+      });
+    },
+  });
+};
+
 export const useInviteUserMomentView = (attendee_id: string) => {
   return useQuery({
     queryKey: ["invite-moment-view", attendee_id],
-    queryFn: () => {
-      return api.get(`/invites/attendees/${attendee_id}`);
-    },
+    queryFn: () => api.get(`/invites/attendees/${attendee_id}`),
   });
 };
 
-//Owner views sent moment invites
 export const useOwnerViewMomentInvites = (invite_by: string) => {
   return useQuery({
     queryKey: ["invite-owner-view-moment", invite_by],
-    queryFn: () => {
-      return api.get(`/invites/attendees/sent/${invite_by}`);
-    },
+    queryFn: () => api.get(`/invites/attendees/sent/${invite_by}`),
   });
 };
 
-////User Accept or Reject Moment Invite
 export const useInviteAttendeeDecision = () => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (attendee_decision: InviteAttendeesProp) => {
       return api.put(
         `/invites/attendees/${attendee_decision.id}`,
         attendee_decision,
       );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["invite-moment-view"] });
+      queryClient.invalidateQueries({ queryKey: ["invite-owner-view-moment"] });
+    },
+  });
+};
+
+export const useCreateReferral = () => {
+  return useMutation({
+    mutationFn: (data: { recipient: string; reason: string }) => {
+      return api.post("/referrals", data);
     },
   });
 };

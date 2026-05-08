@@ -1,36 +1,35 @@
 import { AnimatePresence, motion } from "motion/react";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import SearchMap from "./search";
-import { StaticImport } from "next/dist/shared/lib/get-img-props";
-import useDebounce from "../../hooks/useDebounce";
 import Image from "next/image";
 import CloseIcon from "./icons/CloseIcon";
+import { useGetCirclesWithMembers } from "@/hooks/useCircles";
+import { useUserStore } from "@/stores/useUserStore";
 
 type InviteSelection = "people" | "where" | "share";
 
-interface UserProp {
+interface InviteUserProp {
   id: string;
   username: string;
   phonenumber: string;
   email: string;
   isExternal?: boolean;
+  first_name?: string;
+  last_name?: string;
+  profile_image?: string;
   profile: {
     fullname: string;
-    avatarUrl: string | StaticImport;
+    avatarUrl: string;
   };
 }
 
 interface InvitePeopleProp {
-  selectedInvitedUser: UserProp[];
-  setSelectedInvitedUser: React.Dispatch<React.SetStateAction<UserProp[]>>;
+  selectedInvitedUser: InviteUserProp[];
+  setSelectedInvitedUser: React.Dispatch<
+    React.SetStateAction<InviteUserProp[]>
+  >;
   setInviteSelection: (inviteSelection: InviteSelection) => void;
 }
-
-const isEmail = (value: string) =>
-  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
-
-const isPhone = (value: string) =>
-  /^[\+]?[\d\s\-\(\)]{7,15}$/.test(value.trim());
 
 export default function InvitePeople({
   setInviteSelection,
@@ -38,155 +37,103 @@ export default function InvitePeople({
   setSelectedInvitedUser,
 }: InvitePeopleProp) {
   const [inviteQuery, setInviteQuery] = useState("");
-  const [isSearching, setIsSearching] = useState<boolean>(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [receipients, setRecipients] = useState<InviteUserProp[]>([]);
   const [showConfirmation, setShowConfirmation] = useState(false);
 
-  const mockSuggestedUsers: UserProp[] = [
-    {
-      id: "u1",
-      username: "ava_martinez",
-      phonenumber: "",
-      email: "ava@example.com",
-      profile: { fullname: "Ava Martinez", avatarUrl: "/profile-1.jpg" },
-    },
-    {
-      id: "u2",
-      username: "marcus_lee",
-      phonenumber: "",
-      email: "marcus@example.com",
-      profile: { fullname: "Marcus Lee", avatarUrl: "/profile-2.jpg" },
-    },
-    {
-      id: "u3",
-      username: "elijah_brooks",
-      phonenumber: "",
-      email: "elijah@example.com",
-      profile: { fullname: "Elijah Brooks", avatarUrl: "/profile-3.jpg" },
-    },
-    {
-      id: "u4",
-      username: "lina_park",
-      phonenumber: "",
-      email: "lina@example.com",
-      profile: { fullname: "Lina Park", avatarUrl: "/profile-4.jpg" },
-    },
-    {
-      id: "u5",
-      username: "theo_reynolds",
-      phonenumber: "",
-      email: "theo@example.com",
-      profile: { fullname: "Theo Reynolds", avatarUrl: "/profile-5.jpg" },
-    },
-  ];
+  const { user } = useUserStore();
+  const { data: getAllCircleMembers } = useGetCirclesWithMembers(
+    user?.id as string,
+  );
 
-  const mockRecipients: UserProp[] = [
-    {
-      id: "u1",
-      username: "jordan",
-      phonenumber: "3105551234",
-      email: "jordan@brew.app",
-      profile: { fullname: "Jordan Alvarez", avatarUrl: "/profile-7.jpg" },
-    },
-    {
-      id: "u2",
-      username: "maya",
-      phonenumber: "4155559876",
-      email: "maya@brew.app",
-      profile: { fullname: "Maya Chen", avatarUrl: "/profile-8.jpg" },
-    },
-    {
-      id: "u3",
-      username: "andre",
-      phonenumber: "5105554321",
-      email: "andre@brew.app",
-      profile: { fullname: "Andre Williams", avatarUrl: "/profile-9.jpg" },
-    },
-    {
-      id: "u4",
-      username: "sofia",
-      phonenumber: "3235550987",
-      email: "sofia@brew.app",
-      profile: { fullname: "Sofia Martinez", avatarUrl: "/profile-10.jpg" },
-    },
-    {
-      id: "u5",
-      username: "devon",
-      phonenumber: "2135556789",
-      email: "devon@brew.app",
-      profile: { fullname: "Devon Brooks", avatarUrl: "/profile-11.jpg" },
-    },
-  ];
-
-  const [suggestedInvites] = useState<UserProp[]>(mockSuggestedUsers);
-  const [receipients, setRecipients] = useState<UserProp[]>(mockRecipients);
+  const isEmail = (value: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+  const isPhone = (value: string) =>
+    /^[\+]?[\d\s\-\(\)]{7,15}$/.test(value.trim());
 
   const queryIsEmail = isEmail(inviteQuery);
   const queryIsPhone = isPhone(inviteQuery);
-  const isExternalEligible = queryIsEmail || queryIsPhone;
   const queryType = queryIsEmail ? "email" : queryIsPhone ? "phone" : null;
+  const isExternalEligible = queryIsEmail || queryIsPhone;
 
-  const inviteUserSearch = (query: string) => {
-    setRecipients(() => {
-      const normalizeQuery = query.trim().toLowerCase();
-      if (normalizeQuery === "") return mockRecipients;
-      return mockRecipients.filter(
-        (user) =>
-          user.username.toLowerCase().includes(normalizeQuery) ||
-          user.email.toLowerCase().includes(normalizeQuery) ||
-          user.phonenumber.toLowerCase().includes(normalizeQuery) ||
-          user.profile.fullname.toLowerCase().includes(normalizeQuery),
-      );
-    });
+  const getAllMembersInEachCircle = (): InviteUserProp[] => {
+    if (!getAllCircleMembers?.data.data) return [];
+    const seen = new Set<string>();
+    return getAllCircleMembers.data.data
+      .flatMap((circle: any) =>
+        circle.members
+          .filter((member: any) => member != null)
+          .map((member: any) => ({
+            id: member.id,
+            username: member.username,
+            phonenumber: member.phonenumber ?? "",
+            email: member.email ?? "",
+            first_name: member.first_name,
+            last_name: member.last_name,
+            profile_image: member.profile_image,
+            profile: {
+              fullname: `${member.first_name} ${member.last_name}`,
+              avatarUrl: member.profile_image ?? "",
+            },
+          })),
+      )
+      .filter((member: any) => {
+        if (seen.has(member.username)) return false;
+        if (member.id === user?.id) return false; // exclude self
+        seen.add(member.username);
+        return true;
+      });
   };
+
+  const allMembers = getAllMembersInEachCircle();
+  const suggestedInvites = allMembers;
 
   const handleInviteUserSearch = (value: string) => {
     setInviteQuery(value);
-    inviteUserSearch(value);
+    if (value.length >= 2) {
+      setIsSearching(true);
+      const results = allMembers.filter(
+        (m) =>
+          m.username?.toLowerCase().includes(value.toLowerCase()) ||
+          m.first_name?.toLowerCase().includes(value.toLowerCase()) ||
+          m.last_name?.toLowerCase().includes(value.toLowerCase()),
+      );
+      setRecipients(results);
+      setIsSearching(false);
+    } else {
+      setRecipients([]);
+    }
   };
 
-  const handleSelectedInviteUser = (user: UserProp) => {
-    setSelectedInvitedUser((prev) => {
-      const exist = prev.some((u) => u.id === user.id);
-      if (exist) return prev.filter((u) => u.id !== user.id);
-      return [...prev, user];
-    });
+  const handleSelectedInviteUser = (user: InviteUserProp) => {
+    if (selectedInvitedUser.some((u) => u.id === user.id)) return;
+    setSelectedInvitedUser((prev) => [...prev, user]);
   };
 
-  const handleRemoveInvitedUser = (user: UserProp) => {
-    setSelectedInvitedUser((prev) => prev.filter((u) => u.id !== user.id));
+  const handleRemoveInvitedUser = (user: InviteUserProp) => {
+    setSelectedInvitedUser(selectedInvitedUser.filter((u) => u.id !== user.id));
   };
 
-  // Build an external user card from the query so it's selectable
   const handleSelectExternal = () => {
-    const externalUser: UserProp = {
-      id: `ext-${inviteQuery}`,
+    const external: InviteUserProp = {
+      id: crypto.randomUUID(),
       username: inviteQuery,
       phonenumber: queryIsPhone ? inviteQuery : "",
       email: queryIsEmail ? inviteQuery : "",
       isExternal: true,
       profile: {
         fullname: inviteQuery,
-        avatarUrl: "/profile-placeholder.jpg",
+        avatarUrl: "",
       },
     };
-    setSelectedInvitedUser((prev) => {
-      const exists = prev.some((u) => u.id === externalUser.id);
-      if (exists) return prev;
-      return [...prev, externalUser];
-    });
+    setSelectedInvitedUser((prev) => [...prev, external]);
     setInviteQuery("");
-    setRecipients(mockRecipients);
+    setRecipients([]);
   };
-
-  const debounce = useDebounce(inviteQuery, 500);
-  useEffect(() => {
-    if (debounce.length >= 3) inviteUserSearch(inviteQuery);
-  }, [debounce]);
 
   const handleContinue = () => setShowConfirmation(true);
   const handleGoBack = () => setShowConfirmation(false);
 
-  // — Confirmation screen —
   if (showConfirmation) {
     return (
       <motion.section
@@ -233,15 +180,15 @@ export default function InvitePeople({
                 className="flex items-center gap-x-4 p-3 rounded-md hover:bg-white/4 transition-all duration-200"
               >
                 <div className="w-12 h-12 rounded-md overflow-hidden border border-white/8 shadow-lg relative shrink-0 flex items-center justify-center bg-white/5">
-                  {!invite.isExternal ? (
+                  {!invite.isExternal && invite.profile.avatarUrl ? (
                     <Image
                       src={invite.profile.avatarUrl}
                       alt={invite.profile.fullname}
                       fill
-                      className="w-full h-full object-cover"
+                      className="object-cover"
                     />
                   ) : (
-                    <span className="text-white/30 text-xs font-medium tracking-wide uppercase">
+                    <span className="text-white/30 text-xs font-medium">
                       {queryIsEmail ? "✉" : "#"}
                     </span>
                   )}
@@ -275,26 +222,15 @@ export default function InvitePeople({
             onClick={handleGoBack}
             whileHover={{ scale: 1.02, y: -1 }}
             whileTap={{ scale: 0.98 }}
-            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="text-sm font-medium cursor-pointer px-6 py-3.5 bg-white/5 backdrop-blur-2xl 
-                        text-white/60 border border-white/10 rounded-md 
-                        hover:bg-white/8 hover:text-white/90 hover:border-white/20
-                        transition-all duration-200"
+            className="text-sm font-medium cursor-pointer px-6 py-3.5 bg-white/5 backdrop-blur-2xl text-white/60 border border-white/10 rounded-md hover:bg-white/8 hover:text-white/90 hover:border-white/20 transition-all duration-200"
           >
             Go back
           </motion.button>
           <motion.button
-            onClick={() => {
-              console.log("Proceeding with:", selectedInvitedUser);
-              setInviteSelection("where");
-            }}
+            onClick={() => setInviteSelection("where")}
             whileHover={{ scale: 1.02, y: -1 }}
             whileTap={{ scale: 0.98 }}
-            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="text-sm font-medium cursor-pointer px-6 py-3.5 bg-white/90 backdrop-blur-2xl 
-                        text-black border border-white/20 rounded-md 
-                        hover:bg-white shadow-lg shadow-white/10
-                        transition-all duration-200"
+            className="text-sm font-medium cursor-pointer px-6 py-3.5 bg-white/90 backdrop-blur-2xl text-black border border-white/20 rounded-md hover:bg-white shadow-lg shadow-white/10 transition-all duration-200"
           >
             Confirm selection
           </motion.button>
@@ -349,7 +285,7 @@ export default function InvitePeople({
                 className="p-5 space-y-3"
               >
                 <h3 className="text-left text-white/40 text-xs font-medium uppercase tracking-wide">
-                  Suggested for this vibe
+                  From your circles
                 </h3>
                 <div
                   className={`${selectedInvitedUser.length > 0 ? "max-h-55" : "max-h-75"} overflow-y-auto`}
@@ -380,13 +316,20 @@ export default function InvitePeople({
                           onClick={() => handleSelectedInviteUser(suggest)}
                           className={`w-full p-3 text-left hover:bg-white/4 rounded-md transition-all duration-200 cursor-pointer flex items-center gap-x-4 ${selectedInvitedUser.some((u) => u.id === suggest.id) ? "hidden" : "flex"}`}
                         >
-                          <div className="w-11 h-11 rounded-md relative overflow-hidden shadow-lg shrink-0 border border-white/8">
-                            <Image
-                              src={suggest.profile.avatarUrl}
-                              alt={suggest.profile.fullname}
-                              fill
-                              className="w-full h-full object-cover"
-                            />
+                          <div className="w-11 h-11 rounded-md relative overflow-hidden shadow-lg shrink-0 border border-white/8 bg-white/5 flex items-center justify-center">
+                            {suggest.profile.avatarUrl ? (
+                              <Image
+                                src={suggest.profile.avatarUrl}
+                                alt={suggest.profile.fullname}
+                                fill
+                                className="object-cover"
+                              />
+                            ) : (
+                              <span className="text-xs text-white/40 font-medium">
+                                {suggest.first_name?.[0]}
+                                {suggest.last_name?.[0]}
+                              </span>
+                            )}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="font-medium text-white/90 text-sm truncate">
@@ -449,13 +392,20 @@ export default function InvitePeople({
                             onClick={() => handleSelectedInviteUser(recipient)}
                             className={`w-full p-3 text-left hover:bg-white/4 rounded-md transition-all duration-200 cursor-pointer flex items-center gap-x-4 ${selectedInvitedUser.some((u) => u.id === recipient.id) ? "hidden" : "flex"}`}
                           >
-                            <div className="w-11 h-11 rounded-md relative overflow-hidden shadow-lg shrink-0 border border-white/8">
-                              <Image
-                                src={recipient.profile.avatarUrl}
-                                alt={recipient.profile.fullname}
-                                fill
-                                className="w-full h-full object-cover"
-                              />
+                            <div className="w-11 h-11 rounded-md relative overflow-hidden shadow-lg shrink-0 border border-white/8 bg-white/5 flex items-center justify-center">
+                              {recipient.profile.avatarUrl ? (
+                                <Image
+                                  src={recipient.profile.avatarUrl}
+                                  alt={recipient.profile.fullname}
+                                  fill
+                                  className="object-cover"
+                                />
+                              ) : (
+                                <span className="text-xs text-white/40 font-medium">
+                                  {recipient.first_name?.[0]}
+                                  {recipient.last_name?.[0]}
+                                </span>
+                              )}
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="font-medium text-white/90 text-sm truncate">
@@ -480,7 +430,6 @@ export default function InvitePeople({
           </motion.div>
         )}
 
-        {/* Empty state */}
         {!isSearching &&
           inviteQuery.length >= 3 &&
           receipients.length === 0 && (
@@ -493,17 +442,13 @@ export default function InvitePeople({
               className="bg-[#1c1c1c] rounded-lg border border-white/8 overflow-hidden shadow-2xl shadow-black/20"
             >
               {isExternalEligible ? (
-                // Selectable external card
                 <motion.button
                   whileHover={{ x: 2 }}
                   whileTap={{ scale: 0.99 }}
                   onClick={handleSelectExternal}
                   className="w-full p-5 text-left flex items-center gap-x-4 hover:bg-white/4 transition-all duration-200 cursor-pointer"
                 >
-                  <div
-                    className="w-11 h-11 rounded-md shrink-0 flex items-center justify-center border border-white/8"
-                    style={{ background: "rgba(255,255,255,0.05)" }}
-                  >
+                  <div className="w-11 h-11 rounded-md shrink-0 flex items-center justify-center border border-white/8 bg-white/5">
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                       {queryIsEmail ? (
                         <path
@@ -534,7 +479,6 @@ export default function InvitePeople({
                   <div className="w-1.5 h-1.5 rounded-full bg-white/20 shrink-0" />
                 </motion.button>
               ) : (
-                // Generic no match
                 <div className="p-12 text-center space-y-2">
                   <p className="text-white/40 text-sm">
                     No results for "{inviteQuery}"
@@ -547,7 +491,6 @@ export default function InvitePeople({
             </motion.div>
           )}
 
-        {/* Selected users */}
         <AnimatePresence mode="wait">
           {selectedInvitedUser.length > 0 && (
             <motion.div
@@ -594,12 +537,13 @@ export default function InvitePeople({
                       <CloseIcon size={12} color="#000" />
                     </motion.button>
                     <div className="w-16 h-16 rounded-lg overflow-hidden border border-white/10 shadow-xl relative flex items-center justify-center bg-white/5">
-                      {!selectedUser.isExternal ? (
+                      {!selectedUser.isExternal &&
+                      selectedUser.profile.avatarUrl ? (
                         <Image
                           src={selectedUser.profile.avatarUrl}
                           alt={selectedUser.profile.fullname}
                           fill
-                          className="w-full h-full object-cover absolute inset-0"
+                          className="object-cover absolute inset-0"
                         />
                       ) : (
                         <svg
@@ -647,11 +591,7 @@ export default function InvitePeople({
                   onClick={handleContinue}
                   whileHover={{ scale: 1.02, y: -1 }}
                   whileTap={{ scale: 0.98 }}
-                  transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                  className="text-sm font-medium cursor-pointer px-6 py-3.5 bg-white/90 backdrop-blur-2xl 
-                            text-black border border-white/20 rounded-md 
-                            hover:bg-white shadow-lg shadow-white/10
-                            transition-all duration-200"
+                  className="text-sm font-medium cursor-pointer px-6 py-3.5 bg-white/90 backdrop-blur-2xl text-black border border-white/20 rounded-md hover:bg-white shadow-lg shadow-white/10 transition-all duration-200"
                 >
                   Continue with {selectedInvitedUser.length}{" "}
                   {selectedInvitedUser.length === 1 ? "person" : "people"}
@@ -661,7 +601,6 @@ export default function InvitePeople({
           )}
         </AnimatePresence>
 
-        {/* Loading */}
         {isSearching && (
           <motion.div
             key="loading"

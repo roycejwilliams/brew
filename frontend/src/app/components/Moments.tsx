@@ -1,39 +1,37 @@
 import { AnimatePresence, motion } from "motion/react";
 import React, { useState } from "react";
-import { CalendarDate } from "@internationalized/date";
 import Image from "next/image";
-import { StaticImport } from "next/dist/shared/lib/get-img-props";
+import { useGetAllMomentsOwnedByUser } from "@/hooks/useMoments";
+import { useInviteAttendeeToMoment } from "@/hooks/useInvites";
+import { useUserStore } from "@/stores/useUserStore";
 
 type InviteSelection = "people" | "where" | "share";
 
-interface Moment {
-  id: string;
-  circleId: string;
-  title: string;
-  date: CalendarDate;
-  time: string;
-  description: string;
-  attendees: string[];
-  image: string;
-}
-
-interface UserProp {
+interface InviteUserProp {
   id: string;
   username: string;
   phonenumber: string;
   email: string;
+  isExternal?: boolean;
   profile: {
     fullname: string;
-    avatarUrl: string | StaticImport;
+    avatarUrl: string;
   };
 }
 
 interface InviteMomentSelection {
-  selectedPeople: UserProp[];
+  selectedPeople: InviteUserProp[];
   setInviteSelection: (inviteSelection: InviteSelection) => void;
+  setInviteType: (inviteType: "moment" | "circle" | "referral") => void;
+  setInviteId: (inviteId: string) => void;
 }
 
-const formatDate = (date: CalendarDate, time: string) => {
+const formatDate = (dateStr: Date | string) => {
+  const d = new Date(dateStr);
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+
   const days = [
     "Sunday",
     "Monday",
@@ -43,29 +41,17 @@ const formatDate = (date: CalendarDate, time: string) => {
     "Friday",
     "Saturday",
   ];
-  const months = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
-  const d = new Date(date.year, date.month - 1, date.day);
-  const today = new Date();
-  const tomorrow = new Date(today);
-  tomorrow.setDate(today.getDate() + 1);
 
   let label = "";
   if (d.toDateString() === today.toDateString()) label = "Tonight";
   else if (d.toDateString() === tomorrow.toDateString()) label = "Tomorrow";
   else label = days[d.getDay()];
+
+  const time = d.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
 
   return `${label} · ${time}`;
 };
@@ -73,59 +59,72 @@ const formatDate = (date: CalendarDate, time: string) => {
 export default function Moments({
   selectedPeople,
   setInviteSelection,
+  setInviteId,
+  setInviteType,
 }: InviteMomentSelection) {
-  const mockMoments: Moment[] = [
-    {
-      id: "moment_1",
-      circleId: "circle_founders",
-      title: "Late-Night Ramen",
-      date: new CalendarDate(2026, 2, 22),
-      time: "8:30 PM",
-      description: "Nothing fancy. Just ramen and catching up.",
-      attendees: ["alex", "jordan", "mia"],
-      image: "/ramen.jpg",
-    },
-    {
-      id: "moment_2",
-      circleId: "circle_founders",
-      title: "Founder's Club – Morning Connect & Walk",
-      date: new CalendarDate(2026, 2, 23),
-      time: "7:30 AM",
-      description:
-        "Start the day moving and talking. Coffee after if it feels right.",
-      attendees: ["sam", "jordan"],
-      image: "/founder.jpg",
-    },
-    {
-      id: "moment_3",
-      circleId: "circle_creatives",
-      title: "Wine & Ideas",
-      date: new CalendarDate(2026, 2, 24),
-      time: "7:00 PM",
-      description: "A bottle or two. No agenda. Let the conversation wander.",
-      attendees: ["lena", "omar", "chris"],
-      image: "/wine.jpg",
-    },
-    {
-      id: "moment_4",
-      circleId: "circle_studio",
-      title: "Studio Drop-In",
-      date: new CalendarDate(2026, 2, 25),
-      time: "Afternoon",
-      description: "Working on things. Come by if you're nearby.",
-      attendees: ["maya"],
-      image: "/studio.jpg",
-    },
-  ];
+  const { user } = useUserStore();
+  const { data: ownedMoments, isLoading } = useGetAllMomentsOwnedByUser(
+    user?.id as string,
+  );
+  const { mutate: inviteAttendee } = useInviteAttendeeToMoment();
 
-  const [moments] = useState<Moment[]>(mockMoments);
+  const moments: MomentProp[] = ownedMoments?.data.data || [];
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const fullname = selectedPeople.map(
     (name) => name.profile.fullname.split(" ")[0],
   );
 
-  console.log(fullname);
+  const handleInvite = () => {
+    if (!selectedId) return;
+    selectedPeople.forEach((person) => {
+      inviteAttendee({ moment_id: selectedId, recipient: person.username });
+    });
+    //later feature
+    // setStep("expectation");
+    setInviteType("moment");
+    setInviteId(selectedId);
+    setInviteSelection("share");
+  };
+
+  if (isLoading)
+    return (
+      <motion.section
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="flex flex-col items-center w-full px-6 py-10 gap-y-4"
+      >
+        {[0, 1, 2].map((i) => (
+          <motion.div
+            key={i}
+            className="w-full h-16 rounded-xl bg-white/3 border border-white/5"
+            animate={{ opacity: [0.3, 0.6, 0.3] }}
+            transition={{
+              duration: 1.5,
+              repeat: Infinity,
+              delay: i * 0.2,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
+      </motion.section>
+    );
+
+  if (moments.length === 0)
+    return (
+      <motion.section
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col items-center w-full px-6 py-10 gap-y-4 text-center"
+      >
+        <p className="text-white/40 text-sm">
+          You haven't created any moments yet.
+        </p>
+        <p className="text-white/20 text-xs">
+          Create a moment first, then invite people to it.
+        </p>
+      </motion.section>
+    );
 
   return (
     <motion.section
@@ -149,7 +148,7 @@ export default function Moments({
           {selectedId
             ? `Inviting ${
                 fullname.length > 3
-                  ? `${fullname.slice(0, 3).join(", ")} , +${fullname.length - 3} more`
+                  ? `${fullname.slice(0, 3).join(", ")}, +${fullname.length - 3} more`
                   : fullname.join(", ")
               } to...`
             : "Bring them into something specific."}
@@ -159,7 +158,7 @@ export default function Moments({
       {/* Moment list */}
       <motion.div
         layout
-        className="rounded-xl border border-white/[0.07] overflow-hidden shadow-2xl shadow-black/30 divide-y divide-white/[0.07]"
+        className="w-full rounded-xl border border-white/[0.07] overflow-hidden shadow-2xl shadow-black/30 divide-y divide-white/[0.07]"
       >
         {moments.map((moment, i) => {
           const isSelected = selectedId === moment.id;
@@ -175,7 +174,9 @@ export default function Moments({
                 duration: 0.35,
                 ease: [0.16, 1, 0.3, 1],
               }}
-              onClick={() => setSelectedId(isSelected ? null : moment.id)}
+              onClick={() =>
+                setSelectedId(isSelected ? null : (moment.id as string))
+              }
               className="w-full text-left"
             >
               <motion.div
@@ -204,14 +205,18 @@ export default function Moments({
                 <motion.div
                   animate={{ scale: isSelected ? 1.04 : 1 }}
                   transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                  className="relative w-12 h-12 rounded-md overflow-hidden shrink-0 border border-white/10"
+                  className="relative w-12 h-12 rounded-md overflow-hidden shrink-0 border border-white/10 bg-white/5"
                 >
-                  <Image
-                    src={moment.image}
-                    alt={moment.title}
-                    fill
-                    className="object-cover"
-                  />
+                  {moment.image ? (
+                    <Image
+                      src={moment.image}
+                      alt={moment.moments_name}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-white/5" />
+                  )}
                 </motion.div>
 
                 {/* Text */}
@@ -224,14 +229,15 @@ export default function Moments({
                     }}
                     className="text-sm font-medium leading-snug truncate"
                   >
-                    {moment.title}
+                    {moment.moments_name}
                   </motion.p>
                   <p className="text-xs text-white/35 truncate">
                     <span className="text-white/50">
-                      {formatDate(moment.date, moment.time)}
+                      {moment.moment_start
+                        ? formatDate(moment.moment_start)
+                        : "Date TBD"}
                     </span>
-                    {" · "}
-                    {moment.description}
+                    {moment.description && ` · ${moment.description}`}
                   </p>
                 </div>
 
@@ -266,16 +272,14 @@ export default function Moments({
             className="flex flex-col items-center gap-2 pt-1 w-full"
           >
             <motion.button
-              onClick={() => setInviteSelection("share")}
-              whileTap={{ scale: selectedId ? 0.97 : 1 }}
-              disabled={!selectedId}
+              onClick={handleInvite}
+              whileTap={{ scale: 0.97 }}
               transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="w-full py-4 rounded-md  text-sm font-medium tracking-[-0.2px] transition-opacity duration-200 hover:opacity-90"
+              className="w-full py-4 rounded-md text-sm font-medium tracking-[-0.2px] transition-opacity duration-200 hover:opacity-90"
               style={{
                 background: "#ffffff",
                 color: "#111111",
-                opacity: selectedId ? 1 : 0.3,
-                cursor: selectedId ? "pointer" : "default",
+                cursor: "pointer",
               }}
             >
               Invite them.

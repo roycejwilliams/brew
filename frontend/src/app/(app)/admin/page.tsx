@@ -1,49 +1,78 @@
 "use client";
+import Loading from "@/app/components/loading";
+import {
+  useGetAllApplications,
+  useUpdateApplicationStatus,
+} from "@/hooks/useApplications";
+import { useUserStore } from "@/stores/useUserStore";
 import { motion, AnimatePresence } from "motion/react";
 import { useState } from "react";
-
-const mockApplications = [
-  {
-    id: "1",
-    first_name: "Jordan",
-    last_name: "Miles",
-    email: "jordan@miles.com",
-    phone_number: "555-000-1234",
-    work_link: "https://jordanmiles.com",
-    reason:
-      "I want to build intentional communities and connect with like-minded people.",
-    status: "pending",
-    created_at: "Apr 14, 2026",
-  },
-  {
-    id: "2",
-    first_name: "Amara",
-    last_name: "Chen",
-    email: "amara@chen.com",
-    phone_number: "555-000-5678",
-    work_link: "https://amarachen.com",
-    reason: "Been looking for something like this for years.",
-    status: "pending",
-    created_at: "Apr 13, 2026",
-  },
-  {
-    id: "3",
-    first_name: "Marcus",
-    last_name: "Webb",
-    email: "marcus@webb.io",
-    phone_number: "555-000-9012",
-    work_link: "https://marcuswebb.io",
-    reason: "Community is everything to me.",
-    status: "pending",
-    created_at: "Apr 12, 2026",
-  },
-];
 
 export default function AdminPage() {
   const [selected, setSelected] = useState<string | null>(null);
 
   const getInitials = (first: string, last: string) =>
     `${first[0]}${last[0]}`.toUpperCase();
+
+  const { isPending, data } = useGetAllApplications();
+  const { mutate: updateApp } = useUpdateApplicationStatus();
+
+  const allApps: ApplicationProp[] = data?.data.data || [];
+
+  const { user } = useUserStore();
+  console.log(user);
+
+  if (isPending) {
+    return (
+      <section className="min-h-screen bg-black text-white flex items-center justify-center">
+        <Loading />
+      </section>
+    );
+  }
+
+  console.log(user?.role);
+
+  if (user?.role !== "admin") {
+    return (
+      <section className="min-h-screen bg-black text-white flex items-center justify-center px-6">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="flex flex-col items-center gap-6 text-center max-w-sm"
+        >
+          <div
+            className="w-16 h-16 rounded-full flex items-center justify-center"
+            style={{
+              border: "1px solid rgba(255,255,255,0.07)",
+              background: "rgba(255,255,255,0.03)",
+            }}
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M12 15v-4m0-4h.01M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"
+                stroke="rgba(255,255,255,0.2)"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
+            </svg>
+          </div>
+          <div className="space-y-2">
+            <p className="text-[10px] tracking-[4px] uppercase text-white/20">
+              br3w
+            </p>
+            <h1 className="text-xl font-light tracking-tight text-white/80">
+              Access restricted.
+            </h1>
+            <p className="text-sm text-white/30 leading-relaxed">
+              This area is for BR3W administrators only. If you think this is a
+              mistake, reach out.
+            </p>
+          </div>
+        </motion.div>
+      </section>
+    );
+  }
 
   return (
     <section className="min-h-screen bg-black text-white px-10 py-12">
@@ -76,9 +105,21 @@ export default function AdminPage() {
           className="grid grid-cols-3 gap-3 mb-12"
         >
           {[
-            { label: "Pending", value: 12, sub: "awaiting review" },
-            { label: "Approved", value: 48, sub: null },
-            { label: "Rejected", value: 7, sub: null },
+            {
+              label: "Pending",
+              value: allApps.filter((a) => a.status === "pending").length,
+              sub: "awaiting review",
+            },
+            {
+              label: "Approved",
+              value: allApps.filter((a) => a.status === "accepted").length,
+              sub: "accepted user",
+            },
+            {
+              label: "Rejected",
+              value: allApps.filter((a) => a.status === "rejected").length,
+              sub: "rejected user",
+            },
           ].map((stat) => (
             <div
               key={stat.label}
@@ -112,7 +153,7 @@ export default function AdminPage() {
         </div>
 
         {/* Rows */}
-        {mockApplications.map((app, i) => (
+        {allApps.map((app, i) => (
           <motion.div
             key={app.id}
             initial={{ opacity: 0, y: 4 }}
@@ -124,12 +165,12 @@ export default function AdminPage() {
             }}
           >
             <div
-              onClick={() => setSelected(selected === app.id ? null : app.id)}
+              onClick={() => setSelected(selected === app.id! ? null : app.id!)}
               className="grid grid-cols-[2.5fr_2fr_0.8fr_1.2fr] gap-3 items-center py-4 px-3 border-b border-white/6 cursor-pointer hover:bg-white/2 transition-all rounded-sm"
             >
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-full border border-white/12 flex items-center justify-center text-xs font-medium text-white/50 shrink-0">
-                  {getInitials(app.first_name, app.last_name)}
+                  {getInitials(app.first_name!, app.last_name!)}
                 </div>
                 <div>
                   <p className="text-sm text-white/85">
@@ -147,15 +188,29 @@ export default function AdminPage() {
                 </p>
               </div>
               <div>
-                <span className="text-[10px] tracking-[1px] uppercase border border-amber-400/25 text-amber-400/60 px-2.5 py-1 rounded-full">
+                <span
+                  className={`text-[10px] tracking-[1px] uppercase border px-2.5 py-1 rounded-full ${
+                    app.status === "pending"
+                      ? "border-amber-400/25 text-amber-400/60"
+                      : app.status === "accepted"
+                        ? "border-green-400/25 text-green-400/60"
+                        : "border-red-400/25 text-red-400/60"
+                  }`}
+                >
                   {app.status}
                 </span>
               </div>
               <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-                <button className="text-[11px] tracking-wide px-3.5 py-1.5 border border-white/12 rounded-md text-white/45 hover:text-white/90 hover:border-white/30 transition-all cursor-pointer">
+                <button
+                  onClick={() => updateApp({ id: app.id!, status: "accepted" })}
+                  className="text-[11px] tracking-wide px-3.5 py-1.5 border border-white/12 rounded-md text-white/45 hover:text-white/90 hover:border-white/30 transition-all cursor-pointer"
+                >
                   Approve
                 </button>
-                <button className="text-[11px] tracking-wide px-3.5 py-1.5 border border-red-500/20 rounded-md text-red-400/45 hover:text-red-400/90 hover:border-red-500/40 transition-all cursor-pointer">
+                <button
+                  onClick={() => updateApp({ id: app.id!, status: "rejected" })}
+                  className="text-[11px] tracking-wide px-3.5 py-1.5 border border-red-500/20 rounded-md text-red-400/45 hover:text-red-400/90 hover:border-red-500/40 transition-all cursor-pointer"
+                >
                   Reject
                 </button>
               </div>

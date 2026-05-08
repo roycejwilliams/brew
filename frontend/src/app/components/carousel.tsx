@@ -1,53 +1,28 @@
 import React, { useEffect, useState } from "react";
-import useEmblaCarousel from "embla-carousel-react";
 import Card from "./card";
-import {
-  PrevButton,
-  NextButton,
-  usePrevNextButtons,
-} from "./CarouselArrowButtons";
-import carouselStyle from "@/app/(app)/profile/carousel.module.css";
-import { WheelGesturesPlugin } from "embla-carousel-wheel-gestures";
 import { motion, AnimatePresence } from "motion/react";
+import { useCarousel } from "@/hooks/useCarousel";
+import carouselStyle from "@/app/(app)/profile/carousel.module.css";
+import { PrevButton, NextButton } from "./CarouselArrowButtons";
 
 interface CarouselProps {
   width: number;
   height: number;
-  id: string;
+  moments: MomentProp[];
 }
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
-export default function Carousel({ width, height, id }: CarouselProps) {
-  const [emblaRef, emblaApi] = useEmblaCarousel(
-    { loop: false, skipSnaps: true },
-    [WheelGesturesPlugin()],
-  );
-  const [lastSlide, setIsLastSlide] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [totalSlides, setTotalSlides] = useState(0);
-
+export default function Carousel({ width, height, moments }: CarouselProps) {
   const {
+    emblaRef,
+    lastSlide,
+    currentIndex,
     prevBtnDisabled,
     nextBtnDisabled,
     onPrevButtonClick,
     onNextButtonClick,
-  } = usePrevNextButtons(emblaApi);
-
-  useEffect(() => {
-    if (!emblaApi) return;
-
-    const onSelect = () => {
-      const index = emblaApi.selectedScrollSnap();
-      const last = emblaApi.scrollSnapList().length - 1;
-      setCurrentIndex(index);
-      setTotalSlides(last + 1);
-      setIsLastSlide(index === last);
-    };
-
-    emblaApi.on("select", onSelect);
-    onSelect();
-  }, [emblaApi]);
+  } = useCarousel(moments);
 
   return (
     <section className="w-full relative h-full">
@@ -89,7 +64,7 @@ export default function Carousel({ width, height, id }: CarouselProps) {
       <section className={carouselStyle.embla}>
         <div className={carouselStyle.embla__viewport} ref={emblaRef}>
           <div className={carouselStyle.embla__container}>
-            {Array.from({ length: 1 }).map((_, i) => (
+            {moments?.map((moment, i) => (
               <motion.div
                 className={carouselStyle.embla__slide}
                 key={i}
@@ -97,7 +72,12 @@ export default function Carousel({ width, height, id }: CarouselProps) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.35, delay: i * 0.05, ease: EASE }}
               >
-                <Card id={id} width={width} height={height} />
+                <Card
+                  momentId={moment.id as string}
+                  moment={moment}
+                  width={width}
+                  height={height}
+                />
               </motion.div>
             ))}
           </div>
@@ -106,9 +86,9 @@ export default function Carousel({ width, height, id }: CarouselProps) {
         {/* Controls */}
         <div className="relative flex items-center justify-between mt-4 px-1  ">
           {/* Dot indicators */}
-          {totalSlides > 1 && (
+          {moments?.length > 1 && (
             <div className="flex items-center gap-1.5  mx-auto">
-              {Array.from({ length: totalSlides }).map((_, i) => (
+              {Array.from({ length: moments?.length }).map((_, i) => (
                 <motion.div
                   key={i}
                   animate={{

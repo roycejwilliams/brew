@@ -7,6 +7,12 @@ interface ApplicationProp {
   work_link: string;
   reason: string;
   status?: "pending" | "accepted" | "rejected";
+  created_at?: string;
+}
+
+interface Point {
+  latitude: number;
+  longitude: number;
 }
 
 interface UserProp {
@@ -25,6 +31,10 @@ interface UserProp {
   otp_attempts: number;
   locked: boolean;
   role: string;
+  location: string;
+  instagram: string;
+  twitter: string;
+  linkedin: string;
 }
 
 interface CircleProp {
@@ -34,6 +44,13 @@ interface CircleProp {
   circle_image: string;
   created_at: Date;
   updated_at: Date;
+  members: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    username: string;
+    profile_image: string;
+  }[];
 }
 
 interface MomentProp {
@@ -44,18 +61,18 @@ interface MomentProp {
   moments_name: string;
   created_at: Date;
   update_at: Date;
-  moment_starts: Date;
-  moment_ends: Date;
+  moment_start: string | Date;
+  moment_end: string | Date;
   description: string;
   location: Point;
+  location_name: string;
   cap_attendance: number;
   close_moment: boolean;
   visibility_type?: "nearby" | "circle" | "people";
-}
-
-interface Point {
-  latitude: number;
-  longitude: number;
+  principles: string[];
+  expectations: string[];
+  vibes: string[];
+  faqs: { question: string; answer: string }[];
 }
 
 interface InviteMembersProp {

@@ -1,6 +1,9 @@
 import React from "react";
 import { motion } from "motion/react";
 import Vibe from "./vibe";
+import { openEventCard } from "@/stores/store";
+import { useGetMomentAttendees } from "@/hooks/useMoments";
+import { useGenerateContent } from "@/hooks/useGenerateContent";
 
 interface ActiveEventProp {
   activeEvent: "prequel" | "live" | "end";
@@ -23,6 +26,12 @@ const statusColor = {
 function AttendeeDetails({ activeEvent }: ActiveEventProp) {
   const isLive = activeEvent === "live";
 
+  const eventCard = openEventCard((state) => state.moment);
+
+  const { data } = useGetMomentAttendees(eventCard?.id as string);
+  const attendees = data?.data.data || [];
+  const vibes = eventCard?.vibes || [];
+
   return (
     <section className="w-full py-16 flex flex-col items-center gap-10">
       {/* Spots left — prequel only */}
@@ -42,7 +51,12 @@ function AttendeeDetails({ activeEvent }: ActiveEventProp) {
             style={{ background: "rgba(255,200,100,0.8)" }}
           />
           <p className="text-white/50 text-sm tracking-[-0.1px]">
-            Only <span className="text-white font-semibold text-sm">12</span>{" "}
+            Only{" "}
+            <span className="text-white font-semibold text-sm">
+              <span className="text-white font-semibold text-sm">
+                {(eventCard?.cap_attendance || 0) - attendees.length}
+              </span>
+            </span>{" "}
             spots remaining
           </p>
         </motion.div>
@@ -61,7 +75,7 @@ function AttendeeDetails({ activeEvent }: ActiveEventProp) {
             className="text-white font-semibold leading-none"
             style={{ fontSize: 80, letterSpacing: "-4px" }}
           >
-            200
+            {attendees.length}
           </span>
 
           {/* Avatar stack + label */}
@@ -132,7 +146,7 @@ function AttendeeDetails({ activeEvent }: ActiveEventProp) {
         transition={{ duration: 0.4, delay: 0.18, ease: EASE }}
         className="mx-auto"
       >
-        <Vibe />
+        <Vibe vibes={vibes || []} />{" "}
       </motion.div>
     </section>
   );

@@ -1,28 +1,38 @@
 "use client";
 import React from "react";
 import Image from "next/image";
-import { useState } from "react";
 import { motion } from "motion/react";
 import Attended from "./attended";
 import Hosted from "./hosted";
-import Suggested from "./suggested";
+import {
+  useGetAllMomentsOwnedByUser,
+  useGetAllMomentsUserIsAttendee,
+} from "@/hooks/useMoments";
+// import Suggested from "./suggested";
 
 interface FeedProp {
-  id: string;
+  completed: number;
+  userId: string;
 }
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
-function Feed({ id }: FeedProp) {
-  const [completedProfile, setCompletedProfile] = useState<boolean>(false);
+function Feed({ completed, userId }: FeedProp) {
+  const { data: member } = useGetAllMomentsUserIsAttendee(userId);
+  const { data: owner } = useGetAllMomentsOwnedByUser(userId);
+
+  const attended = member?.data.data || [];
+  const hosted = owner?.data.data || [];
+  const hasMoments = attended.length > 0 || hosted.length > 0;
 
   return (
     <section className="w-full mt-8 h-full flex justify-center items-center">
-      {completedProfile ? (
+      {/* Showing feed based on profile completion */}
+      {completed === 100 && hasMoments ? (
         <div className="flex flex-col gap-y-16 w-full">
-          <Attended id={id} />
-          <Hosted id={id} />
-          <Suggested id={id} />
+          <Attended id={userId} />
+          <Hosted id={userId} />
+          {/* <Suggested id={userId} /> */}
         </div>
       ) : (
         <div className="relative flex flex-col gap-y-10 h-full justify-center items-center mt-8 w-full">

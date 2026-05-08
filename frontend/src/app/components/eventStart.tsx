@@ -3,10 +3,12 @@ import { motion } from "motion/react";
 import AttendeeDetails from "./attendeeDetails";
 import Transfer from "./Transfer";
 import EventFAQ from "./eventFAQ";
-import { Map } from "./map";
+import { openEventCard } from "@/stores/store";
+import MapBoxGl from "./mapBoxGl";
 
 interface EventStartProp {
   activeModal: "prequel";
+  eventCard: MomentProp | null;
 }
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -17,38 +19,10 @@ const stagger = (i: number, base = 0) => ({
   transition: { duration: 0.4, delay: base + i * 0.06, ease: EASE },
 });
 
-export default function EventStart({ activeModal }: EventStartProp) {
-  const details = [
-    {
-      principle:
-        "Craft nights rooted in effortless style, intentional design, and shared human connection.",
-      expect:
-        "A thoughtfully curated environment designed to feel exclusive without being pretentious.",
-    },
-    {
-      principle:
-        "Create intimate atmospheres where conversations feel natural, elevated, and unforgettable.",
-      expect:
-        "Signature cocktails, refined bites, and ambient music that complement—not overpower—the night.",
-    },
-    {
-      principle:
-        "Blend curated soundscapes, modern aesthetics, and subtle storytelling to shape the mood.",
-      expect:
-        "Moments crafted for authenticity, reflection, and connection with people who value creativity.",
-    },
-    {
-      principle:
-        "Host invite-only gatherings in venues chosen for their warmth, texture, and creative character.",
-      expect: "A space where elegance, taste, and community quietly intersect.",
-    },
-    {
-      principle:
-        "Prioritize genuine presence — fewer people, deeper moments, richer energy.",
-      expect:
-        "A gathering that feels intentional, intimate, and grounded in meaningful energy.",
-    },
-  ];
+export default function EventStart({ activeModal, eventCard }: EventStartProp) {
+  const principles = eventCard?.principles || [];
+  const expectations = eventCard?.expectations || [];
+  const faqs = eventCard?.faqs || [];
 
   return (
     <div className="flex flex-col gap-y-24">
@@ -70,21 +44,23 @@ export default function EventStart({ activeModal }: EventStartProp) {
           </motion.div>
 
           <ul className="flex flex-col gap-4">
-            {details.map((d, i) => (
-              <motion.li
-                key={i}
-                {...stagger(i, 0.05)}
-                className="flex gap-3 items-start"
-              >
-                <span
-                  className="mt-1.25 shrink-0 w-1 h-1 rounded-full"
-                  style={{ background: "rgba(255,255,255,0.2)" }}
-                />
-                <p className="text-white/50 text-sm tracking-[-0.1px] leading-relaxed">
-                  {d.principle}
-                </p>
-              </motion.li>
-            ))}
+            <ul className="flex flex-col gap-4">
+              {principles?.map((principle, i) => (
+                <motion.li
+                  key={i}
+                  {...stagger(i, 0.05)}
+                  className="flex gap-3 items-start"
+                >
+                  <span
+                    className="mt-1.25 shrink-0 w-1 h-1 rounded-full"
+                    style={{ background: "rgba(255,255,255,0.2)" }}
+                  />
+                  <p className="text-white/50 text-sm tracking-[-0.1px] leading-relaxed">
+                    {principle}
+                  </p>
+                </motion.li>
+              ))}
+            </ul>
           </ul>
         </div>
 
@@ -104,21 +80,23 @@ export default function EventStart({ activeModal }: EventStartProp) {
           </motion.div>
 
           <ul className="flex flex-col gap-4">
-            {details.map((d, i) => (
-              <motion.li
-                key={i}
-                {...stagger(i, 0.12)}
-                className="flex gap-3 items-start"
-              >
-                <span
-                  className="mt-1.25 shrink-0 w-1 h-1 rounded-full"
-                  style={{ background: "rgba(255,255,255,0.2)" }}
-                />
-                <p className="text-white/50 text-sm tracking-[-0.1px] leading-relaxed">
-                  {d.expect}
-                </p>
-              </motion.li>
-            ))}
+            <ul className="flex flex-col gap-4">
+              {expectations?.map((expectation, i) => (
+                <motion.li
+                  key={i}
+                  {...stagger(i, 0.12)}
+                  className="flex gap-3 items-start"
+                >
+                  <span
+                    className="mt-1.25 shrink-0 w-1 h-1 rounded-full"
+                    style={{ background: "rgba(255,255,255,0.2)" }}
+                  />
+                  <p className="text-white/50 text-sm tracking-[-0.1px] leading-relaxed">
+                    {expectation}
+                  </p>
+                </motion.li>
+              ))}
+            </ul>
           </ul>
         </div>
       </section>
@@ -150,13 +128,15 @@ export default function EventStart({ activeModal }: EventStartProp) {
           opacity: 0.88,
         }}
       >
-        <Map
-          center={[-122.42285, 37.73393]}
+        <MapBoxGl
+          center={[
+            (eventCard?.location as any)?.x ?? -122.4194,
+            (eventCard?.location as any)?.y ?? 37.7749,
+          ]}
           zoom={11}
-          dragPan={false}
           scrollZoom={false}
-          doubleClickZoom={false}
-          touchZoomRotate={false}
+          dragPan={false}
+          dragRotate={false}
         />
 
         {/* Map vignette */}
@@ -183,7 +163,35 @@ export default function EventStart({ activeModal }: EventStartProp) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.2, ease: EASE }}
       >
-        <Transfer />
+        {/* QR Code & Transfer */}
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.2, ease: EASE }}
+        >
+          {eventCard?.close_moment ? (
+            <div
+              className="flex flex-col items-center justify-center py-10 gap-3"
+              style={{
+                border: "1px solid rgba(255,255,255,0.07)",
+                borderRadius: 16,
+              }}
+            >
+              <div
+                className="w-1.5 h-1.5 rounded-full"
+                style={{ background: "#761F17", opacity: 0.7 }}
+              />
+              <p className="text-white/40 text-sm tracking-[-0.1px]">
+                This moment is closed.
+              </p>
+              <p className="text-white/20 text-xs">
+                No new check-ins or transfers.
+              </p>
+            </div>
+          ) : (
+            <Transfer />
+          )}
+        </motion.div>{" "}
       </motion.div>
 
       {/* FAQ */}
@@ -192,7 +200,7 @@ export default function EventStart({ activeModal }: EventStartProp) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.25, ease: EASE }}
       >
-        <EventFAQ />
+        <EventFAQ faqs={faqs || []} />{" "}
       </motion.div>
     </div>
   );

@@ -1,41 +1,24 @@
-import React, { ChangeEvent, useEffect, useState } from "react";
-import { CalendarDate } from "@internationalized/date";
+import React, { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ChevronLeftIcon } from "./icons";
 import Circle from "./circle";
-import MomentConfirmation from "./momentConfirmation";
+import MomentDetails from "./MomentDetails";
 import People from "./people";
 import Start from "./start";
 import AroundYou from "./aroundYou";
 
-type CreateMomentStage = "start" | "circle" | "people" | "nearby" | "confirm";
-type WhoSelectionProp = "circle" | "people" | "nearby" | null;
-
-interface Moment {
-  id: string;
-  circleId: string; // relationship
-  title: string;
-  date: CalendarDate;
-  time: string;
-  attendees: string[];
-  image: string;
-}
-
-interface Circle {
-  id: string;
-  name: string;
-  members: string[]; // or User[]
-  image: string;
-}
+type VisibilityType = "circle" | "people" | "nearby" | null;
+type MomentStage = "start" | "circle" | "people" | "nearby" | "confirm";
 
 interface MomentProp {
   onGoBack?: () => void;
   onContinue?: () => void;
-  selectedModal: CreateMomentStage;
-  setSelectedModal: (selectedModal: CreateMomentStage) => void;
+  selectedModal: MomentStage;
+  setSelectedModal: (selectedModal: MomentStage) => void;
+  onClose: () => void;
 }
 
-const startMomentProp: CreateMomentStage[] = [
+const startMomentProp: MomentStage[] = [
   "start",
   "circle",
   "people",
@@ -47,30 +30,61 @@ export default function StartMoment({
   onGoBack,
   selectedModal,
   setSelectedModal,
+  onClose,
 }: MomentProp) {
-  //Allows you to select the circle of friends you want invited
-  const [selectedCircleProp, setSelectedCircleProp] = useState<Circle | null>(
-    null,
-  );
+  const [form, setForm] = useState({
+    moments_name: "",
+    location: "",
+    location_name: "",
+    moment_start: "",
+    visibility_type: "",
+    moment_end: "",
+    description: "",
+    close_moment: "",
+    cap_attendance: "", // add this
+    principles: [],
+    expectations: [],
+    vibes: [],
+    faqs: [] as { question: string; answer: string }[],
+  });
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const [selectedCircleProp, setSelectedCircleProp] =
+    useState<CircleProp | null>(null);
   const [activeCircle, setActiveCircle] = useState<number>(0);
-  const [selectedWho, setSelectedWho] = useState<WhoSelectionProp | null>();
+  const [selectedVisibility, setSelectVisibility] =
+    useState<VisibilityType | null>();
   const [showSubmit, setShowSubmit] = useState<boolean>(false);
+  const [reveal, setReveal] = useState<boolean>(false);
 
-  //Points to the Active Circle ultimately for selection
-  const [createMoment, setCreateMoment] = useState<string>("");
-
-  //Capturing Event input
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setCreateMoment(e.target.value);
-  };
-
-  const onSelectionWho = (value: WhoSelectionProp) => {
-    setSelectedWho(value);
+  const changeVisibilityType = (value: VisibilityType) => {
+    setSelectVisibility(value);
     setShowSubmit(true);
+    setForm((prev) => ({ ...prev, visibility_type: value ?? "" }));
   };
 
+  const handleDateTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    setForm((prev) => {
+      const date =
+        name === "moment_start_date" ? value : prev.moment_start.split("T")[0];
+      const time =
+        name === "moment_start_time"
+          ? value
+          : prev.moment_start.split("T")[1] || "00:00";
+      return { ...prev, moment_start: `${date}T${time}` };
+    });
+  };
+
+  const [selectedUsers, setSelectedUsers] = useState<UserProp[]>([]);
   //function to cycleback
-  const goBack = (steps: CreateMomentStage[]) => {
+  const goBack = (steps: MomentStage[]) => {
     if (!steps.includes(selectedModal)) return;
 
     const position = steps.indexOf(selectedModal);
@@ -88,7 +102,7 @@ export default function StartMoment({
     }
 
     if (selectedModal === "confirm") {
-      setSelectedModal(selectedWho!);
+      setSelectedModal(selectedVisibility ?? "start");
       return;
     }
 
@@ -97,28 +111,12 @@ export default function StartMoment({
       selectedModal === "nearby" ||
       selectedModal === "people"
     ) {
-      setSelectedWho(null);
       setSelectedModal("start");
       return;
     }
 
     setSelectedModal(previousStep);
   };
-
-  const circles: Circle[] = [
-    {
-      id: "first-pour",
-      name: "First Pour",
-      members: ["Ava", "Marcus", "Elijah"],
-      image: "/ex1.jpg",
-    },
-    {
-      id: "hermes",
-      name: "Hermes Rooftop Session",
-      members: ["Lina", "Theo", "Isabella"],
-      image: "/ex2.jpg",
-    },
-  ];
 
   return (
     <>
@@ -159,12 +157,15 @@ export default function StartMoment({
         <AnimatePresence mode="wait">
           {selectedModal === "start" && (
             <Start
-              createMoment={createMoment}
-              onChange={handleInputChange}
-              onWho={onSelectionWho}
-              selectedWho={selectedWho!}
+              form={form}
+              handleTimeChange={handleDateTimeChange}
+              handleChange={handleChange}
+              setSelectedVisibility={changeVisibilityType}
+              selectedVisbility={selectedVisibility as VisibilityType}
               setSelectedModal={setSelectedModal}
               showSubmit={showSubmit}
+              reveal={reveal}
+              setReveal={setReveal}
             />
           )}
 
@@ -175,14 +176,16 @@ export default function StartMoment({
               setActiveCircle={setActiveCircle}
               setSelectedCircleProp={setSelectedCircleProp}
               setSelectedModal={setSelectedModal}
+              setForm={setForm}
             />
           )}
 
           {selectedModal === "people" && (
             <People
               selectedModal={selectedModal}
-              circles={circles}
               setSelectedModal={setSelectedModal}
+              selectedUsers={selectedUsers}
+              setSelectedUsers={setSelectedUsers}
             />
           )}
           {selectedModal === "nearby" && (
@@ -194,7 +197,14 @@ export default function StartMoment({
           )}
 
           {selectedModal === "confirm" && (
-            <MomentConfirmation selectedModal={selectedModal} />
+            <MomentDetails
+              selectedModal={selectedModal}
+              setForm={setForm}
+              handleChange={handleChange}
+              form={form}
+              onClose={onClose}
+              selectedUsers={selectedUsers}
+            />
           )}
         </AnimatePresence>
       </motion.section>

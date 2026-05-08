@@ -1,34 +1,39 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ToggleState } from "../utils/toggleState";
 import { useOutsideAlerter } from "../utils/outsideAlert";
 import { ScrollLock } from "../utils/scrollLock";
 import { motion, AnimatePresence, Variants } from "motion/react";
 import { CloseIcon, MenuIcon, PinIcon, SpinnerIcon } from "./icons";
+import { openEventCard } from "@/stores/store";
+import { useUserStore } from "@/stores/useUserStore";
+import Grainient from "./Grainient";
 
 export default function Nav() {
   const path = usePathname();
-
+  const router = useRouter();
   const ref = useRef<HTMLDivElement>(null);
 
   const [openNav, setOpenNav] = useState<boolean>(false);
   useOutsideAlerter(ref, () => setOpenNav(false));
 
-  // close on path change
   useEffect(() => {
     setOpenNav(false);
   }, [path]);
 
   ScrollLock(openNav);
 
+  const { clearUser } = useUserStore();
+
+  const handleLogout = () => {
+    clearUser();
+    router.push("/");
+  };
+
   const containerVariants: Variants = {
-    hidden: {
-      opacity: 0,
-      y: -10,
-      scale: 0.95,
-    },
+    hidden: { opacity: 0, y: -10, scale: 0.95 },
     visible: {
       opacity: 1,
       y: 0,
@@ -44,27 +49,21 @@ export default function Nav() {
       opacity: 0,
       y: -10,
       scale: 0.95,
-      transition: {
-        duration: 0.2,
-        ease: [0.16, 1, 0.3, 1],
-      },
+      transition: { duration: 0.2, ease: [0.16, 1, 0.3, 1] },
     },
   };
 
   const itemVariants: Variants = {
-    hidden: {
-      opacity: 0,
-      x: -8,
-    },
+    hidden: { opacity: 0, x: -8 },
     visible: {
       opacity: 1,
       x: 0,
-      transition: {
-        duration: 0.25,
-        ease: [0.16, 1, 0.3, 1],
-      },
+      transition: { duration: 0.25, ease: [0.16, 1, 0.3, 1] },
     },
   };
+
+  const isEventOpen = openEventCard((state) => state.isEventOpen);
+  if (isEventOpen) return null;
 
   return (
     <>
@@ -77,21 +76,15 @@ export default function Nav() {
       >
         {/* Main Nav Container */}
         <motion.div
-          whileHover={{
-            backgroundColor: "rgba(43, 43, 43, 0.4)",
-          }}
           whileTap={{ scale: 0.98 }}
-          transition={{
-            duration: 0.2,
-            ease: [0.16, 1, 0.3, 1],
-          }}
-          className="flex items-center shadow-sm px-4 py-2.5 backdrop-blur-2xl bg-[#2b2b2b]/25 rounded-md border border-white/10 gap-x-4"
+          transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          className="flex items-center px-4 py-2.5 rounded-md gap-x-4"
         >
           <Link
             href="/pulse"
-            className="text-2xl font-normal text-white/90 hover:text-white transition-colors tracking-wider duration-200"
+            className="text-lg tracking-[4px] font-medium text-white/90 transition-colors duration-200"
           >
-            brew
+            BR3W
           </Link>
 
           <motion.button
@@ -102,7 +95,7 @@ export default function Nav() {
             }}
             whileTap={{ scale: 0.95 }}
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="w-8 h-8 bg-black/20 shadow-lg cursor-pointer flex justify-center items-center rounded-md border border-white/10"
+            className="w-8 h-8 shadow-lg cursor-pointer flex justify-center items-center rounded-md border border-white/20"
           >
             <AnimatePresence mode="wait">
               {openNav ? (
@@ -140,7 +133,7 @@ export default function Nav() {
               initial="hidden"
               animate="visible"
               exit="exit"
-              className="absolute z-50 top-0 left-0 mt-18 border border-white/10 backdrop-blur-3xl bg-[#1c1c1c]/95 rounded-lg w-64 shadow-sm shadow-black/40 overflow-hidden"
+              className="absolute z-50 top-0 left-0 mt-18 rounded-lg w-64 overflow-hidden"
             >
               <div className="p-4">
                 <motion.ul className="flex flex-col gap-y-1">
@@ -201,6 +194,37 @@ export default function Nav() {
                       )}
                     </Link>
                   </motion.li>
+
+                  {/* Divider */}
+                  <motion.li variants={itemVariants}>
+                    <div className="h-px bg-white/5 my-1" />
+                  </motion.li>
+
+                  {/* Logout */}
+                  <motion.li variants={itemVariants}>
+                    <motion.button
+                      onClick={handleLogout}
+                      whileHover={{ x: 2 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="w-full flex items-center gap-x-4 px-4 py-3.5 rounded-md text-white/30 hover:text-red-400/70 hover:bg-red-500/5 transition-all duration-200 cursor-pointer"
+                    >
+                      <svg
+                        width="22"
+                        height="22"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" y1="12" x2="9" y2="12" />
+                      </svg>
+                      <span className="text-sm font-medium">Sign out</span>
+                    </motion.button>
+                  </motion.li>
                 </motion.ul>
               </div>
 
@@ -227,12 +251,35 @@ export default function Nav() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{
-              duration: 0.3,
-              ease: [0.16, 1, 0.3, 1],
-            }}
-            className="fixed w-full h-screen bg-linear-to-br from-black/80 via-[#19535F]/20 to-[#98473E]/20 inset-0 backdrop-blur-xl z-30 overflow-hidden"
-          />
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed w-full h-screen opacity-0 bg-[#1a1a1a]/60 inset-0 backdrop-blur-xl z-30 overflow-hidden"
+          >
+            <Grainient
+              color1="#000000"
+              color2="#ff6b35"
+              color3="#000000"
+              timeSpeed={0.25}
+              colorBalance={-0.01}
+              warpStrength={1}
+              warpFrequency={5}
+              warpSpeed={0.7}
+              warpAmplitude={50}
+              blendAngle={0}
+              blendSoftness={0.06}
+              rotationAmount={500}
+              noiseScale={2}
+              grainAmount={0.04}
+              grainScale={2}
+              grainAnimated={false}
+              contrast={1.65}
+              gamma={1}
+              saturation={1}
+              centerX={0}
+              centerY={0}
+              zoom={0.9}
+              className="opacity-50 backdrop-blur-3xl"
+            />
+          </motion.div>
         )}
       </AnimatePresence>
     </>

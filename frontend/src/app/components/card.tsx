@@ -1,31 +1,28 @@
 import { openEventCard } from "@/stores/store";
 import { motion } from "motion/react";
 import React from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 interface CardProp {
   width: number;
   height: number;
-  id: string;
+  moment: MomentProp;
+  momentId: string | null;
 }
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
-// Mock data — replace with real data from store/props
-const MOCK = {
-  title: "Late Night Session",
-  location: "Sliver Lake, Los Angeles, California",
-  date: "Fri, Jan 24",
-  time: "10 PM",
-  attendees: 12,
-  tag: "Moment",
-};
-
-function Card({ width, height, id }: CardProp) {
-  const openCard = openEventCard((state) => state.openEvent);
+function Card({ width, height, moment }: CardProp) {
+  const openMoment = openEventCard((state) => state.openEvent);
+  const router = useRouter();
 
   return (
     <motion.div
-      onClick={() => openCard(id)}
+      onClick={() => {
+        openMoment(moment);
+        router.push(`/moments/${moment.id}`, { scroll: false });
+      }}
       whileHover="hover"
       whileTap={{ scale: 0.98 }}
       initial="rest"
@@ -38,25 +35,15 @@ function Card({ width, height, id }: CardProp) {
       }}
       transition={{ duration: 0.3, ease: EASE }}
     >
-      {/* Background — image placeholder with gradient */}
+      {/* Background */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(160deg, rgba(40,38,36,1) 0%, rgba(20,18,16,1) 100%)",
+            "linear-gradient(180deg, transparent 30%, rgba(0,0,0,0.7) 60%, rgba(0,0,0,0.95) 100%)",
         }}
       />
-
-      {/* Subtle texture grain */}
-      <motion.div
-        className="absolute inset-0 opacity-20"
-        style={{
-          backgroundImage:
-            "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E\")",
-          backgroundSize: "120px",
-        }}
-      />
-
+      {/* Grain */}
       {/* Inner glow on hover */}
       <motion.div
         className="absolute inset-0 rounded-xl pointer-events-none"
@@ -65,80 +52,113 @@ function Card({ width, height, id }: CardProp) {
           hover: { opacity: 1 },
         }}
         transition={{ duration: 0.3, ease: EASE }}
-        style={{
-          boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)",
-        }}
+        style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}
       />
-
-      {/* Bottom scrim */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(180deg, transparent 30%, rgba(0,0,0,0.75) 100%)",
-        }}
-      />
+      {/* Scrim */}
+      {/* Background */}
+      {moment?.image ? (
+        <>
+          <Image
+            src={moment.image}
+            alt=""
+            fill
+            className="object-cover"
+            style={{ filter: "brightness(0.4) saturate(1.2)" }}
+            priority
+          />
+        </>
+      ) : (
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(160deg, rgba(40,38,36,1) 0%, rgba(20,18,16,1) 100%)",
+          }}
+        />
+      )}
 
       {/* Border */}
       <div
         className="absolute inset-0 rounded-xl pointer-events-none"
-        style={{ border: "1px solid rgba(255,255,255,0.08)" }}
+        style={{ border: "1px solid rgba(255,255,255,0.07)" }}
       />
-
-      {/* Top — tag */}
-      <div className="relative z-10 p-4 flex items-start justify-between">
+      {/* Top — tag + attendees */}
+      <div className="relative z-10 p-3.5 flex items-start justify-between">
         <span
-          className="text-white/50 text-[10px] font-medium tracking-widest uppercase px-2.5 py-1 rounded-full"
+          className="text-[9px] font-medium tracking-[2px] uppercase text-white/45 px-2.5 py-1 rounded-full"
           style={{
-            background: "rgba(255,255,255,0.07)",
+            background: "rgba(255,255,255,0.06)",
             border: "1px solid rgba(255,255,255,0.08)",
           }}
         >
-          {MOCK.tag}
+          {moment?.visibility_type || "Moment"}
         </span>
 
-        {/* Attendee count */}
         <div className="flex items-center gap-1.5">
           <div className="flex">
             {[0, 1, 2].map((i) => (
               <div
                 key={i}
-                className="w-4 h-4 rounded-full"
+                className="w-4.5 h-4.5 rounded-full"
                 style={{
-                  background: `rgba(255,255,255,${0.12 + i * 0.06})`,
+                  background: `rgba(255,255,255,${0.12 + i * 0.04})`,
                   border: "1.5px solid rgba(17,17,17,0.8)",
-                  marginLeft: i === 0 ? 0 : -5,
+                  marginLeft: i === 0 ? 0 : -6,
                 }}
               />
             ))}
           </div>
-          <span className="text-white/35 text-[10px] tracking-[-0.1px]">
-            {MOCK.attendees}
+          <span className="text-white/30 text-[14px]">
+            {moment?.cap_attendance || 0}
           </span>
         </div>
       </div>
-
       {/* Bottom — event info */}
-      <div className="relative z-10 p-4 flex flex-col gap-1">
+      <div className="relative z-10 px-3.5 pb-4 flex flex-col gap-2.5">
+        {/* Divider */}
+        <div
+          className="w-full h-px"
+          style={{ background: "rgba(255,255,255,0.08)" }}
+        />
+
+        {/* Title */}
         <h3
-          className="text-white font-semibold leading-tight"
-          style={{ fontSize: 15, letterSpacing: "-0.3px" }}
+          className="text-white/90 font-medium leading-tight truncate"
+          style={{ fontSize: 17, letterSpacing: "-0.4px" }}
         >
-          {MOCK.title}
+          {moment?.moments_name}
         </h3>
 
-        <div className="flex flex-col items-start justify-between mt-1">
-          <span className="text-white/25 text-[10px] tracking-[-0.1px]">
-            {MOCK.date} · {MOCK.time}
-          </span>
-          <div className="flex items-center gap-1 text-white/35 text-xs tracking-[-0.1px]">
-            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-              <path
-                d="M5 1C3.34 1 2 2.34 2 4c0 2.25 3 5 3 5s3-2.75 3-5c0-1.66-1.34-3-3-3zm0 4a1 1 0 110-2 1 1 0 010 2z"
-                fill="rgba(255,255,255,0.35)"
-              />
-            </svg>
-            {MOCK.location}
+        {/* Meta */}
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center gap-1.5">
+            <span className="text-[9px] tracking-[2px] uppercase text-white/20 w-9">
+              When
+            </span>
+            <div className="w-1 h-1 rounded-full bg-white/15" />
+            <span className="text-[11px] text-white/50">
+              {moment?.moment_start
+                ? new Date(moment.moment_start).toLocaleDateString("en-US", {
+                    weekday: "short",
+                    month: "short",
+                    day: "numeric",
+                  }) +
+                  " · " +
+                  new Date(moment.moment_start).toLocaleTimeString("en-US", {
+                    hour: "numeric",
+                    hour12: true,
+                  })
+                : "Date TBD"}
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[9px] tracking-[2px] uppercase text-white/20 w-9">
+              Where
+            </span>
+            <div className="w-1 h-1 rounded-full bg-white/15" />
+            <span className="text-[11px] text-white/50">
+              {moment?.location_name || "Location TBD"}
+            </span>
           </div>
         </div>
       </div>
