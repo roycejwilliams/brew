@@ -10,10 +10,10 @@ interface Phase {
   setState: (state: "form" | "verify" | "success") => void;
 }
 
-const EASE = [0.25, 0.1, 0.25, 1] as const;
+const EASE = [0.16, 1, 0.3, 1] as const;
 
 const inputClass =
-  "flex-1 px-4 py-3 bg-white/5 rounded-md border border-white/10 focus:outline-none focus:border-white/25 text-white/90 placeholder:text-white/20 text-sm transition-all duration-200";
+  "flex-1 px-4 py-3 bg-white/5 rounded-md border border-white/10 focus:outline-none focus:border-white/25 text-white/90 placeholder:text-white/20 text-sm transition-colors duration-150";
 
 function LoginForm({ state, setState }: Phase) {
   const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
@@ -97,11 +97,10 @@ function LoginForm({ state, setState }: Phase) {
       {state === "form" && (
         <motion.div
           key="form"
-          layout
-          initial={{ opacity: 0, y: 6 }}
+          initial={{ opacity: 0, y: 5 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -6 }}
-          transition={{ duration: 0.25, ease: EASE }}
+          exit={{ opacity: 0, y: -5 }}
+          transition={{ duration: 0.18, ease: EASE }}
           className="flex flex-col gap-5"
         >
           <div className="flex flex-col gap-2">
@@ -121,9 +120,8 @@ function LoginForm({ state, setState }: Phase) {
               <motion.button
                 onClick={handleSubmit}
                 disabled={isPending || !email}
-                whileHover={{ scale: 1.04 }}
                 whileTap={{ scale: 0.96 }}
-                className="w-11 h-11 shrink-0 flex justify-center items-center border border-white/10 bg-white/5 cursor-pointer rounded-md hover:bg-white/10 hover:border-white/20 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                className="w-11 h-11 shrink-0 flex justify-center items-center border border-white/10 bg-white/5 cursor-pointer rounded-md hover:bg-white/10 hover:border-white/20 transition-colors duration-150 disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 {isPending ? (
                   <div className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white/60 animate-spin" />
@@ -143,11 +141,10 @@ function LoginForm({ state, setState }: Phase) {
       {state === "verify" && (
         <motion.div
           key="verify"
-          layout
-          initial={{ opacity: 0, y: 6 }}
+          initial={{ opacity: 0, y: 5 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -6 }}
-          transition={{ duration: 0.25, ease: EASE }}
+          exit={{ opacity: 0, y: -5 }}
+          transition={{ duration: 0.18, ease: EASE }}
           className="flex flex-col gap-5"
         >
           <div className="flex flex-col gap-3">
@@ -159,7 +156,6 @@ function LoginForm({ state, setState }: Phase) {
                 We sent a 6-digit code to your email.
               </p>
             </div>
-
             <div className="flex gap-2">
               {otp.map((digit, i) => (
                 <input
@@ -174,7 +170,7 @@ function LoginForm({ state, setState }: Phase) {
                   onChange={(e) => handleOtpChange(e.target.value, i)}
                   onKeyDown={(e) => handleKeyDown(e, i)}
                   onPaste={handlePaste}
-                  className="flex-1 h-12 text-base font-medium text-white text-center rounded-md focus:outline-none transition-all duration-200"
+                  className="flex-1 h-12 text-base font-medium text-white text-center rounded-md focus:outline-none transition-colors duration-150"
                   style={{
                     background: digit
                       ? "rgba(255,255,255,0.08)"
@@ -192,10 +188,10 @@ function LoginForm({ state, setState }: Phase) {
           <AnimatePresence>
             {otpError && (
               <motion.div
-                initial={{ opacity: 0, y: 4 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.2, ease: EASE }}
+                transition={{ duration: 0.15 }}
                 className="px-4 py-3 rounded-md text-center"
                 style={{
                   background: "rgba(239,68,68,0.05)",
@@ -209,17 +205,16 @@ function LoginForm({ state, setState }: Phase) {
             )}
           </AnimatePresence>
 
-          <motion.button
+          <button
             onClick={() => {
               setState("form");
               setOtp(Array(6).fill(""));
               setOtpError(false);
             }}
-            whileTap={{ scale: 0.98 }}
-            className="text-[11px] text-white/20 text-center hover:text-white/40 transition-colors cursor-pointer tracking-[-0.1px]"
+            className="text-[11px] text-white/20 text-center hover:text-white/40 transition-colors duration-150 cursor-pointer tracking-[-0.1px]"
           >
             Wrong email? Go back
-          </motion.button>
+          </button>
 
           <p className="text-[11px] text-center text-white/20 tracking-[-0.1px]">
             By continuing, you agree to BR3W&apos;s Terms & Privacy Policy.
@@ -230,11 +225,10 @@ function LoginForm({ state, setState }: Phase) {
       {state === "success" && (
         <motion.div
           key="success"
-          layout
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.4, ease: EASE }}
+          transition={{ duration: 0.2 }}
           className="flex flex-col items-center gap-4 py-6"
         >
           <div

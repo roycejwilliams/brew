@@ -44,11 +44,11 @@ function LoginState({ active, setActive }: ActiveStateProp) {
 
   return (
     <>
-      {/* Private Beta — fixed top-left */}
+      {/* Private Beta */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, delay: 0.3 }}
+        transition={{ duration: 0.3, delay: 0.2 }}
         className="fixed top-6 left-6 flex items-center gap-2 z-50"
       >
         <div
@@ -62,19 +62,19 @@ function LoginState({ active, setActive }: ActiveStateProp) {
 
       {/* Card */}
       <motion.div
-        layout
-        className="flex flex-col items-center w-full max-w-sm px-6 gap-6"
+        layout="position"
+        className="flex flex-col items-center w-full max-w-sm px-6 gap-5"
         style={{
           background: "rgba(8,8,8,0.85)",
           border: "1px solid rgba(255,255,255,0.07)",
           borderRadius: 16,
-          padding: "40px 28px",
-          backdropFilter: "blur(24px)",
+          padding: "36px 24px",
+          backdropFilter: "blur(20px)",
           position: "relative",
           overflow: "hidden",
         }}
       >
-        {/* Top shimmer line */}
+        {/* Top shimmer */}
         <div
           className="absolute top-0 left-0 right-0"
           style={{
@@ -85,40 +85,34 @@ function LoginState({ active, setActive }: ActiveStateProp) {
         />
 
         {/* Logo */}
+        <div
+          className="flex items-center justify-center w-10 h-10 rounded-full"
+          style={{
+            background: "rgba(255,255,255,0.06)",
+            border: "1px solid rgba(255,255,255,0.1)",
+          }}
+        >
+          <Asterisk size={18} color="rgba(255,255,255,0.7)" />
+        </div>
 
         {/* Header — hide on success */}
         <AnimatePresence mode="wait">
           {!isSuccess && (
-            <>
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.4, ease: EASE }}
-                className="flex items-center justify-center w-10 h-10 rounded-full"
-                style={{
-                  background: "rgba(255,255,255,0.06)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                }}
-              >
-                <Asterisk size={18} color="rgba(255,255,255,0.7)" />
-              </motion.div>
-
-              <motion.div
-                key={`${active}-${loginPhase}`}
-                initial={{ opacity: 0, y: 4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -4 }}
-                transition={{ duration: 0.25, ease: EASE }}
-                className="flex flex-col items-center gap-1 text-center"
-              >
-                <h2 className="text-white text-lg font-medium tracking-[-0.3px]">
-                  {headerText.title}
-                </h2>
-                <p className="text-white/30 text-sm tracking-[-0.1px]">
-                  {headerText.sub}
-                </p>
-              </motion.div>
-            </>
+            <motion.div
+              key={`${active}-${loginPhase}`}
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.18, ease: EASE }}
+              className="flex flex-col items-center gap-1 text-center"
+            >
+              <h2 className="text-white text-lg font-medium tracking-[-0.3px]">
+                {headerText.title}
+              </h2>
+              <p className="text-white/30 text-sm tracking-[-0.1px]">
+                {headerText.sub}
+              </p>
+            </motion.div>
           )}
         </AnimatePresence>
 
@@ -126,21 +120,20 @@ function LoginState({ active, setActive }: ActiveStateProp) {
         <AnimatePresence>
           {!isSuccess && (
             <motion.div
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.25, ease: EASE }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
               className="relative w-full flex items-center p-1 rounded-md"
               style={{
                 background: "rgba(255,255,255,0.04)",
                 border: "1px solid rgba(255,255,255,0.08)",
               }}
             >
-              {/* Sliding indicator */}
               <motion.div
                 className="absolute top-1 bottom-1 rounded-sm"
                 animate={{ left: active === "login" ? 4 : "50%" }}
-                transition={{ duration: 0.25, ease: EASE }}
+                transition={{ duration: 0.2, ease: EASE }}
                 style={{
                   width: "calc(50% - 4px)",
                   background: "rgba(255,255,255,0.08)",
@@ -149,7 +142,7 @@ function LoginState({ active, setActive }: ActiveStateProp) {
               />
               <button
                 onClick={() => setActive("login")}
-                className={`relative z-10 flex-1 text-center cursor-pointer py-1.5 text-xs font-medium transition-colors duration-200 ${
+                className={`relative z-10 flex-1 text-center cursor-pointer py-1.5 text-xs font-medium transition-colors duration-150 ${
                   active === "login" ? "text-white" : "text-white/35"
                 }`}
               >
@@ -157,7 +150,7 @@ function LoginState({ active, setActive }: ActiveStateProp) {
               </button>
               <button
                 onClick={() => setActive("invite")}
-                className={`relative z-10 flex-1 text-center cursor-pointer py-1.5 text-xs font-medium transition-colors duration-200 ${
+                className={`relative z-10 flex-1 text-center cursor-pointer py-1.5 text-xs font-medium transition-colors duration-150 ${
                   active === "invite" ? "text-white" : "text-white/35"
                 }`}
               >
@@ -180,7 +173,7 @@ function LoginState({ active, setActive }: ActiveStateProp) {
         )}
 
         {/* Form */}
-        <motion.div layout className="w-full">
+        <div className="w-full">
           <AnimatePresence mode="popLayout">
             {active === "login" ? (
               <LoginForm
@@ -197,7 +190,7 @@ function LoginState({ active, setActive }: ActiveStateProp) {
               />
             )}
           </AnimatePresence>
-        </motion.div>
+        </div>
       </motion.div>
     </>
   );
