@@ -213,7 +213,8 @@ function InviteForm({ state, setState }: Phase) {
               Application submitted.
             </h3>
             <p className="text-white/30 text-sm tracking-[-0.1px] max-w-[240px] leading-relaxed">
-              We review every application personally. You'll hear from us soon.
+              We review every application personally. You&apos;ll hear from us
+              soon.
             </p>
           </motion.div>
 
@@ -238,10 +239,10 @@ function InviteForm({ state, setState }: Phase) {
             className="flex flex-col items-center gap-1"
           >
             <p className="text-[10px] tracking-[3px] uppercase text-white/20 font-medium">
-              What's next
+              What&apos;s next
             </p>
             <p className="text-[11px] text-white/25 text-center tracking-[-0.1px]">
-              We'll reach out via email within 48 hours.
+              We&apos;ll reach out via email within 48 hours.
             </p>
           </motion.div>
         </motion.div>

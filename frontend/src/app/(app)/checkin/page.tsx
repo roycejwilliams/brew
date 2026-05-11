@@ -1,13 +1,17 @@
 "use client";
 
+import { Suspense } from "react";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { useCheckInAttendee } from "@/hooks/useMoments";
 
+const EASE = [0.16, 1, 0.3, 1] as const;
+
 type Status = "loading" | "success" | "already_checked_in" | "error";
 
-export default function CheckInPage() {
+// ── Inner component — uses useSearchParams ──
+function CheckInContent() {
   const searchParams = useSearchParams();
   const moment_id = searchParams.get("moment");
   const attendee_id = searchParams.get("attendee");
@@ -37,8 +41,9 @@ export default function CheckInPage() {
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [moment_id, attendee_id]);
+
   return (
-    <div className="min-h-screen flex items-center justify-center px-6">
+    <div className="min-h-screen bg-[#0c0c0c] flex items-center justify-center px-6">
       <AnimatePresence mode="wait">
         {status === "loading" && (
           <motion.div
@@ -46,14 +51,15 @@ export default function CheckInPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.3, ease: EASE }}
             className="flex flex-col items-center gap-4"
           >
             <motion.div
               animate={{ rotate: 360 }}
               transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-              className="w-8 h-8 border-2 border-white/10 border-t-white/60 rounded-full"
+              className="w-7 h-7 border-2 border-white/10 border-t-white/50 rounded-full"
             />
-            <p className="text-white/40 text-sm tracking-[-0.1px]">
+            <p className="text-white/30 text-sm tracking-[-0.1px]">
               Checking you in...
             </p>
           </motion.div>
@@ -65,7 +71,7 @@ export default function CheckInPage() {
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.4, ease: EASE }}
             className="flex flex-col items-center gap-6 text-center"
           >
             <motion.div
@@ -79,19 +85,19 @@ export default function CheckInPage() {
               }}
               className="w-16 h-16 rounded-full flex items-center justify-center"
               style={{
-                border: "1px solid rgba(74,222,128,0.3)",
-                background: "rgba(74,222,128,0.08)",
+                border: "1px solid rgba(74,222,128,0.28)",
+                background: "rgba(74,222,128,0.07)",
               }}
             >
               <motion.svg
-                width="24"
-                height="24"
+                width="22"
+                height="22"
                 viewBox="0 0 24 24"
                 fill="none"
               >
                 <motion.path
                   d="M5 13l4 4L19 7"
-                  stroke="rgba(74,222,128,0.8)"
+                  stroke="rgba(74,222,128,0.85)"
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -101,14 +107,19 @@ export default function CheckInPage() {
                 />
               </motion.svg>
             </motion.div>
-            <div className="space-y-1">
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25, duration: 0.35, ease: EASE }}
+              className="flex flex-col gap-1"
+            >
               <h1 className="text-white text-xl font-medium tracking-[-0.3px]">
                 You&apos;re in.
               </h1>
-              <p className="text-white/40 text-sm tracking-[-0.1px]">
+              <p className="text-white/35 text-sm tracking-[-0.1px]">
                 Welcome to the moment.
               </p>
-            </div>
+            </motion.div>
           </motion.div>
         )}
 
@@ -118,17 +129,17 @@ export default function CheckInPage() {
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.4, ease: EASE }}
             className="flex flex-col items-center gap-6 text-center"
           >
             <div
               className="w-16 h-16 rounded-full flex items-center justify-center"
               style={{
-                border: "1px solid rgba(255,255,255,0.1)",
-                background: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(255,255,255,0.08)",
+                background: "rgba(255,255,255,0.04)",
               }}
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
                 <path
                   d="M5 13l4 4L19 7"
                   stroke="rgba(255,255,255,0.3)"
@@ -138,11 +149,11 @@ export default function CheckInPage() {
                 />
               </svg>
             </div>
-            <div className="space-y-1">
+            <div className="flex flex-col gap-1">
               <h1 className="text-white text-xl font-medium tracking-[-0.3px]">
                 Already checked in.
               </h1>
-              <p className="text-white/40 text-sm tracking-[-0.1px]">
+              <p className="text-white/35 text-sm tracking-[-0.1px]">
                 You&apos;re already part of this moment.
               </p>
             </div>
@@ -155,17 +166,17 @@ export default function CheckInPage() {
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.4, ease: EASE }}
             className="flex flex-col items-center gap-6 text-center"
           >
             <div
               className="w-16 h-16 rounded-full flex items-center justify-center"
               style={{
-                border: "1px solid rgba(220,80,80,0.3)",
-                background: "rgba(220,80,80,0.08)",
+                border: "1px solid rgba(220,80,80,0.25)",
+                background: "rgba(220,80,80,0.07)",
               }}
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
                 <path
                   d="M18 6L6 18M6 6l12 12"
                   stroke="rgba(220,80,80,0.8)"
@@ -174,11 +185,11 @@ export default function CheckInPage() {
                 />
               </svg>
             </div>
-            <div className="space-y-1">
+            <div className="flex flex-col gap-1">
               <h1 className="text-white text-xl font-medium tracking-[-0.3px]">
                 Invalid ticket.
               </h1>
-              <p className="text-white/40 text-sm tracking-[-0.1px]">
+              <p className="text-white/35 text-sm tracking-[-0.1px]">
                 This QR code isn&apos;t valid for this moment.
               </p>
             </div>
@@ -186,5 +197,20 @@ export default function CheckInPage() {
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+// ── Page export — Suspense boundary required for useSearchParams ──
+export default function CheckInPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#0c0c0c] flex items-center justify-center">
+          <div className="w-7 h-7 rounded-full border-2 border-white/10 border-t-white/50 animate-spin" />
+        </div>
+      }
+    >
+      <CheckInContent />
+    </Suspense>
   );
 }
