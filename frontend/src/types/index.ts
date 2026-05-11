@@ -15,6 +15,7 @@ interface Point {
   longitude: number;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface UserProp {
   id?: string;
   first_name: string;
@@ -53,6 +54,7 @@ interface CircleProp {
   }[];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface MomentProp {
   id?: string;
   creator_id: string;
@@ -75,6 +77,7 @@ interface MomentProp {
   faqs: { question: string; answer: string }[];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface InviteMembersProp {
   id?: string;
   member_id: string;
@@ -85,6 +88,7 @@ interface InviteMembersProp {
   status?: "pending" | "accepted" | "rejected";
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface InviteAttendeesProp {
   id?: string;
   attendee_id: string;

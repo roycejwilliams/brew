@@ -16,6 +16,7 @@ export default function Moment() {
     if (data?.data.data) {
       openEvent(data.data.data);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
   if (!moment) return null;

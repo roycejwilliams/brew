@@ -4,7 +4,7 @@ import { usePrevNextButtons } from "@/app/components/CarouselArrowButtons";
 import { useEffect, useState } from "react";
 
 // hooks/useCarousel.ts
-export const useCarousel = (moments: MomentProp[]) => {
+export const useCarousel = (_moments: MomentProp[]) => {
   const [emblaRef, emblaApi] = useEmblaCarousel(
     { loop: false, skipSnaps: true },
     [WheelGesturesPlugin()],

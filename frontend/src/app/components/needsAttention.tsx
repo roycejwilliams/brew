@@ -13,6 +13,7 @@ export default function NeedsAttention() {
   const { mutate: decideInvite } = useInviteAttendeeDecision();
 
   const invites = invitesData?.data?.data ?? [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const pending = invites.filter((i: any) => i.status === "pending");
 
   if (pending.length === 0) return null;
@@ -36,6 +37,7 @@ export default function NeedsAttention() {
       </div>
 
       <div className="space-y-2">
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         {pending.map((invite: any, i: number) => (
           <motion.div
             key={invite.id}

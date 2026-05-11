@@ -1,6 +1,5 @@
 "use client";
 import { openEventCard } from "@/stores/store";
-import React, { useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import EventStart from "./eventStart";
 import EventLive from "./eventLive";
@@ -23,8 +22,6 @@ function EventCard() {
     router.back();
   };
   const { activeEvent } = useTimingStates({ eventCard });
-
-  console.log("Event status:", activeEvent);
 
   return (
     <main

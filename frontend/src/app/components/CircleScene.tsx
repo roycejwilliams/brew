@@ -1,5 +1,5 @@
 "use client";
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React, { useLayoutEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import { AnimatePresence, motion } from "motion/react";
@@ -28,7 +28,7 @@ export default function CircleScene({
   markerIndex,
 }: CircleSceneProp) {
   const markerRadius = 250;
-  const windowSize = selectedCircle?.members.length!;
+  const windowSize = selectedCircle?.members.length ?? 0;
   const cadence = Math.round(360 / windowSize); // angular spacing between pins
   const markerOffset = 25; // tweak until it matches Figma
 
@@ -48,8 +48,8 @@ export default function CircleScene({
   ): MarkerGeometry => {
     //Place the markers in their relative positions
     const relativePosition =
-      (i - rotationValue + selectedCircle?.members.length!) %
-      selectedCircle?.members.length!;
+      (i - rotationValue + (selectedCircle?.members.length ?? 0)) %
+      (selectedCircle?.members.length ?? 0);
 
     //Calculations for degree
     const angleDeg = relativePosition * cadence - 90;
@@ -62,9 +62,9 @@ export default function CircleScene({
     const y = cy + Math.sin(angleRad) * (markerRadius + markerOffset) - 24;
 
     const visible =
-      (i - rotationValue + selectedCircle?.members.length!) %
-        selectedCircle?.members.length! <
-      windowSize!;
+      (i - rotationValue + (selectedCircle?.members.length ?? 0)) %
+        (selectedCircle?.members.length ?? 0) <
+      windowSize;
 
     return {
       x,
@@ -100,6 +100,7 @@ export default function CircleScene({
         opacity: g.visible ? (i === (markerIndex ?? 0) ? 1 : 0.6) : 0,
       });
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCircle?.id]); // fires when you switch circles
 
   //GSAP - FIXED: Removed inline style conflicts, proper DOM selection
@@ -115,13 +116,13 @@ export default function CircleScene({
 
       console.log("prev:", prev, "next:", next, "target:", target);
 
-      const halfLength = selectedCircle?.members.length! / 2;
+      const halfLength = (selectedCircle?.members.length ?? 0) / 2;
       // shortest path between prev and next accounting for wrap
       let diff = (next ?? 0) - (prev ?? 0);
 
       // normalize diff to always take the shortest path
-      if (diff > halfLength) diff -= selectedCircle?.members.length!;
-      if (diff < -halfLength) diff += selectedCircle?.members.length!;
+      if (diff > halfLength) diff -= (selectedCircle?.members.length ?? 0);
+      if (diff < -halfLength) diff += (selectedCircle?.members.length ?? 0);
 
       // offset from current interpolated value instead of jumping to absolute index
 

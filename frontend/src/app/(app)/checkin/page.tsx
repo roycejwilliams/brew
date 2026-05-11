@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
-import api from "@/lib/axios";
 import { useCheckInAttendee } from "@/hooks/useMoments";
 
 type Status = "loading" | "success" | "already_checked_in" | "error";
@@ -26,8 +25,8 @@ export default function CheckInPage() {
       { moment_id, attendee_id },
       {
         onSuccess: () => setStatus("success"),
-        onError: (err: any) => {
-          const message = err?.response?.data ?? "";
+        onError: (err: Error) => {
+          const message = err?.message ?? "";
           if (message === "Attendee already checked in.") {
             setStatus("already_checked_in");
           } else {
@@ -36,6 +35,7 @@ export default function CheckInPage() {
         },
       },
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [moment_id, attendee_id]);
   return (
     <div className="min-h-screen flex items-center justify-center px-6">
@@ -103,7 +103,7 @@ export default function CheckInPage() {
             </motion.div>
             <div className="space-y-1">
               <h1 className="text-white text-xl font-medium tracking-[-0.3px]">
-                You're in.
+                You&apos;re in.
               </h1>
               <p className="text-white/40 text-sm tracking-[-0.1px]">
                 Welcome to the moment.
@@ -143,7 +143,7 @@ export default function CheckInPage() {
                 Already checked in.
               </h1>
               <p className="text-white/40 text-sm tracking-[-0.1px]">
-                You're already part of this moment.
+                You&apos;re already part of this moment.
               </p>
             </div>
           </motion.div>
@@ -179,7 +179,7 @@ export default function CheckInPage() {
                 Invalid ticket.
               </h1>
               <p className="text-white/40 text-sm tracking-[-0.1px]">
-                This QR code isn't valid for this moment.
+                This QR code isn&apos;t valid for this moment.
               </p>
             </div>
           </motion.div>

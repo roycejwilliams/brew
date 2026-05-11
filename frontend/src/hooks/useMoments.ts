@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/axios";
-import { openEventCard } from "@/stores/store";
+
 
 export const useCreateMoment = () => {
   const queryClient = useQueryClient();
@@ -59,7 +59,7 @@ export const useUpdateMomentsByOwner = () => {
         visibility_type: moment.visibility_type,
       });
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["moment-owner"] });
     },
   });

@@ -18,13 +18,13 @@ export default function AppLayout({
 
   const { user, hasHydrated } = useUserStore();
 
-  if (!hasHydrated) return null;
-  if (!user?.id) {
-    router.replace("/");
-    return null;
-  }
+  useEffect(() => {
+    if (!hasHydrated) return;
 
-  if (!user?.id) return null;
+    if (!user) {
+      router.replace("/");
+    }
+  }, [user, hasHydrated]);
 
   return (
     <main>

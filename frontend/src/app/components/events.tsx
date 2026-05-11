@@ -7,7 +7,7 @@ import Confirmation from "./confirmation";
 import Nearby from "./nearby";
 import ScopeLocator from "./scopeLocator";
 import { ToggleState } from "../utils/toggleState";
-import { AnimatePresence, motion, number } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { PinIcon, BellIcon } from "./icons";
 import { useUserStore } from "@/stores/useUserStore";
 import { useGetCityName } from "@/hooks/useGetLocationName";
@@ -52,10 +52,10 @@ export default function Events({
 
   const pendingCount =
     (momentInvitesData?.data?.data ?? []).filter(
-      (i: any) => i.status === "pending",
+      (i: { status: string }) => i.status === "pending",
     ).length +
     (circleInvitesData?.data?.data ?? []).filter(
-      (i: any) => i.status === "pending",
+      (i: { status: string }) => i.status === "pending",
     ).length;
 
   const timeLabel = {
@@ -87,7 +87,7 @@ export default function Events({
               Pulse
             </h2>
             <p className="text-xs text-white/30 tracking-[-0.1px]">
-              Here's what's next
+              Here&apos;s what&apos;s next
             </p>
           </div>
 

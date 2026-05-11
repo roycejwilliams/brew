@@ -12,6 +12,7 @@ interface CircleSelection {
   selectedCircle: CircleProp | null;
   setSelectedCircleProp: (selectedCircle: CircleProp | null) => void;
   setSelectedModal: (selectedModal: "confirm") => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setForm: React.Dispatch<React.SetStateAction<any>>;
 }
 
@@ -99,6 +100,7 @@ export default function Circle({
           onSelect={() => {
             const circle = getAllCircles?.data.data[activeIndex];
             setSelectedCircleProp(circle);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             setForm((prev: any) => ({ ...prev, circle_id: circle?.id }));
           }}
           onContinue={() => setSelectedModal("confirm")}

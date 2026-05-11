@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "motion/react";
-import React, { useState } from "react";
+import React from "react";
 import { RadioGroup } from "@heroui/radio";
 import CustomRadio from "./customRadio";
 
@@ -12,7 +12,7 @@ interface MomentProp {
     moment_start: string;
     moment_end: string;
     cap_attendance: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
   handleChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,

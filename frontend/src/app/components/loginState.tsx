@@ -44,59 +44,85 @@ function LoginState({ active, setActive }: ActiveStateProp) {
 
   return (
     <>
-      {/* Private Beta Indicator */}
+      {/* Private Beta — fixed top-left */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.3 }}
-        className="fixed top-6 left-6 flex items-center gap-2"
+        className="fixed top-6 left-6 flex items-center gap-2 z-50"
       >
         <div
           className="w-1.5 h-1.5 rounded-full"
           style={{ background: "rgba(255,255,255,0.3)" }}
         />
-        <span className="text-[10px] tracking-[3px] uppercase text-white/75">
+        <span className="text-[10px] tracking-[3px] uppercase text-white/25 font-medium">
           Private Beta
         </span>
       </motion.div>
+
+      {/* Card */}
       <motion.div
         layout
-        className="flex flex-col items-center w-full max-w-md px-6 py-24 gap-6"
+        className="flex flex-col items-center w-full max-w-sm px-6 gap-6"
+        style={{
+          background: "rgba(8,8,8,0.85)",
+          border: "1px solid rgba(255,255,255,0.07)",
+          borderRadius: 16,
+          padding: "40px 28px",
+          backdropFilter: "blur(24px)",
+          position: "relative",
+          overflow: "hidden",
+        }}
       >
-        {/* Logo — never remounts */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.4, ease: EASE }}
-          className="flex items-center justify-center w-10 h-10 rounded-full"
+        {/* Top shimmer line */}
+        <div
+          className="absolute top-0 left-0 right-0"
           style={{
-            background: "rgba(255,255,255,0.06)",
-            border: "1px solid rgba(255,255,255,0.1)",
+            height: 1,
+            background:
+              "linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)",
           }}
-        >
-          <Asterisk size={18} color="rgba(255,255,255,0.7)" />
-        </motion.div>
+        />
 
-        {/* Header — animates text on state change */}
+        {/* Logo */}
+
+        {/* Header — hide on success */}
         <AnimatePresence mode="wait">
-          <motion.div
-            key={`${active}-${loginPhase}`}
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: 0.25, ease: EASE }}
-            className="flex flex-col items-center gap-1 text-center"
-          >
-            <h2 className="text-white text-lg font-medium tracking-[-0.3px]">
-              {headerText.title}
-            </h2>
-            <p className="text-white/30 text-sm tracking-[-0.1px]">
-              {headerText.sub}
-            </p>
-          </motion.div>
+          {!isSuccess && (
+            <>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4, ease: EASE }}
+                className="flex items-center justify-center w-10 h-10 rounded-full"
+                style={{
+                  background: "rgba(255,255,255,0.06)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                }}
+              >
+                <Asterisk size={18} color="rgba(255,255,255,0.7)" />
+              </motion.div>
+
+              <motion.div
+                key={`${active}-${loginPhase}`}
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.25, ease: EASE }}
+                className="flex flex-col items-center gap-1 text-center"
+              >
+                <h2 className="text-white text-lg font-medium tracking-[-0.3px]">
+                  {headerText.title}
+                </h2>
+                <p className="text-white/30 text-sm tracking-[-0.1px]">
+                  {headerText.sub}
+                </p>
+              </motion.div>
+            </>
+          )}
         </AnimatePresence>
 
-        {/* Toggle — hides on success */}
+        {/* Toggle — hide on success */}
         <AnimatePresence>
           {!isSuccess && (
             <motion.div
@@ -104,16 +130,26 @@ function LoginState({ active, setActive }: ActiveStateProp) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
               transition={{ duration: 0.25, ease: EASE }}
-              className="relative w-full flex bg-white/5 justify-evenly items-center border border-white/10 p-1 rounded-md"
+              className="relative w-full flex items-center p-1 rounded-md"
+              style={{
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.08)",
+              }}
             >
-              <div
-                className={`absolute bg-white/10 rounded-sm transition-all duration-300 w-1/2 h-full ${
-                  active === "login" ? "left-0" : "left-1/2"
-                }`}
+              {/* Sliding indicator */}
+              <motion.div
+                className="absolute top-1 bottom-1 rounded-sm"
+                animate={{ left: active === "login" ? 4 : "50%" }}
+                transition={{ duration: 0.25, ease: EASE }}
+                style={{
+                  width: "calc(50% - 4px)",
+                  background: "rgba(255,255,255,0.08)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                }}
               />
               <button
                 onClick={() => setActive("login")}
-                className={`relative z-10 flex-1 text-center cursor-pointer py-1.5 text-xs font-medium transition-colors ${
+                className={`relative z-10 flex-1 text-center cursor-pointer py-1.5 text-xs font-medium transition-colors duration-200 ${
                   active === "login" ? "text-white" : "text-white/35"
                 }`}
               >
@@ -121,7 +157,7 @@ function LoginState({ active, setActive }: ActiveStateProp) {
               </button>
               <button
                 onClick={() => setActive("invite")}
-                className={`relative z-10 flex-1 text-center cursor-pointer py-1.5 text-xs font-medium transition-colors ${
+                className={`relative z-10 flex-1 text-center cursor-pointer py-1.5 text-xs font-medium transition-colors duration-200 ${
                   active === "invite" ? "text-white" : "text-white/35"
                 }`}
               >
@@ -131,18 +167,20 @@ function LoginState({ active, setActive }: ActiveStateProp) {
           )}
         </AnimatePresence>
 
-        {/* Divider */}
-        <div
-          className="w-full"
-          style={{
-            height: 1,
-            background:
-              "linear-gradient(90deg, transparent, rgba(255,255,255,0.07), transparent)",
-          }}
-        />
+        {/* Divider — hide on success */}
+        {!isSuccess && (
+          <div
+            className="w-full"
+            style={{
+              height: 1,
+              background:
+                "linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)",
+            }}
+          />
+        )}
 
-        {/* Form content — only this swaps */}
-        <div className="w-full">
+        {/* Form */}
+        <motion.div layout className="w-full">
           <AnimatePresence mode="popLayout">
             {active === "login" ? (
               <LoginForm
@@ -159,7 +197,7 @@ function LoginState({ active, setActive }: ActiveStateProp) {
               />
             )}
           </AnimatePresence>
-        </div>
+        </motion.div>
       </motion.div>
     </>
   );

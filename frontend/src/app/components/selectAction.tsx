@@ -1,6 +1,6 @@
 "use client";
 import { motion } from "motion/react";
-import { CalendarDate } from "@internationalized/date";
+
 
 const dotVariants = {
   idle: { opacity: 0.85, scale: 1 },

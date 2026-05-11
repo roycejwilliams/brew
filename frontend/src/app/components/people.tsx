@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "motion/react";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import SearchMap from "./search";
 import { CloseIcon, PlusIcon } from "./icons";
 import Image from "next/image";
@@ -28,8 +28,8 @@ export default function People({
   const [userQuery, setUserQuery] = useState("");
   //users returned from an actual search / database query
   //Will need it's own API call
-  const [isSearchingUser, setIsSearchingUser] = useState<boolean>(false);
-  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [isSearchingUser, _setIsSearchingUser] = useState<boolean>(false);
+  const [showConfirmation, _setShowConfirmation] = useState(false);
 
   const [activeCircleFilter, setActiveCircleFilter] = useState<string | null>(
     null,
@@ -55,12 +55,12 @@ export default function People({
         //takes all the member array from each circle
         //pass callback function, waits for instructions
         //on what to pull from each circle
-        .flatMap((circle: any) =>
+        .flatMap((circle: CircleProp) =>
           circle.members
             //filters out info that doesnt equal null
-            .filter((member: any) => member != null)
+            .filter((member: CircleProp["members"][number] | null) => member != null)
             //get these values for each member
-            .map((member: any) => ({
+            .map((member: CircleProp["members"][number]) => ({
               id: member.id,
               username: member.username,
               first_name: member.first_name,
@@ -69,7 +69,7 @@ export default function People({
             })),
         )
         //filter expect boolean from callback
-        .filter((member: any) => {
+        .filter((member: CircleProp["members"][number]) => {
           //remove this user
           if (seen.has(member.username)) return false;
           if (member.id === user?.id) return false; // exclude self
@@ -100,7 +100,7 @@ export default function People({
       ) ?? {};
 
     return (
-      findMembers?.members.map((member: any) => ({
+      findMembers?.members.map((member: CircleProp["members"][number]) => ({
         id: member.id,
         username: member.username,
         first_name: member.first_name,
@@ -581,7 +581,7 @@ export default function People({
                 className="space-y-2"
               >
                 <p className="text-white/40 text-sm">
-                  No results for "{userQuery}"
+                  No results for &quot;{userQuery}&quot;
                 </p>
                 <p className="text-white/30 text-xs">
                   Try searching for a different name

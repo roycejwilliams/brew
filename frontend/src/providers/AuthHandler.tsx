@@ -20,6 +20,7 @@ export default function AuthHandler({
     if (userData?.data.data) {
       setUser(userData.data.data);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userData]);
 
   if (user?.id && isLoading) {

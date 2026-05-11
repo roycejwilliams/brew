@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import SearchMap from "./search";
-import useDebounce from "../../hooks/useDebounce";
+
 import { useLocationSearch } from "@/hooks/useReverseGeolocateSearch";
 
 type MomentSelectionProp = "start" | "circle" | "people" | "nearby" | "confirm";
@@ -21,6 +21,7 @@ interface VenueProp {
     selectedVenue: { label: string; center?: [number, number] } | null,
   ) => void;
   selectedModal: MomentSelectionProp;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setForm: React.Dispatch<React.SetStateAction<any>>;
 }
 
@@ -38,9 +39,10 @@ export default function Venue({
     label: string;
     center?: [number, number];
   }) => {
-    setSelectedVenue(venue as any);
+    setSelectedVenue(venue);
     setQuery("");
     if (venue.center) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setForm((prev: any) => ({
         ...prev,
         location: `(${venue.center![0]},${venue.center![1]})`,
@@ -87,7 +89,7 @@ export default function Venue({
                 transition={{ delay: 0.15 }}
                 className="text-sm font-medium text-white/95 mb-1"
               >
-                {(selectedVenue as any).label?.split(",")[0]}
+                {(selectedVenue as { label: string; center?: [number, number] }).label?.split(",")[0]}
               </motion.div>
               <motion.div
                 initial={{ opacity: 0 }}
@@ -95,7 +97,7 @@ export default function Venue({
                 transition={{ delay: 0.2 }}
                 className="text-xs text-white/40"
               >
-                {(selectedVenue as any).label
+                {(selectedVenue as { label: string; center?: [number, number] }).label
                   ?.split(",")
                   .slice(1)
                   .join(",")
@@ -181,7 +183,7 @@ export default function Venue({
             transition={{ duration: 0.2 }}
             className="text-center py-12 text-white/30 text-xs"
           >
-            No venues found matching "{query}"
+            No venues found matching &quot;{query}&quot;
           </motion.div>
         )}
 

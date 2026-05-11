@@ -207,7 +207,6 @@ const otpMerge = (status: string) => {
         );
 
         const acceptedUser: UserProp = accepted.rows[0];
-        console.log(acceptedUser);
 
         await sendSMS({
           otp_code: otp.toString(),
@@ -411,8 +410,6 @@ app.post(
       );
 
       const lockAttempts: UserProp = attempts.rows[0];
-
-      console.log("lock attempts:", lockAttempts);
 
       if (lockAttempts.otp_attempts === 5) {
         return res.status(423).send({
@@ -1092,7 +1089,6 @@ app.get(
         end.setHours(23, 59, 59, 0);
         endTime = fmt(end);
       }
-      console.log("startTime:", startTime, "endTime:", endTime);
 
       const result = await pool.query(
         `SELECT m.*,

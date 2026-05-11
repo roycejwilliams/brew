@@ -118,7 +118,7 @@ export default function Moments({
         className="flex flex-col items-center w-full px-6 py-10 gap-y-4 text-center"
       >
         <p className="text-white/40 text-sm">
-          You haven't created any moments yet.
+          You haven&apos;t created any moments yet.
         </p>
         <p className="text-white/20 text-xs">
           Create a moment first, then invite people to it.
@@ -290,7 +290,7 @@ export default function Moments({
               transition={{ delay: 0.1, duration: 0.25 }}
               className="text-xs text-white/30"
             >
-              They'll receive access instantly.
+              They&apos;ll receive access instantly.
             </motion.p>
           </motion.div>
         )}

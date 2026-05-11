@@ -1,5 +1,5 @@
 import { ArrowUpRight } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import Image from "next/image";
 import Moments from "./Moments";
 import CircleDestination from "./CircleDestination";
@@ -55,7 +55,7 @@ export default function InvitePurpose({
   selectPurpose,
   setSelectedPurpose,
   step,
-  setStep,
+  setStep: _setStep,
   setInviteId,
   setInviteType,
 }: InviteMomentSelection) {
@@ -79,7 +79,7 @@ export default function InvitePurpose({
             What is this for?
           </h2>
           <p className="text-white/30 text-sm tracking-[-0.1px]">
-            Choose where you're bringing them.
+            Choose where you&apos;re bringing them.
           </p>
         </motion.div>
 

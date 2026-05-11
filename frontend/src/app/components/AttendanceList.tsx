@@ -13,6 +13,16 @@ interface AttendanceListProps {
   featuredId: string;
 }
 
+type Attendee = {
+  attendee_id: string;
+  profile_image?: string;
+  username: string;
+  first_name?: string;
+  last_name?: string;
+  checked_in: boolean;
+  status: string;
+};
+
 const statusColor: Record<string, string> = {
   attending: "#008000",
   pending: "#8B837E",
@@ -30,7 +40,7 @@ export default function AttendanceList({
   const { mutate: removeAttendee } = useRemoveAttendeeBasedOnRole();
 
   const seen = new Set<string>();
-  const attendees = (getAttendeesDetails?.data?.data ?? []).filter((a: any) => {
+  const attendees = (getAttendeesDetails?.data?.data ?? []).filter((a: Attendee) => {
     if (seen.has(a.attendee_id)) return false;
     seen.add(a.attendee_id);
     return true;
@@ -71,7 +81,7 @@ export default function AttendanceList({
             />
           ))
         ) : attendees.length > 0 ? (
-          attendees.map((attendee: any, i: number) => (
+          attendees.map((attendee: Attendee, i: number) => (
             <motion.div
               key={attendee.attendee_id ?? i}
               className="flex items-center justify-between px-3 py-2.5 border border-white/8 rounded-sm bg-white/3 hover:bg-white/6 transition-colors"
@@ -141,7 +151,7 @@ export default function AttendanceList({
                   onClick={() =>
                     removeAttendee({
                       moment: { id: featuredId } as MomentProp,
-                      attendee: attendee as InviteAttendeesProp,
+                      attendee: attendee as unknown as InviteAttendeesProp,
                     })
                   }
                   className="text-white/20 hover:text-red-400/70 transition-colors cursor-pointer"

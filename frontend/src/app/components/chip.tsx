@@ -1,16 +1,6 @@
 import React from "react";
 import { motion } from "motion/react";
 
-const EASE = [0.16, 1, 0.3, 1] as const;
-
-const vibes = [
-  "Cocktails",
-  "Underground",
-  "Artistic",
-  "Tech",
-  "Private",
-  "Invite Only",
-];
 
 function Chip({ label, index }: { label: string; index: number }) {
   return (

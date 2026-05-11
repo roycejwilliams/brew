@@ -54,7 +54,7 @@ export default function DoneScreen({ momentId, onClose }: DoneScreenProp) {
           Moment created.
         </h2>
         <p className="text-white/30 text-sm tracking-[-0.1px]">
-          It's set. Now let it unfold.
+          It&apos;s set. Now let it unfold.
         </p>
       </motion.div>
 

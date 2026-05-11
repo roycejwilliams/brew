@@ -1,4 +1,4 @@
-import { motion, Variants } from "motion/react";
+import { motion } from "motion/react";
 import React, { useState } from "react";
 import SlashIcon from "./icons/slashIcon";
 import FingerprintIcon from "./icons/fingerPrint";

@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 import AttendeeDetails from "./attendeeDetails";
 import Transfer from "./Transfer";
 import EventFAQ from "./eventFAQ";
-import { openEventCard } from "@/stores/store";
+
 import MapBoxGl from "./mapBoxGl";
 
 interface EventStartProp {
@@ -130,8 +130,10 @@ export default function EventStart({ activeModal, eventCard }: EventStartProp) {
       >
         <MapBoxGl
           center={[
-            (eventCard?.location as any)?.x ?? -122.4194,
-            (eventCard?.location as any)?.y ?? 37.7749,
+            (eventCard?.location as unknown as { x: number; y: number })?.x ??
+              -122.4194,
+            (eventCard?.location as unknown as { x: number; y: number })?.y ??
+              37.7749,
           ]}
           zoom={11}
           scrollZoom={false}

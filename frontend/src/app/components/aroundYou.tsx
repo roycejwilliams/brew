@@ -34,7 +34,7 @@ export default function AroundYou({ goback, setSelectedModal }: AroundYouProp) {
         transition={{ delay: 0.35, duration: 0.3 }}
         className="text-sm text-white/30 mt-12"
       >
-        They can request to join — you decide who's welcome.{" "}
+        They can request to join — you decide who&apos;s welcome.{" "}
       </motion.p>
 
       {/* Visual metaphor */}
@@ -89,7 +89,7 @@ export default function AroundYou({ goback, setSelectedModal }: AroundYouProp) {
         transition={{ delay: 0.35, duration: 0.3 }}
         className="text-sm text-white/30"
       >
-        You'll always see who wants to join.
+        You&apos;ll always see who wants to join.
       </motion.p>
       <motion.div
         initial={{ opacity: 0, y: 8 }}

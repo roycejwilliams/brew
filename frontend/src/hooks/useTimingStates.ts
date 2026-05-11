@@ -1,5 +1,4 @@
-import { openEventCard } from "@/stores/store";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 interface TimeProp {
   eventCard: MomentProp | null;

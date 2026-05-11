@@ -10,7 +10,7 @@ import { useUserStore } from "@/stores/useUserStore";
 import { useGetAllMomentsOwnedByUser } from "@/hooks/useMoments";
 import EditMoment from "./EditMoment";
 import { getMomentStatus, sortMomentsByStatus } from "../utils/momentsUtils";
-import CreateModal from "./CreateModal";
+
 
 type StatusSymbol = "prequel" | "live" | "end" | null;
 

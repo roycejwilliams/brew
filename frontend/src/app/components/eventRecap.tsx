@@ -49,7 +49,7 @@ export default function EventRecap() {
   const { user } = useUserStore();
   const eventCard = openEventCard((state) => state.moment);
 
-  const { data: photosData, isLoading } = useGetMomentPhotos(eventCard?.id);
+  const { data: photosData } = useGetMomentPhotos(eventCard?.id);
   const { mutate: addPhoto } = useAddMomentPhoto();
   const { mutate: deletePhoto } = useDeleteMomentPhoto();
 

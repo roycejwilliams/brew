@@ -267,8 +267,11 @@ function Dashboard({ profile }: DashboardProp) {
                 </div>
                 <span className="text-white/40 text-sm font-medium tracking-[-0.2px]">
                   {
-                    new Set(activeConnection?.data.data.map((c: any) => c.id))
-                      .size
+                    new Set(
+                      activeConnection?.data.data.map(
+                        (c: { id: string; [key: string]: unknown }) => c.id,
+                      ),
+                    ).size
                   }{" "}
                 </span>
               </div>
@@ -428,7 +431,11 @@ function Dashboard({ profile }: DashboardProp) {
                     <input
                       name={name}
                       type="text"
-                      value={(updateForm as any)[name] || ""}
+                      value={
+                        (updateForm as unknown as Record<string, string>)[
+                          name
+                        ] || ""
+                      }
                       onChange={handleChange}
                       className={`${inputClass} pl-8`}
                       placeholder={placeholder}
@@ -585,6 +592,7 @@ function Dashboard({ profile }: DashboardProp) {
                 <div className="flex flex-col gap-4">
                   {Object.entries(
                     activeConnection?.data.data.reduce(
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       (acc: any, conn: any) => {
                         if (!acc[conn.id]) {
                           acc[conn.id] = { ...conn, circles: [] };
@@ -594,7 +602,8 @@ function Dashboard({ profile }: DashboardProp) {
                       },
                       {},
                     ),
-                  ).map(([_, member]: any) => (
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  ).map(([, member]: [string, any]) => (
                     <div
                       key={member.id}
                       className="flex items-center gap-3 px-3 py-2.5 border border-white/8 rounded-md bg-white/3 hover:bg-white/5 transition-all"
