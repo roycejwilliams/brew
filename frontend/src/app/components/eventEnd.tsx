@@ -70,7 +70,7 @@ export default function EventEnd({ activeModal, eventCard }: EventEndProp) {
         }}
       >
         <p className="text-white/20 text-[10px] tracking-widest uppercase font-medium">
-          Tonight's Recap
+          Tonight&apos;s Recap
         </p>
         {recapLoading ? (
           <div className="flex flex-col gap-2">

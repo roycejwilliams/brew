@@ -10,7 +10,7 @@ import {
   useRemoveMemberBasedOnRole,
 } from "@/hooks/useCircles";
 import { useUserStore } from "@/stores/useUserStore";
-import { ChevronRight, PlusIcon, X } from "lucide-react";
+import { ChevronRight, X } from "lucide-react";
 import InvitePeople from "./InvitePeople";
 import { useInviteMemberToCircle } from "@/hooks/useInvites";
 
@@ -36,6 +36,7 @@ export default function ManageCircle() {
   const [query, setQuery] = useState<string>("");
   const [hoveredButton, setHoveredButton] = useState<string | null>(null);
   const [showAddMember, setShowAddMember] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [selectedUsers, setSelectedUsers] = useState<any[]>([]);
 
   const { user } = useUserStore();
@@ -87,7 +88,7 @@ export default function ManageCircle() {
     ? query.trim() === ""
       ? (featured.members ?? [])
       : (featured.members ?? []).filter(
-          (m: any) =>
+          (m: CircleProp["members"][number]) =>
             `${m.first_name} ${m.last_name}`
               .toLowerCase()
               .includes(query.toLowerCase()) ||
@@ -327,68 +328,70 @@ export default function ManageCircle() {
             {/* Member list */}
             <div className="mt-3 flex-1 overflow-y-auto no-scroll">
               <AnimatePresence mode="popLayout">
-                {filteredMembers.map((member: any, i: number) => {
-                  const memberGlobalIndex =
-                    featured?.members?.indexOf(member) ?? i;
-                  const isActiveMarker = memberGlobalIndex === markerIndex;
+                {filteredMembers.map(
+                  (member: CircleProp["members"][number], i: number) => {
+                    const memberGlobalIndex =
+                      featured?.members?.indexOf(member) ?? i;
+                    const isActiveMarker = memberGlobalIndex === markerIndex;
 
-                  return (
-                    <motion.button
-                      onClick={() => setMarkerIndex(memberGlobalIndex)}
-                      key={`${featured?.id}-${member.id}`}
-                      layout
-                      initial={{ opacity: 0, x: -8 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{
-                        opacity: 0,
-                        x: -8,
-                        transition: { duration: 0.15 },
-                      }}
-                      transition={{
-                        delay: 0.15 + i * 0.03,
-                        duration: 0.25,
-                        ease: [0.16, 1, 0.3, 1],
-                      }}
-                      whileTap={{ scale: 0.98 }}
-                      className={`w-full px-3 py-2.5 text-left rounded-lg transition-all duration-200 cursor-pointer flex items-center gap-x-3 group relative ${
-                        isActiveMarker ? "bg-white/5" : "hover:bg-white/2"
-                      }`}
-                    >
-                      <div
-                        className={`w-7 h-7 rounded-full overflow-hidden relative shrink-0 border transition-all duration-200 ${isActiveMarker ? "border-white/20" : "border-white/6"}`}
+                    return (
+                      <motion.button
+                        onClick={() => setMarkerIndex(memberGlobalIndex)}
+                        key={`${featured?.id}-${member.id}`}
+                        layout
+                        initial={{ opacity: 0, x: -8 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{
+                          opacity: 0,
+                          x: -8,
+                          transition: { duration: 0.15 },
+                        }}
+                        transition={{
+                          delay: 0.15 + i * 0.03,
+                          duration: 0.25,
+                          ease: [0.16, 1, 0.3, 1],
+                        }}
+                        whileTap={{ scale: 0.98 }}
+                        className={`w-full px-3 py-2.5 text-left rounded-lg transition-all duration-200 cursor-pointer flex items-center gap-x-3 group relative ${
+                          isActiveMarker ? "bg-white/5" : "hover:bg-white/2"
+                        }`}
                       >
-                        {member.profile_image ? (
-                          <Image
-                            src={member.profile_image}
-                            alt={member.username}
-                            fill
-                            className="object-cover"
+                        <div
+                          className={`w-7 h-7 rounded-full overflow-hidden relative shrink-0 border transition-all duration-200 ${isActiveMarker ? "border-white/20" : "border-white/6"}`}
+                        >
+                          {member.profile_image ? (
+                            <Image
+                              src={member.profile_image}
+                              alt={member.username}
+                              fill
+                              className="object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-white/5 flex items-center justify-center text-white/20 text-[10px]">
+                              {member.first_name?.[0]}
+                            </div>
+                          )}
+                        </div>
+                        <span
+                          className={`text-sm truncate transition-colors duration-200 ${isActiveMarker ? "text-white/90" : "text-white/50 group-hover:text-white/70"}`}
+                        >
+                          {member.first_name} {member.last_name}
+                        </span>
+                        {isActiveMarker && (
+                          <motion.div
+                            layoutId="member-active-dot"
+                            className="ml-auto w-1.5 h-1.5 rounded-full bg-white/50 shrink-0"
+                            transition={{
+                              type: "spring",
+                              stiffness: 500,
+                              damping: 30,
+                            }}
                           />
-                        ) : (
-                          <div className="w-full h-full bg-white/5 flex items-center justify-center text-white/20 text-[10px]">
-                            {member.first_name?.[0]}
-                          </div>
                         )}
-                      </div>
-                      <span
-                        className={`text-sm truncate transition-colors duration-200 ${isActiveMarker ? "text-white/90" : "text-white/50 group-hover:text-white/70"}`}
-                      >
-                        {member.first_name} {member.last_name}
-                      </span>
-                      {isActiveMarker && (
-                        <motion.div
-                          layoutId="member-active-dot"
-                          className="ml-auto w-1.5 h-1.5 rounded-full bg-white/50 shrink-0"
-                          transition={{
-                            type: "spring",
-                            stiffness: 500,
-                            damping: 30,
-                          }}
-                        />
-                      )}
-                    </motion.button>
-                  );
-                })}
+                      </motion.button>
+                    );
+                  },
+                )}
               </AnimatePresence>
 
               {filteredMembers.length === 0 && query.trim() !== "" && (
@@ -397,7 +400,7 @@ export default function ManageCircle() {
                   animate={{ opacity: 1 }}
                   className="text-white/20 text-sm text-center py-8"
                 >
-                  No members match "{query}"
+                  No members match &quot;{query}&quot;
                 </motion.p>
               )}
 

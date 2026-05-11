@@ -1,6 +1,6 @@
 import React from "react";
 import { useQRCode } from "next-qrcode";
-import { openEventCard } from "@/stores/store";
+
 import { useUserStore } from "@/stores/useUserStore";
 
 interface QRCodeProps {

@@ -77,7 +77,7 @@ export default function EditMoment({ setUtils, featured }: EditMomentProps) {
     //if the form location name does match the db
     //call the reverseGeoLocate to Search
     if (form.location_name !== featured.location_name) {
-      const suggestions: any[] = [];
+      const suggestions: { label: string; center?: [number, number] }[] = [];
       await reverseGeolocateSearch(
         form.location_name,
         (results) => suggestions.push(...results),

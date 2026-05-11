@@ -46,6 +46,7 @@ function LoginForm({ state, setState }: Phase) {
         },
       );
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [otp]);
 
   const handleOtpChange = (value: string, index: number) => {
@@ -92,10 +93,11 @@ function LoginForm({ state, setState }: Phase) {
   };
 
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence mode="popLayout">
       {state === "form" && (
         <motion.div
           key="form"
+          layout
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -6 }}
@@ -141,16 +143,23 @@ function LoginForm({ state, setState }: Phase) {
       {state === "verify" && (
         <motion.div
           key="verify"
+          layout
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -6 }}
           transition={{ duration: 0.25, ease: EASE }}
           className="flex flex-col gap-5"
         >
-          <div className="flex flex-col gap-2">
-            <p className="text-[10px] tracking-[3px] uppercase text-white/25">
-              Verification code
-            </p>
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-1">
+              <p className="text-[10px] tracking-[3px] uppercase text-white/25">
+                Verification code
+              </p>
+              <p className="text-[11px] text-white/20 tracking-[-0.1px]">
+                We sent a 6-digit code to your email.
+              </p>
+            </div>
+
             <div className="flex gap-2">
               {otp.map((digit, i) => (
                 <input
@@ -165,7 +174,16 @@ function LoginForm({ state, setState }: Phase) {
                   onChange={(e) => handleOtpChange(e.target.value, i)}
                   onKeyDown={(e) => handleKeyDown(e, i)}
                   onPaste={handlePaste}
-                  className="flex-1 h-14 text-xl text-white text-center bg-white/5 border border-white/10 rounded-md focus:outline-none focus:border-white/30 transition-all"
+                  className="flex-1 h-12 text-base font-medium text-white text-center rounded-md focus:outline-none transition-all duration-200"
+                  style={{
+                    background: digit
+                      ? "rgba(255,255,255,0.08)"
+                      : "rgba(255,255,255,0.04)",
+                    border: digit
+                      ? "1px solid rgba(255,255,255,0.2)"
+                      : "1px solid rgba(255,255,255,0.08)",
+                    caretColor: "transparent",
+                  }}
                 />
               ))}
             </div>
@@ -181,10 +199,10 @@ function LoginForm({ state, setState }: Phase) {
                 className="px-4 py-3 rounded-md text-center"
                 style={{
                   background: "rgba(239,68,68,0.05)",
-                  border: "1px solid rgba(239,68,68,0.15)",
+                  border: "1px solid rgba(239,68,68,0.12)",
                 }}
               >
-                <p className="text-xs text-red-400/70 tracking-[-0.1px]">
+                <p className="text-[11px] text-red-400/60 tracking-[-0.1px]">
                   Incorrect code. Try again.
                 </p>
               </motion.div>
@@ -212,6 +230,7 @@ function LoginForm({ state, setState }: Phase) {
       {state === "success" && (
         <motion.div
           key="success"
+          layout
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}

@@ -1,21 +1,23 @@
-import React from "react";
-import Carousel from "./carousel";
+// import React from "react";
+// import Carousel from "./carousel";
+// import { useGetAllMomentsUserIsAttendee } from "@/hooks/useMoments";
 
-interface SuggestedProp {
-  id: string;
-}
+// interface SuggestedProp {
+//   id: string;
+// }
 
-function Suggested({ id }: SuggestedProp) {
-  return (
-    <section>
-      <div className="flex items-center gap-2 border-b border-white/8 pb-4 mb-4">
-        <p className="text-xs tracking-[3px] uppercase text-white/20">
-          Our picks
-        </p>
-      </div>
-      <Carousel id={id} width={400} height={250} />
-    </section>
-  );
-}
+// function Suggested({ id }: SuggestedProp) {
+//     const { data: member, isLoading } = useGetAllMomentsUserIsAttendee(id);
 
-export default Suggested;
+//     <section>
+//       <div className="flex items-center gap-2 border-b border-white/8 pb-4 mb-4">
+//         <p className="text-xs tracking-[3px] uppercase text-white/20">
+//           Our picks
+//         </p>
+//       </div>
+//       <Carousel moments={[]} width={400} height={250} />
+//     </section>
+//   );
+// }
+
+// export default Suggested;

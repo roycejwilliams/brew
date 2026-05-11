@@ -62,14 +62,14 @@ export default function CircleDestination({
         {
           circle_name: newCircleName,
           owner_id: user?.id,
-        } as any,
+        } as CircleProp,
         {
           onSuccess: (data) => {
             const newCircle = data.data.data;
             selectedPeople.forEach((person) => {
               inviteMember({
                 circle: newCircle,
-                invite_member: { member_id: person.id } as any,
+                invite_member: { member_id: person.id } as InviteMembersProp,
               });
             });
             //later feature
@@ -86,7 +86,7 @@ export default function CircleDestination({
       selectedPeople.forEach((person) => {
         inviteMember({
           circle,
-          invite_member: { member_id: person.id } as any,
+          invite_member: { member_id: person.id } as InviteMembersProp,
         });
       });
       //later feature
@@ -314,7 +314,7 @@ export default function CircleDestination({
                 />
               </div>
               <p className="text-white/20 text-xs tracking-[-0.1px] mt-1 px-1">
-                This name defines who's inside. Choose carefully.
+                This name defines who&apos;s inside. Choose carefully.
               </p>
             </motion.div>
           )}

@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 
 export const ScrollLock = (state: boolean) => {
   useEffect(() => {

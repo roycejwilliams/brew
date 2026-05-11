@@ -60,6 +60,7 @@ export const useUpdateApplicationStatus = () => {
       //use to immediately update a query's cached data
       //queryKey, newData
       //setting/updating the cache
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       queryClient.setQueryData(["applications"], (old: any) => ({
         ...old, // copies everything from the cached response
         data: {

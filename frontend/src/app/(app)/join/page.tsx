@@ -32,8 +32,8 @@ export default function JoinPage() {
 
     joinCircle(circle_id, {
       onSuccess: () => setStatus("success"),
-      onError: (err: any) => {
-        const message = err?.response?.data ?? "";
+      onError: (err: Error) => {
+        const message = err?.message ?? "";
         if (
           message.includes("Unauthorized") ||
           message.includes("unauthorized")
@@ -44,6 +44,7 @@ export default function JoinPage() {
         }
       },
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [circle_id, user?.id]);
 
   return (
@@ -112,7 +113,7 @@ export default function JoinPage() {
             </motion.div>
             <div className="space-y-1">
               <h1 className="text-white text-xl font-medium tracking-[-0.3px]">
-                You're in the circle.
+                You&apos;re in the circle.
               </h1>
               <p className="text-white/40 text-sm tracking-[-0.1px]">
                 You now have access to this circle and its moments.

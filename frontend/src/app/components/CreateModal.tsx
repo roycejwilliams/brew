@@ -69,11 +69,16 @@ function CreateModal({ onClose }: CreateModalProp) {
 
       <div className="mx-auto text-center mt-10 mb-4 flex flex-col justify-center items-center">
         <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 0.75, ease: "easeInOut" }}
-          className="mx-auto text-center text-6xl"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4, ease: EASE }}
+          className="flex items-center justify-center w-10 h-10 rounded-full"
+          style={{
+            background: "rgba(255,255,255,0.06)",
+            border: "1px solid rgba(255,255,255,0.1)",
+          }}
         >
-          <Asterisk size={48} color="white" />
+          <Asterisk size={18} color="rgba(255,255,255,0.7)" />
         </motion.div>
 
         <motion.h1

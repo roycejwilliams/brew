@@ -1,6 +1,5 @@
 import Image from "next/image";
 import { motion } from "motion/react";
-import { openEventCard } from "@/stores/store";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -24,7 +23,7 @@ export default function EventHero({ eventCard }: EventHeroProp) {
       >
         {/* Eyebrow */}
         <p className="text-white/20 text-[10px] tracking-widest uppercase font-medium">
-          Tonight's Event
+          Tonight&apos;s Event
         </p>
 
         {eventCard?.moments_name.split("\n").map((text, index) => (

@@ -209,7 +209,7 @@ export default function ExpectationAssistant({
               </div>
 
               <p className="text-white/20 text-xs tracking-[-0.1px] px-1">
-                We'll use this to suggest expectations.
+                We&apos;ll use this to suggest expectations.
               </p>
             </div>
 

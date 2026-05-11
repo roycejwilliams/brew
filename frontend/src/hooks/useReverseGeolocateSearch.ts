@@ -1,11 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import useDebounce from "./useDebounce";
-
-interface MapBoxSuggestion {
-  name: string;
-  place_formatted?: string;
-  center?: [number, number]; // [lng, lat]
-}
 
 interface LocationSuggestion {
   label: string;
@@ -37,7 +31,7 @@ export const reverseGeolocateSearch = async (
 
     const data = await response.json();
 
-    const locationSearch = data.features.map((f: any) => ({
+    const locationSearch = data.features.map((f: { place_name: string; center: [number, number] }) => ({
       label: f.place_name,
       center: f.center as [number, number],
     }));

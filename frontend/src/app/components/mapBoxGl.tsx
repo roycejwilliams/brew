@@ -68,6 +68,7 @@ function MapBoxGl({
       markersRef.current.forEach((m) => m.remove());
       mapRef.current?.remove();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -78,8 +79,8 @@ function MapBoxGl({
     markersRef.current = [];
 
     moments.forEach((moment) => {
-      const lng = (moment.location as any)?.x;
-      const lat = (moment.location as any)?.y;
+      const lng = (moment.location as unknown as { x: number; y: number })?.x;
+      const lat = (moment.location as unknown as { x: number; y: number })?.y;
       if (lng == null || lat == null) return;
 
       // Wrapper — stable 44px hit target
@@ -186,6 +187,7 @@ function MapBoxGl({
 
       markersRef.current.push(marker);
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapReady, moments]);
 
   useEffect(() => {
@@ -195,6 +197,7 @@ function MapBoxGl({
       zoom: zoom,
       duration: 2000,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userCoordinates]);
 
   return (

@@ -35,10 +35,12 @@ export default function Notification({ onClose }: NotificationProp) {
   const { mutate: decideCircle } = useInviteMemberDecision();
 
   const momentInvites = (momentInvitesData?.data?.data ?? []).filter(
-    (i: any) => i.status === "pending",
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (i: any) => i.status === "pending",
   );
   const circleInvites = (circleInvitesData?.data?.data ?? []).filter(
-    (i: any) => i.status === "pending",
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (i: any) => i.status === "pending",
   );
   const totalCount = momentInvites.length + circleInvites.length;
 
@@ -195,7 +197,7 @@ export default function Notification({ onClose }: NotificationProp) {
                 </div>
                 <div className="text-center space-y-1">
                   <p className="text-sm text-white/40 tracking-[-0.1px]">
-                    It's quiet.
+                    It&apos;s quiet.
                   </p>
                   <p className="text-xs text-white/20 tracking-[-0.1px]">
                     No pending {tab} invites right now.
@@ -211,6 +213,7 @@ export default function Notification({ onClose }: NotificationProp) {
                 transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
                 className="px-5 py-5 space-y-2"
               >
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                 {activeInvites.map((invite: any, i: number) => (
                   <motion.div
                     key={invite.id}

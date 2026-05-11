@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import OrbitDots from "./icons/OrbitDots";
 import CanvasQRcode from "./canvasQRcode";
 
-type InviteSelection = "people" | "where" | "share" | "refer";
 
 interface ShareProp {
   onClose: () => void;

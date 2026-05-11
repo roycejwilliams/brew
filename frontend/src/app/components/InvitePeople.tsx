@@ -60,9 +60,13 @@ export default function InvitePeople({
     if (!getAllCircleMembers?.data.data) return [];
     const seen = new Set<string>();
     return getAllCircleMembers.data.data
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .flatMap((circle: any) =>
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         circle.members
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           .filter((member: any) => member != null)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           .map((member: any) => ({
             id: member.id,
             username: member.username,
@@ -77,6 +81,7 @@ export default function InvitePeople({
             },
           })),
       )
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .filter((member: any) => {
         if (seen.has(member.username)) return false;
         if (member.id === user?.id) return false; // exclude self
@@ -481,7 +486,7 @@ export default function InvitePeople({
               ) : (
                 <div className="p-12 text-center space-y-2">
                   <p className="text-white/40 text-sm">
-                    No results for "{inviteQuery}"
+                    No results for &quot;{inviteQuery}&quot;
                   </p>
                   <p className="text-white/25 text-xs">
                     Try an email or phone number

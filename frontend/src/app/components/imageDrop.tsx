@@ -1,12 +1,13 @@
 import { AnimatePresence, motion } from "motion/react";
-import React, { useState, DragEvent, ChangeEvent, useEffect } from "react";
+import React, { useState, DragEvent, ChangeEvent } from "react";
 
 interface ImageProp {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setForm: React.Dispatch<React.SetStateAction<any>>;
   onFileSelect: (file: File) => void;
 }
 
-export default function ImageDrop({ setForm, onFileSelect }: ImageProp) {
+export default function ImageDrop({ onFileSelect }: ImageProp) {
   const [image, setImage] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState<boolean>(false);
 

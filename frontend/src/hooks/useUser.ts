@@ -45,6 +45,7 @@ export const useUpdateUserById = () => {
 
       const previous = queryClient.getQueryData(["user"]);
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       queryClient.setQueryData(["user", data.id], (old: any) => ({
         ...old,
         data: {

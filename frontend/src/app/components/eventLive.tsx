@@ -1,20 +1,13 @@
-import React, { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import React from "react";
+import { motion } from "motion/react";
 import CanvasQRcode from "./canvasQRcode";
 import AttendeeDetails from "./attendeeDetails";
-import HostMessage from "./hostMessage";
-import { openEventCard } from "@/stores/store";
 import MapBoxGl from "./mapBoxGl";
 
 interface EventLiveProp {
   activeModal: "live";
   eventCard: MomentProp | null;
 }
-
-type HostMessageItem = {
-  text: string;
-  time: string;
-};
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -25,8 +18,8 @@ export default function EventLive({ activeModal, eventCard }: EventLiveProp) {
 
   if (!eventCard) return null;
 
-  const lng = (eventCard?.location as any)?.x;
-  const lat = (eventCard?.location as any)?.y;
+  const lng = (eventCard?.location as unknown as { x: number; y: number })?.x;
+  const lat = (eventCard?.location as unknown as { x: number; y: number })?.y;
   const hasLocation = lng != null && lat != null;
 
   return (
@@ -74,7 +67,7 @@ export default function EventLive({ activeModal, eventCard }: EventLiveProp) {
             className="text-white font-semibold leading-tight"
             style={{ fontSize: 52, letterSpacing: "-2px" }}
           >
-            Let's Party
+            Let&apos;s Party
           </h2>
           <p className="text-white/35 text-base tracking-[-0.1px]">
             Time to Brew

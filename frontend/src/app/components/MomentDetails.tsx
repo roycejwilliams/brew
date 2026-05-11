@@ -41,6 +41,7 @@ interface SelectModal {
     faqs: { question: string; answer: string }[];
     circle_id?: string;
   };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setForm: React.Dispatch<React.SetStateAction<any>>;
   handleChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -150,6 +151,7 @@ export default function MomentDetails({
           image: imageUrl,
           ...generated,
           location: `(${locationCoordinates[0]},${locationCoordinates[1]})`,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any,
         {
           onSuccess: (data) => {
@@ -202,6 +204,7 @@ export default function MomentDetails({
   useEffect(() => {
     if (!coordinates || viewport !== null) return;
     setViewport({ center: coordinates, zoom: 11, bearing: 0, pitch: 0 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [coordinates]);
 
   if (stage === "generating") return <GeneratingScreen />;

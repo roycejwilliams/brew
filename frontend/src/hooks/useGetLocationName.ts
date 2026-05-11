@@ -14,7 +14,7 @@ export const useGetLocationName = (coordinates: [number, number] | null) => {
         const data = await response.json();
         console.log(
           "response",
-          data.features.map((f: any) => ({
+          data.features.map((f: { place_type: string[]; place_name: string }) => ({
             type: f.place_type,
             name: f.place_name,
           })),
@@ -47,7 +47,7 @@ export const useGetCityName = (coordinates: [number, number] | null) => {
           `https://api.mapbox.com/geocoding/v5/mapbox.places/${coordinates[0]},${coordinates[1]}.json?access_token=${process.env.NEXT_PUBLIC_MAPBOXGL_PUBLIC_TOKEN}`,
         );
         const data = await response.json();
-        const cityFeature = data.features.find((f: any) =>
+        const cityFeature = data.features.find((f: { place_type: string[]; place_name: string }) =>
           f.place_type?.includes("place"),
         );
         setCityName(cityFeature?.place_name ?? data.features[2]?.place_name);

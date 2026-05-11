@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface ClockCircleLinearIconProps extends React.SVGProps<SVGSVGElement> {}
 
 export const ClockCircleLinearIcon = (props: ClockCircleLinearIconProps) => {

@@ -34,7 +34,6 @@ const mockComments = [
 ];
 
 export default function NightCap() {
-  const [comments, setComments] = useState<string[]>([]);
   const [value, setValue] = useState("");
   const hasComments = mockComments.length > 0;
   const canSubmit = value.trim().length > 0;

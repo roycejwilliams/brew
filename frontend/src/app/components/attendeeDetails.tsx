@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 import Vibe from "./vibe";
 import { openEventCard } from "@/stores/store";
 import { useGetMomentAttendees } from "@/hooks/useMoments";
-import { useGenerateContent } from "@/hooks/useGenerateContent";
+
 
 interface ActiveEventProp {
   activeEvent: "prequel" | "live" | "end";
