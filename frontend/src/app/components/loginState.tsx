@@ -10,7 +10,7 @@ interface ActiveStateProp {
   isMobile: boolean;
 }
 
-const EASE = [0.16, 1, 0.3, 1] as const;
+const EASE = [0.22, 1, 0.36, 1] as const;
 
 function LoginState({ active, setActive, isMobile }: ActiveStateProp) {
   const [loginPhase, setLoginPhase] = useState<"form" | "verify" | "success">(
@@ -46,8 +46,8 @@ function LoginState({ active, setActive, isMobile }: ActiveStateProp) {
   return (
     <LayoutGroup>
       <motion.div
-        layout="position"
-        transition={{ duration: 0.3, ease: EASE }}
+        layout
+        transition={{ duration: 0.4, ease: EASE }}
         className="flex flex-col items-center w-full max-w-sm gap-5"
         style={{
           background: isMobile ? "rgba(8,8,8,0.95)" : "rgba(8,8,8,0.85)",
@@ -70,10 +70,12 @@ function LoginState({ active, setActive, isMobile }: ActiveStateProp) {
           }}
         />
 
+        {/* Logo + Private Beta */}
         <motion.div
+          layout="position"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
+          transition={{ duration: 0.4, layout: { duration: 0.35, ease: EASE } }}
           className="flex flex-col items-center gap-3"
         >
           <span className="text-[10px] tracking-[3px] uppercase text-white/25 font-medium">
@@ -95,11 +97,10 @@ function LoginState({ active, setActive, isMobile }: ActiveStateProp) {
           {!isSuccess && (
             <motion.div
               key={`${active}-${loginPhase}`}
-              layout
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.18, ease: EASE }}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.22, ease: EASE }}
               className="flex flex-col items-center gap-1 text-center"
             >
               <h2 className="text-white text-lg font-medium tracking-[-0.3px]">
@@ -116,11 +117,14 @@ function LoginState({ active, setActive, isMobile }: ActiveStateProp) {
         <AnimatePresence>
           {!isSuccess && (
             <motion.div
-              layout
+              layout="position"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
+              transition={{
+                duration: 0.2,
+                layout: { duration: 0.35, ease: EASE },
+              }}
               className="relative w-full flex items-center p-1 rounded-md"
               style={{
                 background: "rgba(255,255,255,0.04)",
@@ -130,7 +134,7 @@ function LoginState({ active, setActive, isMobile }: ActiveStateProp) {
               <motion.div
                 className="absolute top-1 bottom-1 rounded-sm"
                 animate={{ left: active === "login" ? 4 : "50%" }}
-                transition={{ duration: 0.2, ease: EASE }}
+                transition={{ duration: 0.28, ease: EASE }}
                 style={{
                   width: "calc(50% - 4px)",
                   background: "rgba(255,255,255,0.08)",
@@ -158,28 +162,40 @@ function LoginState({ active, setActive, isMobile }: ActiveStateProp) {
         </AnimatePresence>
 
         {/* Divider — hide on success */}
-        {!isSuccess && (
-          <motion.div
-            layout
-            className="w-full"
-            style={{
-              height: 1,
-              background:
-                "linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)",
-            }}
-          />
-        )}
+        <AnimatePresence>
+          {!isSuccess && (
+            <motion.div
+              layout="position"
+              initial={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{
+                duration: 0.2,
+                layout: { duration: 0.35, ease: EASE },
+              }}
+              className="w-full"
+              style={{
+                height: 1,
+                background:
+                  "linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)",
+              }}
+            />
+          )}
+        </AnimatePresence>
 
         {/* Form */}
-        <motion.div layout className="w-full">
-          <AnimatePresence mode="popLayout">
+        <motion.div
+          layout="position"
+          transition={{ duration: 0.35, ease: EASE }}
+          className="w-full"
+        >
+          <AnimatePresence mode="wait">
             {active === "login" ? (
               <motion.div
                 key="login"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.15, ease: EASE }}
+                transition={{ duration: 0.2, ease: EASE }}
               >
                 <LoginForm state={loginPhase} setState={setLoginPhase} />
               </motion.div>
@@ -189,7 +205,7 @@ function LoginState({ active, setActive, isMobile }: ActiveStateProp) {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.15, ease: EASE }}
+                transition={{ duration: 0.2, ease: EASE }}
               >
                 <InviteForm
                   state={invitePhase}

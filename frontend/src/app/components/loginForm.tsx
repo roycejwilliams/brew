@@ -10,7 +10,7 @@ interface Phase {
   setState: (state: "form" | "verify" | "success") => void;
 }
 
-const EASE = [0.16, 1, 0.3, 1] as const;
+const EASE = [0.22, 1, 0.36, 1] as const;
 
 const inputClass =
   "flex-1 px-4 py-3 bg-white/5 rounded-md border border-white/10 focus:outline-none focus:border-white/25 text-white/90 placeholder:text-white/20 text-sm transition-colors duration-150";
@@ -96,12 +96,12 @@ function LoginForm({ state, setState }: Phase) {
     <AnimatePresence mode="wait">
       {state === "form" && (
         <motion.div
-          layout
           key="form-login"
+          layout
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.18, ease: EASE }}
+          transition={{ duration: 0.22, ease: EASE }}
           className="flex flex-col gap-5"
         >
           <div className="flex flex-col gap-2">
@@ -140,12 +140,12 @@ function LoginForm({ state, setState }: Phase) {
 
       {state === "verify" && (
         <motion.div
-          layout
           key="verify"
+          layout
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.18, ease: EASE }}
+          transition={{ duration: 0.22, ease: EASE }}
           className="flex flex-col gap-5"
         >
           <div className="flex flex-col gap-3">
@@ -192,7 +192,7 @@ function LoginForm({ state, setState }: Phase) {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.15 }}
+                transition={{ duration: 0.2 }}
                 className="px-4 py-3 rounded-md text-center"
                 style={{
                   background: "rgba(239,68,68,0.05)",
@@ -230,7 +230,7 @@ function LoginForm({ state, setState }: Phase) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
+          transition={{ duration: 0.25 }}
           className="flex flex-col items-center gap-4 py-6"
         >
           <div
