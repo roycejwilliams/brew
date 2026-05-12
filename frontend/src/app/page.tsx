@@ -18,6 +18,8 @@ export default function Login() {
   const { user } = useUserStore();
   const router = useRouter();
 
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+
   const phrases: Record<AuthPhase, string> = {
     authenticating: "Authenticating...",
     almost: "Just a moment.",
@@ -48,11 +50,11 @@ export default function Login() {
 
   return (
     <>
-      {/* Private Beta — fixed top-left */}
+      {/* Private Beta */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, delay: 0.3 }}
+        transition={{ duration: 0.3, delay: 0.2 }}
         className="fixed top-6 left-6 flex items-center gap-2 z-50"
       >
         <div
@@ -63,7 +65,9 @@ export default function Login() {
           Private Beta
         </span>
       </motion.div>
+
       <section className="relative h-screen flex justify-center items-center overflow-hidden">
+        {/* Background */}
         {/* Background */}
         <div
           style={{
@@ -71,19 +75,30 @@ export default function Login() {
             height: "100%",
             position: "absolute",
             zIndex: 0,
+            willChange: isMobile ? undefined : "transform",
           }}
         >
-          <Plasma
-            color="#ff6b35"
-            speed={0.6}
-            direction="forward"
-            scale={1.1}
-            opacity={0.5}
-            mouseInteractive={false}
-          />
+          {isMobile ? (
+            <div
+              className="w-full h-full"
+              style={{
+                background:
+                  "radial-gradient(ellipse at 50% 50%, rgba(255,107,53,0.15) 0%, transparent 70%)",
+              }}
+            />
+          ) : (
+            <Plasma
+              color="#ff6b35"
+              speed={0.6}
+              direction="forward"
+              scale={1.1}
+              opacity={0.5}
+              mouseInteractive={false}
+            />
+          )}
         </div>
 
-        {/* Top gradient vignette */}
+        {/* Vignette */}
         <div
           className="absolute inset-0 pointer-events-none z-[1]"
           style={{
@@ -93,28 +108,28 @@ export default function Login() {
         />
 
         <AnimatePresence mode="wait">
-          {/* Authenticated — cycling phrases */}
+          {/* Authenticated */}
           {user?.id && !transition && (
             <motion.div
               key="auth-flow"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.4, ease: EASE }}
+              transition={{ duration: 0.2 }}
               className="z-10 flex flex-col items-center gap-4"
             >
-              <div className="text-center space-y-1.5">
+              <div className="flex flex-col items-center gap-1.5">
                 <h1 className="text-[24px] tracking-[4px] uppercase text-white/60">
                   br3w
                 </h1>
                 <AnimatePresence mode="wait">
                   <motion.p
                     key={authPhase}
-                    initial={{ opacity: 0, y: 5 }}
+                    initial={{ opacity: 0, y: 4 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -5 }}
-                    transition={{ duration: 0.35, ease: EASE }}
-                    className={`text-sm tracking-[-0.1px] transition-colors ${
+                    exit={{ opacity: 0, y: -4 }}
+                    transition={{ duration: 0.18, ease: EASE }}
+                    className={`text-sm tracking-[-0.1px] ${
                       authPhase === "confirmed"
                         ? "text-white/70"
                         : "text-white/30"
@@ -124,7 +139,6 @@ export default function Login() {
                   </motion.p>
                 </AnimatePresence>
               </div>
-
               <Loading />
             </motion.div>
           )}
@@ -135,19 +149,18 @@ export default function Login() {
               key="intro"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.4, ease: EASE }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
               className="z-10 flex flex-col items-center gap-4"
             >
-              <div className="text-center space-y-1.5">
-                <h1 className="text-[24px]  tracking-[4px] uppercase text-white/60">
+              <div className="flex flex-col items-center gap-1.5">
+                <h1 className="text-[24px] tracking-[4px] uppercase text-white/60">
                   br3w
                 </h1>
                 <p className="text-sm text-white/25 tracking-[-0.1px]">
                   If you know, you know.
                 </p>
               </div>
-
               <Loading />
             </motion.div>
           )}
@@ -156,13 +169,17 @@ export default function Login() {
           {transition && !user?.id && (
             <motion.div
               key="login-state"
-              initial={{ opacity: 0, y: 16 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 16 }}
-              transition={{ duration: 0.45, ease: EASE }}
-              className="z-10"
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25, ease: EASE }}
+              className="z-10 w-full flex justify-center px-4"
             >
-              <LoginState active={active} setActive={setActive} />
+              <LoginState
+                active={active}
+                setActive={setActive}
+                isMobile={isMobile}
+              />
             </motion.div>
           )}
         </AnimatePresence>
