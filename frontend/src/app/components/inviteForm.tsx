@@ -32,10 +32,11 @@ function InviteForm({ state, setState }: Phase) {
   const { mutate: createApplication, isPending } = useCreateApplication();
 
   return (
-    <AnimatePresence mode="popLayout">
+    <AnimatePresence mode="wait">
       {state === "form" && !isPending && (
         <motion.div
-          key="form"
+          key="form-invite"
+          layout
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}

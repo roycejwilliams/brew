@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, LayoutGroup } from "motion/react";
 import LoginForm from "./loginForm";
 import InviteForm from "./inviteForm";
 import Asterisk from "./icons/AsterikIcon";
@@ -44,11 +44,10 @@ function LoginState({ active, setActive, isMobile }: ActiveStateProp) {
   }[active];
 
   return (
-    <>
-      {/* Private Beta */}
-
-      {/* Card */}
-      <div
+    <LayoutGroup>
+      <motion.div
+        layout
+        transition={{ duration: 0.3, ease: EASE }}
         className="flex flex-col items-center w-full max-w-sm gap-5"
         style={{
           background: isMobile ? "rgba(8,8,8,0.95)" : "rgba(8,8,8,0.85)",
@@ -58,7 +57,7 @@ function LoginState({ active, setActive, isMobile }: ActiveStateProp) {
           backdropFilter: isMobile ? "none" : "blur(20px)",
           position: "relative",
           overflow: "hidden",
-          maxHeight: "90svh", // cap the card height
+          maxHeight: "90svh",
         }}
       >
         {/* Top shimmer */}
@@ -71,8 +70,21 @@ function LoginState({ active, setActive, isMobile }: ActiveStateProp) {
           }}
         />
 
+        <motion.div
+          layout
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+          className="flex items-center gap-2 z-50"
+        >
+          <span className="text-[10px] tracking-[3px] uppercase text-white/25 font-medium">
+            Private Beta
+          </span>
+        </motion.div>
+
         {/* Logo */}
-        <div
+        <motion.div
+          layout
           className="flex items-center justify-center w-10 h-10 rounded-full"
           style={{
             background: "rgba(255,255,255,0.06)",
@@ -80,13 +92,14 @@ function LoginState({ active, setActive, isMobile }: ActiveStateProp) {
           }}
         >
           <Asterisk size={18} color="rgba(255,255,255,0.7)" />
-        </div>
+        </motion.div>
 
         {/* Header — hide on success */}
         <AnimatePresence mode="wait">
           {!isSuccess && (
             <motion.div
               key={`${active}-${loginPhase}`}
+              layout
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -107,6 +120,7 @@ function LoginState({ active, setActive, isMobile }: ActiveStateProp) {
         <AnimatePresence>
           {!isSuccess && (
             <motion.div
+              layout
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -149,7 +163,8 @@ function LoginState({ active, setActive, isMobile }: ActiveStateProp) {
 
         {/* Divider — hide on success */}
         {!isSuccess && (
-          <div
+          <motion.div
+            layout
             className="w-full"
             style={{
               height: 1,
@@ -160,15 +175,15 @@ function LoginState({ active, setActive, isMobile }: ActiveStateProp) {
         )}
 
         {/* Form */}
-        <div className="w-full">
-          <AnimatePresence mode="popLayout">
+        <motion.div layout className="w-full">
+          <AnimatePresence mode="wait">
             {active === "login" ? (
               <motion.div
                 key="login"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.15 }}
+                transition={{ duration: 0.15, ease: EASE }}
               >
                 <LoginForm state={loginPhase} setState={setLoginPhase} />
               </motion.div>
@@ -178,7 +193,7 @@ function LoginState({ active, setActive, isMobile }: ActiveStateProp) {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.15 }}
+                transition={{ duration: 0.15, ease: EASE }}
               >
                 <InviteForm
                   state={invitePhase}
@@ -188,9 +203,9 @@ function LoginState({ active, setActive, isMobile }: ActiveStateProp) {
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
-      </div>
-    </>
+        </motion.div>
+      </motion.div>
+    </LayoutGroup>
   );
 }
 

@@ -93,10 +93,11 @@ function LoginForm({ state, setState }: Phase) {
   };
 
   return (
-    <AnimatePresence mode="popLayout">
+    <AnimatePresence mode="wait">
       {state === "form" && (
         <motion.div
-          key="form"
+          layout
+          key="form-login"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
