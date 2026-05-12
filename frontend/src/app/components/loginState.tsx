@@ -7,11 +7,12 @@ import Asterisk from "./icons/AsterikIcon";
 interface ActiveStateProp {
   active: "login" | "invite";
   setActive: (active: "login" | "invite") => void;
+  isMobile: boolean;
 }
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
-function LoginState({ active, setActive }: ActiveStateProp) {
+function LoginState({ active, setActive, isMobile }: ActiveStateProp) {
   const [loginPhase, setLoginPhase] = useState<"form" | "verify" | "success">(
     "form",
   );
@@ -45,31 +46,17 @@ function LoginState({ active, setActive }: ActiveStateProp) {
   return (
     <>
       {/* Private Beta */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3, delay: 0.2 }}
-        className="fixed top-6 left-6 flex items-center gap-2 z-50"
-      >
-        <div
-          className="w-1.5 h-1.5 rounded-full"
-          style={{ background: "rgba(255,255,255,0.3)" }}
-        />
-        <span className="text-[10px] tracking-[3px] uppercase text-white/25 font-medium">
-          Private Beta
-        </span>
-      </motion.div>
 
       {/* Card */}
       <motion.div
         layout="position"
         className="flex flex-col items-center w-full max-w-sm px-6 gap-5"
         style={{
-          background: "rgba(8,8,8,0.85)",
+          background: isMobile ? "rgba(8,8,8,0.95)" : "rgba(8,8,8,0.85)",
           border: "1px solid rgba(255,255,255,0.07)",
           borderRadius: 16,
           padding: "36px 24px",
-          backdropFilter: "blur(20px)",
+          backdropFilter: isMobile ? "none" : "blur(20px)",
           position: "relative",
           overflow: "hidden",
         }}

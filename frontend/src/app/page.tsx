@@ -68,23 +68,34 @@ export default function Login() {
 
       <section className="relative h-screen flex justify-center items-center overflow-hidden">
         {/* Background */}
+        {/* Background */}
         <div
           style={{
             width: "100%",
             height: "100%",
             position: "absolute",
             zIndex: 0,
-            willChange: "transform",
+            willChange: isMobile ? undefined : "transform",
           }}
         >
-          <Plasma
-            color="#ff6b35"
-            speed={isMobile ? 0.2 : 0.6}
-            direction="forward"
-            scale={1.1}
-            opacity={isMobile ? 0.25 : 0.5}
-            mouseInteractive={false}
-          />
+          {isMobile ? (
+            <div
+              className="w-full h-full"
+              style={{
+                background:
+                  "radial-gradient(ellipse at 50% 50%, rgba(255,107,53,0.15) 0%, transparent 70%)",
+              }}
+            />
+          ) : (
+            <Plasma
+              color="#ff6b35"
+              speed={0.6}
+              direction="forward"
+              scale={1.1}
+              opacity={0.5}
+              mouseInteractive={false}
+            />
+          )}
         </div>
 
         {/* Vignette */}
@@ -164,7 +175,11 @@ export default function Login() {
               transition={{ duration: 0.25, ease: EASE }}
               className="z-10 w-full flex justify-center px-4"
             >
-              <LoginState active={active} setActive={setActive} />
+              <LoginState
+                active={active}
+                setActive={setActive}
+                isMobile={isMobile}
+              />
             </motion.div>
           )}
         </AnimatePresence>
