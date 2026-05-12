@@ -48,8 +48,7 @@ function LoginState({ active, setActive, isMobile }: ActiveStateProp) {
       {/* Private Beta */}
 
       {/* Card */}
-      <motion.div
-        layout="position"
+      <div
         className="flex flex-col items-center w-full max-w-sm gap-5"
         style={{
           background: isMobile ? "rgba(8,8,8,0.95)" : "rgba(8,8,8,0.85)",
@@ -161,7 +160,6 @@ function LoginState({ active, setActive, isMobile }: ActiveStateProp) {
         )}
 
         {/* Form */}
-        {/* Form */}
         <div className="w-full">
           <AnimatePresence mode="popLayout">
             {active === "login" ? (
@@ -191,7 +189,7 @@ function LoginState({ active, setActive, isMobile }: ActiveStateProp) {
             )}
           </AnimatePresence>
         </div>
-      </motion.div>
+      </div>
     </>
   );
 }

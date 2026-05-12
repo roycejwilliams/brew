@@ -113,7 +113,6 @@ function LoginForm({ state, setState }: Phase) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-                autoFocus
                 className={inputClass}
                 placeholder="Enter your email"
               />

@@ -228,7 +228,7 @@ export default function Login() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25, ease: EASE }}
-              className="z-10 w-full flex justify-center px-4"
+              className="z-10 w-full flex justify-center  px-4"
             >
               <LoginState
                 isMobile={isMobile}
