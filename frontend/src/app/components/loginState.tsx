@@ -39,7 +39,7 @@ function LoginState({ active, setActive, isMobile }: ActiveStateProp) {
     },
     invite: {
       title: "Request Access.",
-      sub: "BR3W is invite-only. Tell us who you are.",
+      sub: "B R 3 W is invite-only. Tell us who you are.",
     },
   }[active];
 
