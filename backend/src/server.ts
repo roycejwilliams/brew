@@ -29,11 +29,14 @@ const limiter = rateLimit({
 app.use(express.json());
 app.use(
   cors({
-    origin: [
-      "https://br3w.app",
-      "https://www.br3w.app",
-      "http://localhost:3000",
-    ],
+    origin:
+      process.env.NODE_ENV === "production"
+        ? [
+            "https://br3w.app",
+            "https://www.br3w.app",
+            "https://brew-git-feature-frontend-setup-br3w.vercel.app",
+          ]
+        : "http://localhost:3000",
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
