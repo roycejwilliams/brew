@@ -46,7 +46,7 @@ function LoginState({ active, setActive, isMobile }: ActiveStateProp) {
   return (
     <LayoutGroup>
       <motion.div
-        layout
+        layout="position"
         transition={{ duration: 0.3, ease: EASE }}
         className="flex flex-col items-center w-full max-w-sm gap-5"
         style={{
@@ -71,7 +71,6 @@ function LoginState({ active, setActive, isMobile }: ActiveStateProp) {
         />
 
         <motion.div
-          layout
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
@@ -173,7 +172,7 @@ function LoginState({ active, setActive, isMobile }: ActiveStateProp) {
 
         {/* Form */}
         <motion.div layout className="w-full">
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="popLayout">
             {active === "login" ? (
               <motion.div
                 key="login"

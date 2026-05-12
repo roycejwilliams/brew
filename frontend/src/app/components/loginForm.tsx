@@ -140,6 +140,7 @@ function LoginForm({ state, setState }: Phase) {
 
       {state === "verify" && (
         <motion.div
+          layout
           key="verify"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -225,6 +226,7 @@ function LoginForm({ state, setState }: Phase) {
       {state === "success" && (
         <motion.div
           key="success"
+          layout
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
