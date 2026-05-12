@@ -81,15 +81,17 @@ function LoginState({ active, setActive, isMobile }: ActiveStateProp) {
           <span className="text-[10px] tracking-[3px] uppercase text-white/25 font-medium">
             Private Beta
           </span>
-          <div
-            className="flex items-center justify-center w-10 h-10 rounded-full"
-            style={{
-              background: "rgba(255,255,255,0.06)",
-              border: "1px solid rgba(255,255,255,0.1)",
-            }}
-          >
-            <Asterisk size={18} color="rgba(255,255,255,0.7)" />
-          </div>
+          {!isSuccess && (
+            <div
+              className="flex items-center justify-center w-10 h-10 rounded-full"
+              style={{
+                background: "rgba(255,255,255,0.06)",
+                border: "1px solid rgba(255,255,255,0.1)",
+              }}
+            >
+              <Asterisk size={18} color="rgba(255,255,255,0.7)" />
+            </div>
+          )}
         </motion.div>
 
         {/* Header — hide on success */}

@@ -208,7 +208,7 @@ function InviteForm({ state, setState }: Phase) {
             <h3 className="text-white text-base font-medium tracking-[-0.3px]">
               Application submitted.
             </h3>
-            <p className="text-white/30 text-sm tracking-[-0.1px] max-w-[240px] leading-relaxed">
+            <p className="text-white/30 text-sm tracking-[-0.1px] max-w-60 leading-relaxed">
               We review every application personally. You&apos;ll hear from us
               soon.
             </p>
