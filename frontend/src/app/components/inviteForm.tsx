@@ -8,7 +8,7 @@ interface Phase {
   setIsLoading: (loading: boolean) => void;
 }
 
-const EASE = [0.16, 1, 0.3, 1] as const;
+const EASE = [0.22, 1, 0.36, 1] as const;
 
 const inputClass =
   "w-full px-4 py-3 bg-white/5 rounded-md border border-white/10 focus:outline-none focus:border-white/25 text-white/90 placeholder:text-white/20 text-sm transition-colors duration-150";
@@ -35,11 +35,12 @@ function InviteForm({ state, setState }: Phase) {
     <AnimatePresence mode="wait">
       {state === "form" && !isPending && (
         <motion.div
-          key="form"
-          initial={{ opacity: 0, y: 5 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -5 }}
-          transition={{ duration: 0.18, ease: EASE }}
+          key="form-invite"
+          layout
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.22, ease: EASE }}
           className="flex flex-col gap-4"
         >
           <div className="flex gap-2">
@@ -129,7 +130,7 @@ function InviteForm({ state, setState }: Phase) {
                 value={form.reason}
                 onChange={handleChange}
                 className={inputClass}
-                placeholder="Why BR3W?"
+                placeholder="Why B R 3 W?"
                 required
               />
             </div>
@@ -150,18 +151,19 @@ function InviteForm({ state, setState }: Phase) {
           </motion.button>
 
           <p className="text-[11px] text-center text-white/20 tracking-[-0.1px]">
-            By continuing, you agree to BR3W&apos;s Terms & Privacy Policy.
+            By continuing, you agree to B R 3 W&apos;s Terms & Privacy Policy.
           </p>
         </motion.div>
       )}
 
-      {isPending && (
+      {state === "form" && isPending && (
         <motion.div
           key="loading"
+          layout
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.15 }}
+          transition={{ duration: 0.2 }}
           className="flex flex-col items-center gap-4 py-10"
         >
           <div className="w-7 h-7 rounded-full border-2 border-white/10 border-t-white/40 animate-spin" />
@@ -171,19 +173,20 @@ function InviteForm({ state, setState }: Phase) {
         </motion.div>
       )}
 
-      {state === "pending" && (
+      {state === "pending" && !isPending && (
         <motion.div
           key="pending"
-          initial={{ opacity: 0, y: 5 }}
-          animate={{ opacity: 1, y: 0 }}
+          layout
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.2, ease: EASE }}
+          transition={{ duration: 0.25, ease: EASE }}
           className="flex flex-col items-center gap-5 py-4"
         >
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.05, duration: 0.2, ease: EASE }}
+            transition={{ delay: 0.08, duration: 0.25, ease: EASE }}
             className="flex items-center justify-center w-12 h-12 rounded-full"
             style={{
               background: "rgba(255,255,255,0.05)",
@@ -197,9 +200,9 @@ function InviteForm({ state, setState }: Phase) {
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1, duration: 0.2, ease: EASE }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.15, duration: 0.25, ease: EASE }}
             className="flex flex-col items-center gap-1.5 text-center"
           >
             <h3 className="text-white text-base font-medium tracking-[-0.3px]">
@@ -214,7 +217,7 @@ function InviteForm({ state, setState }: Phase) {
           <motion.div
             initial={{ scaleX: 0 }}
             animate={{ scaleX: 1 }}
-            transition={{ delay: 0.15, duration: 0.3, ease: EASE }}
+            transition={{ delay: 0.22, duration: 0.35, ease: EASE }}
             className="origin-left w-full"
             style={{
               height: 1,
@@ -226,14 +229,15 @@ function InviteForm({ state, setState }: Phase) {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.2 }}
+            transition={{ delay: 0.28, duration: 0.25 }}
             className="flex flex-col items-center gap-1"
           >
             <p className="text-[10px] tracking-[3px] uppercase text-white/20 font-medium">
               What&apos;s next
             </p>
             <p className="text-[11px] text-white/25 text-center tracking-[-0.1px]">
-              We&apos;ll reach out via email within 48 hours.
+              We&apos;re reviewing it. If it&apos;s a fit, you&apos;ll hear from
+              us.
             </p>
           </motion.div>
         </motion.div>

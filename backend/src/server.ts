@@ -29,7 +29,10 @@ const limiter = rateLimit({
 app.use(express.json());
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin:
+      process.env.NODE_ENV === "production"
+        ? ["https://br3w.app", "https://www.br3w.app"]
+        : "http://localhost:3000",
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,

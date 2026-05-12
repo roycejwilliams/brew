@@ -10,7 +10,7 @@ interface Phase {
   setState: (state: "form" | "verify" | "success") => void;
 }
 
-const EASE = [0.16, 1, 0.3, 1] as const;
+const EASE = [0.22, 1, 0.36, 1] as const;
 
 const inputClass =
   "flex-1 px-4 py-3 bg-white/5 rounded-md border border-white/10 focus:outline-none focus:border-white/25 text-white/90 placeholder:text-white/20 text-sm transition-colors duration-150";
@@ -93,14 +93,15 @@ function LoginForm({ state, setState }: Phase) {
   };
 
   return (
-    <AnimatePresence mode="popLayout">
+    <AnimatePresence mode="wait">
       {state === "form" && (
         <motion.div
-          key="form"
-          initial={{ opacity: 0, y: 5 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -5 }}
-          transition={{ duration: 0.18, ease: EASE }}
+          key="form-login"
+          layout
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.22, ease: EASE }}
           className="flex flex-col gap-5"
         >
           <div className="flex flex-col gap-2">
@@ -113,7 +114,6 @@ function LoginForm({ state, setState }: Phase) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-                autoFocus
                 className={inputClass}
                 placeholder="Enter your email"
               />
@@ -133,7 +133,7 @@ function LoginForm({ state, setState }: Phase) {
           </div>
 
           <p className="text-[11px] text-center text-white/20 tracking-[-0.1px]">
-            By continuing, you agree to BR3W&apos;s Terms & Privacy Policy.
+            By continuing, you agree to B R 3 W&apos;s Terms & Privacy Policy.
           </p>
         </motion.div>
       )}
@@ -141,10 +141,11 @@ function LoginForm({ state, setState }: Phase) {
       {state === "verify" && (
         <motion.div
           key="verify"
-          initial={{ opacity: 0, y: 5 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -5 }}
-          transition={{ duration: 0.18, ease: EASE }}
+          layout
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.22, ease: EASE }}
           className="flex flex-col gap-5"
         >
           <div className="flex flex-col gap-3">
@@ -191,7 +192,7 @@ function LoginForm({ state, setState }: Phase) {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.15 }}
+                transition={{ duration: 0.2 }}
                 className="px-4 py-3 rounded-md text-center"
                 style={{
                   background: "rgba(239,68,68,0.05)",
@@ -217,7 +218,7 @@ function LoginForm({ state, setState }: Phase) {
           </button>
 
           <p className="text-[11px] text-center text-white/20 tracking-[-0.1px]">
-            By continuing, you agree to BR3W&apos;s Terms & Privacy Policy.
+            By continuing, you agree to B R 3 W&apos;s Terms & Privacy Policy.
           </p>
         </motion.div>
       )}
@@ -225,10 +226,11 @@ function LoginForm({ state, setState }: Phase) {
       {state === "success" && (
         <motion.div
           key="success"
+          layout
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
+          transition={{ duration: 0.25 }}
           className="flex flex-col items-center gap-4 py-6"
         >
           <div
