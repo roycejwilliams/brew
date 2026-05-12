@@ -255,3 +255,64 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+@keyframes drift-slow {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.9;
+  }
+  33% {
+    transform: translate(2%, -1.5%) scale(1.04);
+    opacity: 1;
+  }
+  66% {
+    transform: translate(-1%, 1%) scale(1.02);
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.9;
+  }
+}
+
+@keyframes drift-medium {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: translate(-2%, 1.5%) scale(1.06);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.85;
+  }
+}
+
+@keyframes drift-center {
+  0% {
+    transform: translateX(-50%) scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateX(-48%) scale(1.08);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-50%) scale(1);
+    opacity: 0.8;
+  }
+}
+
+.animate-drift-slow {
+  animation: drift-slow 14s ease-in-out infinite;
+}
+
+.animate-drift-medium {
+  animation: drift-medium 10s ease-in-out infinite;
+}
+
+.animate-drift-center {
+  animation: drift-center 12s ease-in-out infinite;
+}
