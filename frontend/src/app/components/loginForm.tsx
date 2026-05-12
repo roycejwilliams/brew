@@ -97,9 +97,9 @@ function LoginForm({ state, setState }: Phase) {
       {state === "form" && (
         <motion.div
           key="form"
-          initial={{ opacity: 0, y: 5 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -5 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
           transition={{ duration: 0.18, ease: EASE }}
           className="flex flex-col gap-5"
         >
@@ -141,9 +141,9 @@ function LoginForm({ state, setState }: Phase) {
       {state === "verify" && (
         <motion.div
           key="verify"
-          initial={{ opacity: 0, y: 5 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -5 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
           transition={{ duration: 0.18, ease: EASE }}
           className="flex flex-col gap-5"
         >

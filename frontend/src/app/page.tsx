@@ -15,10 +15,13 @@ export default function Login() {
   const [transition, setTransition] = useState<boolean>(false);
   const [active, setActive] = useState<"login" | "invite">("login");
   const [authPhase, setAuthPhase] = useState<AuthPhase>("authenticating");
+  const [isMobile, setIsMobile] = useState(false);
   const { user } = useUserStore();
   const router = useRouter();
 
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+  useEffect(() => {
+    setIsMobile(window.innerWidth < 768);
+  }, []);
 
   const phrases: Record<AuthPhase, string> = {
     authenticating: "Authenticating...",
@@ -66,8 +69,7 @@ export default function Login() {
         </span>
       </motion.div>
 
-      <section className="relative h-screen flex justify-center items-center overflow-hidden">
-        {/* Background */}
+      <section className="relative h-screen flex justify-center items-center overflow-hidden bg-[#0c0c0c]">
         {/* Background */}
         <div
           style={{
@@ -79,13 +81,54 @@ export default function Login() {
           }}
         >
           {isMobile ? (
+            // BR3W mobile background — static, no GPU cost
             <div
               className="w-full h-full"
               style={{
-                background:
-                  "radial-gradient(ellipse at 50% 50%, rgba(255,107,53,0.15) 0%, transparent 70%)",
+                background: "#0c0c0c",
               }}
-            />
+            >
+              {/* Bottom-left warm ember */}
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: "-10%",
+                  left: "-10%",
+                  width: "70%",
+                  height: "65%",
+                  background:
+                    "radial-gradient(ellipse, rgba(255,80,30,0.18) 0%, rgba(180,50,10,0.08) 40%, transparent 70%)",
+                  filter: "blur(40px)",
+                }}
+              />
+              {/* Top-right cool shadow */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: "-5%",
+                  right: "-10%",
+                  width: "60%",
+                  height: "55%",
+                  background:
+                    "radial-gradient(ellipse, rgba(18,18,18,0.9) 0%, rgba(10,10,10,0.5) 40%, transparent 70%)",
+                  filter: "blur(30px)",
+                }}
+              />
+              {/* Center subtle glow */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: "30%",
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  width: "80%",
+                  height: "40%",
+                  background:
+                    "radial-gradient(ellipse, rgba(255,60,20,0.06) 0%, transparent 65%)",
+                  filter: "blur(50px)",
+                }}
+              />
+            </div>
           ) : (
             <Plasma
               color="#ff6b35"
@@ -98,14 +141,26 @@ export default function Login() {
           )}
         </div>
 
-        {/* Vignette */}
-        <div
-          className="absolute inset-0 pointer-events-none z-[1]"
-          style={{
-            background:
-              "linear-gradient(180deg, rgba(0,0,0,0.4) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.5) 100%)",
-          }}
-        />
+        {/* Vignette — stronger on edges */}
+        {/* Vignette — desktop only */}
+        {!isMobile && (
+          <>
+            <div
+              className="absolute inset-0 pointer-events-none z-[1]"
+              style={{
+                background:
+                  "linear-gradient(180deg, rgba(0,0,0,0.55) 0%, transparent 25%, transparent 65%, rgba(0,0,0,0.65) 100%)",
+              }}
+            />
+            <div
+              className="absolute inset-0 pointer-events-none z-[1]"
+              style={{
+                background:
+                  "linear-gradient(90deg, rgba(0,0,0,0.3) 0%, transparent 20%, transparent 80%, rgba(0,0,0,0.3) 100%)",
+              }}
+            />
+          </>
+        )}
 
         <AnimatePresence mode="wait">
           {/* Authenticated */}
@@ -176,9 +231,9 @@ export default function Login() {
               className="z-10 w-full flex justify-center px-4"
             >
               <LoginState
+                isMobile={isMobile}
                 active={active}
                 setActive={setActive}
-                isMobile={isMobile}
               />
             </motion.div>
           )}

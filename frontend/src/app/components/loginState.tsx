@@ -50,7 +50,7 @@ function LoginState({ active, setActive, isMobile }: ActiveStateProp) {
       {/* Card */}
       <motion.div
         layout="position"
-        className="flex flex-col items-center w-full max-w-sm px-6 gap-5"
+        className="flex flex-col items-center w-full max-w-sm gap-5"
         style={{
           background: isMobile ? "rgba(8,8,8,0.95)" : "rgba(8,8,8,0.85)",
           border: "1px solid rgba(255,255,255,0.07)",
@@ -59,6 +59,7 @@ function LoginState({ active, setActive, isMobile }: ActiveStateProp) {
           backdropFilter: isMobile ? "none" : "blur(20px)",
           position: "relative",
           overflow: "hidden",
+          maxHeight: "90svh", // cap the card height
         }}
       >
         {/* Top shimmer */}
@@ -87,9 +88,9 @@ function LoginState({ active, setActive, isMobile }: ActiveStateProp) {
           {!isSuccess && (
             <motion.div
               key={`${active}-${loginPhase}`}
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               transition={{ duration: 0.18, ease: EASE }}
               className="flex flex-col items-center gap-1 text-center"
             >
@@ -160,21 +161,33 @@ function LoginState({ active, setActive, isMobile }: ActiveStateProp) {
         )}
 
         {/* Form */}
+        {/* Form */}
         <div className="w-full">
           <AnimatePresence mode="popLayout">
             {active === "login" ? (
-              <LoginForm
+              <motion.div
                 key="login"
-                state={loginPhase}
-                setState={setLoginPhase}
-              />
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
+              >
+                <LoginForm state={loginPhase} setState={setLoginPhase} />
+              </motion.div>
             ) : (
-              <InviteForm
+              <motion.div
                 key="invite"
-                state={invitePhase}
-                setState={setInvitePhase}
-                setIsLoading={setIsLoading}
-              />
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
+              >
+                <InviteForm
+                  state={invitePhase}
+                  setState={setInvitePhase}
+                  setIsLoading={setIsLoading}
+                />
+              </motion.div>
             )}
           </AnimatePresence>
         </div>

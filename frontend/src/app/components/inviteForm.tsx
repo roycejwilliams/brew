@@ -32,13 +32,13 @@ function InviteForm({ state, setState }: Phase) {
   const { mutate: createApplication, isPending } = useCreateApplication();
 
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence mode="popLayout">
       {state === "form" && !isPending && (
         <motion.div
           key="form"
-          initial={{ opacity: 0, y: 5 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -5 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
           transition={{ duration: 0.18, ease: EASE }}
           className="flex flex-col gap-4"
         >
@@ -174,8 +174,8 @@ function InviteForm({ state, setState }: Phase) {
       {state === "pending" && (
         <motion.div
           key="pending"
-          initial={{ opacity: 0, y: 5 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2, ease: EASE }}
           className="flex flex-col items-center gap-5 py-4"
@@ -197,8 +197,8 @@ function InviteForm({ state, setState }: Phase) {
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
             transition={{ delay: 0.1, duration: 0.2, ease: EASE }}
             className="flex flex-col items-center gap-1.5 text-center"
           >
