@@ -130,7 +130,7 @@ function InviteForm({ state, setState }: Phase) {
                 value={form.reason}
                 onChange={handleChange}
                 className={inputClass}
-                placeholder="Why BR3W?"
+                placeholder="Why B R 3 W?"
                 required
               />
             </div>
@@ -151,7 +151,7 @@ function InviteForm({ state, setState }: Phase) {
           </motion.button>
 
           <p className="text-[11px] text-center text-white/20 tracking-[-0.1px]">
-            By continuing, you agree to BR3W&apos;s Terms & Privacy Policy.
+            By continuing, you agree to B R 3 W&apos;s Terms & Privacy Policy.
           </p>
         </motion.div>
       )}
@@ -236,7 +236,8 @@ function InviteForm({ state, setState }: Phase) {
               What&apos;s next
             </p>
             <p className="text-[11px] text-white/25 text-center tracking-[-0.1px]">
-              We&apos;ll reach out via email within 48 hours.
+              We&apos;re reviewing it. If it&apos;s a fit, you&apos;ll hear from
+              us.
             </p>
           </motion.div>
         </motion.div>

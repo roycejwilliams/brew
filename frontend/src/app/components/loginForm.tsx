@@ -133,7 +133,7 @@ function LoginForm({ state, setState }: Phase) {
           </div>
 
           <p className="text-[11px] text-center text-white/20 tracking-[-0.1px]">
-            By continuing, you agree to BR3W&apos;s Terms & Privacy Policy.
+            By continuing, you agree to B R 3 W&apos;s Terms & Privacy Policy.
           </p>
         </motion.div>
       )}
@@ -218,7 +218,7 @@ function LoginForm({ state, setState }: Phase) {
           </button>
 
           <p className="text-[11px] text-center text-white/20 tracking-[-0.1px]">
-            By continuing, you agree to BR3W&apos;s Terms & Privacy Policy.
+            By continuing, you agree to B R 3 W&apos;s Terms & Privacy Policy.
           </p>
         </motion.div>
       )}
