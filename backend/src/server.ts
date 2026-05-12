@@ -26,18 +26,20 @@ const limiter = rateLimit({
   statusCode: 429,
 });
 
-app.use(express.json());
 app.use(
   cors({
-    origin:
-      process.env.NODE_ENV === "production"
-        ? ["https://br3w.app", "https://www.br3w.app"]
-        : "http://localhost:3000",
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    origin: [
+      "https://br3w.app",
+      "https://www.br3w.app",
+      "https://brew-git-feature-frontend-setup-br3w.vercel.app",
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   }),
 );
+
+app.use(express.json());
 
 //Will parse the cookie header upon request and exposes the
 //cookies data property req.cookie
