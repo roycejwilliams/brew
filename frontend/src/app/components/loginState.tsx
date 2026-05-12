@@ -75,23 +75,20 @@ function LoginState({ active, setActive, isMobile }: ActiveStateProp) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
-          className="flex items-center gap-2 z-50"
+          className="flex flex-col items-center gap-3"
         >
           <span className="text-[10px] tracking-[3px] uppercase text-white/25 font-medium">
             Private Beta
           </span>
-        </motion.div>
-
-        {/* Logo */}
-        <motion.div
-          layout
-          className="flex items-center justify-center w-10 h-10 rounded-full"
-          style={{
-            background: "rgba(255,255,255,0.06)",
-            border: "1px solid rgba(255,255,255,0.1)",
-          }}
-        >
-          <Asterisk size={18} color="rgba(255,255,255,0.7)" />
+          <div
+            className="flex items-center justify-center w-10 h-10 rounded-full"
+            style={{
+              background: "rgba(255,255,255,0.06)",
+              border: "1px solid rgba(255,255,255,0.1)",
+            }}
+          >
+            <Asterisk size={18} color="rgba(255,255,255,0.7)" />
+          </div>
         </motion.div>
 
         {/* Header — hide on success */}
