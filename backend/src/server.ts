@@ -120,38 +120,21 @@ const userRole = (role: string) => {
 
 // APPLICATION FLOW
 // Create an application
-app.post(
-  "/applications",
-  async (req: Request<ApplicationProp>, res: Response, next: NextFunction) => {
-    if (!req.body) {
-      return res.status(400).send("Request body cannot be empty.");
-    }
-
-    const { first_name, last_name, email } = req.body;
-
-    if (!first_name || !last_name || !email) {
-      const missing = ["first_name", "last_name", "email"].find(
-        (field) => !req.body[field],
-      );
-
-      return res.status(400).send(`${missing} is required.`);
-    }
-
-    try {
-      const insertApp = await pool.query(
-        "INSERT INTO applications (first_name, last_name, email) VALUES ($1, $2, $3) RETURNING *",
-        [first_name, last_name, email],
-      );
-
-      const createApp = insertApp.rows[0];
-      return res.status(201).send({
-        success: true,
-        data: createApp,
-      });
-    } catch (error) {
-      next(error);
-    }
-  },
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      const allowed =
+        origin === "https://br3w.app" ||
+        /^https:\/\/brew-.*\.vercel\.app$/.test(origin);
+      allowed
+        ? callback(null, true)
+        : callback(new Error("Not allowed by CORS"));
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  }),
 );
 
 // Get all applications (admin only)
