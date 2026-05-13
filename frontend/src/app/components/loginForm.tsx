@@ -157,7 +157,7 @@ function LoginForm({ state, setState }: Phase) {
                 We sent a 6-digit code to your email.
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 w-full">
               {otp.map((digit, i) => (
                 <input
                   key={i}

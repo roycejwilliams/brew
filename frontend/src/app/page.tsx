@@ -5,7 +5,6 @@ import LoginState from "./components/loginState";
 import { motion, AnimatePresence } from "motion/react";
 import { useUserStore } from "@/stores/useUserStore";
 import { useRouter } from "next/navigation";
-import Plasma from "./components/Plasma";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -57,72 +56,72 @@ export default function Login() {
 
   return (
     <section className="relative h-dvh flex justify-center items-center overflow-hidden bg-[#0c0c0c]">
-      {/* Background — wait for isMobile to resolve before rendering */}
-      {isMobile !== null && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          style={{
-            width: "100%",
-            height: "100%",
-            position: "absolute",
-            zIndex: 0,
-            willChange: isMobile ? undefined : "transform",
-          }}
+      {/* Background */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="absolute inset-0 z-0 overflow-hidden"
+      >
+        <div
+          className="w-full h-full relative"
+          style={{ background: "#0c0c0c" }}
         >
-          {isMobile ? (
-            <div className="w-full h-full" style={{ background: "#0c0c0c" }}>
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: "-10%",
-                  left: "-10%",
-                  width: "70%",
-                  height: "65%",
-                  background:
-                    "radial-gradient(ellipse, rgba(255,80,30,0.18) 0%, rgba(180,50,10,0.08) 40%, transparent 70%)",
-                  filter: "blur(40px)",
-                }}
-              />
-              <div
-                style={{
-                  position: "absolute",
-                  top: "-5%",
-                  right: "-10%",
-                  width: "60%",
-                  height: "55%",
-                  background:
-                    "radial-gradient(ellipse, rgba(18,18,18,0.9) 0%, rgba(10,10,10,0.5) 40%, transparent 70%)",
-                  filter: "blur(30px)",
-                }}
-              />
-              <div
-                style={{
-                  position: "absolute",
-                  top: "30%",
-                  left: "50%",
-                  transform: "translateX(-50%)",
-                  width: "80%",
-                  height: "40%",
-                  background:
-                    "radial-gradient(ellipse, rgba(255,60,20,0.06) 0%, transparent 65%)",
-                  filter: "blur(50px)",
-                }}
-              />
-            </div>
-          ) : (
-            <Plasma
-              color="#ff6b35"
-              speed={0.6}
-              direction="forward"
-              scale={1.1}
-              opacity={0.5}
-              mouseInteractive={false}
-            />
-          )}
-        </motion.div>
-      )}
+          {/* Primary warm glow — bottom left */}
+          <div
+            className="absolute animate-drift-slow"
+            style={{
+              bottom: "-15%",
+              left: "-10%",
+              width: "75%",
+              height: "70%",
+              background:
+                "radial-gradient(ellipse, rgba(255,80,30,0.22) 0%, rgba(180,50,10,0.08) 40%, transparent 70%)",
+              filter: "blur(60px)",
+            }}
+          />
+          {/* Secondary glow — top right */}
+          <div
+            className="absolute animate-drift-medium"
+            style={{
+              top: "-10%",
+              right: "-15%",
+              width: "65%",
+              height: "60%",
+              background:
+                "radial-gradient(ellipse, rgba(255,107,53,0.12) 0%, rgba(200,60,20,0.04) 45%, transparent 70%)",
+              filter: "blur(50px)",
+            }}
+          />
+          {/* Center ambient glow */}
+          <div
+            className="absolute animate-drift-center"
+            style={{
+              top: "25%",
+              left: "50%",
+              transform: "translateX(-50%)",
+              width: "90%",
+              height: "50%",
+              background:
+                "radial-gradient(ellipse, rgba(255,60,20,0.07) 0%, transparent 60%)",
+              filter: "blur(70px)",
+            }}
+          />
+          {/* Subtle cool shadow — top */}
+          <div
+            className="absolute"
+            style={{
+              top: "-5%",
+              left: "20%",
+              width: "60%",
+              height: "40%",
+              background:
+                "radial-gradient(ellipse, rgba(10,10,10,0.8) 0%, transparent 70%)",
+              filter: "blur(40px)",
+            }}
+          />
+        </div>
+      </motion.div>
 
       <AnimatePresence mode="wait">
         {user?.id && !transition && (
@@ -190,7 +189,7 @@ export default function Login() {
             className="z-10 w-full flex justify-center px-4"
           >
             <LoginState
-              isMobile={isMobile!}
+              isMobile={isMobile ?? false}
               active={active}
               setActive={setActive}
             />

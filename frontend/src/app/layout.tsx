@@ -15,6 +15,27 @@ export const metadata: Metadata = {
         type: "image/svg+xml",
       },
     ],
+    apple: "/apple-icon-76x76.png",
+  },
+  openGraph: {
+    title: "B R 3 W",
+    description: "If you know, you know.",
+    url: "https://br3w.app",
+    siteName: "BR3W",
+    images: [
+      {
+        url: "/site-logo.jpg",
+        width: 1200,
+        height: 630,
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "BR3W",
+    description: "If you know, you know.",
+    images: ["/site-logo.jpg"],
   },
 };
 

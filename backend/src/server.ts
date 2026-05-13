@@ -1,3 +1,4 @@
+import "dotenv/config";
 import pool from "./db/db.js";
 import express, {
   type Request,
@@ -26,20 +27,21 @@ const limiter = rateLimit({
   statusCode: 429,
 });
 
+app.use(express.json());
 app.use(
   cors({
-    origin: [
-      "https://br3w.app",
-      "https://www.br3w.app",
-      "https://brew-git-feature-frontend-setup-br3w.vercel.app",
-    ],
+    origin:
+      process.env.NODE_ENV === "production"
+        ? [
+            "https://br3w.app",
+            "https://https://brew-git-feature-frontend-setup-br3w.vercel.app/",
+          ]
+        : "http://localhost:3000",
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   }),
 );
-
-app.use(express.json());
 
 //Will parse the cookie header upon request and exposes the
 //cookies data property req.cookie
@@ -118,51 +120,21 @@ const userRole = (role: string) => {
 
 // APPLICATION FLOW
 // Create an application
-app.post(
-  "/applications",
-  async (req: Request<ApplicationProp>, res: Response, next: NextFunction) => {
-    if (!req.body) {
-      return res.status(400).send("Request body cannot be empty.");
-    }
-
-    const { first_name, last_name, email, phone_number, work_link, reason } =
-      req.body;
-
-    if (
-      !first_name ||
-      !last_name ||
-      !email ||
-      !phone_number ||
-      !work_link ||
-      !reason
-    ) {
-      const missing = [
-        "first_name",
-        "last_name",
-        "email",
-        "phone_number",
-        "work_link",
-        "reason",
-      ].find((field) => !req.body[field]);
-
-      return res.status(400).send(`${missing} is required.`);
-    }
-
-    try {
-      const insertApp = await pool.query(
-        "INSERT INTO applications (first_name, last_name, email, phone_number, work_link, reason) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
-        [first_name, last_name, email, phone_number, work_link, reason],
-      );
-
-      const createApp = insertApp.rows[0];
-      return res.status(201).send({
-        success: true,
-        data: createApp,
-      });
-    } catch (error) {
-      next(error);
-    }
-  },
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      const allowed =
+        origin === "https://br3w.app" ||
+        /^https:\/\/brew-.*\.vercel\.app$/.test(origin);
+      allowed
+        ? callback(null, true)
+        : callback(new Error("Not allowed by CORS"));
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  }),
 );
 
 // Get all applications (admin only)
