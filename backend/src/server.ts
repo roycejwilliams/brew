@@ -153,6 +153,41 @@ app.get(
   },
 );
 
+//create application
+app.post(
+  "/applications",
+  async (req: Request<ApplicationProp>, res: Response, next: NextFunction) => {
+    if (!req.body) {
+      return res.status(400).send("Request body cannot be empty.");
+    }
+
+    const { first_name, last_name, email } = req.body;
+
+    if (!first_name || !last_name || !email) {
+      const missing = ["first_name", "last_name", "email"].find(
+        (field) => !req.body[field],
+      );
+
+      return res.status(400).send(`${missing} is required.`);
+    }
+
+    try {
+      const insertApp = await pool.query(
+        "INSERT INTO applications (first_name, last_name, email) VALUES ($1, $2, $3) RETURNING *",
+        [first_name, last_name, email],
+      );
+
+      const createApp = insertApp.rows[0];
+      return res.status(201).send({
+        success: true,
+        data: createApp,
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
 //OTP status merger
 const otpMerge = (status: string) => {
   return async function (req: Request, res: Response, next: NextFunction) {
