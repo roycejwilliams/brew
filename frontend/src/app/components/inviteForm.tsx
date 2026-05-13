@@ -18,14 +18,9 @@ function InviteForm({ state, setState }: Phase) {
     first_name: "",
     last_name: "",
     email: "",
-    phone_number: "",
-    work_link: "",
-    reason: "",
   });
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
@@ -74,71 +69,24 @@ function InviteForm({ state, setState }: Phase) {
             </div>
           </div>
 
-          <div className="flex gap-2">
-            <div className="flex flex-col gap-2 flex-1">
-              <p className="text-[10px] tracking-[3px] uppercase text-white/25">
-                Email
-              </p>
-              <input
-                name="email"
-                type="email"
-                value={form.email}
-                onChange={handleChange}
-                className={inputClass}
-                placeholder="your@email.com"
-                required
-              />
-            </div>
-            <div className="flex flex-col gap-2 flex-1">
-              <p className="text-[10px] tracking-[3px] uppercase text-white/25">
-                Phone
-              </p>
-              <input
-                name="phone_number"
-                type="tel"
-                value={form.phone_number}
-                onChange={handleChange}
-                className={inputClass}
-                placeholder="Phone number"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="flex gap-2">
-            <div className="flex flex-col gap-2 flex-1">
-              <p className="text-[10px] tracking-[3px] uppercase text-white/25">
-                Work
-              </p>
-              <input
-                name="work_link"
-                type="url"
-                value={form.work_link}
-                onChange={handleChange}
-                className={inputClass}
-                placeholder="Portfolio link"
-                required
-              />
-            </div>
-            <div className="flex flex-col gap-2 flex-1">
-              <p className="text-[10px] tracking-[3px] uppercase text-white/25">
-                Why
-              </p>
-              <input
-                name="reason"
-                type="text"
-                value={form.reason}
-                onChange={handleChange}
-                className={inputClass}
-                placeholder="Why B R 3 W?"
-                required
-              />
-            </div>
+          <div className="flex flex-col gap-2">
+            <p className="text-[10px] tracking-[3px] uppercase text-white/25">
+              Email
+            </p>
+            <input
+              name="email"
+              type="email"
+              value={form.email}
+              onChange={handleChange}
+              className={inputClass}
+              placeholder="your@email.com"
+              required
+            />
           </div>
 
           <motion.button
             onClick={() =>
-              createApplication(form, {
+              createApplication(form as ApplicationProp, {
                 onSuccess: () => setState("pending"),
                 onError: () => setState("form"),
               })
