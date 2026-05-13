@@ -32,7 +32,10 @@ app.use(
   cors({
     origin:
       process.env.NODE_ENV === "production"
-        ? ["https://br3w.app", "https://brew-im5upkvg4-br3w.vercel.app/"]
+        ? [
+            "https://br3w.app",
+            "https://https://brew-git-feature-frontend-setup-br3w.vercel.app/",
+          ]
         : "http://localhost:3000",
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
