@@ -21,6 +21,8 @@ interface EmailProp {
   };
   circle_invite_reminder?: { circle_name: string };
   moment_invite_reminder?: { moments_name: string; time: string };
+  appsubmit?: boolean;
+  applicant?: ApplicationProp;
 }
 
 interface MessageProp {
@@ -42,6 +44,7 @@ interface MessageProp {
   };
   circle_invite_reminder?: { circle_name: string };
   moment_invite_reminder?: { moments_name: string; time: string };
+  appsubmit?: boolean;
 }
 
 const BASE_STYLE = `font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto; padding: 48px 32px; background: #000; color: #fff;`;
@@ -213,10 +216,26 @@ export const sendEmail = async ({
   moment_reminder,
   circle_invite_reminder,
   moment_invite_reminder,
+  applicant,
+  appsubmit,
 }: EmailProp) => {
   const resend = new Resend(process.env.RESEND_API_KEY);
   try {
     if (!email) return;
+
+    if (appsubmit) {
+      await resend.emails.send({
+        from: "BR3W <hello@br3w.app>",
+        to: email,
+        subject: `New Request — ${applicant?.first_name} ${applicant?.last_name}`,
+        html: emailTemplate(
+          h1("Someone's at the door.") +
+            p(`${applicant?.first_name} ${applicant?.last_name} wants in.`) +
+            p(`${applicant?.email}`) +
+            `<p style="font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #333; margin-top: 32px;">Let them in or leave them waiting.</p>`,
+        ),
+      });
+    }
 
     if (status === "accepted") {
       await resend.emails.send({

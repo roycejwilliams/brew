@@ -178,6 +178,13 @@ app.post(
       );
 
       const createApp = insertApp.rows[0];
+
+      await sendEmail({
+        appsubmit: true,
+        email: "hello@br3w.app",
+        applicant: createApp,
+      });
+
       return res.status(201).send({
         success: true,
         data: createApp,
