@@ -181,7 +181,7 @@ app.post(
 
       await sendEmail({
         appsubmit: true,
-        email: "hello@br3w.app",
+        email: "roycewilliamsj@gmail.com",
         applicant: createApp,
       });
 
