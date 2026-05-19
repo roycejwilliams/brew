@@ -25,6 +25,13 @@ const gridCols: Record<GridDensity, string> = {
   dense: "grid-cols-4",
 };
 
+// On mobile, cap at 2 columns regardless of density
+const mobileGridCols: Record<GridDensity, string> = {
+  spacious: "grid-cols-1",
+  default: "grid-cols-2",
+  dense: "grid-cols-2",
+};
+
 const gridGap: Record<GridDensity, number> = {
   spacious: 16,
   default: 10,
@@ -74,10 +81,7 @@ export default function EventRecap() {
         .from("brew-image")
         .getPublicUrl(fileName);
 
-      addPhoto({
-        moment_id: eventCard.id,
-        image_url: urlData.publicUrl,
-      });
+      addPhoto({ moment_id: eventCard.id, image_url: urlData.publicUrl });
     } catch (err) {
       console.error("Upload failed:", err);
     } finally {
@@ -91,8 +95,7 @@ export default function EventRecap() {
   };
 
   return (
-    <section className="flex flex-col gap-10">
-      {/* Hidden file input */}
+    <section className="flex flex-col gap-8 sm:gap-10">
       <input
         ref={fileInputRef}
         type="file"
@@ -102,27 +105,33 @@ export default function EventRecap() {
       />
 
       {/* Header */}
-      <div className="flex items-start justify-between gap-8">
-        <div className="flex flex-col gap-2 max-w-sm">
-          <p className="text-white/20 text-[10px] tracking-widest uppercase font-medium">
+      <div className="flex items-start justify-between gap-4 sm:gap-8">
+        <div className="flex flex-col gap-2 min-w-0">
+          <p
+            className="text-[10px] tracking-widest uppercase font-medium"
+            style={{ color: "rgba(255,255,255,0.2)" }}
+          >
             Recap
           </p>
           <h2
             className="text-white font-semibold tracking-[-0.5px] leading-tight"
-            style={{ fontSize: 28 }}
+            style={{ fontSize: "clamp(20px, 5vw, 28px)" }}
           >
             {hasPhotos ? "Join the recap" : "Be the first to share"}
           </h2>
-          <p className="text-white/35 text-sm tracking-[-0.1px] leading-relaxed">
+          <p
+            className="text-sm tracking-[-0.1px] leading-relaxed"
+            style={{ color: "rgba(255,255,255,0.35)" }}
+          >
             {hasPhotos
               ? "Add your moments from the night and help shape the story."
               : "Upload your photos from the night — it starts with you."}
           </p>
         </div>
 
-        {/* Density toggles */}
+        {/* Density toggles — hidden on mobile, not useful at small sizes */}
         <div
-          className="flex items-center gap-1 p-1 rounded-lg"
+          className="hidden sm:flex items-center gap-1 p-1 rounded-lg shrink-0"
           style={{
             background: "rgba(255,255,255,0.04)",
             border: "1px solid rgba(255,255,255,0.07)",
@@ -173,7 +182,7 @@ export default function EventRecap() {
       {/* Grid */}
       <motion.div
         layout
-        className={`w-full grid ${gridCols[density]}`}
+        className={`w-full grid ${mobileGridCols[density]} sm:${gridCols[density]}`}
         animate={{ gap: gridGap[density] }}
         transition={{ duration: 0.35, ease: EASE }}
         style={{ willChange: "transform" }}
@@ -183,20 +192,19 @@ export default function EventRecap() {
             <motion.div
               key={photo.id}
               layout="position"
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.96 }}
-              transition={{ duration: 0.35, delay: i * 0.03, ease: EASE }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3, delay: i * 0.03, ease: EASE }}
               whileHover="hover"
               className="relative overflow-hidden group flex flex-col gap-1.5"
             >
-              <div className="aspect-square relative overflow-hidden rounded-sm">
+              <div className="aspect-square relative overflow-hidden rounded-lg">
                 <Image
                   src={photo.image_url}
                   fill
                   alt=""
                   className="object-cover"
-                  style={{ transition: "transform 0.5s ease" }}
                 />
                 <motion.div
                   className="absolute inset-0 pointer-events-none"
@@ -206,25 +214,28 @@ export default function EventRecap() {
                   style={{ background: "rgba(0,0,0,0.25)" }}
                 />
 
-                {/* Delete button — only for uploader */}
+                {/* Delete — always visible on mobile, hover on desktop */}
                 {photo.uploader_id === user?.id && (
                   <motion.button
                     initial={{ opacity: 0 }}
                     variants={{ hover: { opacity: 1 } }}
-                    transition={{ duration: 0.2 }}
+                    // Always show on mobile
+                    className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center cursor-pointer z-10 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-150"
+                    style={{
+                      background: "rgba(0,0,0,0.7)",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                    }}
                     onClick={() =>
                       deletePhoto({
                         moment_id: eventCard?.id as string,
                         photo_id: photo.id,
                       })
                     }
-                    className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center cursor-pointer z-10"
-                    style={{
-                      background: "rgba(0,0,0,0.7)",
-                      border: "1px solid rgba(255,255,255,0.1)",
-                    }}
                   >
-                    <span className="text-white/60 text-xs leading-none">
+                    <span
+                      className="leading-none text-xs"
+                      style={{ color: "rgba(255,255,255,0.6)" }}
+                    >
                       ✕
                     </span>
                   </motion.button>
@@ -241,7 +252,10 @@ export default function EventRecap() {
                     className="object-cover"
                   />
                 </div>
-                <span className="text-white/30 text-[10px] tracking-[-0.1px] truncate">
+                <span
+                  className="text-[10px] tracking-[-0.1px] truncate"
+                  style={{ color: "rgba(255,255,255,0.3)" }}
+                >
                   {photo.username}
                 </span>
               </div>
@@ -251,11 +265,10 @@ export default function EventRecap() {
 
         {/* Upload card */}
         <motion.div
-          whileHover={{ y: -3 }}
           whileTap={{ scale: 0.98 }}
-          transition={{ duration: 0.25, ease: EASE }}
+          transition={{ duration: 0.2, ease: EASE }}
           onClick={() => !uploading && fileInputRef.current?.click()}
-          className="aspect-square flex flex-col items-center justify-center gap-4 cursor-pointer rounded-sm"
+          className="aspect-square flex flex-col items-center justify-center gap-3 sm:gap-4 cursor-pointer rounded-lg"
           style={{
             border: "1px dashed rgba(255,255,255,0.1)",
             background: "rgba(255,255,255,0.02)",
@@ -263,21 +276,30 @@ export default function EventRecap() {
           }}
         >
           {uploading ? (
-            <div className="w-5 h-5 rounded-full border-2 border-white/20 border-t-white/60 animate-spin" />
+            <div
+              className="w-5 h-5 rounded-full border-2 animate-spin"
+              style={{
+                borderColor: "rgba(255,255,255,0.15)",
+                borderTopColor: "rgba(255,255,255,0.6)",
+              }}
+            />
           ) : (
             <>
               <div
                 className="flex items-center justify-center rounded-full"
                 style={{
-                  width: 40,
-                  height: 40,
+                  width: 36,
+                  height: 36,
                   background: "rgba(255,255,255,0.06)",
                   border: "1px solid rgba(255,255,255,0.08)",
                 }}
               >
-                <PlusIcon size={18} color="#fff" />
+                <PlusIcon size={16} color="#fff" />
               </div>
-              <p className="text-white/25 text-xs tracking-[-0.1px] text-center px-4">
+              <p
+                className="text-[10px] sm:text-xs tracking-[-0.1px] text-center px-3"
+                style={{ color: "rgba(255,255,255,0.25)" }}
+              >
                 Drop your recap here.
               </p>
             </>

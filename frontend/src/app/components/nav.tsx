@@ -9,8 +9,6 @@ import { motion, AnimatePresence, Variants } from "motion/react";
 import { CloseIcon, MenuIcon, PinIcon, SpinnerIcon } from "./icons";
 import { openEventCard } from "@/stores/store";
 import { useUserStore } from "@/stores/useUserStore";
-import Grainient from "./Grainient";
-
 export default function Nav() {
   const path = usePathname();
   const router = useRouter();
@@ -72,7 +70,7 @@ export default function Nav() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        className="absolute left-8 top-0 flex items-center mt-8 z-40"
+        className="absolute left-4 top-4 flex items-center  z-40"
       >
         {/* Main Nav Container */}
         <motion.div
@@ -245,39 +243,56 @@ export default function Nav() {
       </motion.div>
 
       {/* Backdrop Overlay */}
+      {/* Backdrop Overlay */}
       <AnimatePresence>
         {openNav && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed w-full h-screen opacity-0 bg-[#1a1a1a]/60 inset-0 backdrop-blur-xl z-30 overflow-hidden"
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed w-full h-screen inset-0 z-30 overflow-hidden"
+            style={{ background: "#0c0c0c" }}
           >
-            <Grainient
-              color1="#000000"
-              color2="#ff6b35"
-              color3="#000000"
-              timeSpeed={0.25}
-              colorBalance={-0.01}
-              warpStrength={1}
-              warpFrequency={5}
-              warpSpeed={0.7}
-              warpAmplitude={50}
-              blendAngle={0}
-              blendSoftness={0.06}
-              rotationAmount={500}
-              noiseScale={2}
-              grainAmount={0.04}
-              grainScale={2}
-              grainAnimated={false}
-              contrast={1.65}
-              gamma={1}
-              saturation={1}
-              centerX={0}
-              centerY={0}
-              zoom={0.9}
-              className="opacity-50 backdrop-blur-3xl"
+            {/* Bottom-left warm ember */}
+            <div
+              style={{
+                position: "absolute",
+                bottom: "-10%",
+                left: "-10%",
+                width: "70%",
+                height: "65%",
+                background:
+                  "radial-gradient(ellipse, rgba(255,80,30,0.18) 0%, rgba(180,50,10,0.08) 40%, transparent 70%)",
+                filter: "blur(40px)",
+              }}
+            />
+            {/* Top-right neutral dark */}
+            <div
+              style={{
+                position: "absolute",
+                top: "-5%",
+                right: "-10%",
+                width: "60%",
+                height: "55%",
+                background:
+                  "radial-gradient(ellipse, rgba(18,18,18,0.9) 0%, rgba(10,10,10,0.5) 40%, transparent 70%)",
+                filter: "blur(30px)",
+              }}
+            />
+            {/* Center subtle glow */}
+            <div
+              style={{
+                position: "absolute",
+                top: "30%",
+                left: "50%",
+                transform: "translateX(-50%)",
+                width: "80%",
+                height: "40%",
+                background:
+                  "radial-gradient(ellipse, rgba(255,60,20,0.06) 0%, transparent 65%)",
+                filter: "blur(50px)",
+              }}
             />
           </motion.div>
         )}

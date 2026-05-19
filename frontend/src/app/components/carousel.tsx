@@ -22,7 +22,7 @@ export default function Carousel({ width, height, moments }: CarouselProps) {
     nextBtnDisabled,
     onPrevButtonClick,
     onNextButtonClick,
-  } = useCarousel(moments);
+  } = useCarousel();
 
   return (
     <section className="w-full relative h-full">

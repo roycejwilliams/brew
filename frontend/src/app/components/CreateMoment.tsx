@@ -1,3 +1,4 @@
+"use client";
 import { motion } from "motion/react";
 import React, { useState } from "react";
 import SlashIcon from "./icons/slashIcon";
@@ -30,84 +31,108 @@ export default function CreateMoment({ setCardAction }: CreateMomentProp) {
   const [hovered, setHovered] = useState<"create" | "invite" | null>("create");
 
   return (
-    <div className="flex gap-x-8 justify-center items-center mx-auto max-w-xl">
-      {cards.map(({ key, label, sub, Icon, iconProps }) => (
-        <motion.button
-          key={key}
-          onMouseEnter={() => setHovered(key)}
-          onMouseLeave={() => setHovered(null)}
-          onClick={() => setCardAction(key)}
-          className="cursor-pointer text-center group"
-          animate={{ y: hovered === key ? -4 : 0 }}
-          transition={{ duration: 0.5, ease: EASE }}
-        >
-          <motion.div
-            animate={{
-              scale: hovered === key ? 1.02 : 1,
-              borderColor:
-                hovered === key
-                  ? "rgba(255,255,255,0.18)"
+    <div className="flex flex-col sm:flex-row gap-3 sm:gap-5 justify-center items-stretch mx-auto w-full max-w-sm sm:max-w-xl px-4 sm:px-2">
+      {cards.map(({ key, label, sub, Icon, iconProps }) => {
+        const isActive = hovered === key;
+        return (
+          <motion.button
+            key={key}
+            onMouseEnter={() => setHovered(key)}
+            onMouseLeave={() => setHovered(null)}
+            onFocus={() => setHovered(key)}
+            onClick={() => setCardAction(key)}
+            whileTap={{ scale: 0.98 }}
+            className="cursor-pointer w-full sm:flex-1 sm:min-w-0"
+            animate={{ opacity: isActive ? 1 : 0.55 }}
+            transition={{ duration: 0.3, ease: EASE }}
+          >
+            <motion.div
+              animate={{
+                borderColor: isActive
+                  ? "rgba(255,255,255,0.14)"
                   : "rgba(255,255,255,0.06)",
-              background:
-                hovered === key
+                background: isActive
                   ? "rgba(255,255,255,0.05)"
                   : "rgba(255,255,255,0.02)",
-            }}
-            transition={{ duration: 0.5, ease: EASE }}
-            className="w-56 h-56 rounded-xl relative overflow-hidden flex justify-center items-center"
-            style={{ border: "1px solid rgba(255,255,255,0.06)" }}
-          >
-            {/* Grain */}
-            <div
-              className="absolute inset-0 opacity-10 pointer-events-none"
+              }}
+              transition={{ duration: 0.3, ease: EASE }}
+              className="w-full rounded-2xl relative overflow-hidden flex sm:flex-col sm:aspect-square flex-row items-center gap-5 px-5 py-5 sm:justify-center"
               style={{
-                backgroundImage:
-                  "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E\")",
-                backgroundSize: "120px",
+                border: "1px solid rgba(255,255,255,0.06)",
+                boxShadow: isActive
+                  ? "0 8px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06)"
+                  : "0 2px 8px rgba(0,0,0,0.2)",
               }}
-            />
-
-            {/* Subtle inner glow on hover */}
-            <motion.div
-              className="absolute inset-0 pointer-events-none rounded-xl"
-              animate={{
-                opacity: hovered === key ? 1 : 0,
-              }}
-              transition={{ duration: 0.5, ease: EASE }}
-              style={{
-                boxShadow: "inset 0 0 40px rgba(255,255,255,0.03)",
-              }}
-            />
-
-            <motion.div
-              animate={{
-                opacity: hovered === key ? 1 : 0.35,
-                scale: hovered === key ? 1.05 : 1,
-              }}
-              transition={{ duration: 0.5, ease: EASE }}
             >
-              <Icon {...iconProps} />
+              {/* Top shimmer */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: 1,
+                  background:
+                    "linear-gradient(90deg, transparent, rgba(255,255,255,0.07), transparent)",
+                  pointerEvents: "none",
+                }}
+              />
+
+              {/* Grain */}
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  backgroundImage:
+                    "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E\")",
+                  backgroundSize: "120px",
+                  opacity: 0.07,
+                }}
+              />
+
+              {/* Hover glow */}
+              <motion.div
+                className="absolute inset-0 pointer-events-none"
+                animate={{ opacity: isActive ? 1 : 0 }}
+                transition={{ duration: 0.3, ease: EASE }}
+                style={{
+                  background:
+                    "radial-gradient(ellipse at center, rgba(255,80,30,0.08) 0%, transparent 70%)",
+                }}
+              />
+
+              {/* Icon */}
+              <motion.div
+                animate={{
+                  opacity: isActive ? 1 : 0.3,
+                  scale: isActive ? 1.04 : 1,
+                }}
+                transition={{ duration: 0.3, ease: EASE }}
+                className="relative z-10 shrink-0 flex items-center justify-center w-14 h-14 sm:w-auto sm:h-auto"
+              >
+                <Icon {...iconProps} />
+              </motion.div>
+
+              {/* Text */}
+              <div className="relative z-10 flex flex-col gap-0.5 text-left sm:text-center sm:mt-3">
+                <p className="text-sm text-white font-medium tracking-[-0.2px]">
+                  {label}
+                </p>
+                <p
+                  className="text-[11px] leading-relaxed tracking-[-0.1px]"
+                  style={{
+                    color: isActive
+                      ? "rgba(255,255,255,0.4)"
+                      : "rgba(255,255,255,0.2)",
+                    transition: "color 0.3s",
+                  }}
+                >
+                  {sub}
+                </p>
+              </div>
             </motion.div>
-          </motion.div>
-
-          <motion.div
-            className="mt-4 flex flex-col gap-0.5"
-            animate={{ opacity: hovered === key ? 1 : 0.4 }}
-            transition={{ duration: 0.5, ease: EASE }}
-          >
-            <p className="text-sm  text-white font-medium tracking-[-0.1px]">
-              {label}
-            </p>
-            <motion.p
-              className="text-xs text-white/50 "
-              animate={{ opacity: hovered === key ? 0.5 : 0.25 }}
-              transition={{ duration: 0.5, ease: EASE }}
-            >
-              {sub}
-            </motion.p>
-          </motion.div>
-        </motion.button>
-      ))}
+          </motion.button>
+        );
+      })}
     </div>
   );
 }

@@ -149,7 +149,7 @@ function LoginForm({ state, setState }: Phase) {
           className="flex flex-col gap-5"
         >
           <div className="flex flex-col gap-3">
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-1 items-center">
               <p className="text-[10px] tracking-[3px] uppercase text-white/25">
                 Verification code
               </p>
@@ -171,7 +171,7 @@ function LoginForm({ state, setState }: Phase) {
                   onChange={(e) => handleOtpChange(e.target.value, i)}
                   onKeyDown={(e) => handleKeyDown(e, i)}
                   onPaste={handlePaste}
-                  className="flex-1 h-12 text-base font-medium text-white text-center rounded-md focus:outline-none transition-colors duration-150"
+                  className="flex-1 h-12 w-full text-base font-medium text-white text-center rounded-md focus:outline-none transition-colors duration-150"
                   style={{
                     background: digit
                       ? "rgba(255,255,255,0.08)"

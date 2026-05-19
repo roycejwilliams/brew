@@ -1,4 +1,5 @@
-import { AnimatePresence, motion, Variants } from "motion/react";
+"use client";
+import { AnimatePresence, motion } from "motion/react";
 import React, { useState } from "react";
 import CircleControls from "./circleControls";
 import CircleScene from "./CircleScene";
@@ -11,33 +12,19 @@ import {
 } from "@/hooks/useCircles";
 import { useUserStore } from "@/stores/useUserStore";
 import { ChevronRight, X } from "lucide-react";
-import InvitePeople from "./InvitePeople";
+import InvitePeople, { InviteUserProp } from "./InvitePeople";
 import { useInviteMemberToCircle } from "@/hooks/useInvites";
-
-const buttonContainerVariants: Variants = {
-  hidden: {},
-  visible: {
-    transition: { staggerChildren: 0.08, delayChildren: 0.2 },
-  },
-};
-
-const buttonVariants: Variants = {
-  hidden: { opacity: 0, scale: 0.8, y: 12 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    y: 0,
-    transition: { duration: 0.35, ease: [0.25, 0.1, 0.25, 1] },
-  },
-};
+import useEmblaCarousel from "embla-carousel-react";
 
 export default function ManageCircle() {
   const [markerIndex, setMarkerIndex] = useState<number>(0);
   const [query, setQuery] = useState<string>("");
-  const [hoveredButton, setHoveredButton] = useState<string | null>(null);
   const [showAddMember, setShowAddMember] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [selectedUsers, setSelectedUsers] = useState<any[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<InviteUserProp[]>([]);
+  const [emblaRef] = useEmblaCarousel({
+    dragFree: true,
+    containScroll: "trimSnaps",
+  });
 
   const { user } = useUserStore();
   const { data: circlesData, isLoading } = useGetCirclesWithMembers(
@@ -52,17 +39,14 @@ export default function ManageCircle() {
   const { mutate: removeMember } = useRemoveMemberBasedOnRole();
   const { mutate: inviteMember } = useInviteMemberToCircle();
 
-  const nextMarker = () => {
+  const nextMarker = () =>
     setMarkerIndex((i) => (i + 1) % (featured?.members?.length ?? 1));
-  };
-
-  const prevMarker = () => {
+  const prevMarker = () =>
     setMarkerIndex(
       (i) =>
         (i - 1 + (featured?.members?.length ?? 1)) %
         (featured?.members?.length ?? 1),
     );
-  };
 
   const handleSelectedCircle = (circle: CircleProp) => {
     setSelectedManageCircle((prev) => {
@@ -97,7 +81,7 @@ export default function ManageCircle() {
     : [];
 
   return (
-    <section className="flex-1 shrink-0 relative">
+    <section className="flex-1 h-full overflow-hidden flex flex-col relative">
       {/* Add member modal */}
       <AnimatePresence>
         {showAddMember && (
@@ -105,27 +89,38 @@ export default function ManageCircle() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
             className="fixed inset-0 z-50 flex items-center justify-center"
           >
             <div
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              className="absolute inset-0"
+              style={{
+                background: "rgba(0,0,0,0.7)",
+                backdropFilter: "blur(16px)",
+              }}
               onClick={() => {
                 setShowAddMember(false);
                 setSelectedUsers([]);
               }}
             />
             <motion.div
-              initial={{ opacity: 0, y: 16, scale: 0.97 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 8, scale: 0.97 }}
-              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-              className="relative z-10 w-full max-w-md px-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.18 }}
+              className="relative z-10 w-full max-w-sm sm:max-w-md px-4"
             >
-              <div className="mb-5 text-center space-y-1">
-                <h2 className="text-white/90 text-lg font-medium tracking-[-0.2px]">
+              <div className="flex flex-col gap-1 mb-5 text-center">
+                <h2
+                  className="text-base font-medium tracking-[-0.3px]"
+                  style={{ color: "rgba(255,255,255,0.85)" }}
+                >
                   Add to {featured?.circle_name}
                 </h2>
-                <p className="text-white/30 text-sm tracking-[-0.1px]">
+                <p
+                  className="text-sm tracking-[-0.1px]"
+                  style={{ color: "rgba(255,255,255,0.3)" }}
+                >
                   Search your circles or invite someone new.
                 </p>
               </div>
@@ -139,22 +134,277 @@ export default function ManageCircle() {
         )}
       </AnimatePresence>
 
-      {/* Top bar */}
-      <motion.div
-        className="flex justify-between px-8 pb-4 pt-8 items-start z-20 text-sm backdrop-blur-[10px] bg-[#1b1b1b]/5 border-b border-white/5 shadow-sm absolute top-0 w-full"
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
+      {/* Header */}
+      <div
+        className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 shrink-0 relative z-10"
+        style={{
+          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          background: "rgba(8,8,8,0.6)",
+          backdropFilter: "blur(12px)",
+        }}
       >
-        <h1 className="tracking-[0.15em] font-normal uppercase text-[#555]">
+        <p
+          className="text-[9px] tracking-[3px] uppercase font-medium"
+          style={{ color: "rgba(255,255,255,0.25)" }}
+        >
           {featured?.circle_name ?? "Circles"}
-        </h1>
-      </motion.div>
+        </p>
+        {featured && (
+          <button
+            onClick={() => setShowAddMember(true)}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium tracking-[-0.1px] cursor-pointer transition-all duration-150"
+            style={{
+              background: "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(255,255,255,0.07)",
+              color: "rgba(255,255,255,0.45)",
+            }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.background = "rgba(255,255,255,0.07)")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.background = "rgba(255,255,255,0.04)")
+            }
+          >
+            <PlusCircleIcon className="w-3 h-3" />
+            <span>Add member</span>
+          </button>
+        )}
+      </div>
 
-      <div className="grid grid-cols-4 h-full">
-        {/* Main scene */}
-        <div className="col-span-3 content-center relative">
-          <div className="relative">
+      {/* ── MOBILE LAYOUT ── */}
+      <div className="md:hidden flex-1 flex flex-col overflow-hidden">
+        {/* Circle selector */}
+        <div className="shrink-0 px-4 pt-4 pb-3">
+          <p
+            className="text-[9px] tracking-[2px] uppercase font-medium mb-3"
+            style={{ color: "rgba(255,255,255,0.2)" }}
+          >
+            Circles
+          </p>
+          <div ref={emblaRef} className="overflow-hidden">
+            <div className="flex gap-2">
+              {isLoading
+                ? [0, 1, 2].map((i) => (
+                    <div
+                      key={i}
+                      className="flex-[0_0_auto] h-10 w-32 rounded-xl"
+                      style={{
+                        background: "rgba(255,255,255,0.03)",
+                        border: "1px solid rgba(255,255,255,0.05)",
+                      }}
+                    />
+                  ))
+                : circles.map((circle) => {
+                    const isActive = featured?.id === circle.id;
+                    return (
+                      <motion.button
+                        key={circle.id}
+                        onClick={() => handleSelectedCircle(circle)}
+                        whileTap={{ scale: 0.97 }}
+                        className="flex-[0_0_auto] flex items-center gap-2 px-2.5 py-2 rounded-xl cursor-pointer transition-colors duration-150"
+                        style={{
+                          background: isActive
+                            ? "rgba(255,255,255,0.06)"
+                            : "transparent",
+                          border: isActive
+                            ? "1px solid rgba(255,255,255,0.1)"
+                            : "1px solid rgba(255,255,255,0.05)",
+                        }}
+                      >
+                        <div
+                          className="w-7 h-7 rounded-lg overflow-hidden relative shrink-0"
+                          style={{
+                            border: isActive
+                              ? "1px solid rgba(255,255,255,0.15)"
+                              : "1px solid rgba(255,255,255,0.07)",
+                          }}
+                        >
+                          {circle.circle_image ? (
+                            <Image
+                              src={circle.circle_image}
+                              alt={circle.circle_name}
+                              fill
+                              className="object-cover"
+                            />
+                          ) : (
+                            <div
+                              className="w-full h-full flex items-center justify-center text-[9px] font-medium"
+                              style={{
+                                color: "rgba(255,255,255,0.3)",
+                                background: "rgba(255,255,255,0.05)",
+                              }}
+                            >
+                              {circle.circle_name?.[0]}
+                            </div>
+                          )}
+                        </div>
+                        <div className="text-left">
+                          <p
+                            className="text-[11px] font-medium tracking-[-0.1px] whitespace-nowrap"
+                            style={{
+                              color: isActive
+                                ? "rgba(255,255,255,0.85)"
+                                : "rgba(255,255,255,0.45)",
+                            }}
+                          >
+                            {circle.circle_name}
+                          </p>
+                          <p
+                            className="text-[9px] tracking-[-0.1px]"
+                            style={{ color: "rgba(255,255,255,0.2)" }}
+                          >
+                            {circle.members?.length ?? 0} members
+                          </p>
+                        </div>
+                      </motion.button>
+                    );
+                  })}
+            </div>
+          </div>
+        </div>
+
+        <div
+          className="mx-4"
+          style={{ height: 1, background: "rgba(255,255,255,0.05)" }}
+        />
+
+        {/* Search */}
+        <div className="px-4 pt-3 shrink-0">
+          <div
+            className="rounded-xl overflow-hidden"
+            style={{ border: "1px solid rgba(255,255,255,0.07)" }}
+          >
+            <SearchMap
+              value={query}
+              onChange={(v) => setQuery(v)}
+              autoFocus={false}
+            />
+          </div>
+        </div>
+
+        {/* Member list */}
+        <div className="flex-1 overflow-y-auto px-4 pt-3 pb-24">
+          <AnimatePresence>
+            {filteredMembers.length === 0 ? (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-center py-10 text-[11px] tracking-[-0.1px]"
+                style={{ color: "rgba(255,255,255,0.2)" }}
+              >
+                {query.trim() !== ""
+                  ? `No members match "${query}"`
+                  : "No members yet."}
+              </motion.p>
+            ) : (
+              <div
+                className="rounded-xl overflow-hidden"
+                style={{
+                  background: "rgba(255,255,255,0.02)",
+                  border: "1px solid rgba(255,255,255,0.07)",
+                }}
+              >
+                <div
+                  style={{
+                    height: 1,
+                    background:
+                      "linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)",
+                  }}
+                />
+                {filteredMembers.map(
+                  (member: CircleProp["members"][number], i: number) => (
+                    <motion.div
+                      key={`mobile-${featured?.id}-${member.id}`}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ delay: i * 0.03, duration: 0.15 }}
+                      className="flex items-center gap-3 px-3 py-2.5"
+                      style={{
+                        borderBottom:
+                          i < filteredMembers.length - 1
+                            ? "1px solid rgba(255,255,255,0.05)"
+                            : "none",
+                      }}
+                    >
+                      <div
+                        className="w-9 h-9 rounded-full overflow-hidden relative shrink-0"
+                        style={{ border: "1px solid rgba(255,255,255,0.08)" }}
+                      >
+                        {member.profile_image ? (
+                          <Image
+                            src={member.profile_image}
+                            alt={member.username}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div
+                            className="w-full h-full flex items-center justify-center text-[10px]"
+                            style={{
+                              color: "rgba(255,255,255,0.3)",
+                              background: "rgba(255,255,255,0.05)",
+                            }}
+                          >
+                            {member.first_name?.[0]}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p
+                          className="text-sm font-medium tracking-[-0.1px] truncate"
+                          style={{ color: "rgba(255,255,255,0.82)" }}
+                        >
+                          {member.first_name} {member.last_name}
+                        </p>
+                        <p
+                          className="text-[11px] tracking-[-0.1px]"
+                          style={{ color: "rgba(255,255,255,0.3)" }}
+                        >
+                          @{member.username}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => {
+                          if (!featured) return;
+                          removeMember({
+                            circle: featured as CircleProp,
+                            member: {
+                              member_id: member.id,
+                            } as InviteMembersProp,
+                          });
+                        }}
+                        className="flex items-center justify-center w-7 h-7 rounded-lg cursor-pointer transition-colors duration-150 shrink-0"
+                        style={{
+                          background: "rgba(239,68,68,0.05)",
+                          border: "1px solid rgba(239,68,68,0.1)",
+                          color: "rgba(248,113,113,0.5)",
+                        }}
+                        onMouseEnter={(e) =>
+                          (e.currentTarget.style.background =
+                            "rgba(239,68,68,0.1)")
+                        }
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.background =
+                            "rgba(239,68,68,0.05)")
+                        }
+                      >
+                        <X size={11} />
+                      </button>
+                    </motion.div>
+                  ),
+                )}
+              </div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+
+      {/* ── DESKTOP LAYOUT ── */}
+      <div className="hidden md:flex flex-1 overflow-hidden">
+        {/* Circle scene */}
+        <div className="flex-1 flex flex-col overflow-hidden relative">
+          <div className="flex-1 relative">
             <CircleScene
               circles={circles}
               selectedCircle={featured}
@@ -162,121 +412,96 @@ export default function ManageCircle() {
             />
             <CircleControls nextMarker={nextMarker} prevMarker={prevMarker} />
           </div>
-
-          {/* Action buttons */}
-          <motion.div
-            className="mx-auto w-fit mt-12 flex flex-col items-center"
-            variants={buttonContainerVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            <div className="flex gap-x-6">
-              {[
-                {
-                  icon: <PlusCircleIcon className="w-5 h-5" />,
-                  label: "Add",
-                  color: "rgba(255,255,255,1)",
-                  border: "rgba(255,255,255,0.4)",
-                  textColor: "text-white/60",
-                  onClick: () => setShowAddMember(true),
-                },
-                {
-                  icon: <X className="w-5 h-5" />,
-                  label: "Remove",
-                  color: "rgba(248,113,113,1)",
-                  border: "rgba(248,113,113,0.4)",
-                  textColor: "text-red-400/60",
-                  onClick: () => {
-                    const member = featured?.members?.[markerIndex];
-                    if (!member || !featured) return;
-                    removeMember({
-                      circle: featured as CircleProp,
-                      member: { member_id: member.id } as InviteMembersProp,
-                    });
-                  },
-                },
-              ].map((btn) => (
-                <motion.div
-                  key={btn.label}
-                  className="flex flex-col justify-center space-y-2"
-                  variants={buttonVariants}
-                  onMouseEnter={() => setHoveredButton(btn.label)}
-                  onMouseLeave={() => setHoveredButton(null)}
-                >
-                  <motion.button
-                    onClick={btn.onClick}
-                    className={`w-12 h-12 mx-auto flex justify-center items-center border border-white/10 shadow-lg rounded-full cursor-pointer bg-white/15 ${btn.textColor}`}
-                    whileHover={{
-                      scale: 1.1,
-                      borderColor: btn.border,
-                      color: btn.color,
-                    }}
-                    whileTap={{ scale: 0.95 }}
-                    transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
-                  >
-                    {btn.icon}
-                  </motion.button>
-                  <motion.span
-                    className="text-xs mx-auto text-white/60"
-                    initial={{ opacity: 0, y: 4 }}
-                    animate={
-                      hoveredButton === btn.label
-                        ? { opacity: 1, y: 0 }
-                        : { opacity: 0, y: 4 }
-                    }
-                    transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
-                  >
-                    {btn.label}
-                  </motion.span>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
         </div>
 
         {/* Sidebar */}
-        <div className="col-span-1 border-l border-white/4 relative">
-          <div className="absolute inset-0 bg-linear-to-r from-white/1 to-transparent pointer-events-none" />
-          <div className="relative px-6 pt-32 pb-6 h-full flex flex-col">
+        <div
+          className="w-52 lg:w-64 shrink-0 flex flex-col overflow-hidden relative"
+          style={{ borderLeft: "1px solid rgba(255,255,255,0.06)" }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 1,
+              background:
+                "linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent)",
+              pointerEvents: "none",
+            }}
+          />
+
+          <div className="flex flex-col gap-4 p-4 overflow-y-auto flex-1">
             {/* Circle list */}
-            <div>
-              <h2 className="uppercase text-[11px] tracking-[0.2em] text-white/25 font-medium mb-4">
+            <div className="flex flex-col gap-2">
+              <p
+                className="text-[9px] tracking-[2px] uppercase font-medium"
+                style={{ color: "rgba(255,255,255,0.2)" }}
+              >
                 Circles
-              </h2>
-              <div className="space-y-1">
-                {isLoading ? (
-                  [0, 1, 2].map((i) => (
-                    <div
-                      key={i}
-                      className="h-12 rounded-lg bg-white/3 border border-white/5"
-                    />
-                  ))
-                ) : (
-                  <AnimatePresence>
-                    {circles.map((circle) => {
+              </p>
+              <div className="flex flex-col gap-1">
+                {isLoading
+                  ? [0, 1, 2].map((i) => (
+                      <div
+                        key={i}
+                        className="h-10 rounded-xl"
+                        style={{
+                          background: "rgba(255,255,255,0.03)",
+                          border: "1px solid rgba(255,255,255,0.05)",
+                        }}
+                      />
+                    ))
+                  : circles.map((circle) => {
                       const isActive = featured?.id === circle.id;
                       return (
                         <motion.button
-                          onClick={() => handleSelectedCircle(circle)}
                           key={circle.id}
-                          className={`w-full flex items-center gap-x-3 px-3 py-2.5 rounded-lg cursor-pointer transition-colors duration-200 group relative ${
-                            isActive ? "bg-white/6" : "hover:bg-white/3"
-                          }`}
+                          onClick={() => handleSelectedCircle(circle)}
                           whileTap={{ scale: 0.98 }}
+                          className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl cursor-pointer transition-colors duration-150 relative"
+                          style={{
+                            background: isActive
+                              ? "rgba(255,255,255,0.06)"
+                              : "transparent",
+                            border: isActive
+                              ? "1px solid rgba(255,255,255,0.1)"
+                              : "1px solid transparent",
+                          }}
+                          onMouseEnter={(e) => {
+                            if (!isActive)
+                              e.currentTarget.style.background =
+                                "rgba(255,255,255,0.03)";
+                          }}
+                          onMouseLeave={(e) => {
+                            if (!isActive)
+                              e.currentTarget.style.background = "transparent";
+                          }}
                         >
                           {isActive && (
                             <motion.div
-                              layoutId="circle-active-indicator"
-                              className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full bg-white/40"
+                              layoutId="circle-active-bar"
+                              className="absolute left-0 top-1/2 -translate-y-1/2 rounded-full"
+                              style={{
+                                width: 2,
+                                height: 16,
+                                background: "rgba(212,165,116,0.7)",
+                              }}
                               transition={{
                                 type: "spring",
-                                stiffness: 400,
+                                stiffness: 500,
                                 damping: 30,
                               }}
                             />
                           )}
                           <div
-                            className={`w-10 h-10 rounded-full overflow-hidden relative shrink-0 ring-1 transition-all duration-300 ${isActive ? "ring-white/20" : "ring-white/6"}`}
+                            className="w-8 h-8 rounded-lg overflow-hidden relative shrink-0"
+                            style={{
+                              border: isActive
+                                ? "1px solid rgba(255,255,255,0.15)"
+                                : "1px solid rgba(255,255,255,0.07)",
+                            }}
                           >
                             {circle.circle_image ? (
                               <Image
@@ -286,38 +511,57 @@ export default function ManageCircle() {
                                 className="object-cover"
                               />
                             ) : (
-                              <div className="w-full h-full bg-white/5 flex items-center justify-center text-white/20 text-xs">
+                              <div
+                                className="w-full h-full flex items-center justify-center text-[10px] font-medium"
+                                style={{
+                                  color: "rgba(255,255,255,0.3)",
+                                  background: "rgba(255,255,255,0.05)",
+                                }}
+                              >
                                 {circle.circle_name?.[0]}
                               </div>
                             )}
                           </div>
                           <div className="flex-1 min-w-0 text-left">
-                            <span
-                              className={`text-sm truncate block transition-colors duration-200 ${isActive ? "text-white/90" : "text-white/50 group-hover:text-white/70"}`}
+                            <p
+                              className="text-xs font-medium tracking-[-0.1px] truncate"
+                              style={{
+                                color: isActive
+                                  ? "rgba(255,255,255,0.85)"
+                                  : "rgba(255,255,255,0.45)",
+                              }}
                             >
                               {circle.circle_name}
-                            </span>
-                            <span className="text-[11px] text-white/20">
+                            </p>
+                            <p
+                              className="text-[10px] tracking-[-0.1px]"
+                              style={{ color: "rgba(255,255,255,0.2)" }}
+                            >
                               {circle.members?.length ?? 0} members
-                            </span>
+                            </p>
                           </div>
                           <ChevronRight
-                            size={14}
-                            className={`shrink-0 transition-all duration-200 ${isActive ? "text-white/30" : "text-transparent group-hover:text-white/20"}`}
+                            size={12}
+                            style={{
+                              color: isActive
+                                ? "rgba(255,255,255,0.25)"
+                                : "transparent",
+                              flexShrink: 0,
+                            }}
                           />
                         </motion.button>
                       );
                     })}
-                  </AnimatePresence>
-                )}
               </div>
             </div>
 
-            {/* Divider */}
-            <div className="my-5 h-px bg-linear-to-r from-transparent via-white/6 to-transparent" />
+            <div style={{ height: 1, background: "rgba(255,255,255,0.05)" }} />
 
             {/* Search */}
-            <div className="rounded-lg overflow-hidden border border-white/5 bg-white/2">
+            <div
+              className="rounded-xl overflow-hidden"
+              style={{ border: "1px solid rgba(255,255,255,0.07)" }}
+            >
               <SearchMap
                 value={query}
                 onChange={(v) => setQuery(v)}
@@ -325,39 +569,46 @@ export default function ManageCircle() {
               />
             </div>
 
-            {/* Member list */}
-            <div className="mt-3 flex-1 overflow-y-auto no-scroll">
+            {/* Member list — desktop */}
+            <div className="flex flex-col gap-0.5">
               <AnimatePresence mode="popLayout">
                 {filteredMembers.map(
                   (member: CircleProp["members"][number], i: number) => {
                     const memberGlobalIndex =
                       featured?.members?.indexOf(member) ?? i;
                     const isActiveMarker = memberGlobalIndex === markerIndex;
-
                     return (
                       <motion.button
+                        key={`desktop-${featured?.id}-${member.id}`}
                         onClick={() => setMarkerIndex(memberGlobalIndex)}
-                        key={`${featured?.id}-${member.id}`}
-                        layout
-                        initial={{ opacity: 0, x: -8 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{
-                          opacity: 0,
-                          x: -8,
-                          transition: { duration: 0.15 },
-                        }}
-                        transition={{
-                          delay: 0.15 + i * 0.03,
-                          duration: 0.25,
-                          ease: [0.16, 1, 0.3, 1],
-                        }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ delay: i * 0.03, duration: 0.15 }}
                         whileTap={{ scale: 0.98 }}
-                        className={`w-full px-3 py-2.5 text-left rounded-lg transition-all duration-200 cursor-pointer flex items-center gap-x-3 group relative ${
-                          isActiveMarker ? "bg-white/5" : "hover:bg-white/2"
-                        }`}
+                        className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg cursor-pointer transition-colors duration-150 text-left relative"
+                        style={{
+                          background: isActiveMarker
+                            ? "rgba(255,255,255,0.05)"
+                            : "transparent",
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isActiveMarker)
+                            e.currentTarget.style.background =
+                              "rgba(255,255,255,0.03)";
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isActiveMarker)
+                            e.currentTarget.style.background = "transparent";
+                        }}
                       >
                         <div
-                          className={`w-7 h-7 rounded-full overflow-hidden relative shrink-0 border transition-all duration-200 ${isActiveMarker ? "border-white/20" : "border-white/6"}`}
+                          className="w-7 h-7 rounded-full overflow-hidden relative shrink-0"
+                          style={{
+                            border: isActiveMarker
+                              ? "1px solid rgba(255,255,255,0.2)"
+                              : "1px solid rgba(255,255,255,0.07)",
+                          }}
                         >
                           {member.profile_image ? (
                             <Image
@@ -367,20 +618,32 @@ export default function ManageCircle() {
                               className="object-cover"
                             />
                           ) : (
-                            <div className="w-full h-full bg-white/5 flex items-center justify-center text-white/20 text-[10px]">
+                            <div
+                              className="w-full h-full flex items-center justify-center text-[9px]"
+                              style={{
+                                color: "rgba(255,255,255,0.3)",
+                                background: "rgba(255,255,255,0.05)",
+                              }}
+                            >
                               {member.first_name?.[0]}
                             </div>
                           )}
                         </div>
                         <span
-                          className={`text-sm truncate transition-colors duration-200 ${isActiveMarker ? "text-white/90" : "text-white/50 group-hover:text-white/70"}`}
+                          className="text-xs tracking-[-0.1px] truncate flex-1"
+                          style={{
+                            color: isActiveMarker
+                              ? "rgba(255,255,255,0.85)"
+                              : "rgba(255,255,255,0.4)",
+                          }}
                         >
                           {member.first_name} {member.last_name}
                         </span>
                         {isActiveMarker && (
                           <motion.div
                             layoutId="member-active-dot"
-                            className="ml-auto w-1.5 h-1.5 rounded-full bg-white/50 shrink-0"
+                            className="w-1.5 h-1.5 rounded-full shrink-0"
+                            style={{ background: "rgba(212,165,116,0.7)" }}
                             transition={{
                               type: "spring",
                               stiffness: 500,
@@ -393,28 +656,18 @@ export default function ManageCircle() {
                   },
                 )}
               </AnimatePresence>
-
-              {filteredMembers.length === 0 && query.trim() !== "" && (
+              {filteredMembers.length === 0 && (
                 <motion.p
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="text-white/20 text-sm text-center py-8"
+                  className="text-center py-6 text-[11px] tracking-[-0.1px]"
+                  style={{ color: "rgba(255,255,255,0.2)" }}
                 >
-                  No members match &quot;{query}&quot;
+                  {query.trim() !== ""
+                    ? `No members match "${query}"`
+                    : "No members yet."}
                 </motion.p>
               )}
-
-              {filteredMembers.length === 0 &&
-                query.trim() === "" &&
-                !isLoading && (
-                  <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="text-white/20 text-sm text-center py-8"
-                  >
-                    No members yet.
-                  </motion.p>
-                )}
             </div>
           </div>
         </div>

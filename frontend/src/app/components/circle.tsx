@@ -1,3 +1,4 @@
+"use client";
 import { AnimatePresence, motion } from "motion/react";
 import CircleScene from "./CircleScene";
 import CircleSignal from "./CircleSignal";
@@ -16,6 +17,8 @@ interface CircleSelection {
   setForm: React.Dispatch<React.SetStateAction<any>>;
 }
 
+const EASE = [0.16, 1, 0.3, 1] as const;
+
 export default function Circle({
   activeIndex,
   selectedCircle,
@@ -27,86 +30,138 @@ export default function Circle({
   const { user } = useUserStore();
   const { data: getAllCircles } = useGetCirclesWithMembers(user?.id as string);
 
+  const circles = getAllCircles?.data.data ?? [];
+
   const nextSignal = () => {
-    setActiveCircle((i) => (i + 1) % getAllCircles?.data.data.length);
+    setActiveCircle((i) => (i + 1) % circles.length);
   };
 
   const prevSignal = () => {
-    setActiveCircle(
-      (i) =>
-        (i - 1 + getAllCircles?.data.data.length) %
-        getAllCircles?.data.data.length,
-    );
+    setActiveCircle((i) => (i - 1 + circles.length) % circles.length);
   };
+
+  const activeCircle = circles[activeIndex];
 
   return (
     <AnimatePresence mode="sync">
-      <motion.section key="circle" className=" text-center space-y-5 relative">
+      <motion.section key="circle" className="text-center space-y-5 relative">
+        {/* Header */}
         <motion.div
           key={selectedCircle ? "selected-header" : "browse-header"}
-          initial={{ opacity: 0, y: -4 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 4 }}
-          transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          className="mb-6 space-y-1"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.25, ease: EASE }}
+          className="mb-6 flex flex-col gap-1"
         >
           {selectedCircle ? (
             <>
-              <h2 className="text-lg font-medium text-white/90">
+              <h2
+                className="text-base font-medium tracking-[-0.3px]"
+                style={{ color: "rgba(255,255,255,0.85)" }}
+              >
                 Inviting your circle
               </h2>
-              <p className="text-sm text-white/40">
+              <p
+                className="text-sm tracking-[-0.1px]"
+                style={{ color: "rgba(255,255,255,0.3)" }}
+              >
                 Sending to{" "}
-                <span className="text-white/70 font-medium">
+                <span
+                  style={{ color: "rgba(255,255,255,0.65)", fontWeight: 500 }}
+                >
                   {selectedCircle.circle_name}
                 </span>
               </p>
             </>
           ) : (
             <>
-              <h2 className="text-lg font-medium text-white/90">
+              <h2
+                className="text-base font-medium tracking-[-0.3px]"
+                style={{ color: "rgba(255,255,255,0.85)" }}
+              >
                 Share with your circle
               </h2>
-              <p className="text-sm text-white/40">
+              <p
+                className="text-sm tracking-[-0.1px]"
+                style={{ color: "rgba(255,255,255,0.3)" }}
+              >
                 Invite people you already trust
               </p>
             </>
           )}
         </motion.div>
 
-        {/* MIDDLE — persistent */}
+        {/* Circle scene — always shown */}
         <CircleScene
-          circles={getAllCircles?.data.data}
+          circles={circles}
           circleIndex={activeIndex}
           markerIndex={activeIndex}
           selectedCircle={selectedCircle}
         />
 
         <AnimatePresence mode="wait">
-          {/* CONTROLS — presence */}
           {selectedCircle === null && (
             <>
-              <CircleSignal
-                circles={getAllCircles?.data.data}
-                activeIndex={activeIndex}
-              />
+              {/* Desktop — full signal list */}
+              <div className="hidden sm:block">
+                <CircleSignal circles={circles} activeIndex={activeIndex} />
+              </div>
+
+              {/* Mobile — active circle pill */}
+              <motion.div
+                key="mobile-signal"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2, ease: EASE }}
+                className="sm:hidden flex items-center justify-center"
+              >
+                {activeCircle && (
+                  <div
+                    className="flex items-center gap-2.5 px-3.5 py-2 rounded-full"
+                    style={{
+                      background: "rgba(255,255,255,0.05)",
+                      border: "1px solid rgba(255,255,255,0.09)",
+                    }}
+                  >
+                    {/* Active dot */}
+                    <div
+                      className="w-1.5 h-1.5 rounded-full shrink-0"
+                      style={{ background: "rgba(212,165,116,0.8)" }}
+                    />
+                    <span
+                      className="text-xs font-medium tracking-[-0.1px]"
+                      style={{ color: "rgba(255,255,255,0.75)" }}
+                    >
+                      {activeCircle.circle_name}
+                    </span>
+                    <span
+                      className="text-[10px] tracking-[-0.1px]"
+                      style={{ color: "rgba(255,255,255,0.3)" }}
+                    >
+                      {activeCircle.members?.length ?? 0} members
+                    </span>
+                  </div>
+                )}
+              </motion.div>
+
               <CircleControls nextMarker={nextSignal} prevMarker={prevSignal} />
             </>
           )}
         </AnimatePresence>
 
+        {/* Select action — persistent */}
         <SelectAction
           selectedCircle={selectedCircle}
           onSelect={() => {
-            const circle = getAllCircles?.data.data[activeIndex];
+            const circle = circles[activeIndex];
             setSelectedCircleProp(circle);
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             setForm((prev: any) => ({ ...prev, circle_id: circle?.id }));
           }}
           onContinue={() => setSelectedModal("confirm")}
         />
-
-        {/* CTA — persistent */}
       </motion.section>
     </AnimatePresence>
   );

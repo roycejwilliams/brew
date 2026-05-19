@@ -114,15 +114,13 @@ export default function CircleScene({
       const next = markerIndex; //holds the next marker value
       let target = next; //the point at which we want to go
 
-      console.log("prev:", prev, "next:", next, "target:", target);
-
       const halfLength = (selectedCircle?.members.length ?? 0) / 2;
       // shortest path between prev and next accounting for wrap
       let diff = (next ?? 0) - (prev ?? 0);
 
       // normalize diff to always take the shortest path
-      if (diff > halfLength) diff -= (selectedCircle?.members.length ?? 0);
-      if (diff < -halfLength) diff += (selectedCircle?.members.length ?? 0);
+      if (diff > halfLength) diff -= selectedCircle?.members.length ?? 0;
+      if (diff < -halfLength) diff += selectedCircle?.members.length ?? 0;
 
       // offset from current interpolated value instead of jumping to absolute index
 
@@ -193,8 +191,6 @@ export default function CircleScene({
       dependencies: [markerIndex],
     },
   );
-
-  console.log("circles", circles);
 
   if (!selectedCircle)
     return (

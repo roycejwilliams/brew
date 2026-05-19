@@ -78,8 +78,6 @@ export const sendSMS = async ({
   circle_invite_reminder,
   moment_invite_reminder,
 }: MessageProp) => {
-  console.log("Twilio SID:", process.env.TWILIO_TEST_SID?.slice(0, 6));
-
   const client = twilio(
     process.env.TWILIO_TEST_SID,
     process.env.TWILIO_TEST_AUTH_TOKEN,

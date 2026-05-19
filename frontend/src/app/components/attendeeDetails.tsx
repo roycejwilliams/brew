@@ -1,9 +1,9 @@
+"use client";
 import React from "react";
 import { motion } from "motion/react";
 import Vibe from "./vibe";
 import { openEventCard } from "@/stores/store";
 import { useGetMomentAttendees } from "@/hooks/useMoments";
-
 
 interface ActiveEventProp {
   activeEvent: "prequel" | "live" | "end";
@@ -27,19 +27,18 @@ function AttendeeDetails({ activeEvent }: ActiveEventProp) {
   const isLive = activeEvent === "live";
 
   const eventCard = openEventCard((state) => state.moment);
-
   const { data } = useGetMomentAttendees(eventCard?.id as string);
   const attendees = data?.data.data || [];
   const vibes = eventCard?.vibes || [];
 
   return (
-    <section className="w-full py-16 flex flex-col items-center gap-10">
+    <section className="w-full py-10 sm:py-16 flex flex-col items-center gap-8 sm:gap-10">
       {/* Spots left — prequel only */}
       {activeEvent === "prequel" && (
         <motion.div
-          initial={{ opacity: 0, y: -6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: EASE }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.35, ease: EASE }}
           className="flex items-center gap-2 px-4 py-2 rounded-full"
           style={{
             background: "rgba(255,255,255,0.05)",
@@ -47,33 +46,37 @@ function AttendeeDetails({ activeEvent }: ActiveEventProp) {
           }}
         >
           <span
-            className="w-1.5 h-1.5 rounded-full"
+            className="w-1.5 h-1.5 rounded-full shrink-0"
             style={{ background: "rgba(255,200,100,0.8)" }}
           />
-          <p className="text-white/50 text-sm tracking-[-0.1px]">
+          <p
+            className="text-sm tracking-[-0.1px]"
+            style={{ color: "rgba(255,255,255,0.5)" }}
+          >
             Only{" "}
-            <span className="text-white font-semibold text-sm">
-              <span className="text-white font-semibold text-sm">
-                {(eventCard?.cap_attendance || 0) - attendees.length}
-              </span>
+            <span className="text-white font-semibold">
+              {(eventCard?.cap_attendance || 0) - attendees.length}
             </span>{" "}
             spots remaining
           </p>
         </motion.div>
       )}
 
-      {/* Count + label */}
+      {/* Count + avatars + label */}
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, delay: 0.05, ease: EASE }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.35, delay: 0.05, ease: EASE }}
         className="flex flex-col items-center gap-3"
       >
-        {/* Big number */}
-        <div className="flex items-end gap-5">
+        <div className="flex items-end gap-4 sm:gap-5">
+          {/* Big number */}
           <span
             className="text-white font-semibold leading-none"
-            style={{ fontSize: 80, letterSpacing: "-4px" }}
+            style={{
+              fontSize: "clamp(52px, 12vw, 80px)",
+              letterSpacing: "clamp(-2px, -0.05em, -4px)",
+            }}
           >
             {attendees.length}
           </span>
@@ -84,18 +87,18 @@ function AttendeeDetails({ activeEvent }: ActiveEventProp) {
               {Array.from({ length: 5 }).map((_, i) => (
                 <motion.div
                   key={i}
-                  initial={{ opacity: 0, x: -6 }}
-                  animate={{ opacity: 1, x: 0 }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
                   transition={{
-                    duration: 0.3,
+                    duration: 0.25,
                     delay: 0.1 + i * 0.05,
                     ease: EASE,
                   }}
-                  className="w-7 h-7 rounded-full"
+                  className="w-6 h-6 sm:w-7 sm:h-7 rounded-full"
                   style={{
                     background: `rgba(255,255,255,${0.08 + i * 0.04})`,
                     border: "1.5px solid rgba(17,17,17,0.9)",
-                    marginLeft: i === 0 ? 0 : -10,
+                    marginLeft: i === 0 ? 0 : -8,
                     boxShadow: "0 2px 6px rgba(0,0,0,0.4)",
                   }}
                 />
@@ -112,7 +115,7 @@ function AttendeeDetails({ activeEvent }: ActiveEventProp) {
                     repeat: Infinity,
                     ease: "easeInOut",
                   }}
-                  className="w-1.5 h-1.5 rounded-full"
+                  className="w-1.5 h-1.5 rounded-full shrink-0"
                   style={{ background: "#4ade80" }}
                 />
               )}
@@ -132,21 +135,18 @@ function AttendeeDetails({ activeEvent }: ActiveEventProp) {
           animate={{ scaleX: 1, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.2, ease: EASE }}
           className="w-16 origin-left"
-          style={{
-            height: 1,
-            background: "rgba(255,255,255,0.08)",
-          }}
+          style={{ height: 1, background: "rgba(255,255,255,0.08)" }}
         />
       </motion.div>
 
       {/* Vibe chips */}
       <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.18, ease: EASE }}
-        className="mx-auto"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.35, delay: 0.18, ease: EASE }}
+        className="w-full flex justify-center"
       >
-        <Vibe vibes={vibes || []} />{" "}
+        <Vibe vibes={vibes || []} />
       </motion.div>
     </section>
   );

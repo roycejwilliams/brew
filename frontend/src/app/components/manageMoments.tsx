@@ -1,3 +1,4 @@
+"use client";
 import React, { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { EditIcon, EyeIcon } from "./icons";
@@ -11,47 +12,61 @@ import { useGetAllMomentsOwnedByUser } from "@/hooks/useMoments";
 import EditMoment from "./EditMoment";
 import { getMomentStatus, sortMomentsByStatus } from "../utils/momentsUtils";
 
-
 type StatusSymbol = "prequel" | "live" | "end" | null;
 
-const indicators = [
-  { key: "prequel", code: "Upcoming", color: "#8B837E" },
-  { key: "live", code: "Live now", color: "#008000" },
-  { key: "end", code: "Ended", color: "#761F17" },
-];
+const EASE = [0.16, 1, 0.3, 1] as const;
+
+const statusConfig = {
+  live: { label: "Live now", color: "#4ade80" },
+  prequel: { label: "Upcoming", color: "rgba(255,255,255,0.4)" },
+  end: { label: "Ended", color: "rgba(255,255,255,0.2)" },
+};
 
 export function FocusStatus({ status }: { status: StatusSymbol }) {
-  const indicator = indicators.find((stat) => stat.key === status);
+  if (!status) return null;
+  const config = statusConfig[status];
 
   return (
-    <>
-      {indicator && (
-        <div className="flex gap-x-2 items-center absolute top-0 left-0 m-4 z-10">
-          {status === "live" ? (
-            <motion.div
-              className="w-2 h-2 rounded-full border border-white/10 shadow-sm"
-              style={{ background: indicator.color }}
-              animate={{ opacity: [0.4, 1, 0.4] }}
-              transition={{
-                duration: 1.6,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            />
-          ) : (
-            <div
-              className="w-2 h-2 rounded-full border border-white/10 shadow-sm"
-              style={{ background: indicator.color, opacity: 0.5 }}
-            />
-          )}
-          <span className="uppercase text-xs text-white font-medium tracking-wide">
-            {indicator.code}
-          </span>
-        </div>
+    <div className="flex gap-x-2 items-center absolute top-0 left-0 m-3 z-10">
+      {status === "live" ? (
+        <motion.div
+          className="w-1.5 h-1.5 rounded-full"
+          style={{ background: config.color }}
+          animate={{ opacity: [0.4, 1, 0.4] }}
+          transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+        />
+      ) : (
+        <div
+          className="w-1.5 h-1.5 rounded-full"
+          style={{ background: config.color, opacity: 0.6 }}
+        />
       )}
-    </>
+      <span
+        className="text-[9px] tracking-[2px] uppercase font-medium"
+        style={{ color: "rgba(255,255,255,0.6)" }}
+      >
+        {config.label}
+      </span>
+    </div>
   );
 }
+
+const formatDate = (dateStr: string | Date) => {
+  const d = new Date(dateStr);
+  return (
+    d.toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    }) +
+    " · " +
+    d.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    })
+  );
+};
 
 export default function ManageMoments() {
   const [selectedMoment, setSelectedMoment] = useState<MomentProp | null>(null);
@@ -68,40 +83,78 @@ export default function ManageMoments() {
   );
 
   const moments: MomentProp[] = MomentsByUser?.data?.data ?? [];
-
-  // Sort — live first, then upcoming, then ended
   const sortedMoments = sortMomentsByStatus(moments);
-
   const featured = selectedMoment ?? sortedMoments[0] ?? null;
   const historyMoments = sortedMoments.filter((m) => m.id !== featured?.id);
   const featuredStatus = featured ? getMomentStatus(featured) : null;
 
   return (
-    <section className="flex-1 shrink-0 relative">
+    <section className="flex-1 h-full overflow-hidden flex flex-col relative">
       {/* Header */}
-      <motion.div
-        className="flex justify-between px-8 pb-4 pt-8 items-start z-20 text-sm backdrop-blur-[10px] bg-[#1b1b1b]/5 border-b border-white/5 shadow-sm absolute top-0 w-full"
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
+      <div
+        className="flex items-center justify-between px-6 py-4 shrink-0 relative z-10"
+        style={{
+          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          background: "rgba(8,8,8,0.6)",
+          backdropFilter: "blur(12px)",
+        }}
       >
-        <h1 className="tracking-wide font-normal uppercase text-[#656565]">
+        <p
+          className="text-[9px] tracking-[3px] uppercase font-medium"
+          style={{ color: "rgba(255,255,255,0.25)" }}
+        >
           Moments
-        </h1>
-      </motion.div>
+        </p>
+        {featured && (
+          <div className="flex items-center gap-2">
+            {(["attendance", "edit"] as const).map((view) => (
+              <button
+                key={view}
+                onClick={() => setUtils(utils === view ? "history" : view)}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium tracking-[-0.1px] cursor-pointer transition-all duration-150"
+                style={{
+                  background:
+                    utils === view
+                      ? "rgba(255,255,255,0.08)"
+                      : "rgba(255,255,255,0.04)",
+                  border:
+                    utils === view
+                      ? "1px solid rgba(255,255,255,0.14)"
+                      : "1px solid rgba(255,255,255,0.07)",
+                  color:
+                    utils === view
+                      ? "rgba(255,255,255,0.82)"
+                      : "rgba(255,255,255,0.35)",
+                }}
+              >
+                {view === "attendance" ? (
+                  <GroupIcon size={11} />
+                ) : (
+                  <EditIcon size={11} color="currentColor" />
+                )}
+                <span className="hidden sm:block">
+                  {view.charAt(0).toUpperCase() + view.slice(1)}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
 
-      <motion.div className="grid grid-cols-2 h-full gap-8 px-8 items-center">
+      {/* Content */}
+      <div className="flex-1 flex flex-col sm:flex-row overflow-hidden">
         {/* Featured moment */}
-        <motion.div
-          key="live-moment"
-          className="col-span-1 h-5/6 mt-12 border border-white/10 rounded-sm relative overflow-hidden"
-          initial={{ opacity: 0, scale: 0.97 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+        <div
+          className="sm:w-2/5 lg:w-1/3 shrink-0 relative overflow-hidden"
+          style={{
+            minHeight: 280,
+            borderRight: "1px solid rgba(255,255,255,0.06)",
+          }}
         >
           {isLoading ? (
             <motion.div
-              className="w-full h-full bg-white/3"
+              className="w-full h-full"
+              style={{ background: "rgba(255,255,255,0.03)" }}
               animate={{ opacity: [0.3, 0.6, 0.3] }}
               transition={{
                 duration: 1.5,
@@ -116,98 +169,86 @@ export default function ManageMoments() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 0.2, ease: EASE }}
                 className="w-full h-full relative"
               >
                 <FocusStatus status={featuredStatus} />
+
                 {featured.image && (
                   <Image
                     src={featured.image}
                     alt={featured.moments_name}
                     fill
-                    sizes="(max-width: 768px) 50vw, 25vw"
+                    sizes="33vw"
                     priority
-                    className="absolute w-full h-full object-cover brightness-50"
+                    className="object-cover"
+                    style={{ filter: "brightness(0.45)" }}
                   />
                 )}
-                <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent" />
 
-                {/* Moment info */}
-                <div className="absolute bottom-0 left-0 p-4 space-y-1 max-w-2/5">
-                  <h2 className="text-white text-xl font-medium tracking-[-0.3px]">
-                    {featured.moments_name}
-                  </h2>
-                  <p className="text-white/50 text-xs">
-                    {/* There's no T in the string so we have to use this. */}
-                    {featured?.moment_start
-                      ? new Date(featured.moment_start).toLocaleDateString(
-                          "en-US",
-                          {
-                            weekday: "short",
-                            month: "short",
-                            day: "numeric",
-                          },
-                        ) +
-                        " · " +
-                        new Date(featured.moment_start).toLocaleTimeString(
-                          "en-US",
-                          {
-                            hour: "numeric",
-                            minute: "2-digit",
-                            hour12: true,
-                          },
-                        )
-                      : "Date TBD"}
-                  </p>
-                  {featured.location_name && (
-                    <p className="text-white/40 text-xs">
-                      {featured.location_name}
+                {/* Gradient scrim */}
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background:
+                      "linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 50%)",
+                  }}
+                />
+
+                {/* Info */}
+                <div className="absolute bottom-0 left-0 right-0 p-4 flex items-end justify-between">
+                  <div className="flex flex-col gap-1 min-w-0 flex-1 mr-3">
+                    <h2
+                      className="font-medium tracking-[-0.3px] truncate"
+                      style={{ fontSize: 18, color: "rgba(255,255,255,0.9)" }}
+                    >
+                      {featured.moments_name}
+                    </h2>
+                    <p
+                      className="text-[11px] tracking-[-0.1px]"
+                      style={{ color: "rgba(255,255,255,0.4)" }}
+                    >
+                      {featured.moment_start
+                        ? formatDate(featured.moment_start)
+                        : "Date TBD"}
                     </p>
-                  )}
-                </div>
+                    {featured.location_name && (
+                      <p
+                        className="text-[10px] tracking-[-0.1px]"
+                        style={{ color: "rgba(255,255,255,0.3)" }}
+                      >
+                        {featured.location_name}
+                      </p>
+                    )}
+                  </div>
 
-                {/* Actions */}
-                <div className="absolute bottom-0 right-0 p-4 flex gap-x-2">
-                  <motion.button
-                    onClick={() => setUtils("attendance")}
-                    className="relative flex items-center gap-x-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-white/70 border border-white/10 bg-white/8 backdrop-blur-sm hover:text-white hover:border-white/25 hover:bg-white/15 transition-colors duration-150 cursor-pointer"
-                    whileHover={{ scale: 1.04 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <GroupIcon size={15} />
-                    <span>Attendees</span>
-                  </motion.button>
-
-                  <motion.button
-                    onClick={() => setUtils("edit")}
-                    className="relative flex items-center gap-x-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-white/70 border border-white/10 bg-white/8 backdrop-blur-sm hover:text-white hover:border-white/25 hover:bg-white/15 transition-colors duration-150 cursor-pointer"
-                    whileHover={{ scale: 1.04 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <EditIcon size={15} color="#fff" />
-                    <span>Edit</span>
-                  </motion.button>
-
+                  {/* View button */}
                   <motion.button
                     onClick={() => {
                       openMoment(featured);
                       router.push(`/moments/${featured.id}`, { scroll: false });
                     }}
-                    className="relative flex items-center gap-x-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-white/70 border border-white/10 bg-white/8 backdrop-blur-sm hover:text-white hover:border-white/25 hover:bg-white/15 transition-colors duration-150 cursor-pointer"
-                    whileHover={{ scale: 1.04 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileTap={{ scale: 0.96 }}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl cursor-pointer transition-all duration-150 shrink-0 text-[11px] font-medium tracking-[-0.1px]"
+                    style={{
+                      background: "rgba(255,255,255,0.1)",
+                      border: "1px solid rgba(255,255,255,0.14)",
+                      color: "rgba(255,255,255,0.75)",
+                      backdropFilter: "blur(8px)",
+                    }}
                   >
                     <EyeIcon />
-                    <span>View</span>
+                    <span className="hidden sm:block">View</span>
                   </motion.button>
                 </div>
               </motion.div>
             </AnimatePresence>
           ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center gap-6">
-              <div className="relative w-16 h-16">
+            <div className="w-full h-full flex flex-col items-center justify-center gap-5 p-6">
+              <div className="relative w-14 h-14">
                 <motion.div
-                  className="absolute inset-0 rounded-full border border-white/10"
+                  className="absolute inset-0 rounded-full"
+                  style={{ border: "1px solid rgba(255,255,255,0.08)" }}
                   animate={{ scale: [1, 1.6, 1], opacity: [0.4, 0, 0.4] }}
                   transition={{
                     duration: 2.5,
@@ -215,43 +256,45 @@ export default function ManageMoments() {
                     ease: "easeInOut",
                   }}
                 />
-                <motion.div
-                  className="absolute inset-0 rounded-full border border-white/5"
-                  animate={{ scale: [1, 2, 1], opacity: [0.2, 0, 0.2] }}
-                  transition={{
-                    duration: 2.5,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                    delay: 0.4,
-                  }}
-                />
-                <div className="absolute inset-0 rounded-full border border-white/20 flex items-center justify-center">
-                  <div className="w-2 h-2 rounded-full bg-white/30" />
+                <div
+                  className="absolute inset-0 rounded-full flex items-center justify-center"
+                  style={{ border: "1px solid rgba(255,255,255,0.12)" }}
+                >
+                  <div
+                    className="w-2 h-2 rounded-full"
+                    style={{ background: "rgba(255,255,255,0.25)" }}
+                  />
                 </div>
               </div>
-              <div className="flex flex-col gap-1 text-center">
-                <p className="text-white/50 text-sm tracking-wide">
+              <div className="text-center flex flex-col gap-1">
+                <p
+                  className="text-sm tracking-[-0.1px]"
+                  style={{ color: "rgba(255,255,255,0.4)" }}
+                >
                   Nothing live yet.
                 </p>
-                <p className="text-white/20 text-xs">
+                <p
+                  className="text-[11px] tracking-[-0.1px]"
+                  style={{ color: "rgba(255,255,255,0.2)" }}
+                >
                   Create a moment and bring people together.
                 </p>
               </div>
             </div>
           )}
-        </motion.div>
+        </div>
 
         {/* Right panel */}
-        <motion.div className="col-span-1 h-full pb-10 pt-24 justify-center gap-4 overflow-y-auto no-scrollbar">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
           <AnimatePresence mode="wait">
             {utils === "history" && (
               <motion.div
                 key="history"
-                className="w-full grid grid-cols-2 gap-4 content-start"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.25, ease: "easeOut" }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.18 }}
+                className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3"
               >
                 {historyMoments.length > 0 ? (
                   historyMoments.map((event, index) => {
@@ -261,27 +304,34 @@ export default function ManageMoments() {
                         key={event.id}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        transition={{ duration: 0.2, delay: index * 0.08 }}
+                        transition={{ duration: 0.18, delay: index * 0.05 }}
                         onClick={() => setSelectedMoment(event)}
-                        className="w-full aspect-3/4 rounded-md overflow-hidden relative cursor-pointer group"
-                        whileHover={{ scale: 1.02 }}
+                        className="aspect-3/4 rounded-xl overflow-hidden relative cursor-pointer"
+                        style={{ border: "1px solid rgba(255,255,255,0.07)" }}
                         whileTap={{ scale: 0.98 }}
                       >
                         <Image
                           src={event.image || "/brew.jpg"}
-                          alt={event.moments_name || "brew"}
+                          alt={event.moments_name || "moment"}
                           fill
-                          priority
-                          sizes="(max-width: 768px) 50vw, 25vw"
-                          className="object-cover brightness-75 group-hover:brightness-90 transition-all duration-300"
+                          sizes="25vw"
+                          className="object-cover"
+                          style={{ filter: "brightness(0.65)" }}
                         />
-                        <div className="absolute inset-0 bg-linear-to-t from-black/70 via-transparent to-transparent" />
+                        <div
+                          className="absolute inset-0"
+                          style={{
+                            background:
+                              "linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 50%)",
+                          }}
+                        />
 
-                        {/* Status indicator */}
+                        {/* Status dot */}
                         <div className="absolute top-2 left-2 flex items-center gap-1.5">
                           {status === "live" ? (
                             <motion.div
-                              className="w-1.5 h-1.5 rounded-full bg-green-500"
+                              className="w-1.5 h-1.5 rounded-full"
+                              style={{ background: "#4ade80" }}
                               animate={{ opacity: [0.4, 1, 0.4] }}
                               transition={{
                                 duration: 1.6,
@@ -294,32 +344,29 @@ export default function ManageMoments() {
                               className="w-1.5 h-1.5 rounded-full"
                               style={{
                                 background:
-                                  status === "prequel" ? "#8B837E" : "#761F17",
-                                opacity: 0.7,
+                                  status === "prequel"
+                                    ? "rgba(255,255,255,0.4)"
+                                    : "rgba(255,255,255,0.2)",
                               }}
                             />
                           )}
-                          <span className="text-white/50 text-[9px] uppercase tracking-wide">
-                            {status === "live"
-                              ? "Live"
-                              : status === "prequel"
-                                ? "Upcoming"
-                                : "Ended"}
-                          </span>
                         </div>
 
-                        <div className="absolute bottom-0 left-0 p-3">
-                          <p className="text-white/90 text-xs font-medium truncate">
+                        <div className="absolute bottom-0 left-0 right-0 p-2.5">
+                          <p
+                            className="text-xs font-medium tracking-[-0.1px] truncate"
+                            style={{ color: "rgba(255,255,255,0.85)" }}
+                          >
                             {event.moments_name}
                           </p>
-                          <p className="text-white/40 text-[10px]">
+                          <p
+                            className="text-[10px] tracking-[-0.1px] mt-0.5"
+                            style={{ color: "rgba(255,255,255,0.4)" }}
+                          >
                             {event.moment_start
                               ? new Date(event.moment_start).toLocaleDateString(
                                   "en-US",
-                                  {
-                                    month: "short",
-                                    day: "numeric",
-                                  },
+                                  { month: "short", day: "numeric" },
                                 )
                               : "TBD"}
                           </p>
@@ -328,32 +375,32 @@ export default function ManageMoments() {
                     );
                   })
                 ) : (
-                  <div className="col-span-2 flex flex-col items-center justify-center w-full h-full gap-6 text-center">
-                    <div className="relative w-48 h-48 mx-auto flex justify-center items-center">
-                      <div
-                        className="absolute w-28 h-36 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm"
-                        style={{
-                          transform:
-                            "rotate(-12deg) translateX(-30px) translateY(10px)",
-                        }}
-                      />
-                      <div
-                        className="absolute w-28 h-36 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm"
-                        style={{
-                          transform:
-                            "rotate(10deg) translateX(30px) translateY(10px)",
-                        }}
-                      />
-                      <div
-                        className="absolute w-28 h-36 rounded-lg border border-white/10 bg-white/8 backdrop-blur-sm"
-                        style={{ transform: "rotate(0deg)" }}
-                      />
+                  <div className="col-span-full flex flex-col items-center justify-center py-16 gap-4 text-center">
+                    <div className="flex relative w-32 h-40 mx-auto items-center justify-center">
+                      {[-12, 10, 0].map((rotate, i) => (
+                        <div
+                          key={i}
+                          className="absolute w-20 h-28 rounded-xl"
+                          style={{
+                            transform: `rotate(${rotate}deg) translateX(${i === 0 ? -20 : i === 1 ? 20 : 0}px) translateY(${i === 2 ? 0 : 8}px)`,
+                            background: "rgba(255,255,255,0.03)",
+                            border: "1px solid rgba(255,255,255,0.08)",
+                            opacity: 1 - i * 0.15,
+                          }}
+                        />
+                      ))}
                     </div>
                     <div className="flex flex-col gap-1">
-                      <p className="text-white/60 text-sm tracking-wide">
+                      <p
+                        className="text-sm tracking-[-0.1px]"
+                        style={{ color: "rgba(255,255,255,0.4)" }}
+                      >
                         Your moments live here.
                       </p>
-                      <p className="text-white/25 text-xs">
+                      <p
+                        className="text-[11px] tracking-[-0.1px]"
+                        style={{ color: "rgba(255,255,255,0.2)" }}
+                      >
                         The nights worth remembering will find their place.
                       </p>
                     </div>
@@ -363,18 +410,34 @@ export default function ManageMoments() {
             )}
 
             {utils === "attendance" && (
-              <AttendanceList
+              <motion.div
                 key="attendance"
-                setUtils={setUtils}
-                featuredId={featured?.id as string}
-              />
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.18 }}
+              >
+                <AttendanceList
+                  setUtils={setUtils}
+                  featuredId={featured?.id as string}
+                />
+              </motion.div>
             )}
+
             {utils === "edit" && (
-              <EditMoment key="edit" setUtils={setUtils} featured={featured} />
+              <motion.div
+                key="edit"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.18 }}
+              >
+                <EditMoment setUtils={setUtils} featured={featured} />
+              </motion.div>
             )}
           </AnimatePresence>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
     </section>
   );
 }

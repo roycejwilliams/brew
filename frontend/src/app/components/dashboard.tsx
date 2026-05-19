@@ -4,7 +4,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowRotateRight,
   faCheck,
-  faMapPin,
   faTrash,
   faXmark,
 } from "@fortawesome/free-solid-svg-icons";
@@ -28,6 +27,7 @@ import {
   getCompletionColor,
   profileCompletion,
 } from "@/tools/profileCompletion";
+import { supabase } from "@/lib/supabase";
 
 interface DashboardProp {
   profile: UserProp;
@@ -36,10 +36,13 @@ interface DashboardProp {
 const EASE = [0.16, 1, 0.3, 1] as const;
 
 const stagger = (i: number) => ({
-  initial: { opacity: 0, y: 10 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.4, delay: i * 0.07, ease: EASE },
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+  transition: { duration: 0.3, delay: i * 0.06, ease: EASE },
 });
+
+const inputClass =
+  "w-full px-3 py-2.5 border text-sm rounded-xl bg-white/4 text-white placeholder:text-white/20 focus:outline-none focus:bg-white/6 transition-colors duration-150 tracking-[-0.1px]";
 
 function Dashboard({ profile }: DashboardProp) {
   const [revealEdit, setRevealEdit] = useState<boolean>(false);
@@ -56,6 +59,7 @@ function Dashboard({ profile }: DashboardProp) {
   const [query, setQuery] = useState("");
   const { suggestions, isSearching } = useLocationSearch(query);
   const [showConnections, setShowConnections] = useState(false);
+  const [avatarUploading, setAvatarUploading] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -63,15 +67,69 @@ function Dashboard({ profile }: DashboardProp) {
     setUpdateForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const inputClass =
-    "w-full px-3 py-2.5 border border-white/10 text-sm rounded-md bg-white/5 text-white placeholder:text-white/25 focus:outline-none focus:border-white/30 focus:bg-white/8 transition-all";
-
   const { data: activeConnection } = useRetriveActiveConnection(
     profile.id as string,
   );
 
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    //photo user select from their device
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setAvatarUploading(true);
+
+    // Preview immediately — base64
+    //reads files locally, no network involved
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      if (ev.target?.result) {
+        setUpdateForm((prev) => ({
+          ...prev,
+          profile_image: ev.target!.result as string,
+        }));
+      }
+    };
+    reader.readAsDataURL(file);
+
+    // Upload to Supabase storage
+    try {
+      const ext = file.name.split(".").pop();
+      const fileName = `avatars/${profile.id}-${Date.now()}.${ext}`;
+
+      const { error } = await supabase.storage
+        .from("brew-image")
+        //fileName is a labled path
+        //file is the actual photo.
+        // so basicaly its just giving a fileName to the photo
+        .upload(fileName, file, { upsert: true });
+
+      if (error) throw error;
+
+      //uses the fileName to get the photo
+      const { data: urlData } = supabase.storage
+        .from("brew-image")
+        .getPublicUrl(fileName);
+
+      // Persist to user record
+      updateUserById({
+        ...updateForm,
+        id: profile.id as string,
+        profile_image: urlData.publicUrl,
+      });
+
+      setUpdateForm((prev) => ({
+        ...prev,
+        profile_image: urlData.publicUrl,
+      }));
+    } catch (err) {
+      console.error("Avatar upload failed:", err);
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
+
   return (
-    <section className="min-h-screen bg-[#111111] relative overflow-hidden">
+    <section className="min-h-screen bg-[#0c0c0c] relative overflow-hidden">
       {/* Ambient glow */}
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 pointer-events-none"
@@ -79,73 +137,121 @@ function Dashboard({ profile }: DashboardProp) {
           width: 900,
           height: 500,
           background:
-            "radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.04) 35%, transparent 65%)",
+            "radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 35%, transparent 65%)",
         }}
       />
 
-      <div className="relative max-w-5xl mx-auto p-4 mt-4  pb-20">
+      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 pt-24 sm:pt-6 pb-28">
         {/* Profile header */}
-        <div className="flex items-start justify-between gap-8">
+        <div className="flex items-start justify-between gap-4 sm:gap-8">
           {/* Left — avatar + info */}
-          <div className="flex gap-6 items-start">
+          <div className="flex gap-4 sm:gap-6 items-start">
             {/* Avatar */}
             <motion.div {...stagger(0)} className="relative shrink-0">
               <div
-                className="w-24 h-24 rounded-xl overflow-hidden relative"
+                className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden relative group"
                 style={{
-                  border: "1px solid rgba(255,255,255,0.1)",
+                  border: "1px solid rgba(255,255,255,0.08)",
                   boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
                 }}
               >
                 <Image
-                  src={profile.profile_image || "/profile_4.png"}
+                  src={updateForm.profile_image || "/profile_4.png"}
                   fill
                   priority
                   alt="Profile"
-                  className="object-cover w-full h-full"
+                  className="object-cover"
+                />
+
+                {/* Upload overlay */}
+                <label
+                  htmlFor="avatar-upload"
+                  className="absolute inset-0 flex items-center justify-center cursor-pointer transition-opacity duration-200 opacity-0 group-hover:opacity-100"
+                  style={{ background: "rgba(0,0,0,0.55)" }}
+                >
+                  {avatarUploading ? (
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{
+                        duration: 1,
+                        repeat: Infinity,
+                        ease: "linear",
+                      }}
+                      className="w-5 h-5 rounded-full border-2"
+                      style={{
+                        borderColor: "rgba(255,255,255,0.15)",
+                        borderTopColor: "rgba(255,255,255,0.7)",
+                      }}
+                    />
+                  ) : (
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="rgba(255,255,255,0.85)"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                    >
+                      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                      <circle cx="12" cy="13" r="4" />
+                    </svg>
+                  )}
+                </label>
+                <input
+                  id="avatar-upload"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleAvatarUpload}
                 />
               </div>
-              {/* Edit */}
+
+              {/* Edit button */}
               <button
                 onClick={() => setRevealEdit(true)}
-                className="absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-110"
+                className="absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center cursor-pointer transition-colors duration-150"
                 style={{
-                  background: "rgba(255,255,255,0.1)",
-                  border: "1px solid rgba(255,255,255,0.15)",
+                  background: "rgba(255,255,255,0.08)",
+                  border: "1px solid rgba(255,255,255,0.12)",
                   backdropFilter: "blur(8px)",
                 }}
               >
                 <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
                   <path
                     d="M7 1L9 3L3.5 8.5L1 9L1.5 6.5L7 1Z"
-                    stroke="rgba(255,255,255,0.6)"
+                    stroke="rgba(255,255,255,0.55)"
                     strokeWidth="1"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
                 </svg>
               </button>
+
               {/* Online dot */}
               <div
                 className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full"
                 style={{
                   background: "#4ade80",
-                  border: "2px solid #111111",
-                  boxShadow: "0 0 8px rgba(74,222,128,0.5)",
+                  border: "2px solid #0c0c0c",
+                  boxShadow: "0 0 8px rgba(74,222,128,0.4)",
                 }}
               />
             </motion.div>
 
             {/* Info */}
-            <div className="flex flex-col gap-3 pt-1">
+            <div className="flex flex-col gap-2.5 pt-1 min-w-0">
               <motion.div {...stagger(1)}>
                 <h1
-                  className="text-white font-semibold leading-none"
-                  style={{ fontSize: 22, letterSpacing: "-0.5px" }}
+                  className="text-white font-medium leading-none truncate"
+                  style={{ fontSize: 20, letterSpacing: "-0.5px" }}
                 >
                   {profile.first_name} {profile.last_name}
                 </h1>
-                <p className="text-white/40 text-sm mt-0.5 tracking-[-0.1px]">
+                <p
+                  className="text-sm mt-0.5 tracking-[-0.1px]"
+                  style={{ color: "rgba(255,255,255,0.35)" }}
+                >
                   @{profile.username}
                 </p>
               </motion.div>
@@ -153,16 +259,29 @@ function Dashboard({ profile }: DashboardProp) {
               {/* Location */}
               <motion.div
                 {...stagger(2)}
-                className="flex items-center gap-1.5 text-white/30 text-xs tracking-[-0.1px]"
+                className="flex items-center gap-1.5 text-xs tracking-[-0.1px]"
+                style={{ color: "rgba(255,255,255,0.28)" }}
               >
-                <FontAwesomeIcon icon={faMapPin} className="text-[16px]" />
+                <svg
+                  width="11"
+                  height="11"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                >
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
                 {profile.location}
               </motion.div>
 
-              {/* Bio */}
+              {/* Bio — desktop */}
               <motion.p
                 {...stagger(3)}
-                className="text-white/50 text-sm tracking-[-0.1px] leading-relaxed max-w-xs"
+                className="text-sm tracking-[-0.1px] leading-relaxed max-w-60 sm:max-w-xs hidden sm:block"
+                style={{ color: "rgba(255,255,255,0.4)" }}
               >
                 {profile.description || "Notes about me go here."}
               </motion.p>
@@ -178,7 +297,8 @@ function Dashboard({ profile }: DashboardProp) {
                     key={i}
                     href={href}
                     target="_blank"
-                    className="text-white/25 hover:text-white/70 transition-colors duration-200 text-base"
+                    className="transition-colors duration-150 text-sm"
+                    style={{ color: "rgba(255,255,255,0.2)" }}
                   >
                     <FontAwesomeIcon icon={icon} />
                   </Link>
@@ -187,15 +307,18 @@ function Dashboard({ profile }: DashboardProp) {
             </div>
           </div>
 
-          {/* Right — connections + completion */}
+          {/* Right — stats */}
           <div className="flex flex-col items-end gap-4 pt-1 shrink-0">
             {/* Profile completion */}
             <motion.div
               {...stagger(1)}
-              className="flex flex-col items-end gap-2"
+              className="flex flex-col items-end gap-1.5"
             >
-              <div className="flex items-center gap-2">
-                <span className="text-white/25 text-xs tracking-[-0.1px]">
+              <div className="flex items-center gap-1.5">
+                <span
+                  className="text-xs tracking-[-0.1px]"
+                  style={{ color: "rgba(255,255,255,0.22)" }}
+                >
                   Profile
                 </span>
                 <span
@@ -210,17 +333,16 @@ function Dashboard({ profile }: DashboardProp) {
                   <motion.span
                     initial={{ opacity: 0, scale: 0.5 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                    className="text-xs"
-                    style={{ color: "rgba(250,204,21,0.9)" }}
+                    transition={{ duration: 0.3, ease: EASE }}
+                    style={{ color: "rgba(250,204,21,0.9)", fontSize: 10 }}
                   >
                     ✦
                   </motion.span>
                 )}
               </div>
               <div
-                className="w-28 h-0.75 rounded-full overflow-hidden"
-                style={{ background: "rgba(255,255,255,0.08)" }}
+                className="w-20 sm:w-24 rounded-full overflow-hidden"
+                style={{ height: 2, background: "rgba(255,255,255,0.07)" }}
               >
                 <motion.div
                   className="h-full rounded-full transition-colors duration-500"
@@ -240,10 +362,13 @@ function Dashboard({ profile }: DashboardProp) {
             <motion.div
               {...stagger(2)}
               onClick={() => setShowConnections(true)}
-              className="flex flex-col items-end gap-2 cursor-pointer"
+              className="flex flex-col items-end gap-1.5 cursor-pointer"
             >
-              <span className="text-white/25 text-xs tracking-[-0.1px]">
-                Active connections
+              <span
+                className="text-xs tracking-[-0.1px]"
+                style={{ color: "rgba(255,255,255,0.22)" }}
+              >
+                Connections
               </span>
               <div className="flex items-center gap-2">
                 <div className="flex">
@@ -252,38 +377,59 @@ function Dashboard({ profile }: DashboardProp) {
                     return (
                       <div
                         key={i}
-                        className="w-7 h-7 rounded-full overflow-hidden relative"
+                        className="w-6 h-6 rounded-full overflow-hidden relative"
                         style={{
                           background: conn
                             ? `rgba(255,255,255,${0.08 + i * 0.03})`
-                            : `rgba(255,255,255,${0.05 + i * 0.03})`,
-                          border: "1.5px solid #111111",
-                          marginLeft: i === 0 ? 0 : -10,
-                          boxShadow: "0 2px 8px rgba(0,0,0,0.4)",
+                            : `rgba(255,255,255,${0.04 + i * 0.02})`,
+                          border: "1.5px solid #0c0c0c",
+                          marginLeft: i === 0 ? 0 : -8,
                         }}
                       />
                     );
                   })}
                 </div>
-                <span className="text-white/40 text-sm font-medium tracking-[-0.2px]">
+                <span
+                  className="text-xs font-medium tracking-[-0.2px]"
+                  style={{ color: "rgba(255,255,255,0.35)" }}
+                >
                   {
                     new Set(
                       activeConnection?.data.data.map(
-                        (c: { id: string; [key: string]: unknown }) => c.id,
+                        (c: { id: string }) => c.id,
                       ),
                     ).size
-                  }{" "}
+                  }
                 </span>
               </div>
             </motion.div>
           </div>
         </div>
 
+        {/* Bio — mobile only */}
+        <motion.p
+          {...stagger(3)}
+          className="text-sm tracking-[-0.1px] leading-relaxed mt-4 sm:hidden"
+          style={{ color: "rgba(255,255,255,0.4)" }}
+        >
+          {profile.description || "Notes about me go here."}
+        </motion.p>
+
+        {/* Divider */}
+        <div
+          className="my-6"
+          style={{
+            height: 1,
+            background:
+              "linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)",
+          }}
+        />
+
         {/* Feed */}
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.45, ease: EASE }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.35, delay: 0.3, ease: EASE }}
         >
           <Feed
             completed={profileCompletion(updateForm)}
@@ -300,55 +446,145 @@ function Dashboard({ profile }: DashboardProp) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.4, ease: "easeInOut" }}
-            className="w-full h-screen absolute top-0 left-0 bg-black/70 backdrop-blur-2xl z-50 flex justify-center items-center"
+            transition={{ duration: 0.2 }}
+            className="w-full h-screen fixed top-0 left-0 z-50 flex justify-center items-start sm:items-center overflow-y-auto"
+            style={{
+              background: "rgba(0,0,0,0.7)",
+              backdropFilter: "blur(20px)",
+            }}
           >
             <motion.div
-              key="form"
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 8 }}
-              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              className="w-full max-w-md px-8 py-8"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="w-full max-w-md px-5 sm:px-8 py-8 my-8"
             >
-              <p className="text-xs tracking-[4px] uppercase text-white/20 mb-1">
+              <p
+                className="text-[10px] tracking-[4px] uppercase font-medium mb-1"
+                style={{ color: "rgba(255,255,255,0.2)" }}
+              >
                 BR3W
               </p>
-              <h2 className="text-xl font-light tracking-tight mb-1">
+              <h2 className="text-xl font-medium tracking-[-0.4px] mb-1">
                 Manage Profile.
               </h2>
-              <p className="text-xs text-white/30 mb-6">
+              <p
+                className="text-xs tracking-[-0.1px] mb-6"
+                style={{ color: "rgba(255,255,255,0.3)" }}
+              >
                 Update your information.
               </p>
 
-              <div className="border-t border-white/8 mb-6" />
+              <div
+                style={{
+                  height: 1,
+                  background: "rgba(255,255,255,0.07)",
+                  marginBottom: 20,
+                }}
+              />
 
-              <div className="flex gap-x-2">
-                <input
-                  name="first_name"
-                  type="text"
-                  value={updateForm.first_name}
-                  onChange={handleChange}
-                  className={inputClass}
-                  placeholder="First name"
-                />
-                <input
-                  name="last_name"
-                  type="text"
-                  value={updateForm.last_name}
-                  onChange={handleChange}
-                  className={inputClass}
-                  placeholder="Last name"
-                />
+              {/* Avatar picker inside modal */}
+              <div className="flex items-center gap-4 mb-5">
+                <div
+                  className="relative w-16 h-16 rounded-xl overflow-hidden group shrink-0"
+                  style={{ border: "1px solid rgba(255,255,255,0.08)" }}
+                >
+                  <Image
+                    src={updateForm.profile_image || "/profile_4.png"}
+                    fill
+                    alt="Profile"
+                    className="object-cover"
+                  />
+                  <label
+                    htmlFor="avatar-upload-modal"
+                    className="absolute inset-0 flex items-center justify-center cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    style={{ background: "rgba(0,0,0,0.55)" }}
+                  >
+                    {avatarUploading ? (
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{
+                          duration: 1,
+                          repeat: Infinity,
+                          ease: "linear",
+                        }}
+                        className="w-4 h-4 rounded-full border-2"
+                        style={{
+                          borderColor: "rgba(255,255,255,0.15)",
+                          borderTopColor: "rgba(255,255,255,0.7)",
+                        }}
+                      />
+                    ) : (
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="rgba(255,255,255,0.85)"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      >
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                        <circle cx="12" cy="13" r="4" />
+                      </svg>
+                    )}
+                  </label>
+                  <input
+                    id="avatar-upload-modal"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleAvatarUpload}
+                  />
+                </div>
+                <div>
+                  <p
+                    className="text-sm font-medium tracking-[-0.1px]"
+                    style={{ color: "rgba(255,255,255,0.7)" }}
+                  >
+                    {profile.first_name} {profile.last_name}
+                  </p>
+                  <label
+                    htmlFor="avatar-upload-modal"
+                    className="text-[11px] tracking-[-0.1px] cursor-pointer transition-colors duration-150"
+                    style={{ color: "rgba(255,255,255,0.3)" }}
+                  >
+                    {avatarUploading ? "Uploading..." : "Change photo"}
+                  </label>
+                </div>
               </div>
 
-              <div className="flex flex-col gap-y-2 mt-2">
+              <div className="flex flex-col gap-3">
+                {/* Name row */}
+                <div className="flex gap-2">
+                  <input
+                    name="first_name"
+                    type="text"
+                    value={updateForm.first_name}
+                    onChange={handleChange}
+                    className={inputClass}
+                    style={{ border: "1px solid rgba(255,255,255,0.08)" }}
+                    placeholder="First name"
+                  />
+                  <input
+                    name="last_name"
+                    type="text"
+                    value={updateForm.last_name}
+                    onChange={handleChange}
+                    className={inputClass}
+                    style={{ border: "1px solid rgba(255,255,255,0.08)" }}
+                    placeholder="Last name"
+                  />
+                </div>
+
                 <input
                   name="email"
                   type="email"
                   value={updateForm.email}
                   onChange={handleChange}
                   className={inputClass}
+                  style={{ border: "1px solid rgba(255,255,255,0.08)" }}
                   placeholder="Email"
                 />
                 <input
@@ -357,8 +593,11 @@ function Dashboard({ profile }: DashboardProp) {
                   value={updateForm.phone_number}
                   onChange={handleChange}
                   className={inputClass}
+                  style={{ border: "1px solid rgba(255,255,255,0.08)" }}
                   placeholder="Phone number"
                 />
+
+                {/* Location with suggestions */}
                 <div className="relative">
                   <input
                     name="location"
@@ -366,6 +605,7 @@ function Dashboard({ profile }: DashboardProp) {
                     value={query || updateForm.location || ""}
                     onChange={(e) => setQuery(e.target.value)}
                     className={inputClass}
+                    style={{ border: "1px solid rgba(255,255,255,0.08)" }}
                     placeholder="Location"
                   />
                   {isSearching && (
@@ -375,11 +615,16 @@ function Dashboard({ profile }: DashboardProp) {
                   )}
                   {suggestions.length > 0 && (
                     <motion.div
-                      initial={{ opacity: 0, y: 4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 4 }}
-                      transition={{ duration: 0.2, ease: "easeOut" }}
-                      className="absolute top-full left-0 right-0 mt-1 border border-white/10 rounded-md bg-[#111] overflow-hidden z-10"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute top-full left-0 right-0 mt-1 rounded-xl overflow-hidden z-10"
+                      style={{
+                        border: "1px solid rgba(255,255,255,0.08)",
+                        background: "rgba(12,12,12,0.98)",
+                        backdropFilter: "blur(16px)",
+                      }}
                     >
                       {suggestions.map((suggestion, i) => (
                         <button
@@ -390,8 +635,23 @@ function Dashboard({ profile }: DashboardProp) {
                               ...prev,
                               location: suggestion.label,
                             }));
+                            setQuery("");
                           }}
-                          className="w-full text-left px-3 py-2.5 text-xs text-white/50 hover:bg-white/5 hover:text-white/80 transition-all border-b border-white/5 last:border-none cursor-pointer"
+                          className="w-full text-left px-3 py-2.5 text-xs tracking-[-0.1px] transition-colors duration-150 cursor-pointer"
+                          style={{
+                            color: "rgba(255,255,255,0.5)",
+                            borderBottom:
+                              i < suggestions.length - 1
+                                ? "1px solid rgba(255,255,255,0.05)"
+                                : "none",
+                          }}
+                          onMouseEnter={(e) =>
+                            (e.currentTarget.style.background =
+                              "rgba(255,255,255,0.04)")
+                          }
+                          onMouseLeave={(e) =>
+                            (e.currentTarget.style.background = "transparent")
+                          }
                         >
                           {suggestion.label}
                         </button>
@@ -399,33 +659,28 @@ function Dashboard({ profile }: DashboardProp) {
                     </motion.div>
                   )}
                 </div>
+
                 <textarea
                   name="description"
                   value={updateForm.description || ""}
                   onChange={handleChange}
                   rows={3}
                   className={`${inputClass} resize-none`}
+                  style={{ border: "1px solid rgba(255,255,255,0.08)" }}
                   placeholder="Tell us more"
                 />
+
+                {/* Social links */}
                 {[
-                  {
-                    name: "instagram",
-                    icon: faInstagram,
-                    placeholder: "",
-                  },
-                  {
-                    name: "twitter",
-                    icon: faXTwitter,
-                    placeholder: "",
-                  },
-                  {
-                    name: "linkedin",
-                    icon: faLinkedin,
-                    placeholder: "",
-                  },
-                ].map(({ name, icon, placeholder }) => (
+                  { name: "instagram", icon: faInstagram },
+                  { name: "twitter", icon: faXTwitter },
+                  { name: "linkedin", icon: faLinkedin },
+                ].map(({ name, icon }) => (
                   <div key={name} className="relative">
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/25 text-xs">
+                    <div
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-xs"
+                      style={{ color: "rgba(255,255,255,0.2)" }}
+                    >
                       <FontAwesomeIcon icon={icon} />
                     </div>
                     <input
@@ -438,15 +693,23 @@ function Dashboard({ profile }: DashboardProp) {
                       }
                       onChange={handleChange}
                       className={`${inputClass} pl-8`}
-                      placeholder={placeholder}
+                      style={{ border: "1px solid rgba(255,255,255,0.08)" }}
+                      placeholder={name.charAt(0).toUpperCase() + name.slice(1)}
                     />
                   </div>
                 ))}
               </div>
 
-              <div className="border-t border-white/8 my-5" />
+              <div
+                style={{
+                  height: 1,
+                  background: "rgba(255,255,255,0.07)",
+                  margin: "20px 0",
+                }}
+              />
 
-              <div className="flex flex-col gap-y-2">
+              <div className="flex flex-col gap-2">
+                {/* Save */}
                 <button
                   type="button"
                   onClick={() => {
@@ -462,6 +725,7 @@ function Dashboard({ profile }: DashboardProp) {
                         instagram: updateForm.instagram,
                         twitter: updateForm.twitter,
                         linkedin: updateForm.linkedin,
+                        profile_image: updateForm.profile_image,
                       },
                       {
                         onSuccess: () => {
@@ -473,7 +737,20 @@ function Dashboard({ profile }: DashboardProp) {
                     );
                   }}
                   disabled={isPending}
-                  className="w-full flex justify-between items-center px-4 py-2.5 border border-white/10 rounded-md hover:bg-white/5 hover:border-white/20 transition-all cursor-pointer text-sm text-white/50 hover:text-white group disabled:opacity-40"
+                  className="w-full flex justify-between items-center px-4 py-2.5 rounded-xl transition-colors duration-150 cursor-pointer text-sm font-medium tracking-[-0.1px] disabled:opacity-40"
+                  style={{
+                    border: "1px solid rgba(255,255,255,0.09)",
+                    background: "rgba(255,255,255,0.04)",
+                    color: "rgba(255,255,255,0.6)",
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.background =
+                      "rgba(255,255,255,0.07)")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.background =
+                      "rgba(255,255,255,0.04)")
+                  }
                 >
                   <span>Save changes</span>
                   {isPending && (
@@ -498,13 +775,15 @@ function Dashboard({ profile }: DashboardProp) {
                     />
                   )}
                   {!isPending && updateStatus === "idle" && (
-                    <FontAwesomeIcon
-                      icon={faArrowRotateRight}
-                      size="xs"
-                      className="group-hover:rotate-180 transition-transform duration-300"
-                    />
+                    <span
+                      style={{ color: "rgba(255,255,255,0.25)", fontSize: 12 }}
+                    >
+                      →
+                    </span>
                   )}
                 </button>
+
+                {/* Delete */}
                 <button
                   type="button"
                   onClick={() =>
@@ -517,7 +796,18 @@ function Dashboard({ profile }: DashboardProp) {
                     )
                   }
                   disabled={isDeleting}
-                  className="w-full flex justify-between items-center px-4 py-2.5 border border-red-500/10 rounded-md hover:bg-red-500/5 hover:border-red-500/20 transition-all cursor-pointer text-sm text-red-400/40 hover:text-red-400/70 group disabled:opacity-40"
+                  className="w-full flex justify-between items-center px-4 py-2.5 rounded-xl transition-colors duration-150 cursor-pointer text-sm font-medium tracking-[-0.1px] disabled:opacity-40"
+                  style={{
+                    border: "1px solid rgba(239,68,68,0.1)",
+                    background: "transparent",
+                    color: "rgba(248,113,113,0.4)",
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.background = "rgba(239,68,68,0.04)")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.background = "transparent")
+                  }
                 >
                   <span>Delete account</span>
                   {isDeleting && (
@@ -549,7 +839,14 @@ function Dashboard({ profile }: DashboardProp) {
 
               <button
                 onClick={() => setRevealEdit(false)}
-                className="mt-4 w-full text-center text-xs text-white/20 hover:text-white/40 transition-colors cursor-pointer"
+                className="mt-4 w-full text-center text-xs tracking-[-0.1px] transition-colors duration-150 cursor-pointer"
+                style={{ color: "rgba(255,255,255,0.2)" }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.color = "rgba(255,255,255,0.4)")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.color = "rgba(255,255,255,0.2)")
+                }
               >
                 Cancel
               </button>
@@ -558,7 +855,7 @@ function Dashboard({ profile }: DashboardProp) {
         )}
       </AnimatePresence>
 
-      {/* Active Connection Modal */}
+      {/* Connections Modal */}
       <AnimatePresence>
         {showConnections && (
           <motion.section
@@ -566,37 +863,52 @@ function Dashboard({ profile }: DashboardProp) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.4, ease: "easeInOut" }}
-            className="w-full h-screen absolute top-0 left-0 bg-black/70 backdrop-blur-2xl z-50 flex justify-center items-center"
+            transition={{ duration: 0.2 }}
+            className="w-full h-screen fixed top-0 left-0 z-50 flex justify-center items-start sm:items-center overflow-y-auto"
+            style={{
+              background: "rgba(0,0,0,0.7)",
+              backdropFilter: "blur(20px)",
+            }}
           >
             <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 8 }}
-              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              className="w-full max-w-md px-8 py-8"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="w-full max-w-md px-5 sm:px-8 py-8 my-8"
             >
-              <p className="text-xs tracking-[4px] uppercase text-white/20 mb-1">
-                br3w
+              <p
+                className="text-[10px] tracking-[4px] uppercase font-medium mb-1"
+                style={{ color: "rgba(255,255,255,0.2)" }}
+              >
+                BR3W
               </p>
-              <h2 className="text-xl font-light tracking-tight mb-1">
+              <h2 className="text-xl font-medium tracking-[-0.4px] mb-1">
                 Connections.
               </h2>
-              <p className="text-xs text-white/30 mb-6">
+              <p
+                className="text-xs tracking-[-0.1px] mb-6"
+                style={{ color: "rgba(255,255,255,0.3)" }}
+              >
                 People in your circles.
               </p>
 
-              <div className="border-t border-white/8 mb-6" />
+              <div
+                style={{
+                  height: 1,
+                  background: "rgba(255,255,255,0.07)",
+                  marginBottom: 20,
+                }}
+              />
 
               {activeConnection?.data.data.length > 0 ? (
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
                   {Object.entries(
                     activeConnection?.data.data.reduce(
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       (acc: any, conn: any) => {
-                        if (!acc[conn.id]) {
+                        if (!acc[conn.id])
                           acc[conn.id] = { ...conn, circles: [] };
-                        }
                         acc[conn.id].circles.push(conn.circle_name);
                         return acc;
                       },
@@ -606,13 +918,18 @@ function Dashboard({ profile }: DashboardProp) {
                   ).map(([, member]: [string, any]) => (
                     <div
                       key={member.id}
-                      className="flex items-center gap-3 px-3 py-2.5 border border-white/8 rounded-md bg-white/3 hover:bg-white/5 transition-all"
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
+                      style={{
+                        border: "1px solid rgba(255,255,255,0.07)",
+                        background: "rgba(255,255,255,0.02)",
+                      }}
                     >
                       <div
-                        className="w-8 h-8 rounded-full overflow-hidden shrink-0 flex items-center justify-center text-xs text-white/50 font-medium"
+                        className="w-8 h-8 rounded-lg overflow-hidden shrink-0 flex items-center justify-center text-xs font-medium relative"
                         style={{
-                          background: "rgba(255,255,255,0.08)",
-                          border: "1px solid rgba(255,255,255,0.1)",
+                          background: "rgba(255,255,255,0.07)",
+                          border: "1px solid rgba(255,255,255,0.09)",
+                          color: "rgba(255,255,255,0.45)",
                         }}
                       >
                         {member.profile_image ? (
@@ -627,11 +944,17 @@ function Dashboard({ profile }: DashboardProp) {
                           `${member.first_name[0]}${member.last_name[0]}`
                         )}
                       </div>
-                      <div className="flex-1">
-                        <p className="text-sm text-white/70">
+                      <div className="flex-1 min-w-0">
+                        <p
+                          className="text-sm font-medium tracking-[-0.1px] truncate"
+                          style={{ color: "rgba(255,255,255,0.75)" }}
+                        >
                           {member.first_name} {member.last_name}
                         </p>
-                        <p className="text-xs text-white/30">
+                        <p
+                          className="text-[11px] tracking-[-0.1px]"
+                          style={{ color: "rgba(255,255,255,0.3)" }}
+                        >
                           @{member.username}
                         </p>
                       </div>
@@ -639,7 +962,11 @@ function Dashboard({ profile }: DashboardProp) {
                         {member.circles.map((circle: string, i: number) => (
                           <span
                             key={i}
-                            className="text-[9px] tracking-[1px] uppercase text-white/20 border border-white/8 px-2 py-0.5 rounded-full"
+                            className="text-[9px] tracking-[1px] uppercase px-2 py-0.5 rounded-full"
+                            style={{
+                              color: "rgba(255,255,255,0.2)",
+                              border: "1px solid rgba(255,255,255,0.07)",
+                            }}
                           >
                             {circle}
                           </span>
@@ -649,14 +976,24 @@ function Dashboard({ profile }: DashboardProp) {
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-white/25 text-center py-8">
+                <p
+                  className="text-sm text-center py-8 tracking-[-0.1px]"
+                  style={{ color: "rgba(255,255,255,0.22)" }}
+                >
                   No connections yet. Join a circle to connect.
                 </p>
               )}
 
               <button
                 onClick={() => setShowConnections(false)}
-                className="mt-6 w-full text-center text-xs text-white/20 hover:text-white/40 transition-colors cursor-pointer"
+                className="mt-6 w-full text-center text-xs tracking-[-0.1px] transition-colors duration-150 cursor-pointer"
+                style={{ color: "rgba(255,255,255,0.2)" }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.color = "rgba(255,255,255,0.4)")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.color = "rgba(255,255,255,0.2)")
+                }
               >
                 Close
               </button>
