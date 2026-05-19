@@ -82,6 +82,9 @@ export const sendSMS = async ({
     process.env.TWILIO_TEST_SID,
     process.env.TWILIO_TEST_AUTH_TOKEN,
   );
+
+  if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN) return;
+
   try {
     if (status === "accepted") {
       await client.messages.create({
