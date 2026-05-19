@@ -11,32 +11,62 @@ import jwt from "jsonwebtoken";
 import rateLimit from "express-rate-limit"; //restricts how many request an IP or user can make in a window time
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import cron from "node-cron";
+// import cron from "node-cron";
+import helmut from "helmet";
 
 const app = express();
 const port = "8080";
 
 //Used to control the rate of traffic sent or received by a network interface or service
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // how long to remember a request for
-  limit: 10, //how many request to allow
-  standardHeaders: "draft-8", // Enables RateLimit Header
-  legacyHeaders: false, // Enable the X-Rate-Limit header
-  ipv6Subnet: 56, //improves routing efficiency, enhances network security through segementation, and maintain organized, hiearchical address planning
-  message: "Rate limit hit, please try again in approx. 15 minutes",
+  windowMs: 15 * 60 * 1000,
+  limit: 100,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  message: "Too many requests, please try again in 15 minutes.",
   statusCode: 429,
 });
 
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  message: "Too many attempts, please try again in 15 minutes.",
+  statusCode: 429,
+});
+
+// Applications — prevent spam submissions
+const applicationLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  limit: 3,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  message: "Too many requests, please try again later.",
+  statusCode: 429,
+});
+
+app.use(limiter); // cover every route
+app.use("/auth", authLimiter); // overrides global for auth
+app.use("/applications", applicationLimiter); // overrides global for applications
+
 app.use(express.json());
+//helps secure express apps by setting http response headers
+app.use(helmut());
+//CROSS ORIGIN RESOURCE SHARING
 app.use(
   cors({
-    origin:
-      process.env.NODE_ENV === "production"
-        ? [
-            "https://br3w.app",
-            "https://https://brew-git-feature-frontend-setup-br3w.vercel.app/",
-          ]
-        : "http://localhost:3000",
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      const allowed =
+        process.env.NODE_ENV === "production"
+          ? origin === "https://br3w.app" ||
+            /^https:\/\/brew-.*\.vercel\.app$/.test(origin)
+          : origin === "http://localhost:3000";
+      allowed
+        ? callback(null, true)
+        : callback(new Error("Not allowed by CORS"));
+    },
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -120,22 +150,6 @@ const userRole = (role: string) => {
 
 // APPLICATION FLOW
 // Create an application
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin) return callback(null, true);
-      const allowed =
-        origin === "https://br3w.app" ||
-        /^https:\/\/brew-.*\.vercel\.app$/.test(origin);
-      allowed
-        ? callback(null, true)
-        : callback(new Error("Not allowed by CORS"));
-    },
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
-  }),
-);
 
 // Get all applications (admin only)
 app.get(
@@ -359,7 +373,6 @@ app.get(
 //happens during login
 app.post(
   "/auth/verify/:id",
-  limiter,
   async (req: Request, res: Response, next: NextFunction) => {
     const { otp_code } = req.body;
 
@@ -498,7 +511,6 @@ app.post(
 // Resend OTP if expired or not received
 app.put(
   "/auth/resend/:id",
-  limiter,
   async (req: Request, res: Response, next: NextFunction) => {
     const updatedGeneratedOTP = generateOTP();
     const updatedExpiryAt = Date.now() + 300000;
@@ -567,6 +579,7 @@ app.put(
       "instagram",
       "twitter",
       "linkedin",
+      "profile_image",
     ];
 
     const filterKeys = Object.keys(req.body).filter((key) => {
@@ -2072,13 +2085,39 @@ app.put(
 );
 
 //Anthropic Auto-generation
-app.post(
-  "/ai/generate",
+// GET /moments/:id/recap
+app.get(
+  "/moments/:id/recap",
   authenticateToken,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { description } = req.body;
+      const { id } = req.params;
 
+      // Check if recap already exists
+      const existing = await pool.query(
+        "SELECT recap FROM moments WHERE id = $1",
+        [id],
+      );
+
+      if (existing.rows[0]?.recap) {
+        return res
+          .status(200)
+          .json({ success: true, data: existing.rows[0].recap });
+      }
+
+      // No recap yet — fetch moment description to generate from
+      const moment = await pool.query(
+        "SELECT description FROM moments WHERE id = $1",
+        [id],
+      );
+
+      if (!moment.rows[0]) {
+        return res
+          .status(404)
+          .json({ success: false, message: "Moment not found" });
+      }
+
+      // Call Anthropic
       const response = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
         headers: {
@@ -2088,32 +2127,26 @@ app.post(
         },
         body: JSON.stringify({
           model: "claude-sonnet-4-5",
-          max_tokens: 1000,
+          max_tokens: 300,
           messages: [
             {
               role: "user",
-              content: `Based on this event description: "${description}"
-                
-Return ONLY a JSON object with no preamble or markdown:
-{
-  "principles": [...],
-  "expectations": [...],
-  "faqs": [{ "question": "...", "answer": "..." }],
-  "vibes": ["vibe 1", "vibe 2"]
-}
-
-Generate between 3 and 6 items for each array. Vibes between 5 and 10 with 1 word describing the event.
-Keep each item to 1-2 sentences. Match the tone of the description.`,
+              content: `Write a short, evocative 2-3 sentence recap of an event that had this description: "${moment.rows[0].description}". Write it in past tense as if the event just ended. Be atmospheric and specific. No quotes, no preamble.`,
             },
           ],
         }),
       });
 
-      const data = await response.json();
-      const text = data.content[0].text;
-      const parsed = JSON.parse(text.replace(/```json|```/g, "").trim());
+      const aiData = await response.json();
+      const recap = aiData.content[0].text.trim();
 
-      return res.status(200).send({ success: true, data: parsed });
+      // Persist so we never generate again
+      await pool.query("UPDATE moments SET recap = $1 WHERE id = $2", [
+        recap,
+        id,
+      ]);
+
+      return res.status(200).json({ success: true, data: recap });
     } catch (error) {
       next(error);
     }
@@ -2389,126 +2422,126 @@ app.post(
 //Node-cron is a lightweight task scheduler for Node.js applications
 // that allows you to execute JavaScript code at specific intervals or times
 
-cron.schedule("*/15 * * * *", async () => {
-  try {
-    const windowStart = new Date(Date.now() + 45 * 60 * 1000).toISOString();
-    const windowEnd = new Date(Date.now() + 75 * 60 * 1000).toISOString();
+// cron.schedule("*/15 * * * *", async () => {
+//   try {
+//     const windowStart = new Date(Date.now() + 45 * 60 * 1000).toISOString();
+//     const windowEnd = new Date(Date.now() + 75 * 60 * 1000).toISOString();
 
-    const upcoming = await pool.query(
-      `SELECT m.moments_name, m.location_name, m.moment_start, ia.attendee_id
-      FROM moments m
-      JOIN invite_attendees ia ON m.id = ia.moment_id
-      WHERE m.moment_start >= $1
-      AND m.moment_start <= $2
-      AND ia.status = 'accepted'
-      AND m.close_moment IS NOT TRUE`,
-      [windowStart, windowEnd],
-    );
+//     const upcoming = await pool.query(
+//       `SELECT m.moments_name, m.location_name, m.moment_start, ia.attendee_id
+//       FROM moments m
+//       JOIN invite_attendees ia ON m.id = ia.moment_id
+//       WHERE m.moment_start >= $1
+//       AND m.moment_start <= $2
+//       AND ia.status = 'accepted'
+//       AND m.close_moment IS NOT TRUE`,
+//       [windowStart, windowEnd],
+//     );
 
-    for (const row of upcoming.rows) {
-      const attendee = await pool.query(
-        `SELECT email, phone_number FROM users WHERE id = $1`,
-        [row.attendee_id],
-      );
-      if (!attendee.rows[0]) continue;
+//     for (const row of upcoming.rows) {
+//       const attendee = await pool.query(
+//         `SELECT email, phone_number FROM users WHERE id = $1`,
+//         [row.attendee_id],
+//       );
+//       if (!attendee.rows[0]) continue;
 
-      const time = new Date(row.moment_start).toLocaleTimeString("en-US", {
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true,
-      });
+//       const time = new Date(row.moment_start).toLocaleTimeString("en-US", {
+//         hour: "numeric",
+//         minute: "2-digit",
+//         hour12: true,
+//       });
 
-      await sendEmail({
-        email: attendee.rows[0].email,
-        moment_reminder: {
-          moments_name: row.moments_name,
-          location_name: row.location_name,
-          time,
-        },
-      });
-      await sendSMS({
-        phone_number: attendee.rows[0].phone_number,
-        moment_reminder: {
-          moments_name: row.moments_name,
-          location_name: row.location_name,
-          time,
-        },
-      });
-    }
-  } catch (error) {
-    console.error("Reminder cron error:", error);
-  }
-});
+//       await sendEmail({
+//         email: attendee.rows[0].email,
+//         moment_reminder: {
+//           moments_name: row.moments_name,
+//           location_name: row.location_name,
+//           time,
+//         },
+//       });
+//       await sendSMS({
+//         phone_number: attendee.rows[0].phone_number,
+//         moment_reminder: {
+//           moments_name: row.moments_name,
+//           location_name: row.location_name,
+//           time,
+//         },
+//       });
+//     }
+//   } catch (error) {
+//     console.error("Reminder cron error:", error);
+//   }
+// });
 
-// Runs daily at 10 AM — pending invite nudges
-cron.schedule("0 10 * * *", async () => {
-  try {
-    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+// // Runs daily at 10 AM — pending invite nudges
+// cron.schedule("0 10 * * *", async () => {
+//   try {
+//     const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
-    // Pending moment invites
-    const pendingMoments = await pool.query(
-      `SELECT ia.attendee_id, m.moments_name, m.moment_start
-      FROM invite_attendees ia
-      JOIN moments m ON ia.moment_id = m.id
-      WHERE ia.status = 'pending'
-      AND ia.created_at <= $1
-      AND m.moment_start > NOW()`,
-      [yesterday],
-    );
+//     // Pending moment invites
+//     const pendingMoments = await pool.query(
+//       `SELECT ia.attendee_id, m.moments_name, m.moment_start
+//       FROM invite_attendees ia
+//       JOIN moments m ON ia.moment_id = m.id
+//       WHERE ia.status = 'pending'
+//       AND ia.created_at <= $1
+//       AND m.moment_start > NOW()`,
+//       [yesterday],
+//     );
 
-    for (const row of pendingMoments.rows) {
-      const attendee = await pool.query(
-        `SELECT email, phone_number FROM users WHERE id = $1`,
-        [row.attendee_id],
-      );
-      if (!attendee.rows[0]) continue;
+//     for (const row of pendingMoments.rows) {
+//       const attendee = await pool.query(
+//         `SELECT email, phone_number FROM users WHERE id = $1`,
+//         [row.attendee_id],
+//       );
+//       if (!attendee.rows[0]) continue;
 
-      const time = new Date(row.moment_start).toLocaleTimeString("en-US", {
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true,
-      });
+//       const time = new Date(row.moment_start).toLocaleTimeString("en-US", {
+//         hour: "numeric",
+//         minute: "2-digit",
+//         hour12: true,
+//       });
 
-      await sendEmail({
-        email: attendee.rows[0].email,
-        moment_invite_reminder: { moments_name: row.moments_name, time },
-      });
-      await sendSMS({
-        phone_number: attendee.rows[0].phone_number,
-        moment_invite_reminder: { moments_name: row.moments_name, time },
-      });
-    }
+//       await sendEmail({
+//         email: attendee.rows[0].email,
+//         moment_invite_reminder: { moments_name: row.moments_name, time },
+//       });
+//       await sendSMS({
+//         phone_number: attendee.rows[0].phone_number,
+//         moment_invite_reminder: { moments_name: row.moments_name, time },
+//       });
+//     }
 
-    // Pending circle invites
-    const pendingCircles = await pool.query(
-      `SELECT im.member_id, c.circle_name
-      FROM invite_members im
-      JOIN circles c ON im.circle_id = c.id
-      WHERE im.status = 'pending'
-      AND im.created_at <= $1`,
-      [yesterday],
-    );
+//     // Pending circle invites
+//     const pendingCircles = await pool.query(
+//       `SELECT im.member_id, c.circle_name
+//       FROM invite_members im
+//       JOIN circles c ON im.circle_id = c.id
+//       WHERE im.status = 'pending'
+//       AND im.created_at <= $1`,
+//       [yesterday],
+//     );
 
-    for (const row of pendingCircles.rows) {
-      const member = await pool.query(
-        `SELECT email, phone_number FROM users WHERE id = $1`,
-        [row.member_id],
-      );
-      if (!member.rows[0]) continue;
+//     for (const row of pendingCircles.rows) {
+//       const member = await pool.query(
+//         `SELECT email, phone_number FROM users WHERE id = $1`,
+//         [row.member_id],
+//       );
+//       if (!member.rows[0]) continue;
 
-      await sendEmail({
-        email: member.rows[0].email,
-        circle_invite_reminder: { circle_name: row.circle_name },
-      });
-      await sendSMS({
-        phone_number: member.rows[0].phone_number,
-        circle_invite_reminder: { circle_name: row.circle_name },
-      });
-    }
-  } catch (error) {
-    console.error("Invite reminder cron error:", error);
-  }
-});
+//       await sendEmail({
+//         email: member.rows[0].email,
+//         circle_invite_reminder: { circle_name: row.circle_name },
+//       });
+//       await sendSMS({
+//         phone_number: member.rows[0].phone_number,
+//         circle_invite_reminder: { circle_name: row.circle_name },
+//       });
+//     }
+//   } catch (error) {
+//     console.error("Invite reminder cron error:", error);
+//   }
+// });
 
 app.listen(port, () => {
   console.log(`Listening on port: ${port}`);

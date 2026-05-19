@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-const hideNavRoutes = ["/checkin", "/join", "/admin"];
+const hideNavRoutes = ["/checkin", "/join", "/admin", "/manage"];
 
 export default function AppLayout({
   children,
@@ -24,7 +24,7 @@ export default function AppLayout({
     if (!user) {
       router.replace("/");
     }
-  }, [user, hasHydrated]);
+  }, [user, hasHydrated, router]);
 
   return (
     <main>

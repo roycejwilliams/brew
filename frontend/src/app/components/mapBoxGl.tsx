@@ -31,7 +31,6 @@ function MapBoxGl({
   const markersRef = useRef<mapboxgl.Marker[]>([]);
   const selectedMarkerRef = useRef<string | null>(null);
   const [mapReady, setMapReady] = useState(false);
-  const eventCard = openEventCard((state) => state.moment);
   const openCard = openEventCard((state) => state.openEvent);
   const router = useRouter();
 
@@ -48,9 +47,7 @@ function MapBoxGl({
       dragPan: dragPan,
       dragRotate: dragRotate,
       pitch: 0,
-      style: eventCard
-        ? "mapbox://styles/mapbox/dark-v11"
-        : "mapbox://styles/roycwilliams/cmh2r2dac003j01rfhgc38cft/draft",
+      style: "mapbox://styles/mapbox/dark-v11",
     });
 
     mapRef.current.on("load", () => {

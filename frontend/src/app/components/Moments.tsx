@@ -133,7 +133,7 @@ export default function Moments({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-      className="flex flex-col items-center w-full px-6 py-10 gap-y-8"
+      className="flex flex-col items-center w-full  py-10 gap-y-8"
     >
       {/* Header */}
       <AnimatePresence mode="wait">
@@ -143,7 +143,7 @@ export default function Moments({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 4 }}
           transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-          className="text-white text-xl font-medium tracking-[-0.3px] leading-tight"
+          className="text-white md:text-xl text-md text-center font-medium tracking-[-0.3px] leading-tight"
         >
           {selectedId
             ? `Inviting ${
@@ -158,7 +158,7 @@ export default function Moments({
       {/* Moment list */}
       <motion.div
         layout
-        className="w-full rounded-xl border border-white/[0.07] overflow-hidden shadow-2xl shadow-black/30 divide-y divide-white/[0.07]"
+        className="w-full rounded-xl border border-white/[0.07] overflow-y-auto lg:max-h-100 max-h-125 no-scroll shadow-2xl shadow-black/30 divide-y divide-white/[0.07]"
       >
         {moments.map((moment, i) => {
           const isSelected = selectedId === moment.id;

@@ -10,9 +10,9 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import useTimingStates from "@/hooks/useTimingStates";
 
-function EventCard() {
-  const EASE = [0.16, 1, 0.3, 1] as const;
+const EASE = [0.16, 1, 0.3, 1] as const;
 
+function EventCard() {
   const router = useRouter();
   const closeEventCard = openEventCard((state) => state.closeEvent);
   const eventCard = openEventCard((state) => state.moment);
@@ -21,6 +21,7 @@ function EventCard() {
     closeEventCard();
     router.back();
   };
+
   const { activeEvent } = useTimingStates({ eventCard });
 
   return (
@@ -67,45 +68,73 @@ function EventCard() {
         )}
       </div>
 
-      {/* Content */}
-      <div className="relative z-10 w-full px-24">
-        <motion.button
-          onClick={handleClose}
-          initial={{ opacity: 0, x: -8 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.3, ease: EASE }}
-          whileHover={{ x: -2 }}
-          whileTap={{ scale: 0.94 }}
-          className="fixed top-0 left-0 mt-12 ml-6 z-50 flex items-center gap-2 cursor-pointer group"
+      {/* Close button */}
+      <motion.button
+        onClick={handleClose}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.25, ease: EASE }}
+        whileTap={{ scale: 0.94 }}
+        className="fixed top-0 left-0 mt-5 sm:mt-8 ml-4 sm:ml-6 z-50 flex items-center gap-2 cursor-pointer group"
+      >
+        <div
+          className="flex items-center justify-center transition-colors duration-200"
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.08)",
+            border: "1px solid rgba(255,255,255,0.12)",
+            backdropFilter: "blur(8px)",
+          }}
         >
-          <div
-            className="flex items-center justify-center transition-all duration-200"
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: "50%",
-              background: "rgba(255,255,255,0.06)",
-              border: "1px solid rgba(255,255,255,0.1)",
-            }}
-          >
-            <CloseIcon color="#fff" size={14} />
-          </div>
-          <span className="text-white/30 text-xs tracking-[-0.1px] opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            Close
-          </span>
-        </motion.button>
+          <CloseIcon color="#fff" size={14} />
+        </div>
+        <span
+          className="text-xs tracking-[-0.1px] opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+          style={{ color: "rgba(255,255,255,0.3)" }}
+        >
+          Close
+        </span>
+      </motion.button>
 
+      {/* Content */}
+      <div className="relative z-10 w-full px-4 sm:px-8 md:px-16 lg:px-24 pb-28 pt-20">
         <EventHero eventCard={eventCard} />
 
         <AnimatePresence mode="popLayout">
           {activeEvent === "prequel" && (
-            <EventStart activeModal="prequel" eventCard={eventCard} />
+            <motion.div
+              key="prequel"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <EventStart activeModal="prequel" eventCard={eventCard} />
+            </motion.div>
           )}
           {activeEvent === "live" && (
-            <EventLive activeModal="live" eventCard={eventCard} />
+            <motion.div
+              key="live"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <EventLive activeModal="live" eventCard={eventCard} />
+            </motion.div>
           )}
           {activeEvent === "end" && (
-            <EventEnd activeModal="end" eventCard={eventCard} />
+            <motion.div
+              key="end"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <EventEnd activeModal="end" eventCard={eventCard} />
+            </motion.div>
           )}
         </AnimatePresence>
       </div>

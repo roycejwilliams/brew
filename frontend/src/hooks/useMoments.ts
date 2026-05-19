@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/axios";
 
-
 export const useCreateMoment = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -174,16 +173,8 @@ export const useGetNearbyMoments = (params: {
 //recaps the night
 // uses anthropic sonnet 4.6
 const generateRecap = async (eventCard: MomentProp) => {
-  const res = await api.post("/ai/recap", {
-    moments_name: eventCard.moments_name,
-    description: eventCard.description,
-    location_name: eventCard.location_name,
-    vibes: eventCard.vibes,
-    principles: eventCard.principles,
-    moment_start: eventCard.moment_start,
-    moment_end: eventCard.moment_end,
-  });
-  return res.data.data.recap as string;
+  const response = await api.get(`/moments/${eventCard.id}/recap`);
+  return response.data.data;
 };
 
 export const useGenerateRecap = (eventCard: MomentProp | null) => {
@@ -191,7 +182,7 @@ export const useGenerateRecap = (eventCard: MomentProp | null) => {
     queryKey: ["recap", eventCard?.id],
     queryFn: () => generateRecap(eventCard!),
     enabled: !!eventCard?.id,
-    staleTime: Infinity, // never refetch — recap is a one-time generation
+    staleTime: Infinity,
     retry: false,
   });
 };

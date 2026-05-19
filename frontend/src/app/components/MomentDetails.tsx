@@ -1,3 +1,4 @@
+"use client";
 import { motion } from "motion/react";
 import React, { useState, useEffect } from "react";
 import LocationSelector from "./locationSelector";
@@ -50,6 +51,11 @@ interface SelectModal {
   selectedUsers: UserProp[];
 }
 
+const EASE = [0.16, 1, 0.3, 1] as const;
+
+const inputClass =
+  "w-full bg-transparent text-white/90 text-sm placeholder:text-white/25 resize-none px-4 pt-4 pb-10 focus:outline-none tracking-[-0.1px]";
+
 export default function MomentDetails({
   selectedModal,
   form,
@@ -77,8 +83,6 @@ export default function MomentDetails({
     "details",
   );
   const [createdMomentId, setCreatedMomentId] = useState<string | null>(null);
-
-  // Single source of truth for coordinates
   const [locationCoordinates, setLocationCoordinates] = useState<
     [number, number] | null
   >(null);
@@ -92,26 +96,31 @@ export default function MomentDetails({
   const { user } = useUserStore();
   const { mutate: inviteAttendee } = useInviteAttendeeToMoment();
 
-  // Set coordinates when near mode resolves GPS
   useEffect(() => {
-    if (selectedLocation === "near" && coordinates) {
+    if (selectedLocation === "near" && coordinates)
       setLocationCoordinates(coordinates);
-    }
   }, [coordinates, selectedLocation]);
 
-  // Set coordinates when area is confirmed
   useEffect(() => {
-    if (selectedLocation === "area" && selectedArea) {
+    if (selectedLocation === "area" && selectedArea)
       setLocationCoordinates(selectedArea.center);
-    }
   }, [selectedArea, selectedLocation]);
 
-  // Set coordinates when venue is selected
   useEffect(() => {
-    if (selectedLocation === "venue" && venue?.center) {
+    if (selectedLocation === "venue" && venue?.center)
       setLocationCoordinates(venue.center);
-    }
   }, [venue, selectedLocation]);
+
+  useEffect(() => {
+    const t = setTimeout(() => setIsTyping(false), 500);
+    return () => clearTimeout(t);
+  }, [isTyping]);
+
+  useEffect(() => {
+    if (!coordinates || viewport !== null) return;
+    setViewport({ center: coordinates, zoom: 11, bearing: 0, pitch: 0 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [coordinates]);
 
   const handleChangeArea = () => {
     setSelectedArea(null);
@@ -151,17 +160,14 @@ export default function MomentDetails({
           image: imageUrl,
           ...generated,
           location: `(${locationCoordinates[0]},${locationCoordinates[1]})`,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any,
         {
           onSuccess: (data) => {
             const momentId = data.data.data.id;
-            selectedUsers.forEach((user) => {
-              inviteAttendee({
-                moment_id: momentId,
-                recipient: user.username,
-              });
-            });
+            selectedUsers.forEach((u) =>
+              inviteAttendee({ moment_id: momentId, recipient: u.username }),
+            );
             setCreatedMomentId(momentId);
             setStage("done");
           },
@@ -176,14 +182,9 @@ export default function MomentDetails({
 
   const locationChange = (location: "near" | "area" | "venue") => {
     setSelectedLocation(location);
-    // Reset coordinates when switching modes
     setLocationCoordinates(null);
-    if (location !== "area") {
-      handleChangeArea();
-    }
-    if (location !== "venue") {
-      setVenue(null);
-    }
+    if (location !== "area") handleChangeArea();
+    if (location !== "venue") setVenue(null);
     if (location === "near" && coordinates) {
       setViewport({ center: coordinates, zoom: 11, bearing: 0, pitch: 0 });
     }
@@ -196,87 +197,124 @@ export default function MomentDetails({
       venue !== null &&
       locationCoordinates !== null);
 
-  useEffect(() => {
-    const typingTimeout = setTimeout(() => setIsTyping(false), 500);
-    return () => clearTimeout(typingTimeout);
-  }, [isTyping]);
-
-  useEffect(() => {
-    if (!coordinates || viewport !== null) return;
-    setViewport({ center: coordinates, zoom: 11, bearing: 0, pitch: 0 });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [coordinates]);
-
   if (stage === "generating") return <GeneratingScreen />;
   if (stage === "done")
     return <DoneScreen momentId={createdMomentId} onClose={onClose} />;
 
   return (
-    <div className="text-white p-4 flex items-center justify-center">
-      <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-        <ImageDrop setForm={setForm} onFileSelect={setFile} />
-        <div className="flex flex-col justify-start gap-4 h-full">
-          <div>
-            <LocationSelector
-              selectedLocation={selectedLocation}
-              onLocationChange={locationChange}
+    <div className="w-full text-white px-4 sm:px-6 pb-24 sm:pb-10 overflow-y-auto">
+      <div className="w-full max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 items-start">
+        {/* Image drop */}
+        <div className="w-full">
+          <ImageDrop setForm={setForm} onFileSelect={setFile} />
+        </div>
+
+        {/* Right column */}
+        <div className="flex flex-col gap-4">
+          {/* Location selector */}
+          <div
+            className="rounded-xl overflow-hidden"
+            style={{
+              background: "rgba(255,255,255,0.02)",
+              border: "1px solid rgba(255,255,255,0.07)",
+            }}
+          >
+            {/* Top shimmer */}
+            <div
+              style={{
+                height: 1,
+                background:
+                  "linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)",
+              }}
             />
-            <div className="mt-4">
-              {selectedLocation === "near" && (
-                <NearYou place={near as string} />
-              )}
-              {selectedLocation === "area" && viewport && (
-                <ChooseAreaPanel
-                  onAreaSelected={(center, zoom) => {
-                    setSelectedArea({ center, zoom });
-                    setLocationCoordinates(center);
-                  }}
-                  viewport={viewport as MapViewport}
-                  isAreaConfirmed={isConfirming}
-                  onAreaCleared={handleChangeArea}
-                  selectedArea={selectedArea}
-                  setViewport={setViewport}
-                  place={around as string}
-                  onCancel={() => setSelectedLocation("area")}
-                />
-              )}
-              {selectedLocation === "venue" && viewport && (
-                <Venue
-                  selectedModal={selectedModal}
-                  viewport={viewport as MapViewport}
-                  selectedVenue={venue}
-                  setSelectedVenue={(v) => {
-                    setVenue(v);
-                    if (v?.center) setLocationCoordinates(v.center);
-                  }}
-                  setForm={setForm}
-                />
-              )}
+            <div className="p-4">
+              <LocationSelector
+                selectedLocation={selectedLocation}
+                onLocationChange={locationChange}
+              />
+              <div className="mt-3">
+                {selectedLocation === "near" && (
+                  <NearYou place={near as string} />
+                )}
+                {selectedLocation === "area" && viewport && (
+                  <ChooseAreaPanel
+                    onAreaSelected={(center, zoom) => {
+                      setSelectedArea({ center, zoom });
+                      setLocationCoordinates(center);
+                    }}
+                    viewport={viewport as MapViewport}
+                    isAreaConfirmed={isConfirming}
+                    onAreaCleared={handleChangeArea}
+                    selectedArea={selectedArea}
+                    setViewport={setViewport}
+                    place={around as string}
+                    onCancel={() => setSelectedLocation("area")}
+                  />
+                )}
+                {selectedLocation === "venue" && viewport && (
+                  <Venue
+                    selectedModal={selectedModal}
+                    viewport={viewport as MapViewport}
+                    selectedVenue={venue}
+                    setSelectedVenue={(v) => {
+                      setVenue(v);
+                      if (v?.center) setLocationCoordinates(v.center);
+                    }}
+                    setForm={setForm}
+                  />
+                )}
+              </div>
             </div>
           </div>
 
+          {/* Description textarea */}
           {isLocationSet && (
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.2, ease: EASE }}
             >
-              <div className="relative w-full bg-[#1c1c1c] backdrop-blur-xl border border-white/8 rounded-xl shadow-2xl shadow-black/20 overflow-hidden mt-auto">
+              <div
+                className="relative w-full rounded-xl overflow-hidden"
+                style={{
+                  background: "rgba(255,255,255,0.02)",
+                  border: "1px solid rgba(255,255,255,0.07)",
+                }}
+              >
+                {/* Top shimmer */}
+                <div
+                  style={{
+                    height: 1,
+                    background:
+                      "linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)",
+                  }}
+                />
                 <textarea
                   name="description"
                   rows={5}
                   maxLength={300}
                   value={form.description}
-                  onChange={(e) => handleChange(e)}
+                  onChange={(e) => {
+                    setIsTyping(true);
+                    handleChange(e);
+                  }}
                   placeholder="Set the vibe..."
-                  className="w-full bg-transparent text-white/90 text-sm placeholder:text-white/30 resize-none px-5 pt-4 pb-10 focus:outline-none"
+                  className={inputClass}
                 />
-                <div className="absolute bottom-0 left-0 right-0 px-5 py-2.5 flex justify-between items-center border-t border-white/6">
-                  <span className="text-[10px] uppercase tracking-wider text-white/20 font-medium">
+                <div
+                  className="absolute bottom-0 left-0 right-0 px-4 py-2.5 flex justify-between items-center"
+                  style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}
+                >
+                  <span
+                    className="text-[9px] tracking-[2px] uppercase font-medium"
+                    style={{ color: "rgba(255,255,255,0.2)" }}
+                  >
                     Description
                   </span>
-                  <span className="text-[10px] text-white/25 tabular-nums">
+                  <span
+                    className="text-[10px] tabular-nums tracking-[-0.1px]"
+                    style={{ color: "rgba(255,255,255,0.2)" }}
+                  >
                     {form.description?.length}/300
                   </span>
                 </div>
@@ -284,27 +322,37 @@ export default function MomentDetails({
             </motion.div>
           )}
 
+          {/* Generate button */}
           {!isTyping && isLocationSet && (
             <motion.button
               onClick={handleGenerate}
               disabled={isPending}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              whileHover={{ scale: isPending ? 1 : 1.02 }}
-              whileTap={{ scale: isPending ? 1 : 0.97 }}
-              className="w-fit mt-auto px-5 py-3.5 rounded-md text-sm font-medium text-white/90 bg-[#1c1c1c] backdrop-blur-xl border border-white/8 shadow-2xl shadow-black/20 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.2, ease: EASE }}
+              whileTap={{ scale: isPending ? 1 : 0.98 }}
+              className="w-full flex justify-between items-center px-4 py-3 rounded-xl cursor-pointer transition-all duration-150 text-sm font-medium tracking-[-0.1px] disabled:opacity-40 disabled:cursor-not-allowed"
+              style={{
+                background: "rgba(255,255,255,0.9)",
+                color: "#0c0c0c",
+                border: "1px solid rgba(255,255,255,0.2)",
+              }}
             >
-              <motion.span
-                key={isPending ? "creating" : "idle"}
-                initial={{ opacity: 0, y: 4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -4 }}
-                transition={{ duration: 0.2 }}
-              >
-                {isPending ? "Creating..." : "Generate Moment"}
-              </motion.span>
+              <span>{isPending ? "Creating..." : "Generate Moment"}</span>
+              {!isPending && (
+                <span style={{ opacity: 0.4, fontSize: 16 }}>✦</span>
+              )}
+              {isPending && (
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  className="w-4 h-4 rounded-full border-2"
+                  style={{
+                    borderColor: "rgba(0,0,0,0.1)",
+                    borderTopColor: "rgba(0,0,0,0.5)",
+                  }}
+                />
+              )}
             </motion.button>
           )}
         </div>

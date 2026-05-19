@@ -54,8 +54,6 @@ export default function CircleDestination({
         ? selectedCircle !== null
         : false;
 
-  console.log();
-
   const handleContinue = () => {
     if (circleOption === "new") {
       createCircle(
@@ -113,7 +111,7 @@ export default function CircleDestination({
           transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
           className="text-center space-y-1 pt-2"
         >
-          <h2 className="text-white text-xl font-medium tracking-[-0.3px] leading-tight">
+          <h2 className="text-white md:text-xl text-md text-center font-medium tracking-[-0.3px] leading-tight">
             Where should these people live?
           </h2>
           <p className="text-white/40 text-sm tracking-[-0.1px]">

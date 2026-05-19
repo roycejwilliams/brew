@@ -1,3 +1,4 @@
+"use client";
 import React, { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ChevronLeftIcon } from "./icons";
@@ -26,6 +27,8 @@ const startMomentProp: MomentStage[] = [
   "confirm",
 ];
 
+const EASE = [0.16, 1, 0.3, 1] as const;
+
 export default function StartMoment({
   onGoBack,
   selectedModal,
@@ -41,7 +44,7 @@ export default function StartMoment({
     moment_end: "",
     description: "",
     close_moment: "",
-    cap_attendance: "", // add this
+    cap_attendance: "",
     principles: [],
     expectations: [],
     vibes: [],
@@ -61,6 +64,7 @@ export default function StartMoment({
     useState<VisibilityType | null>();
   const [showSubmit, setShowSubmit] = useState<boolean>(false);
   const [reveal, setReveal] = useState<boolean>(false);
+  const [selectedUsers, setSelectedUsers] = useState<UserProp[]>([]);
 
   const changeVisibilityType = (value: VisibilityType) => {
     setSelectVisibility(value);
@@ -70,7 +74,6 @@ export default function StartMoment({
 
   const handleDateTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-
     setForm((prev) => {
       const date =
         name === "moment_start_date" ? value : prev.moment_start.split("T")[0];
@@ -82,19 +85,14 @@ export default function StartMoment({
     });
   };
 
-  const [selectedUsers, setSelectedUsers] = useState<UserProp[]>([]);
-  //function to cycleback
   const goBack = (steps: MomentStage[]) => {
     if (!steps.includes(selectedModal)) return;
-
     const position = steps.indexOf(selectedModal);
 
     if (position === 0) {
       onGoBack?.();
       return;
     }
-
-    const previousStep = steps[position - 1];
 
     if (selectedModal === "circle" && selectedCircleProp) {
       setSelectedCircleProp(null);
@@ -115,96 +113,177 @@ export default function StartMoment({
       return;
     }
 
-    setSelectedModal(previousStep);
+    setSelectedModal(steps[position - 1]);
   };
 
   return (
     <>
+      {/* Back button */}
       <motion.button
         onClick={() => goBack(startMomentProp)}
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: -20 }}
-        whileHover={{ x: -4, scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        transition={{
-          opacity: { duration: 0.2 },
-          x: { type: "spring", stiffness: 300, damping: 25 },
-        }}
-        className="absolute left-0 top-0 m-8 cursor-pointer flex gap-x-1 items-center text-white/80 hover:text-white transition-colors"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        whileTap={{ scale: 0.94 }}
+        className="absolute left-0 top-0 m-5 sm:m-6 z-50 cursor-pointer flex items-center gap-2 group"
       >
-        <motion.div
-          animate={{ x: [0, -3, 0] }}
-          transition={{
-            repeat: Infinity,
-            duration: 1.5,
-            ease: "easeInOut",
-            repeatDelay: 2,
+        <div
+          className="flex items-center justify-center transition-colors duration-200"
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.06)",
+            border: "1px solid rgba(255,255,255,0.1)",
           }}
         >
-          <ChevronLeftIcon size={18} />
-        </motion.div>
-        back
+          <ChevronLeftIcon size={16} />
+        </div>
+        <span
+          className="text-xs tracking-[-0.1px] opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+          style={{ color: "rgba(255,255,255,0.25)" }}
+        >
+          Back
+        </span>
       </motion.button>
 
+      {/* Stage indicator dots */}
+      <div
+        className="absolute top-0 left-1/2 -translate-x-1/2 mt-6 flex items-center gap-1.5"
+        style={{ zIndex: 20 }}
+      >
+        {startMomentProp
+          .filter((s) => s !== "confirm")
+          .map((stage) => {
+            const idx = startMomentProp.indexOf(stage);
+            const currentIdx = startMomentProp.indexOf(selectedModal);
+            const isActive = stage === selectedModal;
+            const isPast = currentIdx > idx;
+            return (
+              <motion.div
+                key={stage}
+                animate={{
+                  width: isActive ? 18 : 4,
+                  background: isActive
+                    ? "#d4a574"
+                    : isPast
+                      ? "rgba(212,165,116,0.32)"
+                      : "rgba(255,255,255,0.1)",
+                }}
+                transition={{ duration: 0.35, ease: EASE }}
+                style={{ height: 3, borderRadius: 2 }}
+              />
+            );
+          })}
+      </div>
+
+      {/* Content */}
       <motion.section
         layout
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -6 }}
-        className={`mx-auto ${selectedModal !== "confirm" ? "max-w-full" : "max-w-7xl"} text-[#cecece]/75`}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        className={`mx-auto w-full  ${
+          selectedModal !== "confirm"
+            ? "max-w-full px-0"
+            : "max-w-7xl px-4 sm:px-6"
+        }`}
+        style={{ color: "rgba(255,255,255,0.75)" }}
       >
         <AnimatePresence mode="wait">
           {selectedModal === "start" && (
-            <Start
-              form={form}
-              handleTimeChange={handleDateTimeChange}
-              handleChange={handleChange}
-              setSelectedVisibility={changeVisibilityType}
-              selectedVisbility={selectedVisibility as VisibilityType}
-              setSelectedModal={setSelectedModal}
-              showSubmit={showSubmit}
-              reveal={reveal}
-              setReveal={setReveal}
-            />
+            <motion.div
+              key="start"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.18 }}
+            >
+              <Start
+                form={form}
+                handleTimeChange={handleDateTimeChange}
+                handleChange={handleChange}
+                setSelectedVisibility={changeVisibilityType}
+                selectedVisbility={selectedVisibility as VisibilityType}
+                setSelectedModal={setSelectedModal}
+                showSubmit={showSubmit}
+                reveal={reveal}
+                setReveal={setReveal}
+              />
+            </motion.div>
           )}
 
           {selectedModal === "circle" && (
-            <Circle
-              activeIndex={activeCircle}
-              selectedCircle={selectedCircleProp}
-              setActiveCircle={setActiveCircle}
-              setSelectedCircleProp={setSelectedCircleProp}
-              setSelectedModal={setSelectedModal}
-              setForm={setForm}
-            />
+            <motion.div
+              key="circle"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.18 }}
+            >
+              <Circle
+                activeIndex={activeCircle}
+                selectedCircle={selectedCircleProp}
+                setActiveCircle={setActiveCircle}
+                setSelectedCircleProp={setSelectedCircleProp}
+                setSelectedModal={setSelectedModal}
+                setForm={setForm}
+              />
+            </motion.div>
           )}
 
           {selectedModal === "people" && (
-            <People
-              selectedModal={selectedModal}
-              setSelectedModal={setSelectedModal}
-              selectedUsers={selectedUsers}
-              setSelectedUsers={setSelectedUsers}
-            />
+            <motion.div
+              key="people"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.18 }}
+            >
+              <People
+                selectedModal={selectedModal}
+                setSelectedModal={setSelectedModal}
+                selectedUsers={selectedUsers}
+                setSelectedUsers={setSelectedUsers}
+              />
+            </motion.div>
           )}
+
           {selectedModal === "nearby" && (
-            <AroundYou
-              goback={() => goBack(startMomentProp)}
-              selectedModal={selectedModal}
-              setSelectedModal={setSelectedModal}
-            />
+            <motion.div
+              key="nearby"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.18 }}
+            >
+              <AroundYou
+                goback={() => goBack(startMomentProp)}
+                selectedModal={selectedModal}
+                setSelectedModal={setSelectedModal}
+              />
+            </motion.div>
           )}
 
           {selectedModal === "confirm" && (
-            <MomentDetails
-              selectedModal={selectedModal}
-              setForm={setForm}
-              handleChange={handleChange}
-              form={form}
-              onClose={onClose}
-              selectedUsers={selectedUsers}
-            />
+            <motion.div
+              key="confirm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.18 }}
+            >
+              <MomentDetails
+                selectedModal={selectedModal}
+                setForm={setForm}
+                handleChange={handleChange}
+                form={form}
+                onClose={onClose}
+                selectedUsers={selectedUsers}
+              />
+            </motion.div>
           )}
         </AnimatePresence>
       </motion.section>

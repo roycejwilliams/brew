@@ -14,6 +14,8 @@ export const useGetUser = (id: string) => {
 //Update User by id (User)
 export const useUpdateUserById = () => {
   const queryClient = useQueryClient();
+  //basically this is just sends your request
+  //talks to the server, doesn't care about UI
   return useMutation({
     mutationFn: (data: {
       id: string;
@@ -26,6 +28,7 @@ export const useUpdateUserById = () => {
       instagram: string;
       twitter: string;
       linkedin: string;
+      profile_image: string;
     }) => {
       return api.put(`/users/${data.id}`, {
         first_name: data.first_name,
@@ -37,34 +40,45 @@ export const useUpdateUserById = () => {
         instagram: data.instagram,
         twitter: data.twitter,
         linkedin: data.linkedin,
+        profile_image: data.profile_image,
       });
     },
 
+    //fires before the function
+    //talks to the cache, doesnt care about server
     onMutate: async (data) => {
       await queryClient.cancelQueries({ queryKey: ["user"] });
 
+      //gets the current cached data for "user"
       const previous = queryClient.getQueryData(["user"]);
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      queryClient.setQueryData(["user", data.id], (old: any) => ({
-        ...old,
-        data: {
-          ...old,
+      //updates the caches data
+      //targets the exact user cache entry
+      //is the success return
+      queryClient.setQueryData(["user", data.id], (old: unknown) => {
+        const prev = old as { data: { data: Partial<UserProp> } };
+        return {
+          ...prev,
           data: {
-            ...old.data.data,
-            first_name: data.first_name,
-            last_name: data.last_name,
-            email: data.email,
-            description: data.description,
-            username: data.username,
-            location: data.location,
-            instagram: data.instagram,
-            twitter: data.twitter,
-            linkedin: data.linkedin,
+            ...prev,
+            data: {
+              ...prev?.data?.data,
+              first_name: data.first_name,
+              last_name: data.last_name,
+              email: data.email,
+              description: data.description,
+              username: data.username,
+              location: data.location,
+              instagram: data.instagram,
+              twitter: data.twitter,
+              linkedin: data.linkedin,
+              profile_image: data.profile_image,
+            },
           },
-        },
-      }));
+        };
+      });
 
+      //rollback if fails
       return { previous };
     },
   });

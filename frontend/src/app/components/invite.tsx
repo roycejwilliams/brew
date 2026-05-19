@@ -1,6 +1,7 @@
-import { motion } from "motion/react";
+"use client";
+import { motion, AnimatePresence } from "motion/react";
 import React, { useState } from "react";
-import ChevronLeftIcon from "./icons/ChevronLeftIcon";
+import { ChevronLeftIcon } from "./icons";
 import InvitePeople from "./InvitePeople";
 import InvitePurpose from "./InvitePurpose";
 import GenerateQrCode from "./GenerateQrCode";
@@ -31,6 +32,10 @@ interface InviteUserProp {
   };
 }
 
+const EASE = [0.16, 1, 0.3, 1] as const;
+
+const inviteProp: InviteSelection[] = ["people", "where", "share"];
+
 export default function Invite({
   onGoBack,
   inviteSelection,
@@ -51,11 +56,8 @@ export default function Invite({
   >("moment");
   const [inviteId, setInviteId] = useState<string>("");
 
-  const inviteProp: InviteSelection[] = ["people", "where", "share"];
-
   const goBack = (steps: InviteSelection[]) => {
     if (!steps.includes(inviteSelection)) return;
-
     const position = steps.indexOf(inviteSelection);
 
     if (position === 0) {
@@ -78,64 +80,124 @@ export default function Invite({
   };
 
   return (
-    <motion.section className="max-w-2xl mx-auto space-y-5 px-4">
-      <motion.button
-        onClick={() => goBack(inviteProp)}
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: -20 }}
-        whileHover={{ x: -4, scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        transition={{
-          opacity: { duration: 0.2 },
-          x: { type: "spring", stiffness: 300, damping: 25 },
-        }}
-        className={`absolute left-0 top-0 m-8 cursor-pointer flex gap-x-1 ${
-          inviteSelection === "share" ? "hidden" : "block"
-        } items-center text-white/80 hover:text-white transition-colors`}
+    <div className="w-full max-w-sm sm:max-w-md mx-auto px-4 sm:px-0 ">
+      {/* Back button */}
+      <AnimatePresence>
+        {inviteSelection !== "share" && (
+          <motion.button
+            onClick={() => goBack(inviteProp)}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            whileTap={{ scale: 0.94 }}
+            className="absolute left-0 top-0 m-5 sm:m-6 z-50 cursor-pointer flex items-center gap-2 group"
+          >
+            <div
+              className="flex items-center justify-center"
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: "50%",
+                background: "rgba(255,255,255,0.06)",
+                border: "1px solid rgba(255,255,255,0.1)",
+              }}
+            >
+              <ChevronLeftIcon size={16} />
+            </div>
+            <span
+              className="text-xs tracking-[-0.1px] opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+              style={{ color: "rgba(255,255,255,0.25)" }}
+            >
+              Back
+            </span>
+          </motion.button>
+        )}
+      </AnimatePresence>
+
+      {/* Step dots */}
+      <div
+        className="absolute top-0 left-1/2 -translate-x-1/2 mt-6 flex items-center gap-1.5"
+        style={{ zIndex: 20 }}
       >
-        <motion.div
-          animate={{ x: [0, -3, 0] }}
-          transition={{
-            repeat: Infinity,
-            duration: 1.5,
-            ease: "easeInOut",
-            repeatDelay: 2,
-          }}
-        >
-          <ChevronLeftIcon size={18} />
-        </motion.div>
-        back
-      </motion.button>
+        {inviteProp.map((stage) => {
+          const idx = inviteProp.indexOf(stage);
+          const currentIdx = inviteProp.indexOf(inviteSelection);
+          const isActive = stage === inviteSelection;
+          const isPast = currentIdx > idx;
+          return (
+            <motion.div
+              key={stage}
+              animate={{
+                width: isActive ? 18 : 4,
+                background: isActive
+                  ? "#d4a574"
+                  : isPast
+                    ? "rgba(212,165,116,0.32)"
+                    : "rgba(255,255,255,0.1)",
+              }}
+              transition={{ duration: 0.35, ease: EASE }}
+              style={{ height: 3, borderRadius: 2 }}
+            />
+          );
+        })}
+      </div>
 
-      {inviteSelection === "people" && (
-        <InvitePeople
-          setInviteSelection={setInviteSelection}
-          selectedInvitedUser={selectedInvitedUser}
-          setSelectedInvitedUser={setSelectedInvitedUser}
-        />
-      )}
+      {/* Content */}
+      <AnimatePresence mode="wait">
+        {inviteSelection === "people" && (
+          <motion.div
+            key="people"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+          >
+            <InvitePeople
+              setInviteSelection={setInviteSelection}
+              selectedInvitedUser={selectedInvitedUser}
+              setSelectedInvitedUser={setSelectedInvitedUser}
+            />
+          </motion.div>
+        )}
 
-      {inviteSelection === "where" && (
-        <InvitePurpose
-          selectedPeople={selectedInvitedUser}
-          setInviteSelection={setInviteSelection}
-          selectPurpose={selectPurpose}
-          setSelectedPurpose={setSelectedPurpose}
-          step={step}
-          setStep={setStep}
-          setInviteType={setInviteType}
-          setInviteId={setInviteId}
-        />
-      )}
+        {inviteSelection === "where" && (
+          <motion.div
+            key="where"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+          >
+            <InvitePurpose
+              selectedPeople={selectedInvitedUser}
+              setInviteSelection={setInviteSelection}
+              selectPurpose={selectPurpose}
+              setSelectedPurpose={setSelectedPurpose}
+              step={step}
+              setStep={setStep}
+              setInviteType={setInviteType}
+              setInviteId={setInviteId}
+            />
+          </motion.div>
+        )}
 
-      {inviteSelection === "share" && (
-        <GenerateQrCode
-          onClose={onClose}
-          inviteType={inviteType}
-          inviteId={inviteId}
-        />
-      )}
-    </motion.section>
+        {inviteSelection === "share" && (
+          <motion.div
+            key="share"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+          >
+            <GenerateQrCode
+              onClose={onClose}
+              inviteType={inviteType}
+              inviteId={inviteId}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }

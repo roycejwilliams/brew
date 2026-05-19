@@ -1,3 +1,4 @@
+"use client";
 import { AnimatePresence, motion } from "motion/react";
 import React, { useRef, useState } from "react";
 import { useOutsideAlerter } from "../utils/outsideAlert";
@@ -22,11 +23,8 @@ function CreateModal({ onClose }: CreateModalProp) {
   const [cardAction, setCardAction] = useState<"create" | "invite" | null>(
     null,
   );
-
-  //Allows you to switch between each modal depending on selection
   const [selectedModal, setSelectedModal] =
     useState<CreateMomentStage>("start");
-
   const [inviteSelection, setInviteSelection] =
     useState<InviteSelection>("people");
 
@@ -37,124 +35,222 @@ function CreateModal({ onClose }: CreateModalProp) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="w-full h-screen  fixed left-0 top-0 bg-linear-to-br from-black/80 to-[#535353] backdrop-blur-sm z-80"
+      transition={{ duration: 0.25 }}
+      className={`w-full h-screen fixed left-0 top-0 z-80 sm:overflow-y-auto lg:overflow-y-hidden ${cardAction === null && "overflow-y-hidden"} ${cardAction === "invite" || (cardAction === "create" && "overflow-y-hidden")} overflow-x-hidden flex flex-col`}
+      style={{ background: "#0c0c0c" }}
     >
-      {cardAction === null && (
-        <motion.button
-          onClick={onClose}
-          initial={{ opacity: 0, x: -8 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.3, ease: EASE }}
-          whileHover={{ x: -2 }}
-          whileTap={{ scale: 0.94 }}
-          className="fixed top-0 left-0 m-6 z-50 flex items-center gap-2 cursor-pointer group"
-        >
-          <div
-            className="flex items-center justify-center transition-all duration-200"
+      {/* Background — bottom-left ember */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: "-10%",
+          left: "-10%",
+          width: "70%",
+          height: "65%",
+          background:
+            "radial-gradient(ellipse, rgba(255,80,30,0.18) 0%, rgba(180,50,10,0.08) 40%, transparent 70%)",
+          filter: "blur(40px)",
+          pointerEvents: "none",
+        }}
+      />
+      {/* Top-right neutral dark */}
+      <div
+        style={{
+          position: "absolute",
+          top: "-5%",
+          right: "-10%",
+          width: "60%",
+          height: "55%",
+          background:
+            "radial-gradient(ellipse, rgba(18,18,18,0.9) 0%, rgba(10,10,10,0.5) 40%, transparent 70%)",
+          filter: "blur(30px)",
+          pointerEvents: "none",
+        }}
+      />
+      {/* Center subtle glow */}
+      <div
+        style={{
+          position: "absolute",
+          top: "30%",
+          left: "50%",
+          transform: "translateX(-50%)",
+          width: "80%",
+          height: "40%",
+          background:
+            "radial-gradient(ellipse, rgba(255,60,20,0.05) 0%, transparent 65%)",
+          filter: "blur(50px)",
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* Close button */}
+      <AnimatePresence>
+        {cardAction === null && (
+          <motion.button
+            onClick={onClose}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            whileTap={{ scale: 0.94 }}
+            className="fixed top-0 left-0 m-6 z-50 flex items-center gap-2 cursor-pointer group"
+          >
+            <div
+              className="flex items-center justify-center transition-all duration-200"
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: "50%",
+                background: "rgba(255,255,255,0.06)",
+                border: "1px solid rgba(255,255,255,0.1)",
+              }}
+            >
+              <CloseIcon color="#fff" size={14} />
+            </div>
+            <span className="text-white/25 text-xs tracking-[-0.1px] opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              Close
+            </span>
+          </motion.button>
+        )}
+      </AnimatePresence>
+
+      {/* Content */}
+      <div className="relative z-10 w-full h-full flex flex-col">
+        {/* Header */}
+        <div className="mx-auto text-center mt-16 mb-6 flex flex-col justify-center items-center px-6 gap-2">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.35, ease: EASE }}
+            className="flex items-center justify-center w-10 h-10 rounded-full"
             style={{
-              width: 36,
-              height: 36,
-              borderRadius: "50%",
               background: "rgba(255,255,255,0.06)",
               border: "1px solid rgba(255,255,255,0.1)",
             }}
           >
-            <CloseIcon color="#fff" size={14} />
-          </div>
-          <span className="text-white/30 text-xs tracking-[-0.1px] opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            Close
-          </span>
-        </motion.button>
-      )}
+            <Asterisk size={18} color="rgba(255,255,255,0.7)" />
+          </motion.div>
 
-      <div className="mx-auto text-center mt-10 mb-4 flex flex-col justify-center items-center">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.4, ease: EASE }}
-          className="flex items-center justify-center w-10 h-10 rounded-full"
-          style={{
-            background: "rgba(255,255,255,0.06)",
-            border: "1px solid rgba(255,255,255,0.1)",
-          }}
+          <AnimatePresence mode="wait">
+            <motion.h1
+              key={cardAction ?? "default"}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="text-3xl font-medium tracking-[-0.6px] text-white"
+            >
+              {cardAction === "create"
+                ? "Start a moment."
+                : cardAction === "invite"
+                  ? "Invite people."
+                  : "Create a moment."}
+            </motion.h1>
+          </AnimatePresence>
+
+          <AnimatePresence mode="wait">
+            <motion.p
+              key={`sub-${cardAction}-${selectedModal}-${inviteSelection}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="text-sm tracking-[-0.1px] leading-relaxed max-w-xs"
+              style={{ color: "rgba(255,255,255,0.3)" }}
+            >
+              {cardAction === "create" && selectedModal === "start"
+                ? "Set something in motion."
+                : cardAction === "invite"
+                  ? "Start with people. We'll figure out the rest."
+                  : "Turn a passing idea into a real plan."}
+            </motion.p>
+          </AnimatePresence>
+
+          <AnimatePresence>
+            {cardAction === null && (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="text-sm tracking-[-0.1px]"
+                style={{ color: "rgba(255,255,255,0.2)" }}
+              >
+                Invite people, set the tone, and see what happens.
+              </motion.p>
+            )}
+          </AnimatePresence>
+
+          {/* Divider */}
+          <AnimatePresence>
+            {cardAction === null && (
+              <motion.div
+                initial={{ opacity: 0, scaleX: 0 }}
+                animate={{ opacity: 1, scaleX: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.35, delay: 0.1, ease: EASE }}
+                className="w-full max-w-xs origin-center mt-2"
+                style={{
+                  height: 1,
+                  background:
+                    "linear-gradient(90deg, transparent, rgba(255,255,255,0.07), transparent)",
+                }}
+              />
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Modal content */}
+        <div
+          className={`w-full flex-1 mx-auto ${
+            cardAction === "create" || cardAction === "invite" ? "mt-0" : "mt-4"
+          }`}
         >
-          <Asterisk size={18} color="rgba(255,255,255,0.7)" />
-        </motion.div>
-
-        <motion.h1
-          key={cardAction ?? "default"}
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -4 }}
-          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-          className="text-3xl font-normal mt-2"
-        >
-          {cardAction === "create"
-            ? "Start a moment"
-            : cardAction === "invite"
-              ? "Invite"
-              : "Create a moment."}
-        </motion.h1>
-
-        <motion.h3
-          key={`${cardAction === "create" && `sub-${cardAction}-${selectedModal}`}
-          ${cardAction === "invite" && `sub-${cardAction}-${inviteSelection}`}`}
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -4 }}
-          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-          className="text-base mt-0 font-light"
-        >
-          {cardAction === "create" &&
-            selectedModal === "start" &&
-            "Set something in motion."}
-          {cardAction === "invite" &&
-            "Start with people. We’ll figure out the rest."}
-          {cardAction === null && "Turn a passing idea into a real plan."}
-        </motion.h3>
-
-        {cardAction === null && (
-          <motion.p
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className="text-base mt-2"
-          >
-            Invite people, set the tone, and see what happens.
-          </motion.p>
-        )}
+          <AnimatePresence mode="wait">
+            {cardAction === "create" ? (
+              <motion.div
+                key="create"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <StartMoment
+                  setSelectedModal={setSelectedModal}
+                  selectedModal={selectedModal}
+                  onGoBack={() => setCardAction(null)}
+                  onClose={onClose}
+                />
+              </motion.div>
+            ) : cardAction === "invite" ? (
+              <motion.div
+                key="invite"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Invite
+                  onGoBack={() => setCardAction(null)}
+                  inviteSelection={inviteSelection}
+                  setInviteSelection={setInviteSelection}
+                  onClose={onClose}
+                />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="selection"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <CreateMoment setCardAction={setCardAction} />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
-
-      <motion.div
-        className={`w-full h-fit mx-auto ${cardAction === "create" || cardAction === "invite" ? "mt-2" : "mt-24"}`}
-      >
-        <AnimatePresence mode="wait">
-          {cardAction === "create" ? (
-            //start moment
-            <StartMoment
-              setSelectedModal={setSelectedModal}
-              selectedModal={selectedModal}
-              onGoBack={() => {
-                setCardAction(null);
-              }}
-              onClose={onClose}
-            /> //invite
-          ) : cardAction === "invite" ? (
-            <Invite
-              onGoBack={() => {
-                setCardAction(null);
-              }}
-              inviteSelection={inviteSelection}
-              setInviteSelection={setInviteSelection}
-              onClose={onClose}
-            />
-          ) : (
-            //Create moment
-            <CreateMoment setCardAction={setCardAction} />
-          )}
-        </AnimatePresence>
-      </motion.div>
     </motion.section>
   );
 }
