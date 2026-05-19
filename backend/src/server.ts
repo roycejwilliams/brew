@@ -15,6 +15,7 @@ import cookieParser from "cookie-parser";
 import helmut from "helmet";
 
 const app = express();
+app.set("trust proxy", 1);
 const port = "8080";
 
 //Used to control the rate of traffic sent or received by a network interface or service
