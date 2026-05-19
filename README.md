@@ -1,144 +1,72 @@
+# BR3W
 
-# Brew
+BR3W is an invite-only social platform for creating small, intentional real-world moments — and letting the right people join. No feeds, no followers, no noise.
 
-Brew is a social app for creating small, intentional moments and letting the right people join — whether they’re already in your circle or around you.
-
-Instead of broadcasting events, Brew focuses on presence, trust, and resonance.
-
----
-
-## What Brew Is
-
-Brew lets you:
-
-Create lightweight, real-world moments
-
-Choose who can see them:
-
-Your Circle (trusted groups)
-
-Specific People
-
-Around You (nearby discovery)
-
-Stay in control of who joins
-
-Keep social interactions calm, human, and intentional
-
-Brew is not an event platform.
-It’s a way to say “I’m here — if this resonates, join.”
+**[br3w.app](https://br3w.app)** · **[join.br3w.app](https://join.br3w.app)**
 
 ---
 
-## Core Concepts
+## What It Does
 
-### Moments
+You create a moment. You decide who sees it. Something real happens.
 
-Moments are small, time-bound social experiences.
-They’re defined by:
-
-vibe
-time
-place
-openness
-
----
-
-### Circles
-
-Circles are pre-trusted groups you control.
-They’re the default for intimate moments.
+- **Moments** — lightweight, time-bound social experiences defined by vibe, time, place, and openness. Hosts control visibility and can close moments at any time.
+- **Circles** — pre-trusted groups you manage. Add members, remove members, invite entire circles to moments.
+- **Nearby Discovery** — moments with `nearby` visibility appear on the Pulse map for anyone within range. No public feeds, no algorithmic ranking.
+- **Pulse** — live map view of what's happening now. Scope by distance (here, nearby, area) and time (tonight, tomorrow, this week). Mapbox markers with two-tap interaction — zoom first, then open.
+- **Invites** — invite people to moments or circles via in-app flow or QR code deep links. Accept/decline with real-time notification updates.
+- **Check-in** — QR code scan at the door. Host gets notified. Closed moments block check-ins.
+- **AI Recap** — after a moment ends, an AI-generated 2-3 sentence cinematic recap is created and persisted. Attendees can upload photos.
+- **Notifications** — email (Resend) and SMS (Twilio) for check-ins, moment reminders (1hr before), invite nudges (24hr pending), recap generation, and photo uploads. Cron-scheduled where appropriate.
 
 ---
 
-### Around You
+## Tech Stack
 
-“Around You” makes a moment discoverable, not broadcast.
+### Frontend
+- Next.js (React), TypeScript
+- Tailwind CSS
+- Framer Motion — opacity-only animations on mobile, layout animations on desktop
+- Mapbox GL JS — Pulse map, moment markers, geocoding (city + address hooks)
+- Embla Carousel — horizontal scroll components
+- Zustand — client state + session persistence with `onRehydrateStorage` hydration detection
+- TanStack Query — all data fetching, cache invalidation on mutations
 
-Nearby people may see it
-They can request to join
-The host always decides
+### Backend
+- Node.js, Express, TypeScript
+- PostgreSQL (Supabase) with PostGIS — geospatial queries via `ST_DWithin`, `ST_MakePoint`
+- JWT authentication (1-year expiry, includes `role` in payload)
+- Phone OTP (Twilio) + Email OTP (Resend)
+- Anthropic API — moment recap generation
+- node-cron — scheduled reminder and nudge jobs
+- helmet.js, tiered rate limiting, input sanitization, parameterized queries
 
-No public feeds. No follower counts. No noise.
-
----
-
-### Pulse & Signals
-
-Pulse is the live map of what’s happening now
-
-Signals are meaningful updates — not notifications
-
----
-
-## Design Philosophy
-
-Human > Viral
-
-Discovery > Broadcasting
-
-Consent > Configuration
-
-Calm > Urgency
-
-Brew avoids:
-
-follower mechanics
-algorithmic feeds
-engagement traps
-loud UI patterns
+### Infrastructure
+- Frontend: Vercel
+- Backend: Railway (Docker)
+- Database: Supabase (PostgreSQL + PostGIS 3.6)
+- Storage: Supabase Storage (`brew-image` bucket — avatars, moment photos)
+- DNS: Namecheap (`br3w.app` → Vercel, `join.br3w.app` → Framer)
 
 ---
 
-## AI (Intentional, Minimal)
+## Security
 
-AI in Brew is used to sharpen human intent, not replace it.
-
-Planned uses include:
-
-Moment refinement (clarity & tone)
-
-Invite ranking (resonance, not exclusion)
-
-Discovery matching for “Around You”
-
-Post-moment reflection
-
-AI never:
-
-decides for the user
-explains itself
-blocks people outright
-
----
-
-## MVP Status
-
-Current MVP focuses on validating one loop:
-
-A user creates a moment → someone joins → something real happens.
-
-Advanced intelligence, analytics, and optimization come later.
-
----
-
-## Tech Stack (subject to change)
-
-React / Next.js
-
-Motion for UI transitions
-
-Mapbox-based mapping
-
-Server-side APIs for moments & signals
-
-(Details intentionally light — Brew is product-first.)
+- SQL injection fixed across all dynamic update routes (parameterized key mapping)
+- Ownership authorization on all user routes (`GET`/`PUT`/`DELETE /users/:id`)
+- Role-based middleware (`userRole("admin")`) on application approval routes
+- CORS locked to production origins + Vercel preview URL regex
+- CSRF not applicable — JWT in Authorization header, not cookies
+- DB indexes on all foreign keys and the PostGIS `location` column (GiST)
 
 ---
 
 ## Project Status
 
-Private beta in progress :)
+Private beta. Invite-only at [br3w.app](https://br3w.app). Sales page live at [join.br3w.app](https://join.br3w.app).
 
-Brew is actively evolving.
-The focus right now is real-world behavior, not feature breadth.
+---
+
+## License
+
+Proprietary. All rights reserved.
