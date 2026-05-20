@@ -7,11 +7,7 @@ import Confirmation from "./confirmation";
 import Nearby from "./nearby";
 import ScopeLocator from "./scopeLocator";
 import { ToggleState } from "../utils/toggleState";
-import {
-  AnimatePresence,
-  motion,
-  useMotionValue,
-} from "motion/react";
+import { AnimatePresence, motion, useMotionValue, PanInfo } from "motion/react";
 import { PinIcon, BellIcon } from "./icons";
 import { useUserStore } from "@/stores/useUserStore";
 import { useGetCityName } from "@/hooks/useGetLocationName";
@@ -36,7 +32,6 @@ interface OpenModal {
   setEventsOpen?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-// Peek = how much sheet is visible in collapsed state (px from bottom)
 const PEEK_HEIGHT = 260;
 
 export default function Events({
@@ -78,43 +73,27 @@ export default function Events({
     week: "This Week",
   }[filter];
 
-  // --- Drag logic for mobile sheet ---
-  const dragY = useMotionValue(0);
   const sheetRef = useRef<HTMLDivElement>(null);
+  const dragY = useMotionValue(0);
 
-  function onDragEnd(
-    _: unknown,
-    info: { offset: { y: number }; velocity: { y: number } },
-  ) {
+  function handleDragEnd(_: unknown, info: PanInfo) {
     const { offset, velocity } = info;
 
     if (isFullHeight) {
-      // Dragging down from full height
       if (offset.y > 80 || velocity.y > 400) {
-        // Snap to peek
         setIsFullHeight(false);
-        dragY.set(0);
-      } else {
-        dragY.set(0);
       }
     } else {
-      // Dragging up from peek
       if (offset.y < -80 || velocity.y < -400) {
-        // Snap to full
         setIsFullHeight(true);
-        dragY.set(0);
       } else if (offset.y > 80 || velocity.y > 400) {
-        // Drag down past peek — close sheet
         setEventsOpen?.(false);
         setIsFullHeight(false);
-        dragY.set(0);
-      } else {
-        dragY.set(0);
       }
     }
+    dragY.set(0);
   }
 
-  // Shared panel content
   const panelContent = (
     <>
       {/* Top gradient */}
@@ -229,32 +208,33 @@ export default function Events({
           <motion.div
             ref={sheetRef}
             key="mobile-sheet"
-            drag="y"
-            dragConstraints={{ top: 0, bottom: PEEK_HEIGHT }}
-            dragElastic={{ top: 0.05, bottom: 0.2 }}
-            onDragEnd={onDragEnd}
             initial={{ y: "100%" }}
             animate={{ y: isFullHeight ? 0 : `calc(100% - ${PEEK_HEIGHT}px)` }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 32, stiffness: 300 }}
             className="fixed inset-x-0 bottom-0 z-40 flex flex-col rounded-t-2xl overflow-hidden"
             style={{
-              y: dragY,
               background: "rgba(8,8,8,0.95)",
               backdropFilter: "blur(24px)",
               borderTop: "1px solid rgba(255,255,255,0.08)",
-              // account for mobile nav bar height
               paddingBottom: "72px",
               height: "100dvh",
             }}
           >
-            {/* Drag handle */}
-            <div className="flex justify-center pt-3 pb-1 shrink-0 touch-none">
+            {/* Drag handle — only draggable area */}
+            <motion.div
+              drag="y"
+              dragConstraints={{ top: 0, bottom: 0 }}
+              dragElastic={{ top: 0.05, bottom: 0.2 }}
+              onDragEnd={handleDragEnd}
+              className="flex justify-center pt-3 pb-3 shrink-0 cursor-grab active:cursor-grabbing"
+              style={{ touchAction: "none" }}
+            >
               <div
                 className="w-10 h-1 rounded-full"
                 style={{ background: "rgba(255,255,255,0.15)" }}
               />
-            </div>
+            </motion.div>
 
             {panelContent}
           </motion.div>
@@ -265,7 +245,7 @@ export default function Events({
 
   // ---- DESKTOP LAYOUT ----
   return (
-    <section className=" right-0 h-full flex z-20">
+    <section className="right-0 h-full flex z-20">
       {/* Main panel */}
       <motion.div
         initial={{ opacity: 0, x: 20 }}
