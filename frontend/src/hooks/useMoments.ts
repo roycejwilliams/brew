@@ -31,6 +31,7 @@ export const useGetAllMomentsOwnedByUser = (id: string) => {
   return useQuery({
     queryKey: ["moment-owner", id],
     queryFn: () => api.get(`/moments/${id}`),
+    enabled: !!id,
   });
 };
 
@@ -38,6 +39,7 @@ export const useGetAllMomentsUserIsAttendee = (id: string) => {
   return useQuery({
     queryKey: ["moment-attendee", id],
     queryFn: () => api.get(`/moments/${id}/member`),
+    enabled: !!id,
   });
 };
 
