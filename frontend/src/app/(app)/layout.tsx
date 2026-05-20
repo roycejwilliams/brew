@@ -29,19 +29,17 @@ export default function AppLayout({
     <main>
       <div className="relative flex-1">
         {showNav && <Nav />}
-        <AnimatePresence>
-          {hasHydrated && (
-            <motion.div
-              key={pathname}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            >
-              {children}
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {hasHydrated && (
+          <motion.div
+            key={pathname}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {children}
+          </motion.div>
+        )}
       </div>
     </main>
   );
