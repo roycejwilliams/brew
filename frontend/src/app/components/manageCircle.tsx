@@ -28,7 +28,7 @@ export default function ManageCircle() {
 
   const { user } = useUserStore();
   const { data: circlesData, isLoading } = useGetCirclesWithMembers(
-    user?.id as string,
+    user?.id ?? "",
   );
   const circles: CircleProp[] = circlesData?.data?.data ?? [];
 

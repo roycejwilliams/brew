@@ -79,7 +79,7 @@ export default function ManageMoments() {
 
   const { user } = useUserStore();
   const { data: MomentsByUser, isLoading } = useGetAllMomentsOwnedByUser(
-    user?.id as string,
+    user?.id ?? "",
   );
 
   const moments: MomentProp[] = MomentsByUser?.data?.data ?? [];
