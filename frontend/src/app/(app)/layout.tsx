@@ -20,7 +20,6 @@ export default function AppLayout({
 
   useEffect(() => {
     if (!hasHydrated) return;
-
     if (!user) {
       router.replace("/");
     }
@@ -31,15 +30,17 @@ export default function AppLayout({
       <div className="relative flex-1">
         {showNav && <Nav />}
         <AnimatePresence mode="wait">
-          <motion.div
-            key={pathname}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          >
-            {children}
-          </motion.div>
+          {hasHydrated && (
+            <motion.div
+              key={pathname}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            >
+              {children}
+            </motion.div>
+          )}
         </AnimatePresence>
       </div>
     </main>
