@@ -29,7 +29,7 @@ export default function AppLayout({
     <main>
       <div className="relative flex-1">
         {showNav && <Nav />}
-        <AnimatePresence mode="wait">
+        <AnimatePresence>
           {hasHydrated && (
             <motion.div
               key={pathname}
