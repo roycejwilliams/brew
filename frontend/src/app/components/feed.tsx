@@ -8,7 +8,6 @@ import {
   useGetAllMomentsOwnedByUser,
   useGetAllMomentsUserIsAttendee,
 } from "@/hooks/useMoments";
-// import Suggested from "./suggested";
 
 interface FeedProp {
   completed: number;
@@ -26,13 +25,11 @@ function Feed({ completed, userId }: FeedProp) {
   const hasMoments = attended.length > 0 || hosted.length > 0;
 
   return (
-    <section className="w-full mt-8 h-full flex justify-center items-center">
-      {/* Showing feed based on profile completion */}
+    <section className="w-full mt-8 h-full flex justify-center items-center pb-24 sm:pb-0">
       {completed === 100 && hasMoments ? (
         <div className="flex flex-col gap-y-16 w-full">
           <Attended id={userId} />
           <Hosted id={userId} />
-          {/* <Suggested id={userId} /> */}
         </div>
       ) : (
         <div className="relative flex flex-col gap-y-10 h-full justify-center items-center mt-8 w-full">
@@ -63,8 +60,8 @@ function Feed({ completed, userId }: FeedProp) {
               }}
               className="relative overflow-hidden cursor-pointer"
               style={{
-                width: 130,
-                height: 175,
+                width: "clamp(90px, 28vw, 130px)",
+                height: "clamp(120px, 38vw, 175px)",
                 borderRadius: 14,
                 marginBottom: 28,
                 border: "1px solid rgba(255,255,255,0.12)",
@@ -98,8 +95,8 @@ function Feed({ completed, userId }: FeedProp) {
               whileHover={{ y: -14, transition: { duration: 0.3, ease: EASE } }}
               className="relative overflow-hidden cursor-pointer"
               style={{
-                width: 148,
-                height: 200,
+                width: "clamp(105px, 32vw, 148px)",
+                height: "clamp(140px, 42vw, 200px)",
                 borderRadius: 16,
                 border: "1px solid rgba(255,255,255,0.16)",
                 boxShadow:
@@ -135,8 +132,8 @@ function Feed({ completed, userId }: FeedProp) {
               }}
               className="relative overflow-hidden cursor-pointer"
               style={{
-                width: 130,
-                height: 175,
+                width: "clamp(90px, 28vw, 130px)",
+                height: "clamp(120px, 38vw, 175px)",
                 borderRadius: 14,
                 marginBottom: 28,
                 border: "1px solid rgba(255,255,255,0.12)",
@@ -168,7 +165,7 @@ function Feed({ completed, userId }: FeedProp) {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.32, ease: EASE }}
-            className="flex flex-col items-center gap-1 text-center relative z-10"
+            className="flex flex-col items-center gap-1 text-center relative z-10 px-6"
           >
             <p className="text-white/70 text-[15px] font-medium tracking-[-0.2px]">
               Your story begins when you show up.
@@ -183,13 +180,13 @@ function Feed({ completed, userId }: FeedProp) {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.4, ease: EASE }}
-            className="flex items-center gap-3 relative z-10"
+            className="flex items-center gap-3 relative z-10 px-6 w-full justify-center"
           >
             <motion.button
               whileHover={{ scale: 1.02, y: -1 }}
               whileTap={{ scale: 0.97 }}
               transition={{ duration: 0.2, ease: EASE }}
-              className="px-5 py-2.5 text-sm font-medium tracking-[-0.1px] cursor-pointer rounded-md transition-all duration-200"
+              className="flex-1 max-w-40 px-4 py-2.5 text-sm font-medium tracking-[-0.1px] cursor-pointer rounded-md transition-all duration-200"
               style={{
                 background: "rgba(255,255,255,0.9)",
                 color: "#111111",
@@ -200,7 +197,7 @@ function Feed({ completed, userId }: FeedProp) {
             </motion.button>
 
             <div
-              className="w-1 h-1 rounded-full"
+              className="w-1 h-1 rounded-full shrink-0"
               style={{ background: "rgba(255,255,255,0.2)" }}
             />
 
@@ -208,7 +205,7 @@ function Feed({ completed, userId }: FeedProp) {
               whileHover={{ scale: 1.02, y: -1 }}
               whileTap={{ scale: 0.97 }}
               transition={{ duration: 0.2, ease: EASE }}
-              className="px-5 py-2.5 text-sm font-medium tracking-[-0.1px] cursor-pointer rounded-md transition-all duration-200"
+              className="flex-1 max-w-40 px-4 py-2.5 text-sm font-medium tracking-[-0.1px] cursor-pointer rounded-md transition-all duration-200"
               style={{
                 background: "rgba(255,255,255,0.06)",
                 color: "rgba(255,255,255,0.7)",
