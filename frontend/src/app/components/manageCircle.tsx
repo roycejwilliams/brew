@@ -404,7 +404,7 @@ export default function ManageCircle() {
       <div className="hidden md:flex flex-1 overflow-hidden">
         {/* Circle scene */}
         <div className="flex-1 flex flex-col overflow-hidden relative">
-          <div className="flex-1 relative">
+          <div className="flex-1 flex items-center relative">
             <CircleScene
               circles={circles}
               selectedCircle={featured}

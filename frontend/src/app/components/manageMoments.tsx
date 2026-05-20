@@ -294,7 +294,7 @@ export default function ManageMoments() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.18 }}
-                className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3"
+                className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 ${historyMoments.length === 0 && "h-full"}`}
               >
                 {historyMoments.length > 0 ? (
                   historyMoments.map((event, index) => {
