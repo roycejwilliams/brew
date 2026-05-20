@@ -423,7 +423,7 @@ app.post(
         res.cookie("token", authorize, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
-          sameSite: "none",
+          sameSite: "strict",
           maxAge: 365 * 24 * 60 * 60 * 1000,
         });
 
