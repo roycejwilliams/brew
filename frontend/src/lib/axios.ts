@@ -9,7 +9,14 @@ const api = axios.create({
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401 && typeof window !== "undefined") {
+    const url = error.config?.url || "";
+    const isAuthRoute = url.includes("/auth/");
+
+    if (
+      error.response?.status === 401 &&
+      typeof window !== "undefined" &&
+      !isAuthRoute
+    ) {
       useUserStore.getState().clearUser();
       window.location.href = "/";
     }
