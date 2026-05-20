@@ -23,6 +23,7 @@ export const useInviteUserCircleView = (member_id: string) => {
   return useQuery({
     queryKey: ["invite-circle-view", member_id],
     queryFn: () => api.get(`/invites/members/${member_id}`),
+    enabled: !!member_id,
   });
 };
 
@@ -67,6 +68,7 @@ export const useInviteUserMomentView = (attendee_id: string) => {
   return useQuery({
     queryKey: ["invite-moment-view", attendee_id],
     queryFn: () => api.get(`/invites/attendees/${attendee_id}`),
+    enabled: !!attendee_id,
   });
 };
 
