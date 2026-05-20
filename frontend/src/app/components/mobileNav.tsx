@@ -1,287 +1,150 @@
 "use client";
-import React, { useState, useRef } from "react";
-import Image from "next/image";
+import { motion } from "motion/react";
 import Link from "next/link";
-import NeedsAttention from "./needsAttention";
-import Confirmation from "./confirmation";
-import Nearby from "./nearby";
-import ScopeLocator from "./scopeLocator";
-import { ToggleState } from "../utils/toggleState";
-import { AnimatePresence, motion, useMotionValue, PanInfo } from "motion/react";
-import { PinIcon, BellIcon } from "./icons";
-import { useUserStore } from "@/stores/useUserStore";
-import { useGetCityName } from "@/hooks/useGetLocationName";
-import {
-  useInviteUserMomentView,
-  useInviteUserCircleView,
-} from "@/hooks/useInvites";
+import Image from "next/image";
+import Asterisk from "./icons/AsterikIcon";
 
-type ScopeType = "here" | "nearby" | "area";
-type TimeFilter = "tonight" | "tomorrow" | "week";
-
-interface OpenModal {
-  openModal: (type: "notifications") => void;
-  id: string;
-  userCoordinates?: [number, number] | null;
-  setSelectedCoordinates: React.Dispatch<
-    React.SetStateAction<[number, number] | null>
-  >;
-  selectedCoordinates?: [number, number] | null;
-  isMobile?: boolean;
-  eventsOpen?: boolean;
-  setEventsOpen?: React.Dispatch<React.SetStateAction<boolean>>;
+interface MobileNavProps {
+  user: UserProp | null;
+  onEventsPress: () => void;
+  onCreatePress: () => void;
+  eventsOpen: boolean;
 }
 
-const PEEK_HEIGHT = 260;
-
-export default function Events({
-  openModal,
-  id,
-  userCoordinates,
-  setSelectedCoordinates,
-  selectedCoordinates,
-  isMobile = false,
-  eventsOpen = false,
-  setEventsOpen,
-}: OpenModal) {
-  const [openScope, setOpenScope] = useState<boolean>(false);
-  const openScopeLocator = () => ToggleState(setOpenScope);
-  const { user } = useUserStore();
-
-  const { cityName } = useGetCityName(userCoordinates ?? null);
-  const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
-  const [filter, setFilter] = useState<TimeFilter>("tonight");
-  const [isFullHeight, setIsFullHeight] = useState(false);
-
-  const { data: momentInvitesData } = useInviteUserMomentView(id);
-  const { data: circleInvitesData } = useInviteUserCircleView(
-    user?.id as string,
-  );
-  const [activeScope, setActiveScope] = useState<ScopeType>("nearby");
-
-  const pendingCount =
-    (momentInvitesData?.data?.data ?? []).filter(
-      (i: { status: string }) => i.status === "pending",
-    ).length +
-    (circleInvitesData?.data?.data ?? []).filter(
-      (i: { status: string }) => i.status === "pending",
-    ).length;
-
-  const timeLabel = {
-    tonight: "Tonight",
-    tomorrow: "Tomorrow",
-    week: "This Week",
-  }[filter];
-
-  const sheetRef = useRef<HTMLDivElement>(null);
-  const dragY = useMotionValue(0);
-
-  function handleDragEnd(_: unknown, info: PanInfo) {
-    const { offset, velocity } = info;
-
-    if (isFullHeight) {
-      if (offset.y > 80 || velocity.y > 400) {
-        setIsFullHeight(false);
-      }
-    } else {
-      if (offset.y < -80 || velocity.y < -400) {
-        setIsFullHeight(true);
-      } else if (offset.y > 80 || velocity.y > 400) {
-        setEventsOpen?.(false);
-        setIsFullHeight(false);
-      }
-    }
-    dragY.set(0);
-  }
-
-  const panelContent = (
-    <>
-      {/* Top gradient */}
-      <div className="absolute top-0 left-0 right-0 h-32 bg-linear-to-b from-white/3 to-transparent pointer-events-none z-10" />
-
-      {/* Header */}
-      <div className="relative z-10 px-5 pt-6 pb-4 flex items-start justify-between border-b border-white/5">
-        <div className="space-y-0.5">
-          <p className="text-[10px] tracking-[3px] uppercase text-white/20 font-medium">
-            BR3W
-          </p>
-          <h2 className="text-base font-medium tracking-[-0.2px] text-white/90">
-            Pulse
-          </h2>
-          <p className="text-xs text-white/30 tracking-[-0.1px]">
-            Here&apos;s what&apos;s next
-          </p>
-        </div>
-
-        <motion.button
-          onClick={() => openModal("notifications")}
-          whileHover={{ scale: 1.08 }}
-          whileTap={{ scale: 0.94 }}
-          className="relative flex items-center justify-center w-8 h-8 rounded-md cursor-pointer"
+export default function MobileNav({
+  user,
+  onEventsPress,
+  onCreatePress,
+  eventsOpen,
+}: MobileNavProps) {
+  return (
+    <div className="fixed bottom-6 left-4 right-4">
+      <div
+        className="flex items-center justify-around px-6 pt-3 pb-3 rounded-2xl"
+        style={{
+          background: "rgba(8,8,8,0.96)",
+          border: "1px solid rgba(255,255,255,0.08)",
+          backdropFilter: "blur(24px)",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3)",
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        {/* Top shimmer */}
+        <div
           style={{
-            background: "rgba(255,255,255,0.06)",
-            border: "1px solid rgba(255,255,255,0.08)",
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 1,
+            background:
+              "linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)",
+            pointerEvents: "none",
           }}
-        >
-          <BellIcon size={15} color="#fff" />
-          {pendingCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-[#98473E]/60" />
-          )}
-        </motion.button>
-      </div>
-
-      {/* Location strip */}
-      <div className="relative z-10 px-5 py-3 border-b border-white/5">
-        <motion.div
-          className="flex items-center justify-between px-3 py-2 rounded-md"
-          style={{
-            background: "rgba(255,255,255,0.04)",
-            border: "1px solid rgba(255,255,255,0.07)",
-          }}
-        >
-          <div className="flex items-center gap-2 min-w-0 flex-1">
-            <PinIcon size={12} color="#fff" className="shrink-0" />
-            <p className="text-[11px] text-white/50 tracking-[-0.1px] truncate">
-              {selectedLocation ?? cityName ?? "Locating..."}
-            </p>
-          </div>
-          <div className="flex items-center gap-2 shrink-0 ml-2">
-            <div className="w-px h-3 bg-white/10" />
-            <span className="text-xs text-white/30 tracking-[-0.1px] whitespace-nowrap">
-              {timeLabel}
-            </span>
-            <motion.button
-              onClick={openScopeLocator}
-              whileHover={{ scale: 1.08 }}
-              whileTap={{ scale: 0.94 }}
-              className="w-6 h-6 rounded-sm flex items-center justify-center cursor-pointer shrink-0"
-              style={{
-                background: openScope
-                  ? "rgba(255,255,255,0.12)"
-                  : "rgba(255,255,255,0.06)",
-                border: "1px solid rgba(255,255,255,0.08)",
-              }}
-            >
-              <PinIcon size={11} color="#fff" />
-            </motion.button>
-          </div>
-        </motion.div>
-        <AnimatePresence mode="popLayout">
-          {openScope && (
-            <ScopeLocator
-              onClose={openScopeLocator}
-              activeScope={activeScope}
-              setActiveScope={setActiveScope}
-              selectedLocation={selectedLocation}
-              setSelectedLocation={setSelectedLocation}
-              userCoordinates={userCoordinates}
-              setSelectedCoordinates={setSelectedCoordinates}
-              filter={filter}
-              setFilter={setFilter}
-            />
-          )}
-        </AnimatePresence>
-      </div>
-
-      {/* Feed */}
-      <div className="flex-1 overflow-y-auto no-scrollbar px-4 py-4 space-y-3">
-        <NeedsAttention />
-        <Confirmation />
-        <Nearby
-          filter={filter}
-          selectedCoordinates={selectedCoordinates}
-          activeScope={activeScope}
-          selectedLocation={selectedLocation}
         />
-      </div>
 
-      {/* Bottom fade */}
-      <div className="absolute bottom-0 left-0 right-0 h-16 bg-linear-to-t from-black/60 to-transparent pointer-events-none" />
-    </>
-  );
-
-  // ---- MOBILE LAYOUT ----
-  if (isMobile) {
-    return (
-      <AnimatePresence>
-        {eventsOpen && (
-          <motion.div
-            ref={sheetRef}
-            key="mobile-sheet"
-            initial={{ y: "100%" }}
-            animate={{ y: isFullHeight ? 0 : `calc(100% - ${PEEK_HEIGHT}px)` }}
-            exit={{ y: "100%" }}
-            transition={{ type: "spring", damping: 32, stiffness: 300 }}
-            className="fixed inset-x-0 bottom-0 z-40 flex flex-col rounded-t-2xl overflow-hidden"
+        {/* Pulse */}
+        <motion.button
+          onClick={onEventsPress}
+          whileTap={{ scale: 0.92 }}
+          className="flex flex-col items-center gap-1.5 cursor-pointer"
+        >
+          <div
+            className="w-9 h-9 rounded-md flex items-center justify-center transition-all duration-200"
             style={{
-              background: "rgba(8,8,8,0.95)",
-              backdropFilter: "blur(24px)",
-              borderTop: "1px solid rgba(255,255,255,0.08)",
-              paddingBottom: "72px",
-              height: "100dvh",
+              background: eventsOpen
+                ? "rgba(255,255,255,0.08)"
+                : "rgba(255,255,255,0.04)",
+              border: eventsOpen
+                ? "1px solid rgba(255,255,255,0.14)"
+                : "1px solid rgba(255,255,255,0.07)",
             }}
           >
-            {/* Drag handle — only draggable area */}
-            <motion.div
-              drag="y"
-              dragConstraints={{ top: 0, bottom: 0 }}
-              dragElastic={{ top: 0.05, bottom: 0.2 }}
-              onDragEnd={handleDragEnd}
-              className="flex justify-center pt-3 pb-3 shrink-0 cursor-grab active:cursor-grabbing"
-              style={{ touchAction: "none" }}
-            >
-              <div
-                className="w-10 h-1 rounded-full"
-                style={{ background: "rgba(255,255,255,0.15)" }}
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <circle
+                cx="8"
+                cy="8"
+                r="2.5"
+                fill={
+                  eventsOpen
+                    ? "rgba(255,255,255,0.9)"
+                    : "rgba(255,255,255,0.45)"
+                }
               />
-            </motion.div>
+              <circle
+                cx="8"
+                cy="8"
+                r="5.5"
+                stroke={
+                  eventsOpen
+                    ? "rgba(255,255,255,0.3)"
+                    : "rgba(255,255,255,0.14)"
+                }
+                strokeWidth="1"
+              />
+            </svg>
+          </div>
+          <span
+            className="text-[9px] tracking-[2px] uppercase font-medium transition-colors duration-200"
+            style={{
+              color: eventsOpen
+                ? "rgba(255,255,255,0.75)"
+                : "rgba(255,255,255,0.22)",
+            }}
+          >
+            Pulse
+          </span>
+        </motion.button>
 
-            {panelContent}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    );
-  }
+        {/* Create */}
+        <motion.button
+          onClick={onCreatePress}
+          whileTap={{ scale: 0.92 }}
+          className="flex flex-col items-center gap-1.5 cursor-pointer"
+        >
+          <div
+            className="w-12 h-12 rounded-xl flex items-center justify-center"
+            style={{
+              background: "rgba(12,12,12,1)",
+              border: "1px solid rgba(255,255,255,0.1)",
+              boxShadow:
+                "0 4px 20px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.07)",
+            }}
+          >
+            <Asterisk size={20} color="rgba(255,255,255,0.82)" />
+          </div>
+        </motion.button>
 
-  // ---- DESKTOP LAYOUT ----
-  return (
-    <section className="right-0 h-full flex z-20">
-      {/* Main panel */}
-      <motion.div
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        className="relative w-80 h-full flex flex-col border-l border-white/6 text-white overflow-hidden"
-        style={{ background: "rgba(8,8,8,0.85)", backdropFilter: "blur(24px)" }}
-      >
-        {panelContent}
-      </motion.div>
-
-      {/* Profile column */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.4, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-        className="w-14 h-full flex flex-col items-center pt-6 gap-4"
-        style={{ background: "rgba(0,0,0,0.4)", backdropFilter: "blur(12px)" }}
-      >
+        {/* Profile */}
         <Link href={`/profile/${user?.id}`}>
           <motion.div
-            whileHover={{ scale: 1.06, y: -2 }}
-            whileTap={{ scale: 0.96 }}
-            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="w-9 h-9 rounded-md overflow-hidden relative border cursor-pointer"
-            style={{ border: "1px solid rgba(255,255,255,0.1)" }}
+            whileTap={{ scale: 0.92 }}
+            className="flex flex-col items-center gap-1.5 cursor-pointer"
           >
-            <Image
-              src={user?.profile_image || "/profile_4.png"}
-              alt="profile"
-              fill
-              className="object-cover"
-            />
+            <div
+              className="w-9 h-9 rounded-md  overflow-hidden relative"
+              style={{
+                border: "1px solid rgba(255,255,255,0.08)",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+              }}
+            >
+              <Image
+                src={user?.profile_image || "/profile_4.png"}
+                alt="profile"
+                fill
+                className="object-cover"
+              />
+            </div>
+            <span
+              className="text-[9px] tracking-[2px] uppercase font-medium"
+              style={{ color: "rgba(255,255,255,0.22)" }}
+            >
+              Profile
+            </span>
           </motion.div>
         </Link>
-      </motion.div>
-    </section>
+      </div>
+    </div>
   );
 }
