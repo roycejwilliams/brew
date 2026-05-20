@@ -101,7 +101,7 @@ const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
   const token = req.cookies.token;
 
   //if not the token the redirect back to home
-  if (!token) return res.redirect("/");
+  if (!token) return res.status(401).send("Unauthorized");
 
   //verifies the token
   //along with your made JWT_SECRET_KEY
