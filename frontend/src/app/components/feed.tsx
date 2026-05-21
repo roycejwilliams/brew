@@ -177,7 +177,7 @@ function Feed({ completed, userId }: FeedProp) {
           >
             <motion.button
               whileTap={{ scale: 0.97 }}
-              className="flex-1 max-w-40 px-4 py-2.5 text-sm font-medium tracking-[-0.1px] cursor-pointer rounded-xl transition-colors duration-150"
+              className="flex-1 max-w-40 px-4 py-2.5 text-sm sm:text-xs font-medium tracking-[-0.1px] cursor-pointer rounded-xl transition-colors duration-150"
               style={{
                 background: "rgba(255,255,255,0.9)",
                 color: "#111111",
@@ -194,7 +194,7 @@ function Feed({ completed, userId }: FeedProp) {
 
             <motion.button
               whileTap={{ scale: 0.97 }}
-              className="flex-1 max-w-40 px-4 py-2.5 text-sm font-medium tracking-[-0.1px] cursor-pointer rounded-xl transition-colors duration-150"
+              className="flex-1 max-w-40 px-4 py-2.5 text-sm sm:text-xs font-medium tracking-[-0.1px] cursor-pointer rounded-xl transition-colors duration-150"
               style={{
                 background: "rgba(255,255,255,0.06)",
                 color: "rgba(255,255,255,0.7)",

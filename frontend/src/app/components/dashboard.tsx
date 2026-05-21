@@ -129,7 +129,7 @@ function Dashboard({ profile }: DashboardProp) {
   };
 
   return (
-    <section className="min-h-screen bg-[#0c0c0c] relative overflow-hidden">
+    <section className="h-dvh overflow-y-auto overscroll-contain bg-[#0c0c0c] relative">
       {/* Ambient glow */}
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 pointer-events-none"

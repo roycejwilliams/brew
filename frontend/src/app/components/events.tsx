@@ -184,7 +184,7 @@ export default function Events({
       </div>
 
       {/* Feed */}
-      <div className="flex-1 overflow-y-auto no-scrollbar px-4 py-4 space-y-3">
+      <div className="flex-1 overflow-y-auto overscroll-contain no-scrollbar px-4 py-4 space-y-3">
         <NeedsAttention />
         <Confirmation />
         <Nearby

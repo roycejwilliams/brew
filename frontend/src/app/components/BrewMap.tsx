@@ -51,7 +51,7 @@ export default function BrewMap() {
   return (
     <>
       {/* Map layer */}
-      <div className="w-full h-screen relative flex">
+      <div className="w-full h-dvh relative flex overflow-hidden touch-none">
         <MapBoxGl
           zoom={selectedCoordinates ? 11 : 3.5}
           center={[-122.4194, 37.7749]}
