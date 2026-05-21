@@ -75,13 +75,25 @@ export default function StartMoment({
   const handleDateTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm((prev) => {
+      if (name === "moment_end_time") {
+        const startDate = prev.moment_start.split("T")[0] || "";
+        return {
+          ...prev,
+          moment_end: startDate && value ? `${startDate}T${value}` : "",
+        };
+      }
       const date =
         name === "moment_start_date" ? value : prev.moment_start.split("T")[0];
       const time =
         name === "moment_start_time"
           ? value
           : prev.moment_start.split("T")[1] || "00:00";
-      return { ...prev, moment_start: `${date}T${time}` };
+      // Keep moment_end's date in sync when start date changes
+      const updatedEnd =
+        prev.moment_end && prev.moment_end.includes("T")
+          ? `${date}T${prev.moment_end.split("T")[1]}`
+          : prev.moment_end;
+      return { ...prev, moment_start: `${date}T${time}`, moment_end: updatedEnd };
     });
   };
 
