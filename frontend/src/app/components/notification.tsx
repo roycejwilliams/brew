@@ -108,21 +108,38 @@ export default function Notification({ onClose }: NotificationProp) {
                 Signals
               </h2>
             </div>
-            {totalCount > 0 && (
-              <motion.span
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.3 }}
-                className="text-[10px] px-2 py-0.5 rounded-full tabular-nums"
+            <div className="flex items-center gap-2">
+              {totalCount > 0 && (
+                <motion.span
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.3 }}
+                  className="text-[10px] px-2 py-0.5 rounded-full tabular-nums"
+                  style={{
+                    background: "rgba(255,255,255,0.08)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    color: "rgba(255,255,255,0.5)",
+                  }}
+                >
+                  {totalCount}
+                </motion.span>
+              )}
+              <motion.button
+                whileTap={{ scale: 0.92 }}
+                onClick={onClose}
+                className="w-7 h-7 flex items-center justify-center rounded-md cursor-pointer transition-colors duration-150"
                 style={{
-                  background: "rgba(255,255,255,0.08)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  color: "rgba(255,255,255,0.5)",
+                  background: "rgba(255,255,255,0.06)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  color: "rgba(255,255,255,0.4)",
                 }}
+                aria-label="Close"
               >
-                {totalCount}
-              </motion.span>
-            )}
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path d="M1 1l10 10M11 1L1 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+              </motion.button>
+            </div>
           </div>
 
           {/* Tabs */}
