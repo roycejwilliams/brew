@@ -93,7 +93,11 @@ export default function StartMoment({
         prev.moment_end && prev.moment_end.includes("T")
           ? `${date}T${prev.moment_end.split("T")[1]}`
           : prev.moment_end;
-      return { ...prev, moment_start: `${date}T${time}`, moment_end: updatedEnd };
+      return {
+        ...prev,
+        moment_start: `${date}T${time}`,
+        moment_end: updatedEnd,
+      };
     });
   };
 
@@ -191,13 +195,8 @@ export default function StartMoment({
       </div>
 
       {/* Content */}
-      <motion.section
-        layout
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.2 }}
-        className={`mx-auto w-full  ${
+      <section
+        className={`mx-auto w-full ${
           selectedModal !== "confirm"
             ? "max-w-full px-0"
             : "max-w-7xl px-4 sm:px-6"
@@ -298,7 +297,7 @@ export default function StartMoment({
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.section>
+      </section>
     </>
   );
 }

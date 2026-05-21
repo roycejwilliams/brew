@@ -28,14 +28,14 @@ function Feed({ completed, userId, onCreateMoment }: FeedProp) {
   const hasMoments = attended.length > 0 || hosted.length > 0;
 
   return (
-    <section className="w-full mt-8 h-full flex justify-center items-center pb-24 sm:pb-0">
+    <section className="w-full mt-8 flex flex-col flex-1">
       {completed === 100 && hasMoments ? (
-        <div className="flex flex-col gap-y-16 w-full">
+        <div className="flex flex-col gap-y-16 w-full pb-8">
           <Attended id={userId} />
           <Hosted id={userId} />
         </div>
       ) : (
-        <div className="relative flex flex-col gap-y-10 h-full justify-center items-center mt-8 w-full">
+        <div className="relative flex flex-col gap-y-10 flex-1 justify-center items-center w-full">
           {/* Background glow */}
           <div
             className="absolute inset-0 pointer-events-none"

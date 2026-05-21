@@ -131,7 +131,7 @@ function Dashboard({ profile }: DashboardProp) {
   };
 
   return (
-    <section className="h-dvh overflow-x-hidden overflow-y-auto overscroll-contain bg-[#0c0c0c] relative">
+    <section className="h-dvh overflow-x-hidden overflow-y-auto overscroll-contain bg-[#0c0c0c] relative flex flex-col">
       {/* Ambient glow */}
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 pointer-events-none"
@@ -143,7 +143,7 @@ function Dashboard({ profile }: DashboardProp) {
         }}
       />
 
-      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 pt-24 sm:pt-6 pb-28">
+      <div className="relative max-w-4xl w-full mx-auto px-4 sm:px-6 pt-24 sm:pt-6 pb-6 flex flex-col flex-1">
         {/* Profile header */}
         <div className="flex items-start justify-between gap-4 sm:gap-8">
           {/* Left — avatar + info */}
@@ -432,6 +432,7 @@ function Dashboard({ profile }: DashboardProp) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.35, delay: 0.3, ease: EASE }}
+          className="flex flex-col flex-1"
         >
           <Feed
             completed={profileCompletion(updateForm)}
