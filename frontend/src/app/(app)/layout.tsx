@@ -25,14 +25,6 @@ export default function AppLayout({
     }
   }, [user, hasHydrated, router]);
 
-  useEffect(() => {
-    const handler = (e: ErrorEvent) => {
-      alert(e.message);
-    };
-    window.addEventListener("error", handler);
-    return () => window.removeEventListener("error", handler);
-  }, []);
-
   return (
     <main>
       <div className="relative flex-1">
