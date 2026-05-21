@@ -25,6 +25,10 @@ export default function AppLayout({
     }
   }, [user, hasHydrated, router]);
 
+  window.addEventListener("error", (e) => {
+    alert(e.message);
+  });
+
   return (
     <main>
       <div className="relative flex-1">
