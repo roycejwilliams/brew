@@ -246,7 +246,7 @@ function Dashboard({ profile }: DashboardProp) {
               <motion.div {...stagger(1)}>
                 <h1
                   className="text-white font-medium leading-none truncate"
-                  style={{ fontSize: 20, letterSpacing: "-0.5px" }}
+                  style={{ fontSize: 18, letterSpacing: "-0.5px" }}
                 >
                   {profile.first_name} {profile.last_name}
                 </h1>

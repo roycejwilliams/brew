@@ -28,7 +28,7 @@ function Feed({ completed, userId, onCreateMoment }: FeedProp) {
   const hasMoments = attended.length > 0 || hosted.length > 0;
 
   return (
-    <section className="w-full mt-8 flex flex-col flex-1">
+    <section className="w-full mt-4 flex flex-col flex-1">
       {completed === 100 && hasMoments ? (
         <div className="flex flex-col gap-y-16 w-full pb-8">
           <Attended id={userId} />
