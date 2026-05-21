@@ -68,10 +68,7 @@ export default function Start({
   const canContinue = form.moments_name && dateAndTimeSet && selectedVisbility;
 
   return (
-    <motion.section
-      key="start"
-      className="max-w-lg mx-auto px-6 flex flex-col gap-4 sm:gap-8"
-    >
+    <motion.section className="max-w-lg mx-auto px-6 flex flex-col gap-4 sm:gap-8">
       {/* 1 — Moment name */}
       <motion.div
         layout
@@ -194,11 +191,11 @@ export default function Start({
               onValueChange={(value) =>
                 setSelectedVisibility(value as VisibilityType)
               }
-              orientation="horizontal"
               value={selectedVisbility}
               classNames={{
                 label: "mb-2 text-md font-medium text-white/75",
-                wrapper: "flex flex-wrap gap-2 text-white w-full",
+                wrapper:
+                  "flex flex-col sm:flex-row sm:flex-wrap gap-2 text-white w-full",
               }}
             >
               {typeInvite.map((invite) => (
