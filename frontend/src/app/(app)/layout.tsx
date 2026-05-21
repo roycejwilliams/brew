@@ -1,7 +1,7 @@
 "use client";
 import { useUserStore } from "@/stores/useUserStore";
 import Nav from "../components/nav";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
