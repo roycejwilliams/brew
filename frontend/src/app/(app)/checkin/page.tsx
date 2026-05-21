@@ -43,7 +43,7 @@ function CheckInContent() {
   }, [moment_id, attendee_id]);
 
   return (
-    <div className="min-h-screen bg-[#0c0c0c] flex items-center justify-center px-6">
+    <div className="h-dvh overflow-hidden bg-[#0c0c0c] flex items-center justify-center px-6">
       <AnimatePresence mode="wait">
         {status === "loading" && (
           <motion.div
@@ -205,7 +205,7 @@ export default function CheckInPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#0c0c0c] flex items-center justify-center">
+        <div className="h-dvh bg-[#0c0c0c] flex items-center justify-center">
           <div className="w-7 h-7 rounded-full border-2 border-white/10 border-t-white/50 animate-spin" />
         </div>
       }
