@@ -11,5 +11,9 @@ export default function Profile() {
   const { data } = useGetUser(profile as string);
   if (!data?.data.data) return null;
 
-  return <Dashboard profile={data?.data.data} />; // dashboard is suppose to be tailored for the user
+  return (
+    <div className="h-dvh overflow-hidden">
+      <Dashboard profile={data?.data.data} />
+    </div>
+  );
 }

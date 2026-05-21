@@ -11,7 +11,7 @@ interface AroundYouProp {
 
 export default function AroundYou({ goback, setSelectedModal }: AroundYouProp) {
   return (
-    <motion.section className="text-center space-y-5 relative ">
+    <motion.section className="text-center space-y-5 relative px-6">
       <motion.div
         key="aroundYou-header"
         initial={{ opacity: 0, y: -4 }}
@@ -32,7 +32,7 @@ export default function AroundYou({ goback, setSelectedModal }: AroundYouProp) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.35, duration: 0.3 }}
-        className="text-sm text-white/30 mt-12"
+        className="text-sm text-white/30 mt-8 sm:mt-12"
       >
         They can request to join — you decide who&apos;s welcome.{" "}
       </motion.p>
@@ -42,9 +42,9 @@ export default function AroundYou({ goback, setSelectedModal }: AroundYouProp) {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.15, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-        className="flex justify-center py-4 "
+        className="flex justify-center py-2 sm:py-4"
       >
-        <div className="relative w-64 h-64">
+        <div className="relative w-44 h-44 sm:w-64 sm:h-64">
           {/* Outer fade ring */}
           <motion.div
             className="absolute inset-0 rounded-full border border-white/5"
@@ -95,15 +95,15 @@ export default function AroundYou({ goback, setSelectedModal }: AroundYouProp) {
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.25, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-        className="flex gap-x-3 justify-center pt-2"
+        className="flex flex-col sm:flex-row gap-3 justify-center pt-2 w-full max-w-sm mx-auto"
       >
         <motion.button
           onClick={goback}
           whileHover={{ scale: 1.02, y: -1 }}
           whileTap={{ scale: 0.98 }}
           transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          className="text-sm font-medium cursor-pointer px-6 py-3.5 bg-white/5 backdrop-blur-2xl 
-                            text-white/60 border border-white/10 rounded-md 
+          className="w-full sm:w-auto text-sm font-medium cursor-pointer px-6 py-3.5 bg-white/5 backdrop-blur-2xl
+                            text-white/60 border border-white/10 rounded-md
                             hover:bg-white/8 hover:text-white/90 hover:border-white/20
                             transition-all duration-200"
         >
@@ -116,8 +116,8 @@ export default function AroundYou({ goback, setSelectedModal }: AroundYouProp) {
           whileHover={{ scale: 1.02, y: -1 }}
           whileTap={{ scale: 0.98 }}
           transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          className="text-sm font-medium cursor-pointer px-6 py-3.5 bg-white/90 backdrop-blur-2xl 
-                            text-black border border-white/20 rounded-md 
+          className="w-full sm:w-auto text-sm font-medium cursor-pointer px-6 py-3.5 bg-white/90 backdrop-blur-2xl
+                            text-black border border-white/20 rounded-md
                             hover:bg-white shadow-lg shadow-white/10
                             transition-all duration-200"
         >

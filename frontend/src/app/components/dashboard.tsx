@@ -23,6 +23,7 @@ import {
 } from "@/hooks/useUser";
 import { useLocationSearch } from "@/hooks/useReverseGeolocateSearch";
 import Loading from "./loading";
+import CreateModal from "./CreateModal";
 import {
   getCompletionColor,
   profileCompletion,
@@ -46,6 +47,7 @@ const inputClass =
 
 function Dashboard({ profile }: DashboardProp) {
   const [revealEdit, setRevealEdit] = useState<boolean>(false);
+  const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
   const { mutate: updateUserById, isPending } = useUpdateUserById();
   const { mutate: deleteUserById, isPending: isDeleting } = useDeleteUserById();
 
@@ -434,6 +436,7 @@ function Dashboard({ profile }: DashboardProp) {
           <Feed
             completed={profileCompletion(updateForm)}
             userId={profile.id as string}
+            onCreateMoment={() => setShowCreateModal(true)}
           />
         </motion.div>
       </div>
@@ -852,6 +855,13 @@ function Dashboard({ profile }: DashboardProp) {
               </button>
             </motion.div>
           </motion.section>
+        )}
+      </AnimatePresence>
+
+      {/* Create Moment Modal */}
+      <AnimatePresence>
+        {showCreateModal && (
+          <CreateModal onClose={() => setShowCreateModal(false)} />
         )}
       </AnimatePresence>
 

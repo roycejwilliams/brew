@@ -2,6 +2,7 @@
 import React from "react";
 import Image from "next/image";
 import { motion } from "motion/react";
+import { useRouter } from "next/navigation";
 import Attended from "./attended";
 import Hosted from "./hosted";
 import {
@@ -12,11 +13,13 @@ import {
 interface FeedProp {
   completed: number;
   userId: string;
+  onCreateMoment?: () => void;
 }
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
-function Feed({ completed, userId }: FeedProp) {
+function Feed({ completed, userId, onCreateMoment }: FeedProp) {
+  const router = useRouter();
   const { data: member } = useGetAllMomentsUserIsAttendee(userId);
   const { data: owner } = useGetAllMomentsOwnedByUser(userId);
 
@@ -177,6 +180,7 @@ function Feed({ completed, userId }: FeedProp) {
           >
             <motion.button
               whileTap={{ scale: 0.97 }}
+              onClick={() => router.push("/pulse")}
               className="flex-1 max-w-40 px-4 py-2.5 text-sm sm:text-xs font-medium tracking-[-0.1px] cursor-pointer rounded-xl transition-colors duration-150"
               style={{
                 background: "rgba(255,255,255,0.9)",
@@ -194,6 +198,7 @@ function Feed({ completed, userId }: FeedProp) {
 
             <motion.button
               whileTap={{ scale: 0.97 }}
+              onClick={onCreateMoment}
               className="flex-1 max-w-40 px-4 py-2.5 text-sm sm:text-xs font-medium tracking-[-0.1px] cursor-pointer rounded-xl transition-colors duration-150"
               style={{
                 background: "rgba(255,255,255,0.06)",

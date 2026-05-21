@@ -198,7 +198,7 @@ export default function Start({
               value={selectedVisbility}
               classNames={{
                 label: "mb-2 text-md font-medium text-white/75",
-                wrapper: "flex gap-6 ml-2 text-white",
+                wrapper: "flex flex-wrap gap-2 text-white w-full",
               }}
             >
               {typeInvite.map((invite) => (
