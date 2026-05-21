@@ -42,6 +42,54 @@ export default function Circle({
 
   const activeCircle = circles[activeIndex];
 
+  if (circles.length === 0) {
+    return (
+      <motion.section
+        key="no-circles"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.25, ease: EASE }}
+        className="text-center flex flex-col items-center justify-center gap-4 px-6 py-16"
+      >
+        <div
+          className="w-14 h-14 rounded-full flex items-center justify-center"
+          style={{
+            background: "rgba(255,255,255,0.04)",
+            border: "1px solid rgba(255,255,255,0.08)",
+          }}
+        >
+          <svg
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="rgba(255,255,255,0.25)"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <path d="M8 12h8M12 8v8" />
+          </svg>
+        </div>
+        <div className="flex flex-col gap-1.5 max-w-xs">
+          <p
+            className="text-sm font-medium tracking-[-0.2px]"
+            style={{ color: "rgba(255,255,255,0.65)" }}
+          >
+            No circles yet
+          </p>
+          <p
+            className="text-xs tracking-[-0.1px] leading-relaxed"
+            style={{ color: "rgba(255,255,255,0.3)" }}
+          >
+            Create a circle first to invite people you trust to your moment.
+          </p>
+        </div>
+      </motion.section>
+    );
+  }
+
   return (
     <AnimatePresence mode="sync">
       <motion.section key="circle" className="text-center space-y-5 relative">

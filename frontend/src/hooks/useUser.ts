@@ -7,15 +7,13 @@ export const useGetUser = (id: string) => {
     queryKey: ["user", id],
     queryFn: () => api.get(`/users/${id}`),
     enabled: !!id,
-    staleTime: Infinity,
+    staleTime: 1000 * 60 * 5, // 5 minutes — refetches when invalidated
   });
 };
 
 //Update User by id (User)
 export const useUpdateUserById = () => {
   const queryClient = useQueryClient();
-  //basically this is just sends your request
-  //talks to the server, doesn't care about UI
   return useMutation({
     mutationFn: (data: {
       id: string;
@@ -44,17 +42,9 @@ export const useUpdateUserById = () => {
       });
     },
 
-    //fires before the function
-    //talks to the cache, doesnt care about server
     onMutate: async (data) => {
       await queryClient.cancelQueries({ queryKey: ["user"] });
-
-      //gets the current cached data for "user"
       const previous = queryClient.getQueryData(["user"]);
-
-      //updates the caches data
-      //targets the exact user cache entry
-      //is the success return
       queryClient.setQueryData(["user", data.id], (old: unknown) => {
         const prev = old as { data: { data: Partial<UserProp> } };
         return {
@@ -63,23 +53,21 @@ export const useUpdateUserById = () => {
             ...prev,
             data: {
               ...prev?.data?.data,
-              first_name: data.first_name,
-              last_name: data.last_name,
-              email: data.email,
-              description: data.description,
-              username: data.username,
-              location: data.location,
-              instagram: data.instagram,
-              twitter: data.twitter,
-              linkedin: data.linkedin,
-              profile_image: data.profile_image,
+              ...data,
             },
           },
         };
       });
-
-      //rollback if fails
       return { previous };
+    },
+
+    onSuccess: (_, data) => {
+      queryClient.refetchQueries({ queryKey: ["user", data.id] });
+    },
+    onError: (_, __, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(["user"], context.previous);
+      }
     },
   });
 };

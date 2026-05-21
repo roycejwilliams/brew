@@ -23,6 +23,7 @@ import {
 } from "@/hooks/useUser";
 import { useLocationSearch } from "@/hooks/useReverseGeolocateSearch";
 import Loading from "./loading";
+import CreateModal from "./CreateModal";
 import {
   getCompletionColor,
   profileCompletion,
@@ -46,6 +47,7 @@ const inputClass =
 
 function Dashboard({ profile }: DashboardProp) {
   const [revealEdit, setRevealEdit] = useState<boolean>(false);
+  const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
   const { mutate: updateUserById, isPending } = useUpdateUserById();
   const { mutate: deleteUserById, isPending: isDeleting } = useDeleteUserById();
 
@@ -129,7 +131,7 @@ function Dashboard({ profile }: DashboardProp) {
   };
 
   return (
-    <section className="h-dvh overflow-x-hidden overflow-y-auto overscroll-contain bg-[#0c0c0c] relative">
+    <section className="h-dvh overflow-x-hidden overflow-y-auto overscroll-contain bg-[#0c0c0c] relative flex flex-col">
       {/* Ambient glow */}
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 pointer-events-none"
@@ -141,7 +143,7 @@ function Dashboard({ profile }: DashboardProp) {
         }}
       />
 
-      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 pt-24 sm:pt-6 pb-28">
+      <div className="relative max-w-4xl w-full mx-auto px-4 sm:px-6 pt-24 sm:pt-6 pb-6 flex flex-col flex-1">
         {/* Profile header */}
         <div className="flex items-start justify-between gap-4 sm:gap-8">
           {/* Left — avatar + info */}
@@ -244,7 +246,7 @@ function Dashboard({ profile }: DashboardProp) {
               <motion.div {...stagger(1)}>
                 <h1
                   className="text-white font-medium leading-none truncate"
-                  style={{ fontSize: 20, letterSpacing: "-0.5px" }}
+                  style={{ fontSize: 18, letterSpacing: "-0.5px" }}
                 >
                   {profile.first_name} {profile.last_name}
                 </h1>
@@ -430,10 +432,12 @@ function Dashboard({ profile }: DashboardProp) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.35, delay: 0.3, ease: EASE }}
+          className="flex flex-col flex-1"
         >
           <Feed
             completed={profileCompletion(updateForm)}
             userId={profile.id as string}
+            onCreateMoment={() => setShowCreateModal(true)}
           />
         </motion.div>
       </div>
@@ -852,6 +856,13 @@ function Dashboard({ profile }: DashboardProp) {
               </button>
             </motion.div>
           </motion.section>
+        )}
+      </AnimatePresence>
+
+      {/* Create Moment Modal */}
+      <AnimatePresence>
+        {showCreateModal && (
+          <CreateModal onClose={() => setShowCreateModal(false)} />
         )}
       </AnimatePresence>
 

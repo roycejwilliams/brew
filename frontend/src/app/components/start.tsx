@@ -35,7 +35,7 @@ const typeInvite = [
 ];
 
 const inputClass =
-  "w-full px-4 py-3 bg-white/5 rounded-md border border-white/10 focus:outline-none focus:border-white/25 text-white/90 placeholder:text-white/20 text-sm transition-all duration-200";
+  "appearance-none min-w-0 w-full px-4 py-2 sm:py-3 bg-white/5 rounded-md border border-white/10 focus:outline-none focus:border-white/25 text-white/90 placeholder:text-white/20 text-sm transition-all duration-200";
 
 const labelClass = "text-[10px] tracking-[3px] uppercase text-white/25";
 
@@ -60,26 +60,15 @@ export default function Start({
     visible: { opacity: 1, y: 0, scale: 1 },
   };
 
-  // date AND time both set
   const dateAndTimeSet =
     !!form.moment_start.split("T")[0] && !!form.moment_start.split("T")[1];
 
-  // only requires name, start datetime, and visibility
   const canContinue = form.moments_name && dateAndTimeSet && selectedVisbility;
 
   return (
-    <motion.section
-      key="start"
-      className="max-w-lg mx-auto px-6 flex flex-col gap-8"
-    >
+    <motion.section className="max-w-lg mx-auto px-6 flex flex-col gap-4 sm:gap-8">
       {/* 1 — Moment name */}
-      <motion.div
-        layout
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: EASE }}
-        className="flex flex-col gap-2"
-      >
+      <div className="flex flex-col gap-2">
         <p className={labelClass}>The move</p>
         <input
           name="moments_name"
@@ -90,16 +79,10 @@ export default function Start({
           required
           className={inputClass}
         />
-      </motion.div>
+      </div>
 
       {/* 2 — Date + Start time */}
-      <motion.div
-        layout
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.05, ease: EASE }}
-        className="flex flex-col gap-2"
-      >
+      <div className="flex flex-col gap-2">
         <p className={labelClass}>When</p>
         <div className="flex gap-3">
           <input
@@ -125,21 +108,19 @@ export default function Start({
             className={inputClass}
           />
         </div>
-      </motion.div>
+      </div>
 
-      {/* 3 — Until + Cap — reveal after date AND time set */}
+      {/* 3 — Until + Cap */}
       <AnimatePresence>
         {dateAndTimeSet && (
           <motion.div
-            layout
             initial="hidden"
             animate="visible"
             exit="hidden"
             variants={revealUp}
-            transition={{ duration: 0.4, ease: EASE }}
-            className="flex flex-col gap-6"
+            transition={{ duration: 0.35, ease: EASE }}
+            className="flex flex-col gap-4 sm:gap-6"
           >
-            {/* End time */}
             <div className="flex flex-col gap-2">
               <p className={labelClass}>Until</p>
               <input
@@ -156,7 +137,6 @@ export default function Start({
               </p>
             </div>
 
-            {/* Cap */}
             <div className="flex flex-col gap-2">
               <p className={labelClass}>Cap</p>
               <input
@@ -180,25 +160,25 @@ export default function Start({
       <AnimatePresence>
         {reveal && (
           <motion.div
-            layout
             initial="hidden"
             animate="visible"
             exit="hidden"
             variants={revealUp}
-            transition={{ duration: 0.4, delay: 0.05, ease: EASE }}
+            transition={{ duration: 0.35, delay: 0.05, ease: EASE }}
             className="flex flex-col gap-3"
           >
             <p className={labelClass}>Who</p>
             <RadioGroup
+              orientation="horizontal"
               disableAnimation
+              value={selectedVisbility}
               onValueChange={(value) =>
                 setSelectedVisibility(value as VisibilityType)
               }
-              orientation="horizontal"
-              value={selectedVisbility}
               classNames={{
                 label: "mb-2 text-md font-medium text-white/75",
-                wrapper: "flex gap-6 ml-2 text-white",
+                wrapper:
+                  "flex flex-row text-white w-full flex-wrap !gap-x-6 !gap-y-2",
               }}
             >
               {typeInvite.map((invite) => (
@@ -215,12 +195,11 @@ export default function Start({
       <AnimatePresence>
         {showSubmit && (
           <motion.div
-            layout
             initial="hidden"
             animate="visible"
             exit="hidden"
             variants={commit}
-            transition={{ duration: 0.3, ease: EASE }}
+            transition={{ duration: 0.25, ease: EASE }}
           >
             <button
               type="button"

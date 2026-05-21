@@ -2,6 +2,7 @@
 import React from "react";
 import Image from "next/image";
 import { motion } from "motion/react";
+import { useRouter } from "next/navigation";
 import Attended from "./attended";
 import Hosted from "./hosted";
 import {
@@ -12,11 +13,13 @@ import {
 interface FeedProp {
   completed: number;
   userId: string;
+  onCreateMoment?: () => void;
 }
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
-function Feed({ completed, userId }: FeedProp) {
+function Feed({ completed, userId, onCreateMoment }: FeedProp) {
+  const router = useRouter();
   const { data: member } = useGetAllMomentsUserIsAttendee(userId);
   const { data: owner } = useGetAllMomentsOwnedByUser(userId);
 
@@ -25,14 +28,14 @@ function Feed({ completed, userId }: FeedProp) {
   const hasMoments = attended.length > 0 || hosted.length > 0;
 
   return (
-    <section className="w-full mt-8 h-full flex justify-center items-center pb-24 sm:pb-0">
+    <section className="w-full mt-4 flex flex-col flex-1">
       {completed === 100 && hasMoments ? (
-        <div className="flex flex-col gap-y-16 w-full">
+        <div className="flex flex-col gap-y-16 w-full pb-8">
           <Attended id={userId} />
           <Hosted id={userId} />
         </div>
       ) : (
-        <div className="relative flex flex-col gap-y-10 h-full justify-center items-center mt-8 w-full">
+        <div className="relative flex flex-col gap-y-10 flex-1 justify-center items-center w-full">
           {/* Background glow */}
           <div
             className="absolute inset-0 pointer-events-none"
@@ -177,6 +180,7 @@ function Feed({ completed, userId }: FeedProp) {
           >
             <motion.button
               whileTap={{ scale: 0.97 }}
+              onClick={() => router.push("/pulse")}
               className="flex-1 max-w-40 px-4 py-2.5 text-sm sm:text-xs font-medium tracking-[-0.1px] cursor-pointer rounded-xl transition-colors duration-150"
               style={{
                 background: "rgba(255,255,255,0.9)",
@@ -194,6 +198,7 @@ function Feed({ completed, userId }: FeedProp) {
 
             <motion.button
               whileTap={{ scale: 0.97 }}
+              onClick={onCreateMoment}
               className="flex-1 max-w-40 px-4 py-2.5 text-sm sm:text-xs font-medium tracking-[-0.1px] cursor-pointer rounded-xl transition-colors duration-150"
               style={{
                 background: "rgba(255,255,255,0.06)",
