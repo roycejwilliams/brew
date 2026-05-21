@@ -25,9 +25,13 @@ export default function AppLayout({
     }
   }, [user, hasHydrated, router]);
 
-  window.addEventListener("error", (e) => {
-    alert(e.message);
-  });
+  useEffect(() => {
+    const handler = (e: ErrorEvent) => {
+      alert(e.message);
+    };
+    window.addEventListener("error", handler);
+    return () => window.removeEventListener("error", handler);
+  }, []);
 
   return (
     <main>
