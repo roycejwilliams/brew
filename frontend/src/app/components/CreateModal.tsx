@@ -36,7 +36,7 @@ function CreateModal({ onClose }: CreateModalProp) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.25 }}
-      className={`w-full h-screen fixed left-0 top-0 z-80 sm:overflow-y-auto lg:overflow-y-hidden ${cardAction === null && "overflow-y-hidden"} ${cardAction === "invite" || (cardAction === "create" && "overflow-y-hidden")} overflow-x-hidden flex flex-col`}
+      className={`w-full h-dvh fixed left-0 top-0 z-80 sm:overflow-y-auto lg:overflow-y-hidden ${cardAction === null && "overflow-y-hidden"} ${cardAction === "invite" || (cardAction === "create" && "overflow-y-hidden")} overflow-x-hidden flex flex-col`}
       style={{ background: "#0c0c0c" }}
     >
       {/* Background — bottom-left ember */}
@@ -117,12 +117,12 @@ function CreateModal({ onClose }: CreateModalProp) {
       {/* Content */}
       <div className="relative z-10 w-full h-full flex flex-col">
         {/* Header */}
-        <div className="mx-auto text-center mt-16 mb-6 flex flex-col justify-center items-center px-6 gap-2">
+        <div className="mx-auto text-center mt-8 mb-3 sm:mt-16 sm:mb-6 flex flex-col justify-center items-center px-6 gap-2">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.35, ease: EASE }}
-            className="flex items-center justify-center w-10 h-10 rounded-full"
+            className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full"
             style={{
               background: "rgba(255,255,255,0.06)",
               border: "1px solid rgba(255,255,255,0.1)",
@@ -138,7 +138,7 @@ function CreateModal({ onClose }: CreateModalProp) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="text-3xl font-medium tracking-[-0.6px] text-white"
+              className="text-2xl sm:text-3xl font-medium tracking-[-0.6px] text-white"
             >
               {cardAction === "create"
                 ? "Start a moment."

@@ -35,7 +35,7 @@ const typeInvite = [
 ];
 
 const inputClass =
-  "w-full px-4 py-3 bg-white/5 rounded-md border border-white/10 focus:outline-none focus:border-white/25 text-white/90 placeholder:text-white/20 text-sm transition-all duration-200";
+  "w-full px-4 py-2 sm:py-3 bg-white/5 rounded-md border border-white/10 focus:outline-none focus:border-white/25 text-white/90 placeholder:text-white/20 text-sm transition-all duration-200";
 
 const labelClass = "text-[10px] tracking-[3px] uppercase text-white/25";
 
@@ -70,7 +70,7 @@ export default function Start({
   return (
     <motion.section
       key="start"
-      className="max-w-lg mx-auto px-6 flex flex-col gap-8"
+      className="max-w-lg mx-auto px-6 flex flex-col gap-4 sm:gap-8"
     >
       {/* 1 — Moment name */}
       <motion.div
@@ -137,7 +137,7 @@ export default function Start({
             exit="hidden"
             variants={revealUp}
             transition={{ duration: 0.4, ease: EASE }}
-            className="flex flex-col gap-6"
+            className="flex flex-col gap-4 sm:gap-6"
           >
             {/* End time */}
             <div className="flex flex-col gap-2">
