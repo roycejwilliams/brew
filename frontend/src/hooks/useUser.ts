@@ -7,7 +7,7 @@ export const useGetUser = (id: string) => {
     queryKey: ["user", id],
     queryFn: () => api.get(`/users/${id}`),
     enabled: !!id,
-    staleTime: Infinity,
+    staleTime: 1000 * 60 * 5, // 5 minutes — refetches when invalidated
   });
 };
 
@@ -61,9 +61,8 @@ export const useUpdateUserById = () => {
       return { previous };
     },
 
-    // ✅ Add these two
     onSuccess: (_, data) => {
-      queryClient.invalidateQueries({ queryKey: ["user", data.id] });
+      queryClient.refetchQueries({ queryKey: ["user", data.id] });
     },
     onError: (_, __, context) => {
       if (context?.previous) {

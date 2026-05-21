@@ -356,6 +356,7 @@ app.get(
             twitter: user.twitter,
             linkedin: user.linkedin,
             role: user.role,
+            profile_image: user.profile_image,
           },
         });
       }
