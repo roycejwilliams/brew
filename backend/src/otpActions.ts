@@ -24,6 +24,7 @@ interface EmailProp {
   appsubmit?: boolean;
   applicant?: ApplicationProp;
   external_invite?: { inviter_name: string; invite_type: "circle" | "moment"; target_name?: string };
+  welcome?: boolean;
 }
 
 interface MessageProp {
@@ -47,6 +48,7 @@ interface MessageProp {
   moment_invite_reminder?: { moments_name: string; time: string };
   appsubmit?: boolean;
   external_invite?: { inviter_name: string; invite_type: "circle" | "moment"; target_name?: string };
+  welcome?: boolean;
 }
 
 const EMAIL_STYLES = `
@@ -58,6 +60,8 @@ const EMAIL_STYLES = `
   .otp-box{border:1px solid #222222;border-radius:4px;padding:28px;text-align:center;letter-spacing:12px;font-size:28px;font-weight:700;color:#ffffff;margin:0 0 24px 0;}
   .footer-text{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#333333;margin-top:32px;}
   .muted-sm{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#333333;margin-top:32px;}
+  .cta-btn{display:inline-block;padding:14px 32px;background:#ffffff;color:#000000;text-decoration:none;font-size:14px;font-weight:600;letter-spacing:-0.1px;border-radius:6px;margin:0 auto;}
+  .cta-wrap{text-align:center;margin:8px 0 24px 0;}
   @media(prefers-color-scheme:light){
     body,.body-bg{background:#f2f2f2!important;}
     .wrapper{background:#ffffff!important;}
@@ -67,6 +71,7 @@ const EMAIL_STYLES = `
     .otp-box{border-color:#e0e0e0!important;color:#0a0a0a!important;}
     .footer-text{color:#aaaaaa!important;}
     .muted-sm{color:#aaaaaa!important;}
+    .cta-btn{background:#0a0a0a!important;color:#ffffff!important;}
   }
 `;
 
@@ -84,6 +89,9 @@ const h1 = (text: string) =>
 const p = (text: string) =>
   `<p class="p" style="font-size:15px;color:#666666;line-height:1.6;margin:0 0 24px 0;">${text}</p>`;
 
+const ctaButton = (label: string, href: string) =>
+  `<div class="cta-wrap" style="text-align:center;margin:8px 0 24px 0;"><a href="${href}" class="cta-btn" style="display:inline-block;padding:14px 32px;background:#ffffff;color:#000000;text-decoration:none;font-size:14px;font-weight:600;letter-spacing:-0.1px;border-radius:6px;">${label}</a></div>`;
+
 export const sendSMS = async ({
   phone_number,
   otp_code,
@@ -100,6 +108,7 @@ export const sendSMS = async ({
   circle_invite_reminder,
   moment_invite_reminder,
   external_invite,
+  welcome,
 }: MessageProp) => {
   const client = twilio(
     process.env.TWILIO_TEST_SID,
@@ -231,6 +240,14 @@ export const sendSMS = async ({
         from: process.env.TWILIO_PHONE_NUMBER!,
       });
     }
+
+    if (welcome) {
+      await client.messages.create({
+        body: `Welcome to BR3W. This is invite-only for a reason — set intentions, build circles, and make moments that matter. Open the app to begin. br3w.app`,
+        to: phone_number,
+        from: process.env.TWILIO_PHONE_NUMBER!,
+      });
+    }
   } catch (error) {
     console.error("Cannot process SMS at this time", error);
   }
@@ -254,6 +271,7 @@ export const sendEmail = async ({
   applicant,
   appsubmit,
   external_invite,
+  welcome,
 }: EmailProp) => {
   const resend = new Resend(process.env.RESEND_API_KEY);
   try {
@@ -498,7 +516,22 @@ export const sendEmail = async ({
           h1("You've been chosen.") +
             p(`${external_invite.inviter_name} thought of you.`) +
             p(contextLine) +
-            p("BR3W is invite-only. Visit br3w.app to request access and join the moment."),
+            p("BR3W is invite-only. Request access to join the moment.") +
+            ctaButton("Request Access", "https://br3w.app"),
+        ),
+      });
+    }
+
+    if (welcome) {
+      await resend.emails.send({
+        from: "BR3W <hello@br3w.app>",
+        to: email,
+        subject: `Welcome to br3w.`,
+        html: emailTemplate(
+          h1("You're in.") +
+            p("This is invite-only for a reason. BR3W is built for people who are intentional about who they let in and what they spend their time on.") +
+            p("Set intentions. Build circles. Make moments that actually mean something.") +
+            ctaButton("Open BR3W", "https://br3w.app"),
         ),
       });
     }
