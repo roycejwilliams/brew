@@ -2086,6 +2086,54 @@ app.put(
   },
 );
 
+app.post(
+  "/ai/generate",
+  authenticateToken,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { description } = req.body;
+
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": process.env.ANTHROPIC_API_KEY!,
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-5",
+          max_tokens: 1000,
+          messages: [
+            {
+              role: "user",
+              content: `Based on this event description: "${description}"
+                
+Return ONLY a JSON object with no preamble or markdown:
+{
+  "principles": [...],
+  "expectations": [...],
+  "faqs": [{ "question": "...", "answer": "..." }],
+  "vibes": ["vibe 1", "vibe 2"]
+}
+
+Generate between 3 and 6 items for each array. Vibes between 5 and 10 with 1 word describing the event.
+Keep each item to 1-2 sentences. Match the tone of the description.`,
+            },
+          ],
+        }),
+      });
+
+      const data = await response.json();
+      const text = data.content[0].text;
+      const parsed = JSON.parse(text.replace(/```json|```/g, "").trim());
+
+      return res.status(200).send({ success: true, data: parsed });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
 //Anthropic Auto-generation
 // GET /moments/:id/recap
 app.get(
