@@ -76,32 +76,30 @@ export default function InvitePeople({
   const getAllMembersInEachCircle = (): InviteUserProp[] => {
     if (!getAllCircleMembers?.data.data) return [];
     const seen = new Set<string>();
-    return (
-      getAllCircleMembers.data.data
-        .flatMap((circle: CircleWithMembers) =>
-          circle.members
-            .filter((m): m is CircleMember => m !== null)
-            .map((member) => ({
-              id: member.id,
-              username: member.username,
-              phonenumber: member.phonenumber ?? "",
-              email: member.email ?? "",
-              first_name: member.first_name,
-              last_name: member.last_name,
-              profile_image: member.profile_image,
-              profile: {
-                fullname: `${member.first_name} ${member.last_name}`,
-                avatarUrl: member.profile_image ?? "",
-              },
-            })),
-        )
-        .filter((member: InviteUserProp) => {
-          if (seen.has(member.username)) return false;
-          if (member.id === user?.id) return false;
-          seen.add(member.username);
-          return true;
-        })
-    );
+    return getAllCircleMembers.data.data
+      .flatMap((circle: CircleWithMembers) =>
+        circle.members
+          .filter((m): m is CircleMember => m !== null)
+          .map((member) => ({
+            id: member.id,
+            username: member.username,
+            phonenumber: member.phonenumber ?? "",
+            email: member.email ?? "",
+            first_name: member.first_name,
+            last_name: member.last_name,
+            profile_image: member.profile_image,
+            profile: {
+              fullname: `${member.first_name} ${member.last_name}`,
+              avatarUrl: member.profile_image ?? "",
+            },
+          })),
+      )
+      .filter((member: InviteUserProp) => {
+        if (seen.has(member.username)) return false;
+        if (member.id === user?.id) return false;
+        seen.add(member.username);
+        return true;
+      });
   };
 
   const allMembers = getAllMembersInEachCircle();
@@ -271,7 +269,7 @@ export default function InvitePeople({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.2 }}
-      className="w-full max-w-sm sm:max-w-md mx-auto px-4 sm:px-0 flex flex-col gap-4"
+      className="w-full  mx-auto px-4 sm:px-0 flex flex-col gap-4"
     >
       {/* Search */}
       <div
@@ -289,119 +287,119 @@ export default function InvitePeople({
       <AnimatePresence mode="popLayout">
         {/* Default — from your circles */}
         {!isSearching && inviteQuery === "" && (
-          <motion.div
-            key="suggested"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.18 }}
-            className="rounded-xl overflow-hidden"
-            style={{
-              background: "rgba(255,255,255,0.02)",
-              border: "1px solid rgba(255,255,255,0.07)",
-            }}
-          >
-            <div
+            <motion.div
+              key="suggested"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.18 }}
+              className="rounded-xl overflow-hidden"
               style={{
-                height: 1,
-                background:
-                  "linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)",
+                background: "rgba(255,255,255,0.02)",
+                border: "1px solid rgba(255,255,255,0.07)",
               }}
-            />
-            <div className="p-4 flex flex-col gap-3">
-              <p
-                className="text-left text-[9px] tracking-[2px] uppercase font-medium"
-                style={{ color: "rgba(255,255,255,0.2)" }}
-              >
-                From your circles
-              </p>
-              <div className="flex flex-col gap-0.5">
-                {allMembers.slice(0, 5).map((suggest, index) => {
-                  if (selectedInvitedUser.some((u) => u.id === suggest.id))
-                    return null;
-                  return (
-                    <motion.button
-                      key={suggest.id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{
-                        delay: 0.04 + index * 0.04,
-                        duration: 0.18,
-                      }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => handleSelectedInviteUser(suggest)}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-colors duration-150 text-left"
-                      style={{ background: "transparent" }}
-                      onMouseEnter={(e) =>
-                        (e.currentTarget.style.background =
-                          "rgba(255,255,255,0.04)")
-                      }
-                      onMouseLeave={(e) =>
-                        (e.currentTarget.style.background = "transparent")
-                      }
-                    >
-                      <div
-                        className="w-9 h-9 rounded-lg relative overflow-hidden shrink-0 flex items-center justify-center"
-                        style={{
-                          background: "rgba(255,255,255,0.05)",
-                          border: "1px solid rgba(255,255,255,0.08)",
+            >
+              <div
+                style={{
+                  height: 1,
+                  background:
+                    "linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)",
+                }}
+              />
+              <div className="p-4 flex flex-col gap-3">
+                <p
+                  className="text-left text-[9px] tracking-[2px] uppercase font-medium"
+                  style={{ color: "rgba(255,255,255,0.2)" }}
+                >
+                  From your circles
+                </p>
+                <div className="flex flex-col gap-0.5">
+                  {allMembers.slice(0, 5).map((suggest, index) => {
+                    if (selectedInvitedUser.some((u) => u.id === suggest.id))
+                      return null;
+                    return (
+                      <motion.button
+                        key={suggest.id}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{
+                          delay: 0.04 + index * 0.04,
+                          duration: 0.18,
                         }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => handleSelectedInviteUser(suggest)}
+                        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-colors duration-150 text-left"
+                        style={{ background: "transparent" }}
+                        onMouseEnter={(e) =>
+                          (e.currentTarget.style.background =
+                            "rgba(255,255,255,0.04)")
+                        }
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.background = "transparent")
+                        }
                       >
-                        {suggest.profile.avatarUrl ? (
-                          <Image
-                            src={suggest.profile.avatarUrl}
-                            alt={suggest.profile.fullname}
-                            fill
-                            className="object-cover"
-                          />
-                        ) : (
-                          <span
-                            className="text-xs font-medium"
-                            style={{ color: "rgba(255,255,255,0.4)" }}
-                          >
-                            {suggest.first_name?.[0]}
-                            {suggest.last_name?.[0]}
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p
-                          className="text-sm font-medium tracking-[-0.1px] truncate"
-                          style={{ color: "rgba(255,255,255,0.82)" }}
-                        >
-                          {suggest.profile.fullname}
-                        </p>
-                        <p
-                          className="text-[11px] truncate tracking-[-0.1px]"
-                          style={{ color: "rgba(255,255,255,0.3)" }}
-                        >
-                          @{suggest.username}
-                        </p>
-                      </div>
-                      <div
-                        className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
-                        style={{
-                          background: "rgba(255,255,255,0.05)",
-                          border: "1px solid rgba(255,255,255,0.09)",
-                        }}
-                      >
-                        <span
+                        <div
+                          className="w-9 h-9 rounded-lg relative overflow-hidden shrink-0 flex items-center justify-center"
                           style={{
-                            fontSize: 12,
-                            color: "rgba(255,255,255,0.3)",
-                            lineHeight: 1,
+                            background: "rgba(255,255,255,0.05)",
+                            border: "1px solid rgba(255,255,255,0.08)",
                           }}
                         >
-                          +
-                        </span>
-                      </div>
-                    </motion.button>
-                  );
-                })}
+                          {suggest.profile.avatarUrl ? (
+                            <Image
+                              src={suggest.profile.avatarUrl}
+                              alt={suggest.profile.fullname}
+                              fill
+                              className="object-cover"
+                            />
+                          ) : (
+                            <span
+                              className="text-xs font-medium"
+                              style={{ color: "rgba(255,255,255,0.4)" }}
+                            >
+                              {suggest.first_name?.[0]}
+                              {suggest.last_name?.[0]}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p
+                            className="text-sm font-medium tracking-[-0.1px] truncate"
+                            style={{ color: "rgba(255,255,255,0.82)" }}
+                          >
+                            {suggest.profile.fullname}
+                          </p>
+                          <p
+                            className="text-[11px] truncate tracking-[-0.1px]"
+                            style={{ color: "rgba(255,255,255,0.3)" }}
+                          >
+                            @{suggest.username}
+                          </p>
+                        </div>
+                        <div
+                          className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
+                          style={{
+                            background: "rgba(255,255,255,0.05)",
+                            border: "1px solid rgba(255,255,255,0.09)",
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontSize: 12,
+                              color: "rgba(255,255,255,0.3)",
+                              lineHeight: 1,
+                            }}
+                          >
+                            +
+                          </span>
+                        </div>
+                      </motion.button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          </motion.div>
-        )}
+            </motion.div>
+          )}
 
         {/* Search results */}
         {!isSearching && inviteQuery.length > 0 && receipients.length > 0 && (

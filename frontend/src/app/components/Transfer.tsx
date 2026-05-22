@@ -66,7 +66,7 @@ function Transfer() {
 
   return (
     <div
-      className="w-1/2 mx-auto overflow-hidden"
+      className="max-w-xl mx-auto overflow-hidden"
       style={{
         borderRadius: 18,
         border: "1px solid rgba(255,255,255,0.07)",

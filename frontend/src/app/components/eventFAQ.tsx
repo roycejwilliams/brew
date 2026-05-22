@@ -14,7 +14,7 @@ function EventFAQ({ faqs }: EventFAQProp) {
         <h2 className="text-8xl font-medium">Before You Arrive</h2>
       </div>
       <div className="xl:col-span-1 place-content-center place-self-center w-full">
-        <ul className="flex flex-col space-y-6 h-full w-full mt-40">
+        <ul className="flex flex-col space-y-6 h-full w-full xl:mt-40 ">
           {faqs.map((item, i) => (
             <div key={i}>
               <FaqItem

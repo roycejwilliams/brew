@@ -20,7 +20,7 @@ export default function EventLive({ activeModal, eventCard }: EventLiveProp) {
   const hasLocation = lng != null && lat != null;
 
   return (
-    <div className="flex flex-col gap-16 sm:gap-20 pb-8">
+    <div className="flex flex-col gap-16 sm:gap-20 pb-8 ">
       {/* Live indicator */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -60,7 +60,7 @@ export default function EventLive({ activeModal, eventCard }: EventLiveProp) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.35, delay: 0.05, ease: EASE }}
-        className="flex flex-col items-center gap-6 sm:gap-8 text-center"
+        className="flex flex-col items-center gap-6 sm:gap-8  text-center"
       >
         <div className="flex flex-col items-center gap-2">
           <h2

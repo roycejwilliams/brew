@@ -69,11 +69,13 @@ function MapBoxGl({
   }, []);
 
   useEffect(() => {
-    if (!mapRef.current || !mapReady || !moments?.length) return;
+    if (!mapRef.current || !mapReady) return;
 
     // Clear existing markers
     markersRef.current.forEach((m) => m.remove());
     markersRef.current = [];
+
+    if (!moments?.length) return;
 
     moments.forEach((moment) => {
       const lng = (moment.location as unknown as { x: number; y: number })?.x;

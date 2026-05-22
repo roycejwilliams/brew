@@ -120,198 +120,202 @@ export default function People({
           </div>
 
           {/* Circles filter + default member list */}
-          {!isSearchingUser && userQuery === "" && (
-            <motion.div
-              key="browse"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.18 }}
-              className="rounded-xl overflow-hidden"
-              style={{
-                background: "rgba(255,255,255,0.02)",
-                border: "1px solid rgba(255,255,255,0.07)",
-              }}
-            >
-              {/* Top shimmer */}
-              <div
+          {!isSearchingUser &&
+            userQuery === "" &&
+            circlesOwnedByUser?.data?.data.length > 0 && (
+              <motion.div
+                key="browse"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.18 }}
+                className="rounded-xl overflow-hidden"
                 style={{
-                  height: 1,
-                  background:
-                    "linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)",
+                  background: "rgba(255,255,255,0.02)",
+                  border: "1px solid rgba(255,255,255,0.07)",
                 }}
-              />
-
-              <div className="p-4 flex flex-col gap-4">
-                {/* Circle filters */}
-                <div className="flex flex-col gap-3">
-                  <p
-                    className="text-left text-[9px] tracking-[2px] uppercase font-medium"
-                    style={{ color: "rgba(255,255,255,0.2)" }}
-                  >
-                    Your circles
-                  </p>
-                  <div className="flex items-start gap-3 flex-wrap">
-                    {(
-                      (circlesOwnedByUser?.data?.data as CircleProp[]) ?? []
-                    ).map((circle, index) => (
-                      <motion.button
-                        key={circle.id}
-                        onClick={() =>
-                          setActiveCircleFilter(
-                            activeCircleFilter === circle.id
-                              ? null
-                              : (circle.id as string),
-                          )
-                        }
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{
-                          delay: 0.05 + index * 0.04,
-                          duration: 0.2,
-                          ease: EASE,
-                        }}
-                        whileTap={{ scale: 0.96 }}
-                        className="flex flex-col items-center gap-1.5 cursor-pointer"
-                      >
-                        <div
-                          className="w-12 h-12 rounded-xl relative overflow-hidden transition-all duration-200"
-                          style={{
-                            border:
-                              activeCircleFilter === circle.id
-                                ? "1px solid rgba(255,255,255,0.25)"
-                                : "1px solid rgba(255,255,255,0.08)",
-                            opacity:
-                              activeCircleFilter &&
-                              activeCircleFilter !== circle.id
-                                ? 0.45
-                                : 1,
-                          }}
-                        >
-                          <Image
-                            src={circle.circle_image ?? "/fallback-circle.jpg"}
-                            fill
-                            alt={circle.circle_name}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <span
-                          className="text-[9px] tracking-[-0.1px] max-w-12 truncate"
-                          style={{ color: "rgba(255,255,255,0.45)" }}
-                        >
-                          {circle.circle_name}
-                        </span>
-                      </motion.button>
-                    ))}
-
-                    {/* Add circle */}
-                    <motion.button
-                      whileTap={{ scale: 0.96 }}
-                      className="w-12 h-12 cursor-pointer rounded-xl flex justify-center items-center transition-colors duration-200"
-                      style={{
-                        background: "rgba(255,255,255,0.03)",
-                        border: "1px solid rgba(255,255,255,0.07)",
-                      }}
-                    >
-                      <PlusIcon size={16} color="#fff" />
-                    </motion.button>
-                  </div>
-                </div>
-
-                {/* Divider */}
+              >
+                {/* Top shimmer */}
                 <div
-                  style={{ height: 1, background: "rgba(255,255,255,0.05)" }}
+                  style={{
+                    height: 1,
+                    background:
+                      "linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)",
+                  }}
                 />
 
-                {/* Member list */}
-                {displayedMembers.length > 0 && (
-                  <div className="flex flex-col gap-0.5">
+                <div className="p-4 flex flex-col gap-4">
+                  {/* Circle filters */}
+                  <div className="flex flex-col gap-3">
                     <p
-                      className="text-left text-[9px] tracking-[2px] uppercase font-medium mb-2"
+                      className="text-left text-[9px] tracking-[2px] uppercase font-medium"
                       style={{ color: "rgba(255,255,255,0.2)" }}
                     >
-                      {activeCircleFilter ? "Circle members" : "All members"}
+                      Your circles
                     </p>
-                    {displayedMembers.slice(0, 5).map((person, index) => {
-                      const isSelected = selectedUsers.some(
-                        (u) => u.id === person.id,
-                      );
-                      if (isSelected) return null;
-                      return (
+                    <div className="flex items-start gap-3 flex-wrap">
+                      {(
+                        (circlesOwnedByUser?.data?.data as CircleProp[]) ?? []
+                      ).map((circle, index) => (
                         <motion.button
-                          key={person.id}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
+                          key={circle.id}
+                          onClick={() =>
+                            setActiveCircleFilter(
+                              activeCircleFilter === circle.id
+                                ? null
+                                : (circle.id as string),
+                            )
+                          }
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
                           transition={{
                             delay: 0.05 + index * 0.04,
-                            duration: 0.18,
+                            duration: 0.2,
+                            ease: EASE,
                           }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={() =>
-                            setSelectedUsers((prev) => [...prev, person])
-                          }
-                          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-colors duration-150"
-                          style={{ background: "transparent" }}
-                          onMouseEnter={(e) =>
-                            (e.currentTarget.style.background =
-                              "rgba(255,255,255,0.04)")
-                          }
-                          onMouseLeave={(e) =>
-                            (e.currentTarget.style.background = "transparent")
-                          }
+                          whileTap={{ scale: 0.96 }}
+                          className="flex flex-col items-center gap-1.5 cursor-pointer"
                         >
                           <div
-                            className="w-9 h-9 rounded-lg relative overflow-hidden shrink-0"
+                            className="w-12 h-12 rounded-xl relative overflow-hidden transition-all duration-200"
                             style={{
-                              border: "1px solid rgba(255,255,255,0.08)",
+                              border:
+                                activeCircleFilter === circle.id
+                                  ? "1px solid rgba(255,255,255,0.25)"
+                                  : "1px solid rgba(255,255,255,0.08)",
+                              opacity:
+                                activeCircleFilter &&
+                                activeCircleFilter !== circle.id
+                                  ? 0.45
+                                  : 1,
                             }}
                           >
                             <Image
-                              src={person.profile_image ?? "/fallback.jpg"}
-                              alt={person.username}
+                              src={
+                                circle.circle_image ?? "/fallback-circle.jpg"
+                              }
                               fill
-                              className="object-cover"
+                              alt={circle.circle_name}
+                              className="w-full h-full object-cover"
                             />
                           </div>
-                          <div className="flex-1 min-w-0 text-left">
-                            <p
-                              className="text-sm font-medium tracking-[-0.1px] truncate"
-                              style={{ color: "rgba(255,255,255,0.82)" }}
-                            >
-                              {person.first_name} {person.last_name}
-                            </p>
-                            <p
-                              className="text-[11px] truncate tracking-[-0.1px]"
-                              style={{ color: "rgba(255,255,255,0.3)" }}
-                            >
-                              @{person.username}
-                            </p>
-                          </div>
-                          <div
-                            className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
-                            style={{
-                              background: "rgba(255,255,255,0.05)",
-                              border: "1px solid rgba(255,255,255,0.09)",
-                            }}
+                          <span
+                            className="text-[9px] tracking-[-0.1px] max-w-12 truncate"
+                            style={{ color: "rgba(255,255,255,0.45)" }}
                           >
-                            <span
+                            {circle.circle_name}
+                          </span>
+                        </motion.button>
+                      ))}
+
+                      {/* Add circle */}
+                      <motion.button
+                        whileTap={{ scale: 0.96 }}
+                        className="w-12 h-12 cursor-pointer rounded-xl flex justify-center items-center transition-colors duration-200"
+                        style={{
+                          background: "rgba(255,255,255,0.03)",
+                          border: "1px solid rgba(255,255,255,0.07)",
+                        }}
+                      >
+                        <PlusIcon size={16} color="#fff" />
+                      </motion.button>
+                    </div>
+                  </div>
+
+                  {/* Divider */}
+                  <div
+                    style={{ height: 1, background: "rgba(255,255,255,0.05)" }}
+                  />
+
+                  {/* Member list */}
+                  {displayedMembers.length > 0 && (
+                    <div className="flex flex-col gap-0.5">
+                      <p
+                        className="text-left text-[9px] tracking-[2px] uppercase font-medium mb-2"
+                        style={{ color: "rgba(255,255,255,0.2)" }}
+                      >
+                        {activeCircleFilter ? "Circle members" : "All members"}
+                      </p>
+                      {displayedMembers.slice(0, 5).map((person, index) => {
+                        const isSelected = selectedUsers.some(
+                          (u) => u.id === person.id,
+                        );
+                        if (isSelected) return null;
+                        return (
+                          <motion.button
+                            key={person.id}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{
+                              delay: 0.05 + index * 0.04,
+                              duration: 0.18,
+                            }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() =>
+                              setSelectedUsers((prev) => [...prev, person])
+                            }
+                            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-colors duration-150"
+                            style={{ background: "transparent" }}
+                            onMouseEnter={(e) =>
+                              (e.currentTarget.style.background =
+                                "rgba(255,255,255,0.04)")
+                            }
+                            onMouseLeave={(e) =>
+                              (e.currentTarget.style.background = "transparent")
+                            }
+                          >
+                            <div
+                              className="w-9 h-9 rounded-lg relative overflow-hidden shrink-0"
                               style={{
-                                fontSize: 12,
-                                color: "rgba(255,255,255,0.3)",
-                                lineHeight: 1,
+                                border: "1px solid rgba(255,255,255,0.08)",
                               }}
                             >
-                              +
-                            </span>
-                          </div>
-                        </motion.button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          )}
+                              <Image
+                                src={person.profile_image ?? "/fallback.jpg"}
+                                alt={person.username}
+                                fill
+                                className="object-cover"
+                              />
+                            </div>
+                            <div className="flex-1 min-w-0 text-left">
+                              <p
+                                className="text-sm font-medium tracking-[-0.1px] truncate"
+                                style={{ color: "rgba(255,255,255,0.82)" }}
+                              >
+                                {person.first_name} {person.last_name}
+                              </p>
+                              <p
+                                className="text-[11px] truncate tracking-[-0.1px]"
+                                style={{ color: "rgba(255,255,255,0.3)" }}
+                              >
+                                @{person.username}
+                              </p>
+                            </div>
+                            <div
+                              className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
+                              style={{
+                                background: "rgba(255,255,255,0.05)",
+                                border: "1px solid rgba(255,255,255,0.09)",
+                              }}
+                            >
+                              <span
+                                style={{
+                                  fontSize: 12,
+                                  color: "rgba(255,255,255,0.3)",
+                                  lineHeight: 1,
+                                }}
+                              >
+                                +
+                              </span>
+                            </div>
+                          </motion.button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
 
           {/* Search results */}
           {userQuery.length > 0 && displayedMembers.length > 0 && (

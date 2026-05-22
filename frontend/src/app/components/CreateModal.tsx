@@ -36,7 +36,7 @@ function CreateModal({ onClose }: CreateModalProp) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.25 }}
-      className="w-full h-dvh absolute left-0 top-0 z-80 overflow-x-hidden overflow-y-auto"
+      className={`w-full h-dvh absolute left-0 top-0 z-80 overflow-hidden ${selectedModal === "confirm" && "overflow-x-hidden overflow-y-auto"}`}
       style={{ background: "#0c0c0c" }}
     >
       {/* Background glows */}

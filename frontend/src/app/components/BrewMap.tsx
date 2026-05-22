@@ -12,6 +12,15 @@ import MapBoxGl from "./mapBoxGl";
 import { useGetNearbyMoments } from "@/hooks/useMoments";
 import { useCurrentLocation } from "@/hooks/useCurrentLocation";
 
+type ScopeType = "here" | "nearby" | "area";
+type TimeFilter = "tonight" | "tomorrow" | "week";
+
+const SCOPE_TO_RADIUS: Record<ScopeType, number> = {
+  here: 1000,
+  nearby: 10000,
+  area: 50000,
+};
+
 const MOBILE_BREAKPOINT = 820;
 
 export default function BrewMap() {
@@ -20,6 +29,8 @@ export default function BrewMap() {
   >(null);
   const [isMobile, setIsMobile] = useState<boolean | null>(null);
   const [eventsOpen, setEventsOpen] = useState(false);
+  const [filter, setFilter] = useState<TimeFilter>("tonight");
+  const [activeScope, setActiveScope] = useState<ScopeType>("nearby");
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
@@ -39,8 +50,8 @@ export default function BrewMap() {
   const { data: nearbyData } = useGetNearbyMoments({
     lng: activeCoords?.[0],
     lat: activeCoords?.[1],
-    radius: 10000,
-    filter: "tonight",
+    radius: SCOPE_TO_RADIUS[activeScope],
+    filter,
   });
 
   const nearbyMoments: MomentProp[] = nearbyData?.data?.data ?? [];
@@ -77,6 +88,10 @@ export default function BrewMap() {
           isMobile={isMobile}
           eventsOpen={eventsOpen}
           setEventsOpen={setEventsOpen}
+          filter={filter}
+          setFilter={setFilter}
+          activeScope={activeScope}
+          setActiveScope={setActiveScope}
         />
       </div>
 
