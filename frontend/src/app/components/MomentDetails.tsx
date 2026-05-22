@@ -80,7 +80,7 @@ export default function MomentDetails({
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const [hasTyped, setHasTyped] = useState<boolean>(false);
   const [file, setFile] = useState<File | null>(null);
-  const [stage, setStage] = useState<"details" | "generating" | "done">(
+  const [stage, setStage] = useState<"details" | "generating" | "done" | "error">(
     "details",
   );
   const [createdMomentId, setCreatedMomentId] = useState<string | null>(null);
@@ -155,7 +155,7 @@ export default function MomentDetails({
       const imageUrl = file ? ((await uploadImage(file)) ?? "") : "";
       const generated = await generateContent(form.description);
       if (!generated) {
-        setStage("details");
+        setStage("error");
         return;
       }
 
@@ -183,12 +183,12 @@ export default function MomentDetails({
             setCreatedMomentId(momentId);
             setStage("done");
           },
-          onError: () => setStage("details"),
+          onError: () => setStage("error"),
         },
       );
     } catch (error) {
       console.error("Error generating moment:", error);
-      setStage("details");
+      setStage("error");
     }
   };
 
@@ -212,9 +212,66 @@ export default function MomentDetails({
   if (stage === "generating") return <GeneratingScreen />;
   if (stage === "done")
     return <DoneScreen momentId={createdMomentId} onClose={onClose} />;
+  if (stage === "error")
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="flex flex-col items-center justify-center h-full min-h-[50vh] gap-10"
+      >
+        <motion.div
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.4, ease: EASE }}
+          className="w-16 h-16 rounded-full flex items-center justify-center"
+          style={{
+            background: "rgba(255,80,50,0.08)",
+            border: "1px solid rgba(255,80,50,0.2)",
+          }}
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <path d="M12 8v4m0 4h.01" stroke="rgba(255,100,80,0.8)" strokeWidth="1.5" strokeLinecap="round" />
+            <circle cx="12" cy="12" r="9" stroke="rgba(255,100,80,0.4)" strokeWidth="1.5" />
+          </svg>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15, ease: EASE }}
+          className="flex flex-col items-center gap-2 text-center"
+        >
+          <h2 className="text-white/80 text-xl font-medium tracking-[-0.3px]">
+            Moment didn&apos;t go through.
+          </h2>
+          <p className="text-white/30 text-sm tracking-[-0.1px] max-w-[240px]">
+            Something went wrong on our end. Your details are still saved.
+          </p>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25, ease: EASE }}
+          className="flex items-center gap-4"
+        >
+          <button
+            onClick={onClose}
+            className="px-5 py-2.5 text-sm text-white/35 hover:text-white/60 transition-colors cursor-pointer"
+          >
+            Close
+          </button>
+          <button
+            onClick={() => setStage("details")}
+            className="px-5 py-2.5 text-sm text-white/80 bg-white/5 border border-white/10 rounded-md hover:bg-white/8 hover:border-white/18 transition-all cursor-pointer tracking-[-0.1px]"
+          >
+            Try again
+          </button>
+        </motion.div>
+      </motion.div>
+    );
 
   return (
-    <div className="w-full text-white px-4 sm:px-6 pb-24 sm:pb-10 overflow-y-auto">
+    <div className="w-full h-full text-white px-4 sm:px-6 pb-24 sm:pb-10 overflow-y-auto">
       <div className="w-full max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 items-start">
         {/* Image drop */}
         <div className="w-full">

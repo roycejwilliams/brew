@@ -49,20 +49,40 @@ interface MessageProp {
   external_invite?: { inviter_name: string; invite_type: "circle" | "moment"; target_name?: string };
 }
 
-const BASE_STYLE = `font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto; padding: 48px 32px; background: #000; color: #fff;`;
-const BRAND = `<p style="font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: #444; margin: 0 0 48px 0;">br3w</p>`;
-const FOOTER = `<p style="font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #333; margin-top: 32px;">br3w is intentional. So is this.</p>`;
+const EMAIL_STYLES = `
+  body,.body-bg{background:#000000!important;}
+  .wrapper{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:480px;margin:0 auto;padding:48px 32px;background:#000000;}
+  .brand{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:#444444;margin:0 0 48px 0;}
+  .h1{font-size:28px;font-weight:600;letter-spacing:-0.5px;margin:0 0 16px 0;color:#ffffff;}
+  .p{font-size:15px;color:#666666;line-height:1.6;margin:0 0 24px 0;}
+  .otp-box{border:1px solid #222222;border-radius:4px;padding:28px;text-align:center;letter-spacing:12px;font-size:28px;font-weight:700;color:#ffffff;margin:0 0 24px 0;}
+  .footer-text{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#333333;margin-top:32px;}
+  .muted-sm{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#333333;margin-top:32px;}
+  @media(prefers-color-scheme:light){
+    body,.body-bg{background:#f2f2f2!important;}
+    .wrapper{background:#ffffff!important;}
+    .brand{color:#aaaaaa!important;}
+    .h1{color:#0a0a0a!important;}
+    .p{color:#555555!important;}
+    .otp-box{border-color:#e0e0e0!important;color:#0a0a0a!important;}
+    .footer-text{color:#aaaaaa!important;}
+    .muted-sm{color:#aaaaaa!important;}
+  }
+`;
+
+const BRAND = `<p class="brand" style="font-size:11px;letter-spacing:4px;text-transform:uppercase;color:#444444;margin:0 0 48px 0;">br3w</p>`;
+const FOOTER = `<p class="footer-text" style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#333333;margin-top:32px;">br3w is intentional. So is this.</p>`;
 const OTP_BOX = (code: string) =>
-  `<div style="border: 1px solid #222; border-radius: 4px; padding: 28px; text-align: center; letter-spacing: 12px; font-size: 28px; font-weight: 700; color: #fff;">${code}</div>`;
+  `<div class="otp-box" style="border:1px solid #222222;border-radius:4px;padding:28px;text-align:center;letter-spacing:12px;font-size:28px;font-weight:700;color:#ffffff;margin:0 0 24px 0;">${code}</div>`;
 
 const emailTemplate = (body: string) =>
-  `<div style="${BASE_STYLE}">${BRAND}${body}${FOOTER}</div>`;
+  `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark"><style>${EMAIL_STYLES}</style></head><body class="body-bg" style="margin:0;padding:0;background:#000000;"><div class="wrapper" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:480px;margin:0 auto;padding:48px 32px;background:#000000;">${BRAND}${body}${FOOTER}</div></body></html>`;
 
 const h1 = (text: string) =>
-  `<h1 style="font-size: 28px; font-weight: 600; letter-spacing: -0.5px; margin: 0 0 16px 0;">${text}</h1>`;
+  `<h1 class="h1" style="font-size:28px;font-weight:600;letter-spacing:-0.5px;margin:0 0 16px 0;color:#ffffff;">${text}</h1>`;
 
 const p = (text: string) =>
-  `<p style="font-size: 15px; color: #666; line-height: 1.6; margin: 0 0 24px 0;">${text}</p>`;
+  `<p class="p" style="font-size:15px;color:#666666;line-height:1.6;margin:0 0 24px 0;">${text}</p>`;
 
 export const sendSMS = async ({
   phone_number,
@@ -248,7 +268,7 @@ export const sendEmail = async ({
           h1("Someone's at the door.") +
             p(`${applicant?.first_name} ${applicant?.last_name} wants in.`) +
             p(`${applicant?.email}`) +
-            `<p style="font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #333; margin-top: 32px;">Let them in or leave them waiting.</p>`,
+            `<p class="muted-sm" style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#333333;margin-top:32px;">Let them in or leave them waiting.</p>`,
         ),
       });
     }
@@ -264,7 +284,7 @@ export const sendEmail = async ({
               "Your access code is waiting. Use it to step in — it expires in 5 minutes.",
             ) +
             OTP_BOX(otp_code!) +
-            `<p style="font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #333; margin-top: 32px;">Do not share this code.</p>`,
+            `<p class="muted-sm" style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#333333;margin-top:32px;">Do not share this code.</p>`,
         ),
       });
     }
@@ -294,7 +314,7 @@ export const sendEmail = async ({
               "You requested a new verification code. Use it below to get into BR3W.",
             ) +
             OTP_BOX(otp_code!) +
-            `<p style="font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #333; margin-top: 32px;">This code expires in 5 minutes.</p>`,
+            `<p class="muted-sm" style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#333333;margin-top:32px;">This code expires in 5 minutes.</p>`,
         ),
       });
     }
@@ -308,7 +328,7 @@ export const sendEmail = async ({
           h1("Welcome back.") +
             p("Use the code below to sign in. It expires in 5 minutes.") +
             OTP_BOX(otp_code!) +
-            `<p style="font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #333; margin-top: 32px;">Do not share this code.</p>`,
+            `<p class="muted-sm" style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#333333;margin-top:32px;">Do not share this code.</p>`,
         ),
       });
     }
