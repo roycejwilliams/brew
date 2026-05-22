@@ -23,6 +23,7 @@ interface EmailProp {
   moment_invite_reminder?: { moments_name: string; time: string };
   appsubmit?: boolean;
   applicant?: ApplicationProp;
+  external_invite?: { inviter_name: string; invite_type: "circle" | "moment"; target_name?: string };
 }
 
 interface MessageProp {
@@ -45,6 +46,7 @@ interface MessageProp {
   circle_invite_reminder?: { circle_name: string };
   moment_invite_reminder?: { moments_name: string; time: string };
   appsubmit?: boolean;
+  external_invite?: { inviter_name: string; invite_type: "circle" | "moment"; target_name?: string };
 }
 
 const BASE_STYLE = `font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto; padding: 48px 32px; background: #000; color: #fff;`;
@@ -77,6 +79,7 @@ export const sendSMS = async ({
   moment_reminder,
   circle_invite_reminder,
   moment_invite_reminder,
+  external_invite,
 }: MessageProp) => {
   const client = twilio(
     process.env.TWILIO_TEST_SID,
@@ -197,6 +200,17 @@ export const sendSMS = async ({
         from: process.env.TWILIO_PHONE_NUMBER!,
       });
     }
+
+    if (external_invite) {
+      const context = external_invite.target_name
+        ? ` to ${external_invite.invite_type === "moment" ? `a moment called "${external_invite.target_name}"` : `a circle called "${external_invite.target_name}"`}`
+        : "";
+      await client.messages.create({
+        body: `${external_invite.inviter_name} invited you${context} on BR3W. Visit br3w.app to request access.`,
+        to: phone_number,
+        from: process.env.TWILIO_PHONE_NUMBER!,
+      });
+    }
   } catch (error) {
     console.error("Cannot process SMS at this time", error);
   }
@@ -219,6 +233,7 @@ export const sendEmail = async ({
   moment_invite_reminder,
   applicant,
   appsubmit,
+  external_invite,
 }: EmailProp) => {
   const resend = new Resend(process.env.RESEND_API_KEY);
   try {
@@ -445,6 +460,25 @@ export const sendEmail = async ({
               `You still haven't responded to your invite for ${moment_invite_reminder.moments_name} — it starts at ${moment_invite_reminder.time}.`,
             ) +
             p("Open BR3W to accept or decline before the moment fills up."),
+        ),
+      });
+    }
+
+    if (external_invite) {
+      const contextLine = external_invite.target_name
+        ? external_invite.invite_type === "moment"
+          ? `You've been invited to a moment called "${external_invite.target_name}" on BR3W.`
+          : `You've been invited to join a circle called "${external_invite.target_name}" on BR3W.`
+        : `You've been invited to join BR3W by ${external_invite.inviter_name}.`;
+      await resend.emails.send({
+        from: "BR3W <hello@br3w.app>",
+        to: email,
+        subject: `${external_invite.inviter_name} invited you to BR3W.`,
+        html: emailTemplate(
+          h1("You've been chosen.") +
+            p(`${external_invite.inviter_name} thought of you.`) +
+            p(contextLine) +
+            p("BR3W is invite-only. Visit br3w.app to request access and join the moment."),
         ),
       });
     }

@@ -1,14 +1,14 @@
 "use client";
 import React, { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { EditIcon, EyeIcon } from "./icons";
+import { EditIcon, EyeIcon, TrashIcon } from "./icons";
 import Image from "next/image";
 import { GroupIcon } from "lucide-react";
 import { openEventCard } from "@/stores/store";
 import AttendanceList from "./AttendanceList";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/stores/useUserStore";
-import { useGetAllMomentsOwnedByUser } from "@/hooks/useMoments";
+import { useGetAllMomentsOwnedByUser, useDeleteMomentsByOwner } from "@/hooks/useMoments";
 import EditMoment from "./EditMoment";
 import { getMomentStatus, sortMomentsByStatus } from "../utils/momentsUtils";
 
@@ -73,6 +73,7 @@ export default function ManageMoments() {
   const [utils, setUtils] = useState<"attendance" | "history" | "edit">(
     "history",
   );
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const openMoment = openEventCard((state) => state.openEvent);
   const router = useRouter();
@@ -81,6 +82,7 @@ export default function ManageMoments() {
   const { data: MomentsByUser, isLoading } = useGetAllMomentsOwnedByUser(
     user?.id ?? "",
   );
+  const { mutate: deleteMoment, isPending: isDeleting } = useDeleteMomentsByOwner();
 
   const moments: MomentProp[] = MomentsByUser?.data?.data ?? [];
   const sortedMoments = sortMomentsByStatus(moments);
@@ -110,7 +112,7 @@ export default function ManageMoments() {
             {(["attendance", "edit"] as const).map((view) => (
               <button
                 key={view}
-                onClick={() => setUtils(utils === view ? "history" : view)}
+                onClick={() => { setUtils(utils === view ? "history" : view); setConfirmDelete(false); }}
                 className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium tracking-[-0.1px] cursor-pointer transition-all duration-150"
                 style={{
                   background:
@@ -137,6 +139,70 @@ export default function ManageMoments() {
                 </span>
               </button>
             ))}
+
+            {/* Delete — two-step inline confirm */}
+            <AnimatePresence mode="wait">
+              {confirmDelete ? (
+                <motion.div
+                  key="confirm"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.15 }}
+                  className="flex items-center gap-1.5"
+                >
+                  <button
+                    onClick={() => setConfirmDelete(false)}
+                    className="px-2.5 py-1.5 rounded-lg text-[10px] font-medium tracking-[-0.1px] cursor-pointer transition-all duration-150"
+                    style={{
+                      background: "rgba(255,255,255,0.04)",
+                      border: "1px solid rgba(255,255,255,0.07)",
+                      color: "rgba(255,255,255,0.35)",
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (!featured) return;
+                      deleteMoment(featured, {
+                        onSuccess: () => {
+                          setSelectedMoment(null);
+                          setConfirmDelete(false);
+                          setUtils("history");
+                        },
+                      });
+                    }}
+                    disabled={isDeleting}
+                    className="px-2.5 py-1.5 rounded-lg text-[10px] font-medium tracking-[-0.1px] cursor-pointer transition-all duration-150 disabled:opacity-50"
+                    style={{
+                      background: "rgba(239,68,68,0.12)",
+                      border: "1px solid rgba(239,68,68,0.2)",
+                      color: "rgba(248,113,113,0.9)",
+                    }}
+                  >
+                    {isDeleting ? "Deleting..." : "Confirm"}
+                  </button>
+                </motion.div>
+              ) : (
+                <motion.button
+                  key="delete"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.15 }}
+                  onClick={() => setConfirmDelete(true)}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium tracking-[-0.1px] cursor-pointer transition-all duration-150"
+                  style={{
+                    background: "rgba(239,68,68,0.04)",
+                    border: "1px solid rgba(239,68,68,0.08)",
+                    color: "rgba(248,113,113,0.45)",
+                  }}
+                >
+                  <TrashIcon size={11} color="currentColor" />
+                </motion.button>
+              )}
+            </AnimatePresence>
           </div>
         )}
       </div>

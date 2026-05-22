@@ -7,7 +7,14 @@ export const useCreateCircle = () => {
     mutationFn: (circle: CircleProp) => {
       return api.post(`/circles/${circle.owner_id}`, circle);
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
+      const newCircle: CircleProp = data?.data?.data;
+      if (newCircle && variables.owner_id) {
+        queryClient.setQueryData(["circle-owner", variables.owner_id], (old: { data: { data: CircleProp[] } } | undefined) => {
+          if (!old?.data?.data) return old;
+          return { ...old, data: { ...old.data, data: [newCircle, ...old.data.data] } };
+        });
+      }
       queryClient.invalidateQueries({ queryKey: ["circle-owner"] });
       queryClient.invalidateQueries({ queryKey: ["circles-with-members"] });
     },
@@ -34,7 +41,17 @@ export const useUpdateCircleByOwner = () => {
     mutationFn: (circle: CircleProp) => {
       return api.put(`/circles/${circle.owner_id}/${circle.id}`, circle);
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      queryClient.setQueryData(["circle-owner", variables.owner_id], (old: { data: { data: CircleProp[] } } | undefined) => {
+        if (!old?.data?.data) return old;
+        return {
+          ...old,
+          data: {
+            ...old.data,
+            data: old.data.data.map((c) => c.id === variables.id ? { ...c, ...variables } : c),
+          },
+        };
+      });
       queryClient.invalidateQueries({ queryKey: ["circle-owner"] });
       queryClient.invalidateQueries({ queryKey: ["circles-with-members"] });
     },
@@ -47,7 +64,17 @@ export const useDeleteCircleByOwner = () => {
     mutationFn: (circle: CircleProp) => {
       return api.delete(`/circles/${circle.owner_id}/${circle.id}`);
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      queryClient.setQueryData(["circle-owner", variables.owner_id], (old: { data: { data: CircleProp[] } } | undefined) => {
+        if (!old?.data?.data) return old;
+        return {
+          ...old,
+          data: {
+            ...old.data,
+            data: old.data.data.filter((c) => c.id !== variables.id),
+          },
+        };
+      });
       queryClient.invalidateQueries({ queryKey: ["circle-owner"] });
       queryClient.invalidateQueries({ queryKey: ["circles-with-members"] });
     },

@@ -54,8 +54,10 @@ function MapBoxGl({
       setMapReady(true);
     });
 
-    mapRef.current.on("move", () => {
+    mapRef.current.on("move", (e) => {
       if (!mapRef.current || !onMove) return;
+      // Skip programmatic moves (flyTo, fitBounds, etc.) — only respond to user gestures
+      if (!(e as unknown as { originalEvent?: Event }).originalEvent) return;
       const c = mapRef.current.getCenter();
       const z = mapRef.current.getZoom();
       onMove([c.lng, c.lat], z);

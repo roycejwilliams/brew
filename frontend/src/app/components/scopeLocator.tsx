@@ -4,6 +4,9 @@ import { motion, AnimatePresence } from "motion/react";
 import { useOutsideAlerter } from "../utils/outsideAlert";
 import SearchMap from "./search";
 import { useLocationSearch } from "@/hooks/useReverseGeolocateSearch";
+import { useGetNearbyMoments } from "@/hooks/useMoments";
+import { openEventCard } from "@/stores/store";
+import { useRouter } from "next/navigation";
 
 type ScopeType = "here" | "nearby" | "area";
 type TimeFilter = "tonight" | "tomorrow" | "week";
@@ -43,14 +46,22 @@ function ScopeLocator({
   activeScope,
   filter,
   setFilter,
+  userCoordinates,
 }: FilterProps) {
   const ref = useRef<HTMLDivElement | null>(null);
   useOutsideAlerter(ref, onClose);
 
   const [query, setQuery] = useState("");
-  const { suggestions } = useLocationSearch(query);
+  const { suggestions } = useLocationSearch(query, userCoordinates);
+  const router = useRouter();
+  const openCard = openEventCard((state) => state.openEvent);
 
-  const showResults = query.length >= 2 && suggestions.length > 0;
+  const { data: momentSearchData } = useGetNearbyMoments({
+    search: query.length >= 2 ? query : undefined,
+  });
+  const momentResults: MomentProp[] = momentSearchData?.data?.data ?? [];
+
+  const showResults = query.length >= 2 && (suggestions.length > 0 || momentResults.length > 0);
 
   const handleSelectLocation = (label: string, center?: [number, number]) => {
     setSelectedLocation(label);
@@ -108,43 +119,94 @@ function ScopeLocator({
 
       <AnimatePresence mode="wait">
         {showResults ? (
-          <motion.ul
+          <motion.div
             key="results"
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="py-1"
+            className="py-1 max-h-[42vh] overflow-y-auto overscroll-contain no-scrollbar"
           >
-            {suggestions.map((s, i) => (
-              <motion.li
-                key={i}
-                initial={{ opacity: 0, x: -6 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.04, duration: 0.2 }}
-              >
-                <button
-                  onClick={() => handleSelectLocation(s.label, s.center)}
-                  className="w-full text-left px-4 py-2.5 transition-all cursor-pointer hover:bg-white/4"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-white/60 hover:text-white/90 tracking-[-0.1px] truncate">
-                      {s.label.split(",")[0]}
-                    </span>
-                    {s.category && (
-                      <span className="shrink-0 text-[10px] text-white/30 px-1.5 py-0.5 rounded-full capitalize"
-                        style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.07)" }}>
-                        {s.category}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-[10px] text-white/25 tracking-[-0.1px] truncate mt-0.5">
-                    {s.label.split(",").slice(1).join(",").trim()}
-                  </p>
-                </button>
-              </motion.li>
-            ))}
-          </motion.ul>
+            {/* Location results */}
+            {suggestions.length > 0 && (
+              <>
+                <p className="text-[9px] tracking-[2px] uppercase text-white/20 font-medium px-4 pt-2 pb-1">
+                  Locations
+                </p>
+                {suggestions.map((s, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, x: -6 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.04, duration: 0.2 }}
+                  >
+                    <button
+                      onClick={() => handleSelectLocation(s.label, s.center)}
+                      className="w-full text-left px-4 py-2.5 transition-all cursor-pointer hover:bg-white/4"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-white/60 hover:text-white/90 tracking-[-0.1px] truncate">
+                          {s.label.split(",")[0]}
+                        </span>
+                        {s.category && (
+                          <span
+                            className="shrink-0 text-[10px] text-white/30 px-1.5 py-0.5 rounded-full capitalize"
+                            style={{
+                              background: "rgba(255,255,255,0.05)",
+                              border: "1px solid rgba(255,255,255,0.07)",
+                            }}
+                          >
+                            {s.category}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[10px] text-white/25 tracking-[-0.1px] truncate mt-0.5">
+                        {s.label.split(",").slice(1).join(",").trim()}
+                      </p>
+                    </button>
+                  </motion.div>
+                ))}
+              </>
+            )}
+
+            {/* Moment name results */}
+            {momentResults.length > 0 && (
+              <>
+                {suggestions.length > 0 && (
+                  <div style={{ height: 1, background: "rgba(255,255,255,0.05)", margin: "4px 0" }} />
+                )}
+                <p className="text-[9px] tracking-[2px] uppercase text-white/20 font-medium px-4 pt-2 pb-1">
+                  Moments
+                </p>
+                {momentResults.map((m, i) => (
+                  <motion.div
+                    key={m.id}
+                    initial={{ opacity: 0, x: -6 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.04, duration: 0.2 }}
+                  >
+                    <button
+                      onClick={() => {
+                        openCard(m);
+                        router.push(`/moments/${m.id}`, { scroll: false });
+                        onClose();
+                      }}
+                      className="w-full text-left px-4 py-2.5 transition-all cursor-pointer hover:bg-white/4"
+                    >
+                      <p className="text-xs text-white/60 tracking-[-0.1px] truncate">
+                        {m.moments_name}
+                      </p>
+                      {m.location_name && (
+                        <p className="text-[10px] text-white/25 tracking-[-0.1px] truncate mt-0.5">
+                          {m.location_name}
+                        </p>
+                      )}
+                    </button>
+                  </motion.div>
+                ))}
+              </>
+            )}
+          </motion.div>
         ) : (
           <motion.div
             key="filters"
@@ -152,7 +214,7 @@ function ScopeLocator({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="px-4 py-4 space-y-5"
+            className="px-4 py-4 space-y-5 max-h-[42vh] overflow-y-auto overscroll-contain no-scrollbar"
           >
             {/* Look around */}
             <div className="space-y-2.5">

@@ -3,23 +3,25 @@ import { AnimatePresence, motion } from "motion/react";
 import React, { useState } from "react";
 import CircleControls from "./circleControls";
 import CircleScene from "./CircleScene";
-import { PlusCircleIcon } from "./icons";
+import { PlusCircleIcon, TrashIcon } from "./icons";
 import SearchMap from "./search";
 import Image from "next/image";
 import {
   useGetCirclesWithMembers,
   useRemoveMemberBasedOnRole,
+  useDeleteCircleByOwner,
 } from "@/hooks/useCircles";
+import { useInviteMemberToCircle, useInviteExternalToCircle } from "@/hooks/useInvites";
 import { useUserStore } from "@/stores/useUserStore";
 import { ChevronRight, X } from "lucide-react";
 import InvitePeople, { InviteUserProp } from "./InvitePeople";
-import { useInviteMemberToCircle } from "@/hooks/useInvites";
 import useEmblaCarousel from "embla-carousel-react";
 
 export default function ManageCircle() {
   const [markerIndex, setMarkerIndex] = useState<number>(0);
   const [query, setQuery] = useState<string>("");
   const [showAddMember, setShowAddMember] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<InviteUserProp[]>([]);
   const [emblaRef] = useEmblaCarousel({
     dragFree: true,
@@ -38,6 +40,8 @@ export default function ManageCircle() {
 
   const { mutate: removeMember } = useRemoveMemberBasedOnRole();
   const { mutate: inviteMember } = useInviteMemberToCircle();
+  const { mutate: inviteExternal } = useInviteExternalToCircle();
+  const { mutate: deleteCircle, isPending: isDeleting } = useDeleteCircleByOwner();
 
   const nextMarker = () =>
     setMarkerIndex((i) => (i + 1) % (featured?.members?.length ?? 1));
@@ -59,10 +63,14 @@ export default function ManageCircle() {
   const handleConfirmAdd = () => {
     if (!featured) return;
     selectedUsers.forEach((u) => {
-      inviteMember({
-        circle: featured as CircleProp,
-        invite_member: { member_id: u.id } as InviteMembersProp,
-      });
+      if (u.isExternal) {
+        inviteExternal({ circle_id: featured.id as string, recipient: u.email || u.phonenumber });
+      } else {
+        inviteMember({
+          circle: featured as CircleProp,
+          invite_member: { member_id: u.id } as InviteMembersProp,
+        });
+      }
     });
     setSelectedUsers([]);
     setShowAddMember(false);
@@ -150,24 +158,89 @@ export default function ManageCircle() {
           {featured?.circle_name ?? "Circles"}
         </p>
         {featured && (
-          <button
-            onClick={() => setShowAddMember(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium tracking-[-0.1px] cursor-pointer transition-all duration-150"
-            style={{
-              background: "rgba(255,255,255,0.04)",
-              border: "1px solid rgba(255,255,255,0.07)",
-              color: "rgba(255,255,255,0.45)",
-            }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.background = "rgba(255,255,255,0.07)")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.background = "rgba(255,255,255,0.04)")
-            }
-          >
-            <PlusCircleIcon className="w-3 h-3" />
-            <span>Add member</span>
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => { setShowAddMember(true); setConfirmDelete(false); }}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium tracking-[-0.1px] cursor-pointer transition-all duration-150"
+              style={{
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.07)",
+                color: "rgba(255,255,255,0.45)",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.background = "rgba(255,255,255,0.07)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.background = "rgba(255,255,255,0.04)")
+              }
+            >
+              <PlusCircleIcon className="w-3 h-3" />
+              <span>Add member</span>
+            </button>
+
+            {/* Delete circle — two-step inline confirm */}
+            <AnimatePresence mode="wait">
+              {confirmDelete ? (
+                <motion.div
+                  key="confirm"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.15 }}
+                  className="flex items-center gap-1.5"
+                >
+                  <button
+                    onClick={() => setConfirmDelete(false)}
+                    className="px-2.5 py-1.5 rounded-lg text-[10px] font-medium tracking-[-0.1px] cursor-pointer transition-all duration-150"
+                    style={{
+                      background: "rgba(255,255,255,0.04)",
+                      border: "1px solid rgba(255,255,255,0.07)",
+                      color: "rgba(255,255,255,0.35)",
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (!featured) return;
+                      deleteCircle(featured, {
+                        onSuccess: () => {
+                          setSelectedManageCircle(null);
+                          setConfirmDelete(false);
+                        },
+                      });
+                    }}
+                    disabled={isDeleting}
+                    className="px-2.5 py-1.5 rounded-lg text-[10px] font-medium tracking-[-0.1px] cursor-pointer transition-all duration-150 disabled:opacity-50"
+                    style={{
+                      background: "rgba(239,68,68,0.12)",
+                      border: "1px solid rgba(239,68,68,0.2)",
+                      color: "rgba(248,113,113,0.9)",
+                    }}
+                  >
+                    {isDeleting ? "Deleting..." : "Confirm"}
+                  </button>
+                </motion.div>
+              ) : (
+                <motion.button
+                  key="delete"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.15 }}
+                  onClick={() => setConfirmDelete(true)}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium tracking-[-0.1px] cursor-pointer transition-all duration-150"
+                  style={{
+                    background: "rgba(239,68,68,0.04)",
+                    border: "1px solid rgba(239,68,68,0.08)",
+                    color: "rgba(248,113,113,0.45)",
+                  }}
+                >
+                  <TrashIcon size={11} color="currentColor" />
+                </motion.button>
+              )}
+            </AnimatePresence>
+          </div>
         )}
       </div>
 

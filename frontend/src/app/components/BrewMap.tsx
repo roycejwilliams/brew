@@ -11,6 +11,7 @@ import { useUserStore } from "@/stores/useUserStore";
 import MapBoxGl from "./mapBoxGl";
 import { useGetNearbyMoments } from "@/hooks/useMoments";
 import { useCurrentLocation } from "@/hooks/useCurrentLocation";
+import useDebounce from "@/hooks/useDebounce";
 
 type ScopeType = "here" | "nearby" | "area";
 type TimeFilter = "tonight" | "tomorrow" | "week";
@@ -44,8 +45,10 @@ export default function BrewMap() {
   const [selectedCoordinates, setSelectedCoordinates] = useState<
     [number, number] | null
   >(null);
+  const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
+  const debouncedMapCenter = useDebounce(mapCenter, 700);
 
-  const activeCoords = selectedCoordinates ?? coordinates;
+  const activeCoords = selectedCoordinates ?? debouncedMapCenter ?? coordinates;
 
   const { data: nearbyData } = useGetNearbyMoments({
     lng: activeCoords?.[0],
@@ -71,6 +74,10 @@ export default function BrewMap() {
           dragRotate={true}
           scrollZoom={true}
           moments={nearbyMoments}
+          onMove={(center) => {
+            setMapCenter(center);
+            setSelectedCoordinates(null); // user pan overrides scope selection
+          }}
         />
 
         {/* Desktop create button — hidden on mobile */}
@@ -92,6 +99,7 @@ export default function BrewMap() {
           setFilter={setFilter}
           activeScope={activeScope}
           setActiveScope={setActiveScope}
+          nearbyMoments={nearbyMoments}
         />
       </div>
 

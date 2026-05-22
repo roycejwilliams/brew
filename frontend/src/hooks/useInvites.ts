@@ -95,6 +95,14 @@ export const useInviteAttendeeDecision = () => {
   });
 };
 
+export const useInviteExternalToCircle = () => {
+  return useMutation({
+    mutationFn: (data: { circle_id: string; recipient: string }) => {
+      return api.post(`/circles/${data.circle_id}/invite-external`, { recipient: data.recipient });
+    },
+  });
+};
+
 export const useCreateReferral = () => {
   return useMutation({
     mutationFn: (data: { recipient: string; reason: string }) => {

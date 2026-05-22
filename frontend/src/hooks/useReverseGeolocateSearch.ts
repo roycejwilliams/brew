@@ -11,6 +11,7 @@ export const reverseGeolocateSearch = async (
   query: string,
   setUserSuggestions: (suggestions: LocationSuggestion[]) => void,
   setIsSearching: (isSearching: boolean) => void,
+  coords?: [number, number],
 ) => {
   if (query.length < 2) {
     setUserSuggestions([]);
@@ -21,13 +22,16 @@ export const reverseGeolocateSearch = async (
   setIsSearching(true);
 
   try {
+    const params: Record<string, string> = {
+      access_token: `${process.env.NEXT_PUBLIC_MAPBOXGL_PUBLIC_TOKEN}`,
+      limit: "8",
+      types: "poi,place,address",
+    };
+    if (coords) params.proximity = `${coords[0]},${coords[1]}`;
+
     const response = await fetch(
       `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?` +
-        new URLSearchParams({
-          access_token: `${process.env.NEXT_PUBLIC_MAPBOXGL_PUBLIC_TOKEN}`,
-          limit: "8",
-          types: "poi,place,address",
-        }),
+        new URLSearchParams(params),
     );
 
     if (!response.ok) {
@@ -52,14 +56,15 @@ export const reverseGeolocateSearch = async (
   }
 };
 
-export const useLocationSearch = (query: string) => {
+export const useLocationSearch = (query: string, coords?: [number, number] | null) => {
   const [suggestions, setSuggestions] = useState<LocationSuggestion[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
   const debouncedQuery = useDebounce(query, 500);
 
   useEffect(() => {
-    reverseGeolocateSearch(debouncedQuery, setSuggestions, setIsSearching);
+    reverseGeolocateSearch(debouncedQuery, setSuggestions, setIsSearching, coords ?? undefined);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedQuery]);
 
   return { suggestions, isSearching };
