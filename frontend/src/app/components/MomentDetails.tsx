@@ -78,6 +78,7 @@ export default function MomentDetails({
   const [viewport, setViewport] = useState<MapViewport | null>(null);
   const [isConfirming, setIsConfirming] = useState(false);
   const [isTyping, setIsTyping] = useState<boolean>(false);
+  const [hasTyped, setHasTyped] = useState<boolean>(false);
   const [file, setFile] = useState<File | null>(null);
   const [stage, setStage] = useState<"details" | "generating" | "done">(
     "details",
@@ -86,6 +87,7 @@ export default function MomentDetails({
   const [locationCoordinates, setLocationCoordinates] = useState<
     [number, number] | null
   >(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
 
   const { coordinates, locationName: near } = useNearbyLocation(
     setForm,
@@ -143,7 +145,11 @@ export default function MomentDetails({
   };
 
   const handleGenerate = async () => {
-    if (!locationCoordinates) return;
+    if (!locationCoordinates) {
+      setLocationError("Location unavailable — switch to Area or Venue.");
+      return;
+    }
+    setLocationError(null);
     setStage("generating");
     try {
       const imageUrl = file ? ((await uploadImage(file)) ?? "") : "";
@@ -197,7 +203,7 @@ export default function MomentDetails({
   };
 
   const isLocationSet =
-    (selectedLocation === "near" && locationCoordinates !== null) ||
+    selectedLocation === "near" ||
     (selectedLocation === "area" && selectedArea !== null) ||
     (selectedLocation === "venue" &&
       venue !== null &&
@@ -302,6 +308,7 @@ export default function MomentDetails({
                   value={form.description}
                   onChange={(e) => {
                     setIsTyping(true);
+                    setHasTyped(true);
                     handleChange(e);
                   }}
                   placeholder="Set the vibe..."
@@ -329,7 +336,12 @@ export default function MomentDetails({
           )}
 
           {/* Generate button */}
-          {!isTyping && isLocationSet && (
+          {locationError && (
+            <p className="text-xs text-center" style={{ color: "rgba(255,100,80,0.8)" }}>
+              {locationError}
+            </p>
+          )}
+          {hasTyped && !isTyping && isLocationSet && (
             <motion.button
               onClick={handleGenerate}
               disabled={isPending}
