@@ -36,7 +36,7 @@ function CreateModal({ onClose }: CreateModalProp) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.25 }}
-      className={`w-full h-dvh absolute left-0 top-0 z-80 overflow-hidden ${selectedModal === "confirm" && "overflow-x-hidden overflow-y-auto"}`}
+      className="w-full h-dvh absolute left-0 top-0 z-80 overflow-hidden"
       style={{ background: "#0c0c0c" }}
     >
       {/* Background glows */}
@@ -216,7 +216,7 @@ function CreateModal({ onClose }: CreateModalProp) {
         <motion.div
           animate={{ marginTop: cardAction !== null ? "0" : "1rem" }}
           transition={{ duration: 0.3, ease: EASE }}
-          className="w-full flex-1 mx-auto"
+          className="w-full flex-1 min-h-0 overflow-hidden mx-auto"
         >
           <AnimatePresence mode="wait">
             {cardAction === "create" ? (
@@ -226,6 +226,7 @@ function CreateModal({ onClose }: CreateModalProp) {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
+                className="h-full"
               >
                 <StartMoment
                   setSelectedModal={setSelectedModal}

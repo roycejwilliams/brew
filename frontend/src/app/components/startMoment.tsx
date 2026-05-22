@@ -199,7 +199,7 @@ export default function StartMoment({
         className={`mx-auto w-full ${
           selectedModal !== "confirm"
             ? "max-w-full px-0"
-            : "max-w-7xl px-4 sm:px-6"
+            : "max-w-7xl px-4 sm:px-6 h-full"
         }`}
         style={{ color: "rgba(255,255,255,0.75)" }}
       >
@@ -285,6 +285,7 @@ export default function StartMoment({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.18 }}
+              className="h-full"
             >
               <MomentDetails
                 selectedModal={selectedModal}

@@ -26,7 +26,7 @@ export default function GeneratingScreen() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="flex flex-col items-center justify-center mt-24 gap-12 relative overflow-hidden"
+      className="flex flex-col items-center justify-center min-h-[50vh] gap-12 relative overflow-hidden"
     >
       {/* Ambient background pulse */}
       <motion.div

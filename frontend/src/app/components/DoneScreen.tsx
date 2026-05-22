@@ -16,7 +16,7 @@ export default function DoneScreen({ momentId, onClose }: DoneScreenProp) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="flex flex-col items-center justify-center mt-24 gap-10"
+      className="flex flex-col items-center justify-center  min-h-[50vh] gap-10"
     >
       {/* Check */}
       <motion.div
