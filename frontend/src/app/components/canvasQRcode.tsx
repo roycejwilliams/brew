@@ -19,7 +19,7 @@ export default function CanvasQRcode({ qrWidth, type, id }: QRCodeProps) {
     type === "checkin"
       ? `https://br3w.app/checkin?moment=${id}&attendee=${user?.id}`
       : type === "circle"
-        ? `https://br3w.app/circle/join?circle=${id}&invitedBy=${user?.id}`
+        ? `https://br3w.app/join?circle=${id}&invitedBy=${user?.id}`
         : `https://br3w.app/referral?ref=${id}&referredBy=${user?.id}`;
 
   return (

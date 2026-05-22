@@ -8,6 +8,7 @@ import { useUserStore } from "@/stores/useUserStore";
 interface Phase {
   state: "form" | "verify" | "success";
   setState: (state: "form" | "verify" | "success") => void;
+  redirect?: string;
 }
 
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -15,7 +16,7 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 const inputClass =
   "flex-1 px-4 py-3 bg-white/5 rounded-md border border-white/10 focus:outline-none focus:border-white/25 text-white/90 placeholder:text-white/20 text-sm transition-colors duration-150";
 
-function LoginForm({ state, setState }: Phase) {
+function LoginForm({ state, setState, redirect }: Phase) {
   const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
   const [email, setEmail] = useState("");
   const [userId, setUserId] = useState("");
@@ -36,7 +37,7 @@ function LoginForm({ state, setState }: Phase) {
           onSuccess: () => {
             setUser({ id: userId } as UserProp);
             setState("success");
-            setTimeout(() => router.push("/pulse"), 3000);
+            setTimeout(() => router.push(redirect ?? "/pulse"), 3000);
           },
           onError: () => {
             setOtpError(true);

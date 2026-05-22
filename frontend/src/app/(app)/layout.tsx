@@ -21,7 +21,8 @@ export default function AppLayout({
   useEffect(() => {
     if (!hasHydrated) return;
     if (!user) {
-      router.replace("/");
+      const redirect = window.location.pathname + window.location.search;
+      router.replace(`/?redirect=${encodeURIComponent(redirect)}`);
     }
   }, [user, hasHydrated, router]);
 

@@ -1,5 +1,5 @@
 "use client";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import React, { useState, useEffect } from "react";
 import LocationSelector from "./locationSelector";
 import ChooseAreaPanel from "./chooseAreaPanel";
@@ -341,38 +341,41 @@ export default function MomentDetails({
               {locationError}
             </p>
           )}
-          {hasTyped && !isTyping && isLocationSet && (
-            <motion.button
-              onClick={handleGenerate}
-              disabled={isPending}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.2, ease: EASE }}
-              whileTap={{ scale: isPending ? 1 : 0.98 }}
-              className="w-full flex justify-between items-center px-4 py-3 rounded-xl cursor-pointer transition-all duration-150 text-sm font-medium tracking-[-0.1px] disabled:opacity-40 disabled:cursor-not-allowed"
-              style={{
-                background: "rgba(255,255,255,0.9)",
-                color: "#0c0c0c",
-                border: "1px solid rgba(255,255,255,0.2)",
-              }}
-            >
-              <span>{isPending ? "Creating..." : "Generate Moment"}</span>
-              {!isPending && (
-                <span style={{ opacity: 0.4, fontSize: 16 }}>✦</span>
-              )}
-              {isPending && (
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                  className="w-4 h-4 rounded-full border-2"
-                  style={{
-                    borderColor: "rgba(0,0,0,0.1)",
-                    borderTopColor: "rgba(0,0,0,0.5)",
-                  }}
-                />
-              )}
-            </motion.button>
-          )}
+          <AnimatePresence>
+            {hasTyped && !isTyping && isLocationSet && (
+              <motion.button
+                onClick={handleGenerate}
+                disabled={isPending}
+                initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 6, scale: 0.98 }}
+                transition={{ duration: 0.4, ease: EASE }}
+                whileTap={{ scale: isPending ? 1 : 0.97 }}
+                className="w-full flex justify-between items-center px-4 py-3 rounded-xl cursor-pointer transition-all duration-150 text-sm font-medium tracking-[-0.1px] disabled:opacity-40 disabled:cursor-not-allowed"
+                style={{
+                  background: "rgba(255,255,255,0.9)",
+                  color: "#0c0c0c",
+                  border: "1px solid rgba(255,255,255,0.2)",
+                }}
+              >
+                <span>{isPending ? "Creating..." : "Generate Moment"}</span>
+                {!isPending && (
+                  <span style={{ opacity: 0.4, fontSize: 16 }}>✦</span>
+                )}
+                {isPending && (
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    className="w-4 h-4 rounded-full border-2"
+                    style={{
+                      borderColor: "rgba(0,0,0,0.1)",
+                      borderTopColor: "rgba(0,0,0,0.5)",
+                    }}
+                  />
+                )}
+              </motion.button>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>
