@@ -4,6 +4,7 @@ import useDebounce from "./useDebounce";
 interface LocationSuggestion {
   label: string;
   center?: [number, number];
+  category?: string;
 }
 
 export const reverseGeolocateSearch = async (
@@ -21,7 +22,8 @@ export const reverseGeolocateSearch = async (
       `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?` +
         new URLSearchParams({
           access_token: `${process.env.NEXT_PUBLIC_MAPBOXGL_PUBLIC_TOKEN}`,
-          limit: "5",
+          limit: "8",
+          types: "poi,place,address",
         }),
     );
 
@@ -31,9 +33,10 @@ export const reverseGeolocateSearch = async (
 
     const data = await response.json();
 
-    const locationSearch = data.features.map((f: { place_name: string; center: [number, number] }) => ({
+    const locationSearch = data.features.map((f: { place_name: string; center: [number, number]; properties?: { category?: string } }) => ({
       label: f.place_name,
       center: f.center as [number, number],
+      category: f.properties?.category?.split(",")[0].trim() ?? undefined,
     }));
 
     setTimeout(() => {

@@ -175,7 +175,7 @@ export default function EditMoment({ setUtils, featured }: EditMomentProps) {
           )}
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
+        <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-1">
             <label className={labelClass}>Date</label>
             <input
@@ -186,25 +186,27 @@ export default function EditMoment({ setUtils, featured }: EditMomentProps) {
               className={inputClass}
             />
           </div>
-          <div className="flex flex-col gap-1">
-            <label className={labelClass}>Start</label>
-            <input
-              name="moment_start_time"
-              type="time"
-              value={form.moment_start ? form.moment_start.slice(11, 16) : ""}
-              onChange={(e) => handleDateTimeChange(e)}
-              className={inputClass}
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className={labelClass}>End</label>
-            <input
-              name="moment_end_time"
-              type="time"
-              value={form.moment_end ? form.moment_end.slice(11, 16) : ""}
-              onChange={(e) => handleDateTimeChange(e)}
-              className={inputClass}
-            />
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-1">
+              <label className={labelClass}>Start</label>
+              <input
+                name="moment_start_time"
+                type="time"
+                value={form.moment_start ? form.moment_start.slice(11, 16) : ""}
+                onChange={(e) => handleDateTimeChange(e)}
+                className={inputClass}
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className={labelClass}>End</label>
+              <input
+                name="moment_end_time"
+                type="time"
+                value={form.moment_end ? form.moment_end.slice(11, 16) : ""}
+                onChange={(e) => handleDateTimeChange(e)}
+                className={inputClass}
+              />
+            </div>
           </div>
         </div>
 

@@ -125,9 +125,22 @@ function ScopeLocator({
               >
                 <button
                   onClick={() => handleSelectLocation(s.label, s.center)}
-                  className="w-full text-left px-4 py-2.5 text-xs text-white/50 hover:text-white/90 hover:bg-white/4 transition-all cursor-pointer truncate tracking-[-0.1px]"
+                  className="w-full text-left px-4 py-2.5 transition-all cursor-pointer hover:bg-white/4"
                 >
-                  {s.label}
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-white/60 hover:text-white/90 tracking-[-0.1px] truncate">
+                      {s.label.split(",")[0]}
+                    </span>
+                    {s.category && (
+                      <span className="shrink-0 text-[10px] text-white/30 px-1.5 py-0.5 rounded-full capitalize"
+                        style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.07)" }}>
+                        {s.category}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[10px] text-white/25 tracking-[-0.1px] truncate mt-0.5">
+                    {s.label.split(",").slice(1).join(",").trim()}
+                  </p>
                 </button>
               </motion.li>
             ))}
