@@ -4,7 +4,7 @@ import Image from "next/image";
 import Expectation from "./Expectation";
 import { useGetAllCirclesOwnedByUser } from "@/hooks/useCircles";
 import { useCreateCircle } from "@/hooks/useCircles";
-import { useInviteMemberToCircle } from "@/hooks/useInvites";
+import { useInviteMemberToCircle, useInviteExternalToCircle } from "@/hooks/useInvites";
 import { useUserStore } from "@/stores/useUserStore";
 
 type InviteSelection = "people" | "where" | "share";
@@ -44,6 +44,7 @@ export default function CircleDestination({
   );
   const { mutate: createCircle, isPending: isCreating } = useCreateCircle();
   const { mutate: inviteMember } = useInviteMemberToCircle();
+  const { mutate: inviteExternal } = useInviteExternalToCircle();
 
   const circles: CircleProp[] = circlesData?.data.data || [];
 
@@ -65,10 +66,14 @@ export default function CircleDestination({
           onSuccess: (data) => {
             const newCircle = data.data.data;
             selectedPeople.forEach((person) => {
-              inviteMember({
-                circle: newCircle,
-                invite_member: { member_id: person.id } as InviteMembersProp,
-              });
+              if (person.isExternal) {
+                inviteExternal({ circle_id: newCircle?.id, recipient: person.email || person.phonenumber });
+              } else {
+                inviteMember({
+                  circle: newCircle,
+                  invite_member: { member_id: person.id } as InviteMembersProp,
+                });
+              }
             });
             //later feature
             // setStep("expectation");
@@ -82,10 +87,14 @@ export default function CircleDestination({
       const circle = circles.find((c) => c.id === selectedCircle);
       if (!circle) return;
       selectedPeople.forEach((person) => {
-        inviteMember({
-          circle,
-          invite_member: { member_id: person.id } as InviteMembersProp,
-        });
+        if (person.isExternal) {
+          inviteExternal({ circle_id: circle.id as string, recipient: person.email || person.phonenumber });
+        } else {
+          inviteMember({
+            circle,
+            invite_member: { member_id: person.id } as InviteMembersProp,
+          });
+        }
       });
       //later feature
       // setStep("expectation");

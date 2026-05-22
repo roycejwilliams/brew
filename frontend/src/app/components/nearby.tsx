@@ -15,12 +15,14 @@ interface NearbyProps {
   selectedCoordinates?: [number, number] | null;
   activeScope: "here" | "nearby" | "area";
   selectedLocation?: string | null;
+  moments?: MomentProp[];
 }
 
 export default function Nearby({
   filter,
   selectedCoordinates,
   activeScope,
+  moments: momentsProp,
 }: NearbyProps) {
   const [emblaRef] = useEmblaCarousel(
     { loop: false, skipSnaps: true, align: "start" },
@@ -42,17 +44,17 @@ export default function Nearby({
     area: 50000,
   };
 
-  //call to the api
+  // Skip internal fetch when parent provides moments directly
   const { data: nearbyData, isLoading } = useGetNearbyMoments({
-    lng: activeCoords?.[0],
-    lat: activeCoords?.[1],
+    lng: !momentsProp ? activeCoords?.[0] : undefined,
+    lat: !momentsProp ? activeCoords?.[1] : undefined,
     radius: scopeToRadius[activeScope] ?? 10000,
     filter,
   });
 
-  const moments: MomentProp[] = nearbyData?.data?.data ?? [];
+  const moments: MomentProp[] = momentsProp ?? nearbyData?.data?.data ?? [];
 
-  if (!activeCoords) {
+  if (!activeCoords && !momentsProp) {
     return (
       <div className="space-y-2">
         <p className="text-[10px] tracking-[2px] uppercase text-white/25 font-medium px-1">
@@ -73,7 +75,7 @@ export default function Nearby({
     );
   }
 
-  if (isLoading) {
+  if (!momentsProp && isLoading) {
     return (
       <div className="space-y-2">
         <p className="text-[10px] tracking-[2px] uppercase text-white/25 font-medium px-1">

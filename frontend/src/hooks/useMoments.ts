@@ -21,7 +21,14 @@ export const useCreateMoment = () => {
         vibes: moment.vibes,
       });
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
+      const newMoment: MomentProp = data?.data?.data;
+      if (newMoment && variables.creator_id) {
+        queryClient.setQueryData(["moment-owner", variables.creator_id], (old: { data: { data: MomentProp[] } } | undefined) => {
+          if (!old?.data?.data) return old;
+          return { ...old, data: { ...old.data, data: [newMoment, ...old.data.data] } };
+        });
+      }
       queryClient.invalidateQueries({ queryKey: ["moment-owner"] });
       queryClient.invalidateQueries({ queryKey: ["nearby-moments"] });
     },
@@ -61,8 +68,19 @@ export const useUpdateMomentsByOwner = () => {
         visibility_type: moment.visibility_type,
       });
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      queryClient.setQueryData(["moment-owner", variables.creator_id], (old: { data: { data: MomentProp[] } } | undefined) => {
+        if (!old?.data?.data) return old;
+        return {
+          ...old,
+          data: {
+            ...old.data,
+            data: old.data.data.map((m) => m.id === variables.id ? { ...m, ...variables } : m),
+          },
+        };
+      });
       queryClient.invalidateQueries({ queryKey: ["moment-owner"] });
+      queryClient.invalidateQueries({ queryKey: ["nearby-moments"] });
     },
   });
 };
@@ -73,8 +91,19 @@ export const useDeleteMomentsByOwner = () => {
     mutationFn: (moment: MomentProp) => {
       return api.delete(`/moments/${moment.creator_id}/${moment.id}`);
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      queryClient.setQueryData(["moment-owner", variables.creator_id], (old: { data: { data: MomentProp[] } } | undefined) => {
+        if (!old?.data?.data) return old;
+        return {
+          ...old,
+          data: {
+            ...old.data,
+            data: old.data.data.filter((m) => m.id !== variables.id),
+          },
+        };
+      });
       queryClient.invalidateQueries({ queryKey: ["moment-owner"] });
+      queryClient.invalidateQueries({ queryKey: ["nearby-moments"] });
     },
   });
 };
@@ -164,12 +193,12 @@ export const useGetNearbyMoments = (params: {
   lat?: number;
   radius?: number;
   filter?: "tonight" | "tomorrow" | "week";
-  city?: string;
+  search?: string;
 }) => {
   return useQuery({
     queryKey: ["nearby-moments", params],
     queryFn: () => api.get("/moments/nearby", { params }),
-    enabled: !!(params.lng && params.lat) || !!params.city,
+    enabled: !!(params.lng && params.lat) || !!params.search,
   });
 };
 

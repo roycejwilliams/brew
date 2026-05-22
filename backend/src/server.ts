@@ -1096,7 +1096,35 @@ app.get(
   authenticateToken,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { lng, lat, radius = 10000, filter = "tonight" } = req.query;
+      const { lng, lat, radius = 10000, filter = "tonight", search } = req.query;
+
+      const userId = req.user?.id;
+
+      // Name/establishment search — no coordinates required
+      if (search && !lng && !lat) {
+        const result = await pool.query(
+          `SELECT m.* FROM moments m
+           WHERE (
+             LOWER(m.moments_name) ILIKE $1
+             OR LOWER(m.location_name) ILIKE $1
+           )
+           AND m.close_moment IS NOT TRUE
+           AND (
+             m.visibility_type = 'nearby'
+             OR m.creator_id = $2
+             OR (m.visibility_type = 'circle' AND EXISTS (
+               SELECT 1 FROM circle_members WHERE circle_id = m.circle_id AND member_id = $2
+             ))
+             OR (m.visibility_type = 'people' AND EXISTS (
+               SELECT 1 FROM invite_attendees WHERE moment_id = m.id AND attendee_id = $2
+             ))
+           )
+           ORDER BY m.moment_start ASC
+           LIMIT 10`,
+          [`%${(search as string).toLowerCase()}%`, userId],
+        );
+        return res.status(200).send({ success: true, data: result.rows });
+      }
 
       const lngNum = parseFloat(lng as string);
       const latNum = parseFloat(lat as string);
@@ -1135,8 +1163,6 @@ app.get(
         end.setUTCHours(6, 59, 59, 0);
         endTime = end.toISOString();
       }
-
-      const userId = req.user?.id;
 
       const result = await pool.query(
         `SELECT m.*,
@@ -1616,6 +1642,55 @@ app.post(
   },
 );
 
+// Invite an unregistered user to a circle by email or phone
+app.post(
+  "/circles/:id/invite-external",
+  authenticateToken,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { recipient } = req.body;
+      if (!recipient) return res.status(400).send("recipient is required.");
+
+      const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient);
+      const isPhone = /^[\+]?[\d\s\-\(\)]{7,15}$/.test(recipient);
+      if (!isEmail && !isPhone) return res.status(400).send("recipient must be an email or phone number.");
+
+      const existingUser = await pool.query(
+        `SELECT id FROM users WHERE email = $1 OR phone_number = $1`,
+        [recipient],
+      );
+      if (existingUser.rows.length > 0) {
+        return res.status(400).send("User is already on BR3W. Use the standard invite.");
+      }
+
+      const ownerCheck = await pool.query(`SELECT owner_id FROM circles WHERE id = $1`, [req.params.id]);
+      if (ownerCheck.rows[0]?.owner_id !== req.user?.id) {
+        return res.status(403).send("Unauthorized");
+      }
+
+      const inviterResult = await pool.query(
+        `SELECT first_name, last_name FROM users WHERE id = $1`,
+        [req.user?.id],
+      );
+      const inviter = inviterResult.rows[0];
+      const inviterName = inviter ? `${inviter.first_name} ${inviter.last_name}`.trim() : "Someone";
+
+      const circleResult = await pool.query(`SELECT circle_name FROM circles WHERE id = $1`, [req.params.id]);
+      const targetName = circleResult.rows[0]?.circle_name as string | undefined;
+
+      if (isEmail) {
+        await sendEmail({ email: recipient, external_invite: { inviter_name: inviterName, invite_type: "circle", target_name: targetName } });
+      } else {
+        await sendSMS({ phone_number: recipient, external_invite: { inviter_name: inviterName, invite_type: "circle", target_name: targetName } });
+      }
+
+      return res.status(200).send({ success: true, external: true });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
 // User views their circle invites
 app.get(
   "/invites/members/:member_id",
@@ -1817,7 +1892,29 @@ app.post(
 
       const recipientUser: UserProp = findRecipient.rows[0];
 
-      if (!recipientUser) return res.status(404).send("Recipient not found.");
+      if (!recipientUser) {
+        // External invite — recipient is not yet on BR3W
+        const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient);
+        const isPhone = /^[\+]?[\d\s\-\(\)]{7,15}$/.test(recipient);
+        if (!isEmail && !isPhone) return res.status(404).send("Recipient not found.");
+
+        const inviterResult = await pool.query(
+          `SELECT first_name, last_name FROM users WHERE id = $1`,
+          [req.user?.id],
+        );
+        const inviter = inviterResult.rows[0];
+        const inviterName = inviter ? `${inviter.first_name} ${inviter.last_name}`.trim() : "Someone";
+
+        const momentResult = await pool.query(`SELECT moments_name FROM moments WHERE id = $1`, [req.params.id]);
+        const targetName = momentResult.rows[0]?.moments_name as string | undefined;
+
+        if (isEmail) {
+          await sendEmail({ email: recipient, external_invite: { inviter_name: inviterName, invite_type: "moment", target_name: targetName } });
+        } else {
+          await sendSMS({ phone_number: recipient, external_invite: { inviter_name: inviterName, invite_type: "moment", target_name: targetName } });
+        }
+        return res.status(200).send({ success: true, external: true });
+      }
 
       // Create invite
       const inviteAttendeeToMoment = await pool.query(

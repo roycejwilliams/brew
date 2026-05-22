@@ -70,7 +70,7 @@ export default function Nav() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        className="absolute left-4 top-4 flex items-center  z-40"
+        className="absolute left-4 top-4 flex items-center z-[60]"
       >
         {/* Main Nav Container */}
         <motion.div
@@ -251,7 +251,7 @@ export default function Nav() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed w-full h-screen inset-0 z-30 overflow-hidden"
+            className="fixed w-full h-screen inset-0 z-[55] overflow-hidden"
             style={{ background: "#0c0c0c" }}
           >
             {/* Bottom-left warm ember */}

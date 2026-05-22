@@ -12,6 +12,14 @@ interface EventLiveProp {
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
+const getDirectionsUrl = (lat: number, lng: number): string => {
+  if (typeof navigator === "undefined") return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+  const ua = navigator.userAgent;
+  if (/iPad|iPhone|iPod/.test(ua)) return `maps://maps.apple.com/?daddr=${lat},${lng}&dirflg=d`;
+  if (/Android/.test(ua)) return `geo:${lat},${lng}?q=${lat},${lng}`;
+  return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+};
+
 export default function EventLive({ activeModal, eventCard }: EventLiveProp) {
   if (!eventCard) return null;
 
@@ -167,10 +175,8 @@ export default function EventLive({ activeModal, eventCard }: EventLiveProp) {
           </div>
 
           {/* Directions button */}
-          <motion.a
-            href={`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`}
-            target="_blank"
-            rel="noreferrer"
+          <motion.button
+            onClick={() => window.open(getDirectionsUrl(lat, lng), "_blank", "noreferrer")}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.35, duration: 0.25, ease: EASE }}
@@ -195,7 +201,7 @@ export default function EventLive({ activeModal, eventCard }: EventLiveProp) {
             >
               Get directions
             </span>
-          </motion.a>
+          </motion.button>
         </motion.div>
       )}
 

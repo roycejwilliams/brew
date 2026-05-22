@@ -7,6 +7,7 @@ import {
   useLocationSearch,
   reverseGeolocateSearch,
 } from "@/hooks/useReverseGeolocateSearch";
+import { openEventCard } from "@/stores/store";
 
 interface EditMomentProps {
   setUtils: (view: "attendance" | "history" | "edit") => void;
@@ -32,7 +33,7 @@ export default function EditMoment({ setUtils, featured }: EditMomentProps) {
     location: featured?.location ?? "",
     location_name: featured?.location_name ?? "",
     moment_start: normalizeDate(featured?.moment_start),
-    moment_end: normalizeDate(featured?.moment_end),
+    moment_end: normalizeDate(featured?.moment_end) || normalizeDate(featured?.moment_start),
     description: featured?.description ?? "",
   });
 
@@ -48,8 +49,13 @@ export default function EditMoment({ setUtils, featured }: EditMomentProps) {
     //should update the date portion not the time
     //value would be the date you insert followed by time.
     if (name === "moment_start_date") {
-      const time = form.moment_start.split("T")[1] || "00:00";
-      setForm((prev) => ({ ...prev, moment_start: `${value}T${time}` }));
+      const startTime = form.moment_start.split("T")[1] || "00:00";
+      const endTime = form.moment_end.split("T")[1] || "00:00";
+      setForm((prev) => ({
+        ...prev,
+        moment_start: `${value}T${startTime}`,
+        moment_end: `${value}T${endTime}`,
+      }));
     }
 
     //Takes the first part of the date
@@ -89,8 +95,15 @@ export default function EditMoment({ setUtils, featured }: EditMomentProps) {
       }
     }
 
-    updateMoment({ ...featured, ...form, location } as MomentProp, {
-      onSuccess: () => setUtils("history"),
+    const updatedMoment = { ...featured, ...form, location } as MomentProp;
+    updateMoment(updatedMoment, {
+      onSuccess: () => {
+        const storeMoment = openEventCard.getState().moment;
+        if (storeMoment?.id === featured.id) {
+          openEventCard.getState().openEvent(updatedMoment);
+        }
+        setUtils("history");
+      },
     });
   };
 

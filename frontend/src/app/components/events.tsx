@@ -34,6 +34,7 @@ interface OpenModal {
   setFilter: React.Dispatch<React.SetStateAction<TimeFilter>>;
   activeScope: ScopeType;
   setActiveScope: React.Dispatch<React.SetStateAction<ScopeType>>;
+  nearbyMoments?: MomentProp[];
 }
 
 const PEEK_HEIGHT = 260;
@@ -51,9 +52,13 @@ export default function Events({
   setFilter,
   activeScope,
   setActiveScope,
+  nearbyMoments,
 }: OpenModal) {
   const [openScope, setOpenScope] = useState<boolean>(false);
-  const openScopeLocator = () => ToggleState(setOpenScope);
+  const openScopeLocator = () => {
+    if (!openScope && isMobile) setIsFullHeight(true);
+    ToggleState(setOpenScope);
+  };
   const { user } = useUserStore();
 
   const { cityName } = useGetCityName(userCoordinates ?? null);
@@ -198,6 +203,7 @@ export default function Events({
           selectedCoordinates={selectedCoordinates}
           activeScope={activeScope}
           selectedLocation={selectedLocation}
+          moments={nearbyMoments}
         />
       </div>
 
