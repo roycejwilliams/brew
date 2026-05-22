@@ -12,12 +12,15 @@ export const reverseGeolocateSearch = async (
   setUserSuggestions: (suggestions: LocationSuggestion[]) => void,
   setIsSearching: (isSearching: boolean) => void,
 ) => {
-  try {
-    if (query.length < 2) {
-      setUserSuggestions([]);
-      return;
-    }
+  if (query.length < 2) {
+    setUserSuggestions([]);
+    setIsSearching(false);
+    return;
+  }
 
+  setIsSearching(true);
+
+  try {
     const response = await fetch(
       `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?` +
         new URLSearchParams({
@@ -45,7 +48,6 @@ export const reverseGeolocateSearch = async (
     }, 300);
   } catch (error) {
     console.error("Error occured", error);
-  } finally {
     setIsSearching(false);
   }
 };
