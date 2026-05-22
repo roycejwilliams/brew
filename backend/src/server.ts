@@ -47,6 +47,16 @@ const applicationLimiter = rateLimit({
   statusCode: 429,
 });
 
+// AI endpoints — cap spend per IP
+const aiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 20,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  message: "Too many AI requests, please try again in 15 minutes.",
+  statusCode: 429,
+});
+
 app.use(limiter); // cover every route
 app.use("/auth", authLimiter); // overrides global for auth
 app.use("/applications", applicationLimiter); // overrides global for applications
@@ -960,6 +970,7 @@ app.post(
       expectations,
       faqs,
       vibes,
+      cap_attendance,
     } = req.body;
 
     if (
@@ -991,8 +1002,8 @@ app.post(
 
       const createMomentsById = await pool.query(
         `INSERT INTO moments 
-    (creator_id, moments_name, location, location_name, moment_start, visibility_type, description, circle_id, image, principles, expectations, faqs, vibes) 
-   VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) 
+    (creator_id, moments_name, location, location_name, moment_start, visibility_type, description, circle_id, image, principles, expectations, faqs, vibes, cap_attendance) 
+   VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) 
    RETURNING *`,
         [
           req.params.id,
@@ -1008,6 +1019,7 @@ app.post(
           expectations,
           JSON.stringify(faqs),
           vibes,
+          cap_attendance,
         ],
       );
 
@@ -1096,33 +1108,35 @@ app.get(
 
       let startTime: string;
       let endTime: string;
-      const pad = (n: number) => String(n).padStart(2, "0");
-      const fmt = (d: Date) =>
-        `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}-07:00`;
 
       const now = new Date();
 
       if (filter === "tonight") {
-        startTime = fmt(now);
+        // Look back 6 hours so live events that already started are included
+        const start = new Date(now.getTime() - 6 * 60 * 60 * 1000);
+        startTime = start.toISOString();
         const end = new Date(now);
-        end.setDate(end.getDate() + 1);
-        end.setHours(4, 0, 0, 0);
-        endTime = fmt(end);
+        end.setUTCDate(end.getUTCDate() + 1);
+        end.setUTCHours(11, 0, 0, 0); // 4 AM PDT = 11 AM UTC
+        endTime = end.toISOString();
       } else if (filter === "tomorrow") {
         const start = new Date(now);
-        start.setDate(start.getDate() + 1);
-        start.setHours(0, 0, 0, 0);
+        start.setUTCDate(start.getUTCDate() + 1);
+        start.setUTCHours(7, 0, 0, 0); // midnight PDT = 7 AM UTC
         const end = new Date(start);
-        end.setHours(23, 59, 59, 0);
-        startTime = fmt(start);
-        endTime = fmt(end);
+        end.setUTCHours(6, 59, 59, 0); // 11:59 PM PDT = next day 6:59 AM UTC
+        end.setUTCDate(end.getUTCDate() + 1);
+        startTime = start.toISOString();
+        endTime = end.toISOString();
       } else {
-        startTime = fmt(now);
+        startTime = now.toISOString();
         const end = new Date(now);
-        end.setDate(end.getDate() + 7);
-        end.setHours(23, 59, 59, 0);
-        endTime = fmt(end);
+        end.setUTCDate(end.getUTCDate() + 7);
+        end.setUTCHours(6, 59, 59, 0);
+        endTime = end.toISOString();
       }
+
+      const userId = req.user?.id;
 
       const result = await pool.query(
         `SELECT m.*,
@@ -1131,9 +1145,20 @@ app.get(
             ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography
           ) as distance
         FROM moments m
-        WHERE 
+        WHERE
           m.location IS NOT NULL
-          AND m.visibility_type = 'nearby'
+          AND (
+            m.visibility_type = 'nearby'
+            OR m.creator_id = $6
+            OR (m.visibility_type = 'circle' AND EXISTS (
+              SELECT 1 FROM circle_members
+              WHERE circle_id = m.circle_id AND member_id = $6
+            ))
+            OR (m.visibility_type = 'people' AND EXISTS (
+              SELECT 1 FROM invite_attendees
+              WHERE moment_id = m.id AND attendee_id = $6
+            ))
+          )
           AND ST_DWithin(
             ST_SetSRID(ST_MakePoint(m.location[0], m.location[1]), 4326)::geography,
             ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography,
@@ -1144,7 +1169,7 @@ app.get(
           AND m.close_moment IS NOT TRUE
         ORDER BY distance ASC
         LIMIT 20`,
-        [lngNum, latNum, radNum, startTime, endTime],
+        [lngNum, latNum, radNum, startTime, endTime, userId],
       );
 
       return res.status(200).send({ success: true, data: result.rows });
@@ -1448,40 +1473,6 @@ app.get(
         ORDER BY mp.created_at ASC`,
         [req.params.moment_id],
       );
-
-      // After inserting photo, notify the moment creator
-      const getMomentCreator = await pool.query(
-        `SELECT m.creator_id, m.moments_name, u.email, u.phone_number 
-  FROM moments m 
-  JOIN users u ON m.creator_id = u.id 
-  WHERE m.id = $1`,
-        [req.params.moment_id],
-      );
-      const creator = getMomentCreator.rows[0];
-
-      const getUploader = await pool.query(
-        `SELECT username FROM users WHERE id = $1`,
-        [req.user?.id],
-      );
-      const uploader = getUploader.rows[0];
-
-      // Don't notify if uploader is the creator
-      if (creator.creator_id !== req.user?.id) {
-        await sendEmail({
-          email: creator.email,
-          photo_uploaded: {
-            moments_name: creator.moments_name,
-            uploader_username: uploader.username,
-          },
-        });
-        await sendSMS({
-          phone_number: creator.phone_number,
-          photo_uploaded: {
-            moments_name: creator.moments_name,
-            uploader_username: uploader.username,
-          },
-        });
-      }
       return res.status(200).send({ success: true, data: result.rows });
     } catch (error) {
       next(error);
@@ -1502,6 +1493,40 @@ app.post(
         VALUES ($1, $2, $3) RETURNING *`,
         [req.params.moment_id, req.user?.id, image_url],
       );
+
+      // Notify the moment creator after upload
+      const getMomentCreator = await pool.query(
+        `SELECT m.creator_id, m.moments_name, u.email, u.phone_number
+        FROM moments m
+        JOIN users u ON m.creator_id = u.id
+        WHERE m.id = $1`,
+        [req.params.moment_id],
+      );
+      const creator = getMomentCreator.rows[0];
+
+      const getUploader = await pool.query(
+        `SELECT username FROM users WHERE id = $1`,
+        [req.user?.id],
+      );
+      const uploader = getUploader.rows[0];
+
+      if (creator && creator.creator_id !== req.user?.id) {
+        await sendEmail({
+          email: creator.email,
+          photo_uploaded: {
+            moments_name: creator.moments_name,
+            uploader_username: uploader.username,
+          },
+        });
+        await sendSMS({
+          phone_number: creator.phone_number,
+          photo_uploaded: {
+            moments_name: creator.moments_name,
+            uploader_username: uploader.username,
+          },
+        });
+      }
+
       return res.status(201).send({ success: true, data: result.rows[0] });
     } catch (error) {
       next(error);
@@ -1840,7 +1865,10 @@ app.get(
       }
 
       const getAllInvitesByUser = await pool.query(
-        "SELECT * FROM invite_attendees WHERE attendee_id = $1",
+        `SELECT ia.*, m.moments_name, m.image, m.moment_start, m.location_name
+        FROM invite_attendees ia
+        JOIN moments m ON m.id = ia.moment_id
+        WHERE ia.attendee_id = $1`,
         [req.params.attendee_id],
       );
 
@@ -1933,6 +1961,18 @@ app.put(
       const owner: UserProp = getOwner.rows[0];
 
       if (decision.status === "accepted") {
+        const capacityCheck = await pool.query(
+          `SELECT cap_attendance,
+            (SELECT COUNT(*) FROM moment_attendees WHERE moment_id = $1) AS confirmed
+           FROM moments WHERE id = $1`,
+          [attendeeId.moment_id],
+        );
+
+        const { cap_attendance, confirmed } = capacityCheck.rows[0];
+        if (cap_attendance && parseInt(confirmed) >= cap_attendance) {
+          return res.status(409).send("This moment is at capacity.");
+        }
+
         if (owner) {
           await sendEmail({
             email: owner.email,
@@ -2089,6 +2129,7 @@ app.put(
 app.post(
   "/ai/generate",
   authenticateToken,
+  aiLimiter,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { description } = req.body;
@@ -2101,7 +2142,7 @@ app.post(
           "anthropic-version": "2023-06-01",
         },
         body: JSON.stringify({
-          model: "claude-sonnet-4-5",
+          model: "claude-sonnet-4-6",
           max_tokens: 1000,
           messages: [
             {
@@ -2139,6 +2180,7 @@ Keep each item to 1-2 sentences. Match the tone of the description.`,
 app.get(
   "/moments/:id/recap",
   authenticateToken,
+  aiLimiter,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
@@ -2176,7 +2218,7 @@ app.get(
           "anthropic-version": "2023-06-01",
         },
         body: JSON.stringify({
-          model: "claude-sonnet-4-5",
+          model: "claude-sonnet-4-6",
           max_tokens: 300,
           messages: [
             {
@@ -2207,6 +2249,7 @@ app.get(
 app.post(
   "/ai/recap",
   authenticateToken,
+  aiLimiter,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const {
@@ -2256,7 +2299,7 @@ app.post(
           "anthropic-version": "2023-06-01",
         },
         body: JSON.stringify({
-          model: "claude-sonnet-4-5",
+          model: "claude-sonnet-4-6",
           max_tokens: 300,
           messages: [
             {

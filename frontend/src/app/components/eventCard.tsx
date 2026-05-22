@@ -26,7 +26,7 @@ function EventCard() {
 
   return (
     <main
-      className="h-dvh overflow-hidden w-full text-white"
+      className="h-dvh overflow-x-hidden w-full text-white"
       style={{ background: "#0c0c0c" }}
     >
       {/* Background — fixed so it stays while scrolling */}

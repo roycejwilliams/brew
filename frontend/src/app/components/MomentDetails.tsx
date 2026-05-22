@@ -112,7 +112,7 @@ export default function MomentDetails({
   }, [venue, selectedLocation]);
 
   useEffect(() => {
-    const t = setTimeout(() => setIsTyping(false), 500);
+    const t = setTimeout(() => setIsTyping(false), 800);
     return () => clearTimeout(t);
   }, [isTyping]);
 
@@ -160,6 +160,12 @@ export default function MomentDetails({
           image: imageUrl,
           ...generated,
           location: `(${locationCoordinates[0]},${locationCoordinates[1]})`,
+          moment_start: form.moment_start
+            ? new Date(form.moment_start).toISOString()
+            : form.moment_start,
+          moment_end: form.moment_end
+            ? new Date(form.moment_end).toISOString()
+            : form.moment_end,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any,
         {

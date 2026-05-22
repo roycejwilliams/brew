@@ -30,6 +30,10 @@ interface OpenModal {
   isMobile?: boolean;
   eventsOpen?: boolean;
   setEventsOpen?: React.Dispatch<React.SetStateAction<boolean>>;
+  filter: TimeFilter;
+  setFilter: React.Dispatch<React.SetStateAction<TimeFilter>>;
+  activeScope: ScopeType;
+  setActiveScope: React.Dispatch<React.SetStateAction<ScopeType>>;
 }
 
 const PEEK_HEIGHT = 260;
@@ -43,6 +47,10 @@ export default function Events({
   isMobile = false,
   eventsOpen = false,
   setEventsOpen,
+  filter,
+  setFilter,
+  activeScope,
+  setActiveScope,
 }: OpenModal) {
   const [openScope, setOpenScope] = useState<boolean>(false);
   const openScopeLocator = () => ToggleState(setOpenScope);
@@ -50,14 +58,12 @@ export default function Events({
 
   const { cityName } = useGetCityName(userCoordinates ?? null);
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
-  const [filter, setFilter] = useState<TimeFilter>("tonight");
   const [isFullHeight, setIsFullHeight] = useState(false);
 
   const { data: momentInvitesData } = useInviteUserMomentView(id);
   const { data: circleInvitesData } = useInviteUserCircleView(
     user?.id as string,
   );
-  const [activeScope, setActiveScope] = useState<ScopeType>("nearby");
 
   const pendingCount =
     (momentInvitesData?.data?.data ?? []).filter(

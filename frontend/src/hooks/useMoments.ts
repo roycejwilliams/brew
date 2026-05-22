@@ -23,6 +23,7 @@ export const useCreateMoment = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["moment-owner"] });
+      queryClient.invalidateQueries({ queryKey: ["nearby-moments"] });
     },
   });
 };

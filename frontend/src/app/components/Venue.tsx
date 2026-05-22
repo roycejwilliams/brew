@@ -160,13 +160,19 @@ export default function Venue({
                 onClick={() => handleSelectVenue(venue)}
                 className="w-full px-5 py-3.5 text-left transition-colors cursor-pointer border-b border-white/5 last:border-b-0"
               >
-                <div className="font-medium text-white/90 text-sm">
-                  {venue.label}
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-white/90 text-sm truncate">
+                    {venue.label.split(",")[0]}
+                  </span>
+                  {venue.category && (
+                    <span className="shrink-0 text-[10px] text-white/35 px-1.5 py-0.5 rounded-full capitalize"
+                      style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                      {venue.category}
+                    </span>
+                  )}
                 </div>
-                <div className="text-xs text-white/40">
-                  {venue.center
-                    ? `${venue.center[1].toFixed(4)}, ${venue.center[0].toFixed(4)}`
-                    : ""}
+                <div className="text-xs text-white/35 truncate mt-0.5">
+                  {venue.label.split(",").slice(1).join(",").trim()}
                 </div>
               </motion.button>
             ))}

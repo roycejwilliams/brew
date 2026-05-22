@@ -5,10 +5,12 @@ import { openEventCard } from "@/stores/store";
 import { useInviteUserMomentView } from "@/hooks/useInvites";
 import { useInviteAttendeeDecision } from "@/hooks/useInvites";
 import { useUserStore } from "@/stores/useUserStore";
+import { useRouter } from "next/navigation";
 
 export default function NeedsAttention() {
   const openCard = openEventCard((state) => state.openEvent);
   const { user } = useUserStore();
+  const router = useRouter();
   const { data: invitesData } = useInviteUserMomentView(user?.id as string);
   const { mutate: decideInvite } = useInviteAttendeeDecision();
 
@@ -57,7 +59,16 @@ export default function NeedsAttention() {
             <div className="flex gap-3 p-3">
               {/* Image */}
               <button
-                onClick={() => openCard(invite.moment_id)}
+                onClick={() => {
+                  openCard({
+                    id: invite.moment_id,
+                    moments_name: invite.moments_name,
+                    image: invite.image,
+                    moment_start: invite.moment_start,
+                    location_name: invite.location_name,
+                  } as MomentProp);
+                  router.push(`/moments/${invite.moment_id}`, { scroll: false });
+                }}
                 className="relative w-16 h-16 rounded-sm overflow-hidden shrink-0 cursor-pointer"
                 style={{ border: "1px solid rgba(255,255,255,0.08)" }}
               >
