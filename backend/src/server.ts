@@ -1013,13 +1013,13 @@ app.post(
           moment_start,
           visibility_type,
           description,
-          circle_id,
+          circle_id || null,
           image,
           principles,
           expectations,
           JSON.stringify(faqs),
           vibes,
-          cap_attendance,
+          cap_attendance || null,
         ],
       );
 

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { useCheckInAttendee } from "@/hooks/useMoments";
+import { useUserStore } from "@/stores/useUserStore";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -14,12 +15,16 @@ type Status = "loading" | "success" | "already_checked_in" | "error";
 function CheckInContent() {
   const searchParams = useSearchParams();
   const moment_id = searchParams.get("moment");
-  const attendee_id = searchParams.get("attendee");
+  const attendee_param = searchParams.get("attendee");
+
+  const { user, hasHydrated } = useUserStore();
+  const attendee_id = attendee_param ?? user?.id ?? null;
 
   const [status, setStatus] = useState<Status>("loading");
   const { mutate: checkIn } = useCheckInAttendee();
 
   useEffect(() => {
+    if (!hasHydrated) return;
     if (!moment_id || !attendee_id) {
       setStatus("error");
       return;
@@ -40,7 +45,7 @@ function CheckInContent() {
       },
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [moment_id, attendee_id]);
+  }, [moment_id, attendee_id, hasHydrated]);
 
   return (
     <div className="h-dvh overflow-hidden bg-[#0c0c0c] flex items-center justify-center px-6">

@@ -8,11 +8,12 @@ interface ActiveStateProp {
   active: "login" | "invite";
   setActive: (active: "login" | "invite") => void;
   isMobile: boolean;
+  redirect?: string;
 }
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
-function LoginState({ active, setActive, isMobile }: ActiveStateProp) {
+function LoginState({ active, setActive, isMobile, redirect }: ActiveStateProp) {
   const [loginPhase, setLoginPhase] = useState<"form" | "verify" | "success">(
     "form",
   );
@@ -199,7 +200,7 @@ function LoginState({ active, setActive, isMobile }: ActiveStateProp) {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2, ease: EASE }}
               >
-                <LoginForm state={loginPhase} setState={setLoginPhase} />
+                <LoginForm state={loginPhase} setState={setLoginPhase} redirect={redirect} />
               </motion.div>
             ) : (
               <motion.div

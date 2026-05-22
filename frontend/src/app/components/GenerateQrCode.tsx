@@ -21,7 +21,7 @@ function GenerateQrCode({ onClose, inviteType, inviteId }: ShareProp) {
       ? `https://br3w.app/checkin?moment=${inviteId}`
       : inviteType === "circle"
         ? `https://br3w.app/join?circle=${inviteId}`
-        : `https://br3w.app/join?ref=${inviteId}`;
+        : `https://br3w.app/referral?ref=${inviteId}`;
 
   useEffect(() => {
     const timer = setTimeout(() => setPhase("ready"), 2400);

@@ -1,22 +1,30 @@
 "use client";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Loading from "./components/loading";
 import LoginState from "./components/loginState";
 import { motion, AnimatePresence } from "motion/react";
 import { useUserStore } from "@/stores/useUserStore";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
 type AuthPhase = "authenticating" | "almost" | "brand" | "confirmed" | "ready";
 
-export default function Login() {
+function LoginContent() {
   const [transition, setTransition] = useState<boolean>(false);
   const [active, setActive] = useState<"login" | "invite">("login");
   const [authPhase, setAuthPhase] = useState<AuthPhase>("authenticating");
   const [isMobile, setIsMobile] = useState<boolean | null>(null);
   const { user } = useUserStore();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get("redirect") ?? "/pulse";
+  const tabParam = searchParams.get("tab");
+
+  useEffect(() => {
+    if (tabParam === "invite") setActive("invite");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     setIsMobile(window.innerWidth < 768);
@@ -46,7 +54,7 @@ export default function Login() {
         setTimeout(() => setAuthPhase("almost"), 400);
         setTimeout(() => setAuthPhase("brand"), 1000);
         setTimeout(() => setAuthPhase("confirmed"), 1800);
-        setTimeout(() => router.replace("/pulse"), 3000);
+        setTimeout(() => router.replace(redirect), 3000);
       } else {
         setTransition(true);
       }
@@ -192,10 +200,25 @@ export default function Login() {
               isMobile={isMobile ?? false}
               active={active}
               setActive={setActive}
+              redirect={redirect}
             />
           </motion.div>
         )}
       </AnimatePresence>
     </section>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="h-dvh bg-[#0c0c0c] flex items-center justify-center">
+          <div className="w-7 h-7 rounded-full border-2 border-white/10 border-t-white/50 animate-spin" />
+        </div>
+      }
+    >
+      <LoginContent />
+    </Suspense>
   );
 }
