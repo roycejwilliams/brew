@@ -109,7 +109,7 @@ function Transfer() {
       />
 
       {/* Actions */}
-      <div className="flex flex-col items-center justify-center py-10 px-8 gap-6">
+      <div className="flex flex-col items-center justify-center py-10 px-6 gap-6">
         {/* Eyebrow */}
         <p className="text-[10px] tracking-[3px] uppercase text-white/20">
           {active
@@ -165,7 +165,7 @@ function Transfer() {
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.25, ease: EASE }}
               onSubmit={(e) => e.preventDefault()}
-              className="flex items-center gap-2 w-4/5"
+              className="flex items-center gap-2 w-full"
             >
               <motion.button
                 type="button"
@@ -216,7 +216,6 @@ function Transfer() {
                 style={{
                   width: 40,
                   height: 40,
-                  rotate: "90deg",
                   borderRadius: "50%",
                   background: isSuccess
                     ? "rgba(74,222,128,0.15)"
