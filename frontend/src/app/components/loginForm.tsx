@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useLookUpUser } from "@/hooks/useApplications";
-import { useVerifyUser } from "@/hooks/useUser";
+import { useVerifyUser, useResendOtpToUser } from "@/hooks/useUser";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/stores/useUserStore";
 
@@ -22,9 +22,13 @@ function LoginForm({ state, setState, redirect }: Phase) {
   const [userId, setUserId] = useState("");
   const [otp, setOtp] = useState<string[]>(Array(6).fill(""));
   const [otpError, setOtpError] = useState(false);
+  const [otpErrorMsg, setOtpErrorMsg] = useState("Incorrect code. Try again.");
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [resendSuccess, setResendSuccess] = useState(false);
 
   const { mutate: lookUpUser, isPending } = useLookUpUser();
   const { mutate: verifyOtp } = useVerifyUser();
+  const { mutate: resendOtp, isPending: isResending } = useResendOtpToUser();
   const router = useRouter();
   const { setUser } = useUserStore();
 
@@ -39,7 +43,13 @@ function LoginForm({ state, setState, redirect }: Phase) {
             setState("success");
             setTimeout(() => router.push(redirect ?? "/pulse"), 3000);
           },
-          onError: () => {
+          onError: (err: unknown) => {
+            const status = (err as { response?: { status?: number } })?.response?.status;
+            if (status === 423 || status === 429) {
+              setOtpErrorMsg("Account locked. Too many attempts. Contact support.");
+            } else {
+              setOtpErrorMsg("Incorrect code. Try again.");
+            }
             setOtpError(true);
             setOtp(Array(6).fill(""));
             inputsRef.current[0]?.focus();
@@ -81,6 +91,25 @@ function LoginForm({ state, setState, redirect }: Phase) {
         paste[i] && /^[0-9]$/.test(paste[i]) ? paste[i] : "",
       ),
     );
+  };
+
+  const handleResend = () => {
+    if (resendCooldown > 0 || isResending) return;
+    resendOtp({ id: userId } as UserProp, {
+      onSuccess: () => {
+        setResendSuccess(true);
+        setOtpError(false);
+        setOtp(Array(6).fill(""));
+        setResendCooldown(30);
+        const interval = setInterval(() => {
+          setResendCooldown((prev) => {
+            if (prev <= 1) { clearInterval(interval); return 0; }
+            return prev - 1;
+          });
+        }, 1000);
+        setTimeout(() => setResendSuccess(false), 3000);
+      },
+    });
   };
 
   const handleSubmit = () => {
@@ -201,22 +230,48 @@ function LoginForm({ state, setState, redirect }: Phase) {
                 }}
               >
                 <p className="text-[11px] text-red-400/60 tracking-[-0.1px]">
-                  Incorrect code. Try again.
+                  {otpErrorMsg}
+                </p>
+              </motion.div>
+            )}
+            {resendSuccess && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="px-4 py-3 rounded-md text-center"
+                style={{
+                  background: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                }}
+              >
+                <p className="text-[11px] text-white/40 tracking-[-0.1px]">
+                  New code sent.
                 </p>
               </motion.div>
             )}
           </AnimatePresence>
 
-          <button
-            onClick={() => {
-              setState("form");
-              setOtp(Array(6).fill(""));
-              setOtpError(false);
-            }}
-            className="text-[11px] text-white/20 text-center hover:text-white/40 transition-colors duration-150 cursor-pointer tracking-[-0.1px]"
-          >
-            Wrong email? Go back
-          </button>
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => {
+                setState("form");
+                setOtp(Array(6).fill(""));
+                setOtpError(false);
+              }}
+              className="text-[11px] text-white/20 text-center hover:text-white/40 transition-colors duration-150 cursor-pointer tracking-[-0.1px]"
+            >
+              Wrong email? Go back
+            </button>
+            <button
+              onClick={handleResend}
+              disabled={resendCooldown > 0 || isResending}
+              className="text-[11px] text-white/20 hover:text-white/40 transition-colors duration-150 cursor-pointer tracking-[-0.1px] disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {isResending ? "Sending..." : resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend code"}
+            </button>
+          </div>
 
           <p className="text-[11px] text-center text-white/20 tracking-[-0.1px]">
             By continuing, you agree to B R 3 W&apos;s Terms & Privacy Policy.
