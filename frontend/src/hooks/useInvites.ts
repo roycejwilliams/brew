@@ -24,6 +24,7 @@ export const useInviteUserCircleView = (member_id: string) => {
     queryKey: ["invite-circle-view", member_id],
     queryFn: () => api.get(`/invites/members/${member_id}`),
     enabled: !!member_id,
+    refetchOnMount: "always",
   });
 };
 
@@ -69,6 +70,7 @@ export const useInviteUserMomentView = (attendee_id: string) => {
     queryKey: ["invite-moment-view", attendee_id],
     queryFn: () => api.get(`/invites/attendees/${attendee_id}`),
     enabled: !!attendee_id,
+    refetchOnMount: "always",
   });
 };
 

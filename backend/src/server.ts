@@ -11,7 +11,7 @@ import jwt from "jsonwebtoken";
 import rateLimit from "express-rate-limit"; //restricts how many request an IP or user can make in a window time
 import cors from "cors";
 import cookieParser from "cookie-parser";
-// import cron from "node-cron";
+import cron from "node-cron";
 import helmut from "helmet";
 
 const app = express();
@@ -318,8 +318,7 @@ app.put(
       const updateStatus: ApplicationProp = revealStatus.rows[0];
 
       if (updateStatus) {
-        otpMerge(updateStatus.status as string);
-        return;
+        return otpMerge(updateStatus.status as string)(req, res, next);
       }
 
       return res.status(404).send({
@@ -401,7 +400,7 @@ app.post(
       }
 
       const authUser = await pool.query(
-        `SELECT email, otp_code, otp_expiry, username, id, created_at, role FROM users WHERE id = $1 AND otp_code = $2 AND otp_expiry > NOW()`,
+        `SELECT email, phone_number, otp_code, otp_expiry, username, id, created_at, role FROM users WHERE id = $1 AND otp_code = $2 AND otp_expiry > NOW()`,
         [req.params.id, otp_code],
       );
 
@@ -429,6 +428,17 @@ app.post(
           `UPDATE users SET otp_code = null, otp_expiry = null, otp_attempts = 0 WHERE id = $1 RETURNING *`,
           [req.params.id],
         );
+
+        // send welcome notification on first login (account created within last 24h)
+        const accountAge =
+          Date.now() - new Date(UserAuthorize.created_at).getTime();
+        if (accountAge < 24 * 60 * 60 * 1000) {
+          await sendEmail({ email: UserAuthorize.email, welcome: true });
+          await sendSMS({
+            phone_number: UserAuthorize.phone_number,
+            welcome: true,
+          });
+        }
 
         //creates the cookie token with the following rules
         res.cookie("token", authorize, {
@@ -1096,7 +1106,13 @@ app.get(
   authenticateToken,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { lng, lat, radius = 10000, filter = "tonight", search } = req.query;
+      const {
+        lng,
+        lat,
+        radius = 10000,
+        filter = "tonight",
+        search,
+      } = req.query;
 
       const userId = req.user?.id;
 
@@ -1543,6 +1559,7 @@ app.post(
             moments_name: creator.moments_name,
             uploader_username: uploader.username,
           },
+          action_url: `https://br3w.app/moments/${req.params.moment_id}`,
         });
         await sendSMS({
           phone_number: creator.phone_number,
@@ -1550,6 +1567,7 @@ app.post(
             moments_name: creator.moments_name,
             uploader_username: uploader.username,
           },
+          action_url: `https://br3w.app/moments/${req.params.moment_id}`,
         });
       }
 
@@ -1623,11 +1641,13 @@ app.post(
           email: invitedUser.email,
           invite_type: "received",
           invite_target: "circle",
+          action_url: `https://br3w.app/join?circle=${invitedMember.circle_id}`,
         });
         await sendSMS({
           phone_number: invitedUser.phone_number,
           invite_type: "received",
           invite_target: "circle",
+          action_url: `https://br3w.app/join?circle=${invitedMember.circle_id}`,
         });
         return res.status(201).send({
           success: true,
@@ -1653,17 +1673,25 @@ app.post(
 
       const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient);
       const isPhone = /^[\+]?[\d\s\-\(\)]{7,15}$/.test(recipient);
-      if (!isEmail && !isPhone) return res.status(400).send("recipient must be an email or phone number.");
+      if (!isEmail && !isPhone)
+        return res
+          .status(400)
+          .send("recipient must be an email or phone number.");
 
       const existingUser = await pool.query(
         `SELECT id FROM users WHERE email = $1 OR phone_number = $1`,
         [recipient],
       );
       if (existingUser.rows.length > 0) {
-        return res.status(400).send("User is already on BR3W. Use the standard invite.");
+        return res
+          .status(400)
+          .send("User is already on BR3W. Use the standard invite.");
       }
 
-      const ownerCheck = await pool.query(`SELECT owner_id FROM circles WHERE id = $1`, [req.params.id]);
+      const ownerCheck = await pool.query(
+        `SELECT owner_id FROM circles WHERE id = $1`,
+        [req.params.id],
+      );
       if (ownerCheck.rows[0]?.owner_id !== req.user?.id) {
         return res.status(403).send("Unauthorized");
       }
@@ -1673,15 +1701,36 @@ app.post(
         [req.user?.id],
       );
       const inviter = inviterResult.rows[0];
-      const inviterName = inviter ? `${inviter.first_name} ${inviter.last_name}`.trim() : "Someone";
+      const inviterName = inviter
+        ? `${inviter.first_name} ${inviter.last_name}`.trim()
+        : "Someone";
 
-      const circleResult = await pool.query(`SELECT circle_name FROM circles WHERE id = $1`, [req.params.id]);
-      const targetName = circleResult.rows[0]?.circle_name as string | undefined;
+      const circleResult = await pool.query(
+        `SELECT circle_name FROM circles WHERE id = $1`,
+        [req.params.id],
+      );
+      const targetName = circleResult.rows[0]?.circle_name as
+        | string
+        | undefined;
 
       if (isEmail) {
-        await sendEmail({ email: recipient, external_invite: { inviter_name: inviterName, invite_type: "circle", target_name: targetName } });
+        await sendEmail({
+          email: recipient,
+          external_invite: {
+            inviter_name: inviterName,
+            invite_type: "circle",
+            target_name: targetName,
+          },
+        });
       } else {
-        await sendSMS({ phone_number: recipient, external_invite: { inviter_name: inviterName, invite_type: "circle", target_name: targetName } });
+        await sendSMS({
+          phone_number: recipient,
+          external_invite: {
+            inviter_name: inviterName,
+            invite_type: "circle",
+            target_name: targetName,
+          },
+        });
       }
 
       return res.status(200).send({ success: true, external: true });
@@ -1704,7 +1753,11 @@ app.get(
       }
 
       const getAllInvitesByUser = await pool.query(
-        "SELECT * FROM invite_members WHERE member_id = $1",
+        `SELECT im.*, c.circle_name, c.circle_image, u.username AS invited_by_username
+         FROM invite_members im
+         JOIN circles c ON c.id = im.circle_id
+         LEFT JOIN users u ON u.id = im.invited_by
+         WHERE im.member_id = $1`,
         [req.params.member_id],
       );
 
@@ -1896,22 +1949,44 @@ app.post(
         // External invite — recipient is not yet on BR3W
         const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient);
         const isPhone = /^[\+]?[\d\s\-\(\)]{7,15}$/.test(recipient);
-        if (!isEmail && !isPhone) return res.status(404).send("Recipient not found.");
+        if (!isEmail && !isPhone)
+          return res.status(404).send("Recipient not found.");
 
         const inviterResult = await pool.query(
           `SELECT first_name, last_name FROM users WHERE id = $1`,
           [req.user?.id],
         );
         const inviter = inviterResult.rows[0];
-        const inviterName = inviter ? `${inviter.first_name} ${inviter.last_name}`.trim() : "Someone";
+        const inviterName = inviter
+          ? `${inviter.first_name} ${inviter.last_name}`.trim()
+          : "Someone";
 
-        const momentResult = await pool.query(`SELECT moments_name FROM moments WHERE id = $1`, [req.params.id]);
-        const targetName = momentResult.rows[0]?.moments_name as string | undefined;
+        const momentResult = await pool.query(
+          `SELECT moments_name FROM moments WHERE id = $1`,
+          [req.params.id],
+        );
+        const targetName = momentResult.rows[0]?.moments_name as
+          | string
+          | undefined;
 
         if (isEmail) {
-          await sendEmail({ email: recipient, external_invite: { inviter_name: inviterName, invite_type: "moment", target_name: targetName } });
+          await sendEmail({
+            email: recipient,
+            external_invite: {
+              inviter_name: inviterName,
+              invite_type: "moment",
+              target_name: targetName,
+            },
+          });
         } else {
-          await sendSMS({ phone_number: recipient, external_invite: { inviter_name: inviterName, invite_type: "moment", target_name: targetName } });
+          await sendSMS({
+            phone_number: recipient,
+            external_invite: {
+              inviter_name: inviterName,
+              invite_type: "moment",
+              target_name: targetName,
+            },
+          });
         }
         return res.status(200).send({ success: true, external: true });
       }
@@ -1930,11 +2005,13 @@ app.post(
           email: recipientUser.email,
           invite_type: "received",
           invite_target: "moment",
+          action_url: `https://br3w.app/moments/${req.params.id}`,
         });
         await sendSMS({
           phone_number: recipientUser.phone_number,
           invite_type: "received",
           invite_target: "moment",
+          action_url: `https://br3w.app/moments/${req.params.id}`,
         });
         return res.status(201).send({
           success: true,
@@ -1962,10 +2039,12 @@ app.get(
       }
 
       const getAllInvitesByUser = await pool.query(
-        `SELECT ia.*, m.moments_name, m.image, m.moment_start, m.location_name
-        FROM invite_attendees ia
-        JOIN moments m ON m.id = ia.moment_id
-        WHERE ia.attendee_id = $1`,
+        `SELECT ia.*, m.moments_name, m.image, m.moment_start, m.location_name,
+                u.username AS invited_by_username
+         FROM invite_attendees ia
+         JOIN moments m ON m.id = ia.moment_id
+         LEFT JOIN users u ON u.id = ia.invited_by
+         WHERE ia.attendee_id = $1`,
         [req.params.attendee_id],
       );
 
@@ -2206,10 +2285,15 @@ app.put(
           [getRecipient.id, req.params.attendee_id, req.params.moment_id],
         );
 
-        await sendEmail({ email: getRecipient.email, transfer_ticket: true });
+        await sendEmail({
+          email: getRecipient.email,
+          transfer_ticket: true,
+          action_url: `https://br3w.app/moments/${req.params.moment_id}`,
+        });
         await sendSMS({
           phone_number: getRecipient.phone_number,
           transfer_ticket: true,
+          action_url: `https://br3w.app/moments/${req.params.moment_id}`,
         });
         return res.status(200).send({
           success: true,
@@ -2402,17 +2486,16 @@ app.post(
             {
               role: "user",
               content: `Write a short, evocative 2-3 sentence recap of this event. Make it feel like a memory — cinematic, sensory, present tense. Do not use clichés.
+              Event: ${moments_name}
+              Location: ${location_name}
+              Description: ${description}
+              Vibes: ${vibes?.join(", ")}
+              Principles: ${principles?.join(", ")}
+              Attendees: ${attendeeCount} people
+              ${durationHours ? `Duration: ${durationHours} hours` : ""}
+              ${photoCount > 0 ? `Photos captured: ${photoCount}` : ""}
 
-Event: ${moments_name}
-Location: ${location_name}
-Description: ${description}
-Vibes: ${vibes?.join(", ")}
-Principles: ${principles?.join(", ")}
-Attendees: ${attendeeCount} people
-${durationHours ? `Duration: ${durationHours} hours` : ""}
-${photoCount > 0 ? `Photos captured: ${photoCount}` : ""}
-
-Return ONLY the recap text, no preamble, no quotes.`,
+              Return ONLY the recap text, no preamble, no quotes.`,
             },
           ],
         }),
@@ -2420,6 +2503,8 @@ Return ONLY the recap text, no preamble, no quotes.`,
 
       const data = await response.json();
       const recap = data.content[0].text;
+
+      const momentUrl = `https://br3w.app/moments/${moment_id}`;
 
       const getCreator = await pool.query(
         `SELECT email, phone_number FROM users WHERE id = $1`,
@@ -2429,15 +2514,35 @@ Return ONLY the recap text, no preamble, no quotes.`,
 
       await sendEmail({
         email: creator.email,
-        moment_recap: {
-          moments_name,
-          recap,
-        },
+        moment_recap: { moments_name, recap },
+        action_url: momentUrl,
       });
       await sendSMS({
         phone_number: creator.phone_number,
         moment_recap: { moments_name },
+        action_url: momentUrl,
       });
+
+      // Notify all confirmed attendees (excluding creator)
+      const attendees = await pool.query(
+        `SELECT u.email, u.phone_number
+         FROM moment_attendees ma
+         JOIN users u ON u.id = ma.attendee_id
+         WHERE ma.moment_id = $1 AND ma.attendee_id != $2`,
+        [moment_id, req.user?.id],
+      );
+      for (const attendee of attendees.rows) {
+        await sendEmail({
+          email: attendee.email,
+          moment_recap: { moments_name, recap },
+          action_url: momentUrl,
+        });
+        await sendSMS({
+          phone_number: attendee.phone_number,
+          moment_recap: { moments_name },
+          action_url: momentUrl,
+        });
+      }
 
       return res.status(200).send({ success: true, data: { recap } });
     } catch (error) {
@@ -2552,21 +2657,56 @@ app.post(
       );
       const creator = getCreator.rows[0];
 
+      const checkInUrl = `https://br3w.app/moments/${moment_id}`;
+      const checkInPayload = {
+        moments_name: momentResult.rows[0].moments_name,
+        attendee_username: attendee.username,
+      };
+
+      // Confirm check-in to the attendee themselves
       await sendEmail({
-        email: creator.email,
-        check_in: {
-          moments_name: momentResult.rows[0].moments_name,
-          attendee_username: attendee.username,
-        },
+        email: attendee.email,
+        checked_in_self: { moments_name: momentResult.rows[0].moments_name },
+        action_url: checkInUrl,
+      });
+      await sendSMS({
+        phone_number: attendee.phone_number,
+        checked_in_self: { moments_name: momentResult.rows[0].moments_name },
+        action_url: checkInUrl,
       });
 
+      // Notify creator
+      await sendEmail({
+        email: creator.email,
+        check_in: checkInPayload,
+        action_url: checkInUrl,
+      });
       await sendSMS({
         phone_number: creator.phone_number,
-        check_in: {
-          moments_name: momentResult.rows[0].moments_name,
-          attendee_username: attendee.username,
-        },
+        check_in: checkInPayload,
+        action_url: checkInUrl,
       });
+
+      // Notify all other confirmed attendees
+      const otherAttendees = await pool.query(
+        `SELECT u.email, u.phone_number
+         FROM moment_attendees ma
+         JOIN users u ON u.id = ma.attendee_id
+         WHERE ma.moment_id = $1 AND ma.attendee_id != $2 AND ma.attendee_id != $3`,
+        [moment_id, attendee_id, momentResult.rows[0].creator_id],
+      );
+      for (const other of otherAttendees.rows) {
+        await sendEmail({
+          email: other.email,
+          check_in: checkInPayload,
+          action_url: checkInUrl,
+        });
+        await sendSMS({
+          phone_number: other.phone_number,
+          check_in: checkInPayload,
+          action_url: checkInUrl,
+        });
+      }
 
       return res.status(200).send({ success: true, data: result.rows[0] });
     } catch (error) {
@@ -2584,9 +2724,9 @@ app.post(
       const { circle_id } = req.params;
 
       const result = await pool.query(
-        `UPDATE circle_invites 
-         SET status = 'accepted', accepted_at = NOW() 
-         WHERE circle_id = $1 AND member_id = $2 
+        `UPDATE invite_members
+         SET status = 'accepted', accepted_at = NOW()
+         WHERE circle_id = $1 AND member_id = $2
          RETURNING *`,
         [circle_id, req.user?.id],
       );
@@ -2612,126 +2752,140 @@ app.post(
 //Node-cron is a lightweight task scheduler for Node.js applications
 // that allows you to execute JavaScript code at specific intervals or times
 
-// cron.schedule("*/15 * * * *", async () => {
-//   try {
-//     const windowStart = new Date(Date.now() + 45 * 60 * 1000).toISOString();
-//     const windowEnd = new Date(Date.now() + 75 * 60 * 1000).toISOString();
+cron.schedule("*/15 * * * *", async () => {
+  try {
+    // 14-minute window centered around the 1-hour mark, strictly non-overlapping
+    // with adjacent 15-minute ticks so each attendee gets exactly one reminder
+    const windowStart = new Date(Date.now() + 55 * 60 * 1000).toISOString();
+    const windowEnd = new Date(Date.now() + 69 * 60 * 1000).toISOString();
 
-//     const upcoming = await pool.query(
-//       `SELECT m.moments_name, m.location_name, m.moment_start, ia.attendee_id
-//       FROM moments m
-//       JOIN invite_attendees ia ON m.id = ia.moment_id
-//       WHERE m.moment_start >= $1
-//       AND m.moment_start <= $2
-//       AND ia.status = 'accepted'
-//       AND m.close_moment IS NOT TRUE`,
-//       [windowStart, windowEnd],
-//     );
+    const upcoming = await pool.query(
+      `SELECT m.id AS moment_id, m.moments_name, m.location_name, m.moment_start, ia.attendee_id
+       FROM moments m
+       JOIN invite_attendees ia ON m.id = ia.moment_id
+       WHERE m.moment_start >= $1
+       AND m.moment_start < $2
+       AND ia.status = 'accepted'
+       AND m.close_moment IS NOT TRUE`,
+      [windowStart, windowEnd],
+    );
 
-//     for (const row of upcoming.rows) {
-//       const attendee = await pool.query(
-//         `SELECT email, phone_number FROM users WHERE id = $1`,
-//         [row.attendee_id],
-//       );
-//       if (!attendee.rows[0]) continue;
+    for (const row of upcoming.rows) {
+      const attendee = await pool.query(
+        `SELECT email, phone_number FROM users WHERE id = $1`,
+        [row.attendee_id],
+      );
+      if (!attendee.rows[0]) continue;
 
-//       const time = new Date(row.moment_start).toLocaleTimeString("en-US", {
-//         hour: "numeric",
-//         minute: "2-digit",
-//         hour12: true,
-//       });
+      const time = new Date(row.moment_start).toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      });
 
-//       await sendEmail({
-//         email: attendee.rows[0].email,
-//         moment_reminder: {
-//           moments_name: row.moments_name,
-//           location_name: row.location_name,
-//           time,
-//         },
-//       });
-//       await sendSMS({
-//         phone_number: attendee.rows[0].phone_number,
-//         moment_reminder: {
-//           moments_name: row.moments_name,
-//           location_name: row.location_name,
-//           time,
-//         },
-//       });
-//     }
-//   } catch (error) {
-//     console.error("Reminder cron error:", error);
-//   }
-// });
+      const momentUrl = `https://br3w.app/moments/${row.moment_id}`;
 
-// // Runs daily at 10 AM — pending invite nudges
-// cron.schedule("0 10 * * *", async () => {
-//   try {
-//     const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      await sendEmail({
+        email: attendee.rows[0].email,
+        moment_reminder: {
+          moments_name: row.moments_name,
+          location_name: row.location_name,
+          time,
+        },
+        action_url: momentUrl,
+      });
+      await sendSMS({
+        phone_number: attendee.rows[0].phone_number,
+        moment_reminder: {
+          moments_name: row.moments_name,
+          location_name: row.location_name,
+          time,
+        },
+        action_url: momentUrl,
+      });
+    }
+  } catch (error) {
+    console.error("Reminder cron error:", error);
+  }
+});
 
-//     // Pending moment invites
-//     const pendingMoments = await pool.query(
-//       `SELECT ia.attendee_id, m.moments_name, m.moment_start
-//       FROM invite_attendees ia
-//       JOIN moments m ON ia.moment_id = m.id
-//       WHERE ia.status = 'pending'
-//       AND ia.created_at <= $1
-//       AND m.moment_start > NOW()`,
-//       [yesterday],
-//     );
+//Runs daily at 10 AM — pending invite nudges
+cron.schedule("0 10 * * *", async () => {
+  try {
+    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
-//     for (const row of pendingMoments.rows) {
-//       const attendee = await pool.query(
-//         `SELECT email, phone_number FROM users WHERE id = $1`,
-//         [row.attendee_id],
-//       );
-//       if (!attendee.rows[0]) continue;
+    //Pending moment invites
+    const pendingMoments = await pool.query(
+      `SELECT ia.attendee_id, ia.moment_id, m.moments_name, m.moment_start
+       FROM invite_attendees ia
+       JOIN moments m ON ia.moment_id = m.id
+       WHERE ia.status = 'pending'
+       AND ia.created_at <= $1
+       AND m.moment_start > NOW()`,
+      [yesterday],
+    );
 
-//       const time = new Date(row.moment_start).toLocaleTimeString("en-US", {
-//         hour: "numeric",
-//         minute: "2-digit",
-//         hour12: true,
-//       });
+    for (const row of pendingMoments.rows) {
+      const attendee = await pool.query(
+        `SELECT email, phone_number FROM users WHERE id = $1`,
+        [row.attendee_id],
+      );
+      if (!attendee.rows[0]) continue;
 
-//       await sendEmail({
-//         email: attendee.rows[0].email,
-//         moment_invite_reminder: { moments_name: row.moments_name, time },
-//       });
-//       await sendSMS({
-//         phone_number: attendee.rows[0].phone_number,
-//         moment_invite_reminder: { moments_name: row.moments_name, time },
-//       });
-//     }
+      const time = new Date(row.moment_start).toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      });
 
-//     // Pending circle invites
-//     const pendingCircles = await pool.query(
-//       `SELECT im.member_id, c.circle_name
-//       FROM invite_members im
-//       JOIN circles c ON im.circle_id = c.id
-//       WHERE im.status = 'pending'
-//       AND im.created_at <= $1`,
-//       [yesterday],
-//     );
+      const momentUrl = `https://br3w.app/moments/${row.moment_id}`;
 
-//     for (const row of pendingCircles.rows) {
-//       const member = await pool.query(
-//         `SELECT email, phone_number FROM users WHERE id = $1`,
-//         [row.member_id],
-//       );
-//       if (!member.rows[0]) continue;
+      await sendEmail({
+        email: attendee.rows[0].email,
+        moment_invite_reminder: { moments_name: row.moments_name, time },
+        action_url: momentUrl,
+      });
+      await sendSMS({
+        phone_number: attendee.rows[0].phone_number,
+        moment_invite_reminder: { moments_name: row.moments_name, time },
+        action_url: momentUrl,
+      });
+    }
 
-//       await sendEmail({
-//         email: member.rows[0].email,
-//         circle_invite_reminder: { circle_name: row.circle_name },
-//       });
-//       await sendSMS({
-//         phone_number: member.rows[0].phone_number,
-//         circle_invite_reminder: { circle_name: row.circle_name },
-//       });
-//     }
-//   } catch (error) {
-//     console.error("Invite reminder cron error:", error);
-//   }
-// });
+    //Pending circle invites
+    const pendingCircles = await pool.query(
+      `SELECT im.member_id, im.circle_id, c.circle_name
+       FROM invite_members im
+       JOIN circles c ON im.circle_id = c.id
+       WHERE im.status = 'pending'
+       AND im.created_at <= $1`,
+      [yesterday],
+    );
+
+    for (const row of pendingCircles.rows) {
+      const member = await pool.query(
+        `SELECT email, phone_number FROM users WHERE id = $1`,
+        [row.member_id],
+      );
+      if (!member.rows[0]) continue;
+
+      const circleUrl = `https://br3w.app/join?circle=${row.circle_id}`;
+
+      await sendEmail({
+        email: member.rows[0].email,
+        circle_invite_reminder: { circle_name: row.circle_name },
+        action_url: circleUrl,
+      });
+      await sendSMS({
+        phone_number: member.rows[0].phone_number,
+        circle_invite_reminder: { circle_name: row.circle_name },
+        action_url: circleUrl,
+      });
+    }
+  } catch (error) {
+    console.error("Invite reminder cron error:", error);
+  }
+});
 
 app.listen(port, () => {
   console.log(`Listening on port: ${port}`);
