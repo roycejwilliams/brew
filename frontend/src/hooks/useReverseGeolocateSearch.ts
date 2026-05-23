@@ -25,7 +25,7 @@ export const reverseGeolocateSearch = async (
     const params: Record<string, string> = {
       access_token: `${process.env.NEXT_PUBLIC_MAPBOXGL_PUBLIC_TOKEN}`,
       limit: "8",
-      types: "poi,place,address",
+      types: "poi,address,place,neighborhood,locality,region",
     };
     if (coords) params.proximity = `${coords[0]},${coords[1]}`;
 
