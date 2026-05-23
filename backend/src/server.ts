@@ -186,7 +186,7 @@ app.post(
       return res.status(400).send("Request body cannot be empty.");
     }
 
-    const { first_name, last_name, email } = req.body;
+    const { first_name, last_name, email, work_link } = req.body;
 
     if (!first_name || !last_name || !email) {
       const missing = ["first_name", "last_name", "email"].find(
@@ -198,8 +198,8 @@ app.post(
 
     try {
       const insertApp = await pool.query(
-        "INSERT INTO applications (first_name, last_name, email) VALUES ($1, $2, $3) RETURNING *",
-        [first_name, last_name, email],
+        "INSERT INTO applications (first_name, last_name, email, work_link) VALUES ($1, $2, $3, $4) RETURNING *",
+        [first_name, last_name, email, work_link ?? null],
       );
 
       const createApp = insertApp.rows[0];

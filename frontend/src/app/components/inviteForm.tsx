@@ -18,6 +18,7 @@ function InviteForm({ state, setState }: Phase) {
     first_name: "",
     last_name: "",
     email: "",
+    work_link: "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -81,6 +82,25 @@ function InviteForm({ state, setState }: Phase) {
               className={inputClass}
               placeholder="your@email.com"
               required
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <p className="text-[10px] tracking-[3px] uppercase text-white/25">
+                LinkedIn or work profile
+              </p>
+              <p className="text-[10px] tracking-[2px] uppercase text-white/15">
+                Optional
+              </p>
+            </div>
+            <input
+              name="work_link"
+              type="url"
+              value={form.work_link}
+              onChange={handleChange}
+              className={inputClass}
+              placeholder="linkedin.com/in/you"
             />
           </div>
 
