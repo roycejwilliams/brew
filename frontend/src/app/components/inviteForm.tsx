@@ -118,7 +118,7 @@ function InviteForm({ state, setState }: Phase) {
             <span className="text-white/25">→</span>
           </motion.button>
 
-          <p className="text-[11px] text-center text-white/20 tracking-[-0.1px]">
+          <p className="text-[10px] text-center text-white/20 tracking-[-0.1px] whitespace-nowrap">
             By continuing, you agree to B R 3 W&apos;s Terms & Privacy Policy.
           </p>
         </motion.div>
