@@ -4,6 +4,7 @@ import Nav from "../components/nav";
 import { motion } from "motion/react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useSocket } from "@/hooks/useSocket";
 
 const hideNavRoutes = ["/checkin", "/join", "/admin", "/manage"];
 
@@ -17,6 +18,7 @@ export default function AppLayout({
   const router = useRouter();
 
   const { user, hasHydrated } = useUserStore();
+  useSocket();
 
   useEffect(() => {
     if (!hasHydrated) return;

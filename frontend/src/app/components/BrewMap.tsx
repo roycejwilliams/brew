@@ -9,7 +9,7 @@ import CreateModal from "./CreateModal";
 import MobileNav from "./mobileNav";
 import { useUserStore } from "@/stores/useUserStore";
 import MapBoxGl from "./mapBoxGl";
-import { useGetNearbyMoments } from "@/hooks/useMoments";
+import { useGetNearbyMoments, useGetAllMomentsUserIsAttendee } from "@/hooks/useMoments";
 import { useCurrentLocation } from "@/hooks/useCurrentLocation";
 import useDebounce from "@/hooks/useDebounce";
 
@@ -59,6 +59,15 @@ export default function BrewMap() {
 
   const nearbyMoments: MomentProp[] = nearbyData?.data?.data ?? [];
 
+  const { data: attendeeData } = useGetAllMomentsUserIsAttendee(user?.id as string);
+  const attendeeMoments: MomentProp[] = attendeeData?.data?.data ?? [];
+
+  // Merge nearby + attendee moments, dedup by id, attendee moments preserve their visibility_type
+  const allMapMoments = [
+    ...nearbyMoments,
+    ...attendeeMoments.filter((a) => !nearbyMoments.some((n) => n.id === a.id)),
+  ];
+
   // Prevent hydration flash
   if (isMobile === null) return null;
 
@@ -73,7 +82,7 @@ export default function BrewMap() {
           dragPan={true}
           dragRotate={true}
           scrollZoom={true}
-          moments={nearbyMoments}
+          moments={allMapMoments}
           onMove={(center) => {
             setMapCenter(center);
             setSelectedCoordinates(null); // user pan overrides scope selection

@@ -9,6 +9,8 @@ import EventHero from "./EventHero";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import useTimingStates from "@/hooks/useTimingStates";
+import { useSocket } from "@/hooks/useSocket";
+import { useEffect } from "react";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -16,6 +18,13 @@ function EventCard() {
   const router = useRouter();
   const closeEventCard = openEventCard((state) => state.closeEvent);
   const eventCard = openEventCard((state) => state.moment);
+  const { joinMoment, leaveMoment } = useSocket();
+
+  useEffect(() => {
+    if (!eventCard?.id) return;
+    joinMoment(eventCard.id);
+    return () => leaveMoment(eventCard.id!);
+  }, [eventCard?.id]);
 
   const handleClose = () => {
     closeEventCard();
