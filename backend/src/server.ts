@@ -112,10 +112,6 @@ const aiLimiter = rateLimit({
   statusCode: 429,
 });
 
-app.use(limiter); // cover every route
-app.use("/auth", authLimiter); // overrides global for auth
-app.use("/applications", applicationLimiter); // overrides global for applications
-
 app.use(express.json());
 //helps secure express apps by setting http response headers
 app.use(helmut());
@@ -138,6 +134,10 @@ app.use(
     credentials: true,
   }),
 );
+
+app.use(limiter); // cover every route
+app.use("/auth", authLimiter); // overrides global for auth
+app.post("/applications", applicationLimiter); // only throttle new submissions, not admin reads/updates
 
 //Will parse the cookie header upon request and exposes the
 //cookies data property req.cookie
@@ -326,14 +326,25 @@ const otpMerge = (status: string) => {
 
       if (status === "rejected") {
         const rejected = await pool.query(
-          `UPDATE users SET status = 'pending' WHERE id = $1 RETURNING *`,
+          `UPDATE users SET status = 'pending' WHERE application_id = $1 RETURNING *`,
           [req.params.id],
         );
 
-        const rejectedUser: UserProp = rejected.rows[0];
+        const rejectedUser: UserProp | undefined = rejected.rows[0];
 
-        await sendSMS({ phone_number: rejectedUser.phone_number, status });
-        await sendEmail({ email: rejectedUser.email, status });
+        if (rejectedUser) {
+          await sendSMS({ phone_number: rejectedUser.phone_number, status });
+          await sendEmail({ email: rejectedUser.email, status });
+        } else {
+          const app = await pool.query(
+            `SELECT email, phone_number FROM applications WHERE id = $1`,
+            [req.params.id],
+          );
+          if (app.rows[0]) {
+            await sendSMS({ phone_number: app.rows[0].phone_number, status });
+            await sendEmail({ email: app.rows[0].email, status });
+          }
+        }
 
         return res
           .status(200)
