@@ -54,17 +54,17 @@ export const useSocket = () => {
       });
 
       socket.on("photo:new", (photo) => {
-        queryClient.setQueryData(["moment-photos", momentId], (old: any) =>
+        queryClient.setQueryData(["moment-photos", momentId], (old: { data: { data: unknown[] } } | undefined) =>
           old ? { ...old, data: { data: [...(old.data?.data ?? []), photo] } } : old
         );
       });
 
       socket.on("photo:deleted", ({ photo_id }: { photo_id: string }) => {
-        queryClient.setQueryData(["moment-photos", momentId], (old: any) => {
+        queryClient.setQueryData(["moment-photos", momentId], (old: { data: { data: { id: string }[] } } | undefined) => {
           if (!old) return old;
           return {
             ...old,
-            data: { data: old.data?.data?.filter((p: any) => p.id !== photo_id) ?? [] },
+            data: { data: old.data?.data?.filter((p) => p.id !== photo_id) ?? [] },
           };
         });
       });
