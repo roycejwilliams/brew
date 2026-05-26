@@ -202,11 +202,16 @@ export const useGetNearbyMoments = (params: {
   });
 };
 
-//recaps the night
-// uses anthropic sonnet 4.6
 const generateRecap = async (eventCard: MomentProp) => {
-  const response = await api.get(`/moments/${eventCard.id}/recap`);
-  return response.data.data;
+  const response = await api.post("/ai/recap", {
+    moment_id: eventCard.id,
+    moments_name: eventCard.moments_name,
+    description: eventCard.description,
+    location_name: eventCard.location_name,
+    vibes: eventCard.vibes,
+    principles: eventCard.principles,
+  });
+  return response.data.data.recap;
 };
 
 export const useGenerateRecap = (eventCard: MomentProp | null) => {

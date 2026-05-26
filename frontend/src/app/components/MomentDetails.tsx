@@ -209,12 +209,23 @@ export default function MomentDetails({
       venue !== null &&
       locationCoordinates !== null);
 
-  if (stage === "generating") return <GeneratingScreen />;
+  if (stage === "generating")
+    return (
+      <AnimatePresence mode="wait">
+        <GeneratingScreen key="generating" />
+      </AnimatePresence>
+    );
   if (stage === "done")
-    return <DoneScreen momentId={createdMomentId} onClose={onClose} />;
+    return (
+      <AnimatePresence mode="wait">
+        <DoneScreen key="done" momentId={createdMomentId} onClose={onClose} />
+      </AnimatePresence>
+    );
   if (stage === "error")
     return (
+      <AnimatePresence mode="wait">
       <motion.div
+        key="error"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -268,6 +279,7 @@ export default function MomentDetails({
           </button>
         </motion.div>
       </motion.div>
+      </AnimatePresence>
     );
 
   return (
@@ -398,9 +410,10 @@ export default function MomentDetails({
               {locationError}
             </p>
           )}
-          <AnimatePresence>
+          <AnimatePresence mode="wait">
             {hasTyped && !isTyping && isLocationSet && (
               <motion.button
+                key="generate-btn"
                 onClick={handleGenerate}
                 disabled={isPending}
                 initial={{ opacity: 0, y: 10, scale: 0.98 }}

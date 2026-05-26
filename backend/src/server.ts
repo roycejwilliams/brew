@@ -13,6 +13,9 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import cron from "node-cron";
 import helmut from "helmet";
+import { generateText, Output } from "ai";
+import { anthropic } from "@ai-sdk/anthropic";
+import { z } from "zod";
 
 const app = express();
 app.set("trust proxy", 1);
@@ -2307,6 +2310,10 @@ app.put(
   },
 );
 
+//using AI SDK from vercel
+//LLMs in applications are complicted and heavily dependent on the specific model used
+//standardizes integration across providers
+//Abstracts the model call lifecycle - streaming, tool execution, structured output parsing, error handling
 app.post(
   "/ai/generate",
   authenticateToken,
@@ -2315,41 +2322,40 @@ app.post(
     try {
       const { description } = req.body;
 
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": process.env.ANTHROPIC_API_KEY!,
-          "anthropic-version": "2023-06-01",
-        },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-6",
-          max_tokens: 1000,
-          messages: [
-            {
-              role: "user",
-              content: `Based on this event description: "${description}"
-                
-Return ONLY a JSON object with no preamble or markdown:
-{
-  "principles": [...],
-  "expectations": [...],
-  "faqs": [{ "question": "...", "answer": "..." }],
-  "vibes": ["vibe 1", "vibe 2"]
-}
-
-Generate between 3 and 6 items for each array. Vibes between 5 and 10 with 1 word describing the event.
-Keep each item to 1-2 sentences. Match the tone of the description.`,
-            },
-          ],
+      const { output } = await generateText({
+        model: anthropic("claude-sonnet-4-6"),
+        maxOutputTokens: 1024,
+        //use Zod to validate your schemas and define them.
+        output: Output.object({
+          schema: z.object({
+            generate: z.object({
+              principles: z.array(z.string()),
+              expectations: z.array(z.string()),
+              faqs: z.array(
+                z.object({ question: z.string(), answer: z.string() }),
+              ),
+              vibes: z.array(z.string()),
+            }),
+          }),
         }),
+        prompt: `Based on this event description: "${description}"
+                
+        Return ONLY a JSON object with no preamble or markdown:
+        {
+          "principles": [...],
+          "expectations": [...],
+          "faqs": [{ "question": "...", "answer": "..." }],
+          "vibes": ["vibe 1", "vibe 2"]
+        }
+
+        Generate between 3 and 6 items for each array. Vibes between 5 and 10 with 1 word describing the event.
+        Keep each item to 1-2 sentences. Match the tone of the description.`,
       });
 
-      const data = await response.json();
-      const text = data.content[0].text;
-      const parsed = JSON.parse(text.replace(/```json|```/g, "").trim());
+      const data = await output;
+      const text = data.generate;
 
-      return res.status(200).send({ success: true, data: parsed });
+      return res.status(200).send({ success: true, data: text });
     } catch (error) {
       next(error);
     }
@@ -2357,75 +2363,6 @@ Keep each item to 1-2 sentences. Match the tone of the description.`,
 );
 
 //Anthropic Auto-generation
-// GET /moments/:id/recap
-app.get(
-  "/moments/:id/recap",
-  authenticateToken,
-  aiLimiter,
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { id } = req.params;
-
-      // Check if recap already exists
-      const existing = await pool.query(
-        "SELECT recap FROM moments WHERE id = $1",
-        [id],
-      );
-
-      if (existing.rows[0]?.recap) {
-        return res
-          .status(200)
-          .json({ success: true, data: existing.rows[0].recap });
-      }
-
-      // No recap yet — fetch moment description to generate from
-      const moment = await pool.query(
-        "SELECT description FROM moments WHERE id = $1",
-        [id],
-      );
-
-      if (!moment.rows[0]) {
-        return res
-          .status(404)
-          .json({ success: false, message: "Moment not found" });
-      }
-
-      // Call Anthropic
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": process.env.ANTHROPIC_API_KEY!,
-          "anthropic-version": "2023-06-01",
-        },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-6",
-          max_tokens: 300,
-          messages: [
-            {
-              role: "user",
-              content: `Write a short, evocative 2-3 sentence recap of an event that had this description: "${moment.rows[0].description}". Write it in past tense as if the event just ended. Be atmospheric and specific. No quotes, no preamble.`,
-            },
-          ],
-        }),
-      });
-
-      const aiData = await response.json();
-      const recap = aiData.content[0].text.trim();
-
-      // Persist so we never generate again
-      await pool.query("UPDATE moments SET recap = $1 WHERE id = $2", [
-        recap,
-        id,
-      ]);
-
-      return res.status(200).json({ success: true, data: recap });
-    } catch (error) {
-      next(error);
-    }
-  },
-);
-
 //recap event endpoint
 app.post(
   "/ai/recap",
@@ -2452,7 +2389,7 @@ app.post(
           moment_id,
         ]),
         pool.query(
-          `SELECT moment_start, moment_end FROM moments WHERE id = $1`,
+          `SELECT moment_start, moment_end, recap FROM moments WHERE id = $1`,
           [moment_id],
         ),
       ]);
@@ -2460,6 +2397,12 @@ app.post(
       const attendeeCount = parseInt(attendeeResult.rows[0].count);
       const photoCount = parseInt(photoResult.rows[0].count);
       const moment = momentResult.rows[0];
+
+      if (moment?.recap) {
+        return res
+          .status(200)
+          .json({ success: true, data: { recap: moment.recap } });
+      }
 
       const endTime = moment?.moment_end;
       const durationHours =
@@ -2472,20 +2415,9 @@ app.post(
             ) / 10
           : null;
 
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": process.env.ANTHROPIC_API_KEY!,
-          "anthropic-version": "2023-06-01",
-        },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-6",
-          max_tokens: 300,
-          messages: [
-            {
-              role: "user",
-              content: `Write a short, evocative 2-3 sentence recap of this event. Make it feel like a memory — cinematic, sensory, present tense. Do not use clichés.
+      const { text: recap } = await generateText({
+        model: anthropic("claude-sonnet-4-6"),
+        prompt: `Write a short, evocative 2-3 sentence recap of this event. Make it feel like a memory — cinematic, sensory, present tense. Do not use clichés.
               Event: ${moments_name}
               Location: ${location_name}
               Description: ${description}
@@ -2496,13 +2428,12 @@ app.post(
               ${photoCount > 0 ? `Photos captured: ${photoCount}` : ""}
 
               Return ONLY the recap text, no preamble, no quotes.`,
-            },
-          ],
-        }),
       });
 
-      const data = await response.json();
-      const recap = data.content[0].text;
+      await pool.query("UPDATE moments SET recap = $1 WHERE id = $2", [
+        recap,
+        moment_id,
+      ]);
 
       const momentUrl = `https://br3w.app/moments/${moment_id}`;
 
