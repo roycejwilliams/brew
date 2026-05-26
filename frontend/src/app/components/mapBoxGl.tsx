@@ -84,6 +84,27 @@ function MapBoxGl({
       const lat = (moment.location as unknown as { x: number; y: number })?.y;
       if (lng == null || lat == null) return;
 
+      const borderColor =
+        moment.visibility_type === "circle"
+          ? "rgba(251,191,36,0.5)"
+          : moment.visibility_type === "people"
+          ? "rgba(99,102,241,0.6)"
+          : "rgba(255,255,255,0.25)";
+
+      const hoverBorderColor =
+        moment.visibility_type === "circle"
+          ? "rgba(251,191,36,0.9)"
+          : moment.visibility_type === "people"
+          ? "rgba(99,102,241,1)"
+          : "rgba(255,255,255,0.5)";
+
+      const selectedBorderColor =
+        moment.visibility_type === "circle"
+          ? "rgba(251,191,36,1)"
+          : moment.visibility_type === "people"
+          ? "rgba(129,140,248,1)"
+          : "rgba(255,255,255,0.8)";
+
       // Wrapper — stable 44px hit target
       const wrapper = document.createElement("div");
       wrapper.style.cssText = `
@@ -102,7 +123,7 @@ function MapBoxGl({
         height: 36px;
         border-radius: 50%;
         background: rgba(10,10,10,0.9);
-        border: 1.5px solid rgba(255,255,255,0.25);
+        border: 1.5px solid ${borderColor};
         backdrop-filter: blur(8px);
         box-shadow: 0 4px 16px rgba(0,0,0,0.4);
         overflow: hidden;
@@ -142,19 +163,17 @@ function MapBoxGl({
       // Hover
       wrapper.addEventListener("mouseenter", () => {
         inner.style.transform = "scale(1.1)";
-        inner.style.borderColor = "rgba(255,255,255,0.5)";
+        inner.style.borderColor = hoverBorderColor;
       });
 
       wrapper.addEventListener("mouseleave", () => {
         if (selectedMarkerRef.current !== moment.id) {
           inner.style.transform = "scale(1)";
-          inner.style.borderColor = "rgba(255,255,255,0.25)";
+          inner.style.borderColor = borderColor;
         }
       });
 
-      // Two-step click
-      // first zoom in,
-      // second open event
+      // Two-step click: first zoom in, second open event
       wrapper.addEventListener("click", () => {
         const map = mapRef.current;
         if (!map) return;
@@ -162,11 +181,9 @@ function MapBoxGl({
         const currentZoom = map.getZoom();
 
         if (selectedMarkerRef.current !== moment.id || currentZoom < 13) {
-          // First click
-          // zoom in and select
           selectedMarkerRef.current = moment.id as string;
           inner.style.transform = "scale(1.2)";
-          inner.style.borderColor = "rgba(255,255,255,0.8)";
+          inner.style.borderColor = selectedBorderColor;
           map.flyTo({
             center: [lng, lat],
             zoom: 14,
@@ -174,8 +191,6 @@ function MapBoxGl({
             essential: true,
           });
         } else {
-          // Second click
-          // open event card
           openCard(moment);
           router.push(`/moments/${moment.id}`, { scroll: false });
           selectedMarkerRef.current = null;

@@ -13,10 +13,65 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import cron from "node-cron";
 import helmut from "helmet";
+import { generateText, Output } from "ai";
+import { anthropic } from "@ai-sdk/anthropic";
+import { z } from "zod";
+import { createServer } from "http";
+import { Server } from "socket.io";
 
 const app = express();
 app.set("trust proxy", 1);
 const port = "8080";
+
+//wraps the express app in a native Node.js HTTP server
+const httpServer = createServer(app);
+//allows the connection to remain open for request
+//creates a socket.io server that attachees to the http
+//so both now run on the same port
+const io = new Server(httpServer, {
+  cors: {
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      const allowed =
+        process.env.NODE_ENV === "production"
+          ? origin === "https://br3w.app" ||
+            /^https:\/\/brew-.*\.vercel\.app$/.test(origin)
+          : origin === "http://localhost:3000";
+      allowed
+        ? callback(null, true)
+        : callback(new Error("Not allowed by CORS"));
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  },
+});
+
+io.use((socket, next) => {
+  const cookieHeader = socket.handshake.headers.cookie ?? "";
+  const token = Object.fromEntries(
+    cookieHeader.split(";").map((c) => c.trim().split("=").map(decodeURIComponent))
+  )["token"];
+  if (!token) return next(new Error("Unauthorized"));
+  jwt.verify(token, process.env.JWT_SECRET_KEY!, (err: Error | null, user: any) => {
+    if (err) return next(new Error("Invalid token"));
+    (socket as any).user = user;
+    next();
+  });
+});
+
+io.on("connection", (socket) => {
+  const userId = (socket as any).user?.id as string;
+  if (userId) socket.join(`user:${userId}`);
+
+  socket.on("join:moment", (momentId: string) => {
+    socket.join(`moment:${momentId}`);
+  });
+
+  socket.on("leave:moment", (momentId: string) => {
+    socket.leave(`moment:${momentId}`);
+  });
+});
 
 //Used to control the rate of traffic sent or received by a network interface or service
 const limiter = rateLimit({
@@ -1036,6 +1091,17 @@ app.post(
       const createMoment: MomentProp = createMomentsById.rows[0];
 
       if (createMoment) {
+        if (createMoment.visibility_type === "nearby") {
+          io.emit("moment:created", { visibility_type: "nearby" });
+        } else if (createMoment.visibility_type === "circle" && circle_id) {
+          const members = await pool.query(
+            `SELECT member_id FROM circle_members WHERE circle_id = $1`,
+            [circle_id],
+          );
+          for (const { member_id } of members.rows) {
+            io.to(`user:${member_id}`).emit("moment:created", { visibility_type: "circle" });
+          }
+        }
         return res.status(201).send({
           success: true,
           data: createMoment,
@@ -1415,6 +1481,7 @@ app.put(
       const momentUpdated: MomentProp = updateMoment.rows[0];
 
       if (momentUpdated) {
+        io.to(`moment:${req.params.moment_id}`).emit("moment:updated", momentUpdated);
         return res.status(200).send({
           success: true,
           data: momentUpdated,
@@ -1595,6 +1662,7 @@ app.delete(
       await pool.query(`DELETE FROM moment_photos WHERE id = $1`, [
         req.params.photo_id,
       ]);
+      io.to(`moment:${req.params.moment_id}`).emit("photo:deleted", { photo_id: req.params.photo_id });
       return res.status(200).send({ success: true });
     } catch (error) {
       next(error);
@@ -1870,6 +1938,7 @@ app.put(
         const path: InviteMembersProp = addToCircleQuery.rows[0];
 
         if (path) {
+          io.to(`user:${decision.invited_by}`).emit("invite:decision", { target: "circle", status: "accepted", circle_id: memberId.circle_id });
           return res.status(201).send({
             success: true,
             data: path,
@@ -2169,6 +2238,7 @@ app.put(
         const path: InviteAttendeesProp = addToCircleQuery.rows[0];
 
         if (path) {
+          io.to(`user:${decision.invited_by}`).emit("invite:decision", { target: "moment", status: "accepted", moment_id: attendeeId.moment_id });
           return res.status(201).send({
             success: true,
             data: path,
@@ -2307,6 +2377,10 @@ app.put(
   },
 );
 
+//using AI SDK from vercel
+//LLMs in applications are complicted and heavily dependent on the specific model used
+//standardizes integration across providers
+//Abstracts the model call lifecycle - streaming, tool execution, structured output parsing, error handling
 app.post(
   "/ai/generate",
   authenticateToken,
@@ -2315,41 +2389,40 @@ app.post(
     try {
       const { description } = req.body;
 
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": process.env.ANTHROPIC_API_KEY!,
-          "anthropic-version": "2023-06-01",
-        },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-6",
-          max_tokens: 1000,
-          messages: [
-            {
-              role: "user",
-              content: `Based on this event description: "${description}"
-                
-Return ONLY a JSON object with no preamble or markdown:
-{
-  "principles": [...],
-  "expectations": [...],
-  "faqs": [{ "question": "...", "answer": "..." }],
-  "vibes": ["vibe 1", "vibe 2"]
-}
-
-Generate between 3 and 6 items for each array. Vibes between 5 and 10 with 1 word describing the event.
-Keep each item to 1-2 sentences. Match the tone of the description.`,
-            },
-          ],
+      const { output } = await generateText({
+        model: anthropic("claude-sonnet-4-6"),
+        maxOutputTokens: 1024,
+        //use Zod to validate your schemas and define them.
+        output: Output.object({
+          schema: z.object({
+            generate: z.object({
+              principles: z.array(z.string()),
+              expectations: z.array(z.string()),
+              faqs: z.array(
+                z.object({ question: z.string(), answer: z.string() }),
+              ),
+              vibes: z.array(z.string()),
+            }),
+          }),
         }),
+        prompt: `Based on this event description: "${description}"
+                
+        Return ONLY a JSON object with no preamble or markdown:
+        {
+          "principles": [...],
+          "expectations": [...],
+          "faqs": [{ "question": "...", "answer": "..." }],
+          "vibes": ["vibe 1", "vibe 2"]
+        }
+
+        Generate between 3 and 6 items for each array. Vibes between 5 and 10 with 1 word describing the event.
+        Keep each item to 1-2 sentences. Match the tone of the description.`,
       });
 
-      const data = await response.json();
-      const text = data.content[0].text;
-      const parsed = JSON.parse(text.replace(/```json|```/g, "").trim());
+      const data = await output;
+      const text = data.generate;
 
-      return res.status(200).send({ success: true, data: parsed });
+      return res.status(200).send({ success: true, data: text });
     } catch (error) {
       next(error);
     }
@@ -2357,75 +2430,6 @@ Keep each item to 1-2 sentences. Match the tone of the description.`,
 );
 
 //Anthropic Auto-generation
-// GET /moments/:id/recap
-app.get(
-  "/moments/:id/recap",
-  authenticateToken,
-  aiLimiter,
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { id } = req.params;
-
-      // Check if recap already exists
-      const existing = await pool.query(
-        "SELECT recap FROM moments WHERE id = $1",
-        [id],
-      );
-
-      if (existing.rows[0]?.recap) {
-        return res
-          .status(200)
-          .json({ success: true, data: existing.rows[0].recap });
-      }
-
-      // No recap yet — fetch moment description to generate from
-      const moment = await pool.query(
-        "SELECT description FROM moments WHERE id = $1",
-        [id],
-      );
-
-      if (!moment.rows[0]) {
-        return res
-          .status(404)
-          .json({ success: false, message: "Moment not found" });
-      }
-
-      // Call Anthropic
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": process.env.ANTHROPIC_API_KEY!,
-          "anthropic-version": "2023-06-01",
-        },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-6",
-          max_tokens: 300,
-          messages: [
-            {
-              role: "user",
-              content: `Write a short, evocative 2-3 sentence recap of an event that had this description: "${moment.rows[0].description}". Write it in past tense as if the event just ended. Be atmospheric and specific. No quotes, no preamble.`,
-            },
-          ],
-        }),
-      });
-
-      const aiData = await response.json();
-      const recap = aiData.content[0].text.trim();
-
-      // Persist so we never generate again
-      await pool.query("UPDATE moments SET recap = $1 WHERE id = $2", [
-        recap,
-        id,
-      ]);
-
-      return res.status(200).json({ success: true, data: recap });
-    } catch (error) {
-      next(error);
-    }
-  },
-);
-
 //recap event endpoint
 app.post(
   "/ai/recap",
@@ -2452,7 +2456,7 @@ app.post(
           moment_id,
         ]),
         pool.query(
-          `SELECT moment_start, moment_end FROM moments WHERE id = $1`,
+          `SELECT moment_start, moment_end, recap FROM moments WHERE id = $1`,
           [moment_id],
         ),
       ]);
@@ -2460,6 +2464,12 @@ app.post(
       const attendeeCount = parseInt(attendeeResult.rows[0].count);
       const photoCount = parseInt(photoResult.rows[0].count);
       const moment = momentResult.rows[0];
+
+      if (moment?.recap) {
+        return res
+          .status(200)
+          .json({ success: true, data: { recap: moment.recap } });
+      }
 
       const endTime = moment?.moment_end;
       const durationHours =
@@ -2472,20 +2482,9 @@ app.post(
             ) / 10
           : null;
 
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": process.env.ANTHROPIC_API_KEY!,
-          "anthropic-version": "2023-06-01",
-        },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-6",
-          max_tokens: 300,
-          messages: [
-            {
-              role: "user",
-              content: `Write a short, evocative 2-3 sentence recap of this event. Make it feel like a memory — cinematic, sensory, present tense. Do not use clichés.
+      const { text: recap } = await generateText({
+        model: anthropic("claude-sonnet-4-6"),
+        prompt: `Write a short, evocative 2-3 sentence recap of this event. Make it feel like a memory — cinematic, sensory, present tense. Do not use clichés.
               Event: ${moments_name}
               Location: ${location_name}
               Description: ${description}
@@ -2496,13 +2495,12 @@ app.post(
               ${photoCount > 0 ? `Photos captured: ${photoCount}` : ""}
 
               Return ONLY the recap text, no preamble, no quotes.`,
-            },
-          ],
-        }),
       });
 
-      const data = await response.json();
-      const recap = data.content[0].text;
+      await pool.query("UPDATE moments SET recap = $1 WHERE id = $2", [
+        recap,
+        moment_id,
+      ]);
 
       const momentUrl = `https://br3w.app/moments/${moment_id}`;
 
@@ -2887,6 +2885,6 @@ cron.schedule("0 10 * * *", async () => {
   }
 });
 
-app.listen(port, () => {
+httpServer.listen(port, () => {
   console.log(`Listening on port: ${port}`);
 });
