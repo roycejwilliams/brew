@@ -51,7 +51,7 @@ function JoinContent() {
   }, [circle_id, user?.id]);
 
   return (
-    <div className="h-dvh overflow-hidden bg-[#0c0c0c] flex items-center justify-center px-6">
+    <div className="min-h-dvh overflow-hidden bg-[#0c0c0c] flex items-center justify-center px-6">
       <AnimatePresence mode="wait">
         {status === "loading" && (
           <motion.div
@@ -230,7 +230,7 @@ export default function JoinPage() {
   return (
     <Suspense
       fallback={
-        <div className="h-dvh bg-[#0c0c0c] flex items-center justify-center">
+        <div className="min-h-dvh bg-[#0c0c0c] flex items-center justify-center">
           <div className="w-7 h-7 rounded-full border-2 border-white/10 border-t-white/50 animate-spin" />
         </div>
       }

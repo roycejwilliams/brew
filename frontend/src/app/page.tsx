@@ -63,7 +63,7 @@ function LoginContent() {
   }, []);
 
   return (
-    <section className="relative h-dvh flex justify-center items-center overflow-hidden bg-[#0c0c0c]">
+    <section className="relative min-h-dvh flex justify-center items-center overflow-hidden bg-[#0c0c0c]">
       {/* Background */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -213,7 +213,7 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="h-dvh bg-[#0c0c0c] flex items-center justify-center">
+        <div className="min-h-dvh bg-[#0c0c0c] flex items-center justify-center">
           <div className="w-7 h-7 rounded-full border-2 border-white/10 border-t-white/50 animate-spin" />
         </div>
       }

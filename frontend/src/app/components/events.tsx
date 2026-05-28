@@ -230,7 +230,7 @@ export default function Events({
               backdropFilter: "blur(24px)",
               borderTop: "1px solid rgba(255,255,255,0.08)",
               paddingBottom: "72px",
-              height: "100dvh",
+              minHeight: "100dvh",
             }}
           >
             {/* Drag handle — only draggable area */}
