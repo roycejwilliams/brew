@@ -52,6 +52,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+      </head>
       <body className={`${chillax.className} antialiased`}>
         <div className="fixed inset-0 -z-10 bg-[#0c0c0c]" />
         <Providers>{children}</Providers>
