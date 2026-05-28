@@ -54,8 +54,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${chillax.className} antialiased`}>
-        {" "}
-        <Providers>{children} </Providers>
+        <div className="fixed inset-0 -z-10 bg-[#0c0c0c]" />
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

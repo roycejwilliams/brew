@@ -72,7 +72,8 @@ export default function Nav() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        className={`absolute left-4 top-4 flex items-center ${openNav ? "z-200" : "z-60"}`}
+        className={`fixed left-4 flex items-center ${openNav ? "z-200" : "z-60"}`}
+        style={{ top: "calc(env(safe-area-inset-top, 0px) + 1rem)" }}
       >
         {/* Main Nav Container */}
         <motion.div
