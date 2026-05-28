@@ -12,21 +12,6 @@
   background-color: black;
   --radius: 0.625rem;
   --pt-nav: calc(env(safe-area-inset-top, 0px) + 7rem);
-}
-
-@media (min-width: 640px) {
-  :root {
-    --pt-nav: 1.5rem;
-  }
-}
-
-@utility pt-safe {
-  padding-top: env(safe-area-inset-top, 0px);
-}
-
-@utility pb-safe {
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-}
   --background: oklch(1 0 0);
   --foreground: oklch(0.147 0.004 49.25);
   --card: oklch(1 0 0);
@@ -58,6 +43,20 @@
   --sidebar-accent-foreground: oklch(0.216 0.006 56.043);
   --sidebar-border: oklch(0.923 0.003 48.717);
   --sidebar-ring: oklch(0.709 0.01 56.259);
+}
+
+@media (min-width: 640px) {
+  :root {
+    --pt-nav: 1.5rem;
+  }
+}
+
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 @keyframes blob {
