@@ -51,6 +51,7 @@ function MapBoxGl({
     });
 
     mapRef.current.on("load", () => {
+      mapRef.current?.resize();
       setMapReady(true);
     });
 
