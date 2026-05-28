@@ -143,7 +143,7 @@ function Dashboard({ profile }: DashboardProp) {
         }}
       />
 
-      <div className="relative max-w-4xl w-full mx-auto px-4 sm:px-6 pb-6 flex flex-col flex-1" style={{ paddingTop: "var(--pt-nav)" }}>
+      <div className="relative max-w-4xl w-full mx-auto px-4 sm:px-6 pt-24 sm:pt-6 pb-6 flex flex-col flex-1">
         {/* Profile header */}
         <div className="flex items-start justify-between gap-4 sm:gap-8">
           {/* Left — avatar + info */}

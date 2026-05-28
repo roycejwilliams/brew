@@ -11,7 +11,6 @@
 :root {
   background-color: black;
   --radius: 0.625rem;
-  --pt-nav: calc(env(safe-area-inset-top, 0px) + 7rem);
   --background: oklch(1 0 0);
   --foreground: oklch(0.147 0.004 49.25);
   --card: oklch(1 0 0);
@@ -45,18 +44,9 @@
   --sidebar-ring: oklch(0.709 0.01 56.259);
 }
 
-@media (min-width: 640px) {
-  :root {
-    --pt-nav: 1.5rem;
-  }
-}
-
-@utility pt-safe {
-  padding-top: env(safe-area-inset-top, 0px);
-}
-
-@utility pb-safe {
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+html,
+body {
+  background-color: #0c0c0c;
 }
 
 @keyframes blob {

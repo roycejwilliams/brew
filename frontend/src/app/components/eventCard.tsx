@@ -84,8 +84,7 @@ function EventCard() {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.25, ease: EASE }}
         whileTap={{ scale: 0.94 }}
-        className="fixed z-50 flex items-center gap-2 cursor-pointer group"
-        style={{ top: "calc(env(safe-area-inset-top, 0px) + 1.25rem)", left: "1rem" }}
+        className="fixed top-0 left-0 mt-5 sm:mt-8 ml-4 sm:ml-6 z-50 flex items-center gap-2 cursor-pointer group"
       >
         <div
           className="flex items-center justify-center transition-colors duration-200"

@@ -91,8 +91,7 @@ function CreateModal({ onClose }: CreateModalProp) {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
             whileTap={{ scale: 0.94 }}
-            className="fixed z-50 flex items-center gap-2 cursor-pointer group"
-            style={{ top: "calc(env(safe-area-inset-top, 0px) + 1.5rem)", left: "1.5rem" }}
+            className="fixed top-0 left-0 m-6 z-50 flex items-center gap-2 cursor-pointer group"
           >
             <div
               className="flex items-center justify-center transition-all duration-200"
