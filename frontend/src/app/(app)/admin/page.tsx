@@ -29,7 +29,7 @@ export default function AdminPage() {
 
   if (isPending) {
     return (
-      <section className="h-dvh bg-[#0c0c0c] text-white flex items-center justify-center">
+      <section className="min-h-dvh bg-[#0c0c0c] text-white flex items-center justify-center">
         <Loading />
       </section>
     );
@@ -37,7 +37,7 @@ export default function AdminPage() {
 
   if (user?.role !== "admin") {
     return (
-      <section className="h-dvh overflow-hidden bg-[#0c0c0c] text-white flex items-center justify-center px-6">
+      <section className="min-h-dvh overflow-hidden bg-[#0c0c0c] text-white flex items-center justify-center px-6">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -99,7 +99,7 @@ export default function AdminPage() {
   ];
 
   return (
-    <section className="h-dvh overflow-y-auto overscroll-contain bg-[#0c0c0c] text-white px-4 sm:px-8 lg:px-12 py-10 pb-24">
+    <section className="min-h-dvh overflow-y-auto overscroll-contain bg-[#0c0c0c] text-white px-4 sm:px-8 lg:px-12 py-10 pb-24">
       {/* Ambient glow */}
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 pointer-events-none"

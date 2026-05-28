@@ -36,7 +36,7 @@ function CreateModal({ onClose }: CreateModalProp) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.25 }}
-      className="w-full h-dvh absolute left-0 top-0 z-80 overflow-hidden"
+      className="w-full min-h-dvh absolute left-0 top-0 z-80 overflow-hidden"
       style={{ background: "#0c0c0c" }}
     >
       {/* Background glows */}
@@ -91,7 +91,8 @@ function CreateModal({ onClose }: CreateModalProp) {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
             whileTap={{ scale: 0.94 }}
-            className="fixed top-0 left-0 m-6 z-50 flex items-center gap-2 cursor-pointer group"
+            className="fixed z-50 flex items-center gap-2 cursor-pointer group"
+            style={{ top: "calc(env(safe-area-inset-top, 0px) + 1.5rem)", left: "1.5rem" }}
           >
             <div
               className="flex items-center justify-center transition-all duration-200"

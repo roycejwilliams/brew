@@ -131,7 +131,7 @@ function Dashboard({ profile }: DashboardProp) {
   };
 
   return (
-    <section className="h-dvh overflow-x-hidden overflow-y-auto overscroll-contain bg-[#0c0c0c] relative flex flex-col">
+    <section className="min-h-dvh overflow-x-hidden overflow-y-auto overscroll-contain bg-[#0c0c0c] relative flex flex-col">
       {/* Ambient glow */}
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 pointer-events-none"

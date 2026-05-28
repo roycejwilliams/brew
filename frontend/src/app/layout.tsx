@@ -1,9 +1,16 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { chillax } from "../../public/fonts/chillax";
 import "@heroui/styles";
 import "./globals.css";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Providers } from "@/providers/providers";
+
+export const viewport: Viewport = {
+  viewportFit: "cover",
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#0c0c0c",
+};
 
 export const metadata: Metadata = {
   title: "B R 3 W",
@@ -47,8 +54,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${chillax.className} antialiased`}>
-        {" "}
-        <Providers>{children} </Providers>
+        <div className="fixed inset-0 -z-10 bg-[#0c0c0c]" />
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

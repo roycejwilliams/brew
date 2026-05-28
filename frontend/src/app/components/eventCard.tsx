@@ -35,7 +35,7 @@ function EventCard() {
 
   return (
     <main
-      className="h-dvh overflow-x-hidden w-full text-white"
+      className="min-h-dvh overflow-x-hidden w-full text-white"
       style={{ background: "#0c0c0c" }}
     >
       {/* Background — fixed so it stays while scrolling */}
@@ -84,7 +84,8 @@ function EventCard() {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.25, ease: EASE }}
         whileTap={{ scale: 0.94 }}
-        className="fixed top-0 left-0 mt-5 sm:mt-8 ml-4 sm:ml-6 z-50 flex items-center gap-2 cursor-pointer group"
+        className="fixed z-50 flex items-center gap-2 cursor-pointer group"
+        style={{ top: "calc(env(safe-area-inset-top, 0px) + 1.25rem)", left: "1rem" }}
       >
         <div
           className="flex items-center justify-center transition-colors duration-200"

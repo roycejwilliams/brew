@@ -16,3 +16,13 @@ export const openEventCard = create<OpenEventCard>((set) => ({
     set({ isEventOpen: true, moment: moment, scrollY: window.scrollY }),
   closeEvent: () => set({ isEventOpen: false, moment: null }),
 }));
+
+interface UIStore {
+  pulseOpen: boolean;
+  setPulseOpen: (open: boolean) => void;
+}
+
+export const useUIStore = create<UIStore>((set) => ({
+  pulseOpen: false,
+  setPulseOpen: (open) => set({ pulseOpen: open }),
+}));

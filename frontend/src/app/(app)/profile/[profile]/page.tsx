@@ -12,7 +12,7 @@ export default function Profile() {
   if (!data?.data.data) return null;
 
   return (
-    <div className="h-dvh overflow-hidden">
+    <div className="min-h-dvh overflow-hidden">
       <Dashboard profile={data?.data.data} />
     </div>
   );

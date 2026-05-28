@@ -18,7 +18,10 @@ export default function MobileNav({
   eventsOpen,
 }: MobileNavProps) {
   return (
-    <div className="fixed bottom-7 left-4 right-4 z-50">
+    <div
+      className="fixed bottom-0 left-0 right-0 z-50 px-4"
+      style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 0.75rem)" }}
+    >
       <div
         className="flex items-center justify-around px-6 pt-3 pb-3 rounded-2xl"
         style={{

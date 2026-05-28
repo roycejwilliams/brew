@@ -111,7 +111,10 @@ export default function Events({
       <div className="absolute top-0 left-0 right-0 h-32 bg-linear-to-b from-white/3 to-transparent pointer-events-none z-10" />
 
       {/* Header */}
-      <div className="relative z-10 px-5 pt-6 pb-4 flex items-start justify-between border-b border-white/5">
+      <div
+        className="relative z-10 px-5 pb-4 flex items-start justify-between border-b border-white/5"
+        style={{ paddingTop: isFullHeight ? "calc(env(safe-area-inset-top, 0px) + 1.5rem)" : "1.5rem" }}
+      >
         <div className="space-y-0.5">
           <p className="text-[10px] tracking-[3px] uppercase text-white/20 font-medium">
             BR3W
@@ -224,12 +227,12 @@ export default function Events({
             animate={{ y: isFullHeight ? 0 : `calc(100% - ${PEEK_HEIGHT}px)` }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 32, stiffness: 300 }}
-            className="fixed inset-x-0 bottom-0 z-40 flex flex-col rounded-t-2xl overflow-hidden"
+            className={`fixed inset-x-0 bottom-0 z-50 flex flex-col overflow-hidden ${isFullHeight ? "" : "rounded-t-2xl"}`}
             style={{
               background: "rgba(8,8,8,0.95)",
               backdropFilter: "blur(24px)",
-              borderTop: "1px solid rgba(255,255,255,0.08)",
-              paddingBottom: "72px",
+              borderTop: isFullHeight ? "none" : "1px solid rgba(255,255,255,0.08)",
+              paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 4.5rem)",
               height: "100dvh",
             }}
           >
