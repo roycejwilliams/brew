@@ -7,7 +7,7 @@ import { useOutsideAlerter } from "../utils/outsideAlert";
 import { ScrollLock } from "../utils/scrollLock";
 import { motion, AnimatePresence, Variants } from "motion/react";
 import { CloseIcon, MenuIcon, PinIcon, SpinnerIcon } from "./icons";
-import { openEventCard } from "@/stores/store";
+import { openEventCard, useUIStore } from "@/stores/store";
 import { useUserStore } from "@/stores/useUserStore";
 export default function Nav() {
   const path = usePathname();
@@ -61,7 +61,9 @@ export default function Nav() {
   };
 
   const isEventOpen = openEventCard((state) => state.isEventOpen);
-  if (isEventOpen) return null;
+  const { pulseOpen } = useUIStore();
+
+  if (isEventOpen || pulseOpen) return null;
 
   return (
     <>
@@ -70,7 +72,7 @@ export default function Nav() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        className="absolute left-4 top-4 flex items-center z-50"
+        className={`absolute left-4 top-4 flex items-center ${openNav ? "z-200" : "z-60"}`}
       >
         {/* Main Nav Container */}
         <motion.div
@@ -131,7 +133,7 @@ export default function Nav() {
               initial="hidden"
               animate="visible"
               exit="exit"
-              className="absolute z-50 top-0 left-0 mt-18 rounded-lg w-64 overflow-hidden"
+              className="absolute  top-0 left-0 mt-18 rounded-lg w-64 overflow-hidden"
             >
               <div className="p-4">
                 <motion.ul className="flex flex-col gap-y-1">
@@ -251,7 +253,7 @@ export default function Nav() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed w-full h-screen inset-0 z-[55] overflow-hidden"
+            className="fixed w-full h-screen inset-0 z-50 overflow-hidden"
             style={{ background: "#0c0c0c" }}
           >
             {/* Bottom-left warm ember */}

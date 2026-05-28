@@ -8,6 +8,7 @@ import CreateModalButtton from "./createModalButton";
 import CreateModal from "./CreateModal";
 import MobileNav from "./mobileNav";
 import { useUserStore } from "@/stores/useUserStore";
+import { useUIStore } from "@/stores/store";
 import MapBoxGl from "./mapBoxGl";
 import { useGetNearbyMoments, useGetAllMomentsUserIsAttendee } from "@/hooks/useMoments";
 import { useCurrentLocation } from "@/hooks/useCurrentLocation";
@@ -32,6 +33,7 @@ export default function BrewMap() {
   const [eventsOpen, setEventsOpen] = useState(false);
   const [filter, setFilter] = useState<TimeFilter>("tonight");
   const [activeScope, setActiveScope] = useState<ScopeType>("nearby");
+  const { setPulseOpen } = useUIStore();
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
@@ -39,6 +41,10 @@ export default function BrewMap() {
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
   }, []);
+
+  useEffect(() => {
+    setPulseOpen(eventsOpen);
+  }, [eventsOpen, setPulseOpen]);
 
   const { user } = useUserStore();
   const { coordinates } = useCurrentLocation();
