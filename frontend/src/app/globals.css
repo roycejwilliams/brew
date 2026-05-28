@@ -47,16 +47,6 @@
 html,
 body {
   background-color: #0c0c0c;
-  min-height: 100vh;
-  min-height: -webkit-fill-available;
-}
-
-@utility pt-safe {
-  padding-top: env(safe-area-inset-top, 0px);
-}
-
-@utility pb-safe {
-  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 @keyframes blob {

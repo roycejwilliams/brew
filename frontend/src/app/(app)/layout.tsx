@@ -1,14 +1,49 @@
-import type { Viewport } from "next";
-import AppLayoutClient from "./AppLayoutClient";
+"use client";
+import { useUserStore } from "@/stores/useUserStore";
+import Nav from "../components/nav";
+import { motion } from "motion/react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { useSocket } from "@/hooks/useSocket";
 
-export const viewport: Viewport = {
-  themeColor: "#0c0c0c",
-};
+const hideNavRoutes = ["/checkin", "/join", "/admin", "/manage"];
 
 export default function AppLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <AppLayoutClient>{children}</AppLayoutClient>;
+  const pathname = usePathname();
+  const showNav = !hideNavRoutes.some((route) => pathname.startsWith(route));
+  const router = useRouter();
+
+  const { user, hasHydrated } = useUserStore();
+  useSocket();
+
+  useEffect(() => {
+    if (!hasHydrated) return;
+    if (!user) {
+      const redirect = window.location.pathname + window.location.search;
+      router.replace(`/?redirect=${encodeURIComponent(redirect)}`);
+    }
+  }, [user, hasHydrated, router]);
+
+  return (
+    <main>
+      <div className="relative flex-1">
+        {showNav && <Nav />}
+        {hasHydrated && (
+          <motion.div
+            key={pathname}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {children}
+          </motion.div>
+        )}
+      </div>
+    </main>
+  );
 }

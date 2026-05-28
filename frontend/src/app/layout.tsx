@@ -1,15 +1,9 @@
-import type { Metadata, Viewport } from "next";
+import type { Metadata } from "next";
 import { chillax } from "../../public/fonts/chillax";
 import "@heroui/styles";
 import "./globals.css";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Providers } from "@/providers/providers";
-
-export const viewport: Viewport = {
-  viewportFit: "cover",
-  width: "device-width",
-  initialScale: 1,
-};
 
 export const metadata: Metadata = {
   title: "B R 3 W",
@@ -52,13 +46,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-      </head>
       <body className={`${chillax.className} antialiased`}>
-        <div className="fixed inset-0 -z-10 bg-[#0c0c0c]" />
-        <Providers>{children}</Providers>
+        {" "}
+        <Providers>{children} </Providers>
       </body>
     </html>
   );
