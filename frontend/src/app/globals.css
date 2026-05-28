@@ -46,7 +46,7 @@
 
 html,
 body {
-  background-color: #0c0c0c;
+  background-color: #0c0c0c !important;
   min-height: 100vh;
   min-height: -webkit-fill-available;
 }

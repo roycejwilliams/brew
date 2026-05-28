@@ -220,7 +220,7 @@ function MapBoxGl({
   return (
     <motion.div
       ref={mapContainerRef}
-      className="absolute w-full h-full inset-0 brightness-85 contrast-110"
+      className="fixed inset-0 w-full h-full brightness-85 contrast-110"
       initial={{ opacity: 0 }}
       animate={{ opacity: mapReady ? 1 : 0 }}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
