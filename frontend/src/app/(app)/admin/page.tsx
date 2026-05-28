@@ -99,7 +99,7 @@ export default function AdminPage() {
   ];
 
   return (
-    <section className="min-h-dvh overflow-y-auto overscroll-contain bg-[#0c0c0c] text-white px-4 sm:px-8 lg:px-12 py-10 pb-24">
+    <section className="min-h-dvh overflow-y-auto overscroll-contain bg-[#0c0c0c] text-white px-4 sm:px-8 lg:px-12 pb-24" style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 2.5rem)" }}>
       {/* Ambient glow */}
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 pointer-events-none"

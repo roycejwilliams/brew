@@ -11,6 +11,22 @@
 :root {
   background-color: black;
   --radius: 0.625rem;
+  --pt-nav: calc(env(safe-area-inset-top, 0px) + 7rem);
+}
+
+@media (min-width: 640px) {
+  :root {
+    --pt-nav: 1.5rem;
+  }
+}
+
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
   --background: oklch(1 0 0);
   --foreground: oklch(0.147 0.004 49.25);
   --card: oklch(1 0 0);

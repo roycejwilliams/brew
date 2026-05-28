@@ -84,10 +84,11 @@ export default function Tools({ manage, setManage }: ManageTools) {
 
   return (
     <div
-      className="h-full w-16 sm:w-20 flex flex-col items-center py-6 gap-6 shrink-0 relative z-10"
+      className="h-full w-16 sm:w-20 flex flex-col items-center pb-6 gap-6 shrink-0 relative z-10"
       style={{
         borderRight: "1px solid rgba(255,255,255,0.06)",
         background: "rgba(8,8,8,0.8)",
+        paddingTop: "calc(env(safe-area-inset-top, 0px) + 1.5rem)",
       }}
     >
       {/* Top shimmer */}

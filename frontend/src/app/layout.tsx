@@ -1,9 +1,15 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { chillax } from "../../public/fonts/chillax";
 import "@heroui/styles";
 import "./globals.css";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Providers } from "@/providers/providers";
+
+export const viewport: Viewport = {
+  viewportFit: "cover",
+  width: "device-width",
+  initialScale: 1,
+};
 
 export const metadata: Metadata = {
   title: "B R 3 W",
