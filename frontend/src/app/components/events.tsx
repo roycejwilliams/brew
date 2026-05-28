@@ -266,7 +266,7 @@ export default function Events({
 
   // ---- DESKTOP LAYOUT ----
   return (
-    <section className="right-0 h-full flex z-20">
+    <section className="fixed inset-y-0 right-0 flex z-20">
       {/* Main panel */}
       <motion.div
         initial={{ opacity: 0, x: 20 }}

@@ -104,24 +104,24 @@ export default function BrewMap() {
         {!isMobile && (
           <CreateModalButtton openModal={(type) => setActiveModal(type)} />
         )}
-
-        {/* Events panel — desktop sidebar or mobile bottom sheet */}
-        <Events
-          id={user?.id as string}
-          openModal={(type) => setActiveModal(type)}
-          userCoordinates={coordinates}
-          setSelectedCoordinates={setSelectedCoordinates}
-          selectedCoordinates={selectedCoordinates}
-          isMobile={isMobile}
-          eventsOpen={eventsOpen}
-          setEventsOpen={setEventsOpen}
-          filter={filter}
-          setFilter={setFilter}
-          activeScope={activeScope}
-          setActiveScope={setActiveScope}
-          nearbyMoments={nearbyMoments}
-        />
       </div>
+
+      {/* Events panel — outside map div so its z-50 is in the root stacking context */}
+      <Events
+        id={user?.id as string}
+        openModal={(type) => setActiveModal(type)}
+        userCoordinates={coordinates}
+        setSelectedCoordinates={setSelectedCoordinates}
+        selectedCoordinates={selectedCoordinates}
+        isMobile={isMobile}
+        eventsOpen={eventsOpen}
+        setEventsOpen={setEventsOpen}
+        filter={filter}
+        setFilter={setFilter}
+        activeScope={activeScope}
+        setActiveScope={setActiveScope}
+        nearbyMoments={nearbyMoments}
+      />
 
       {/* Mobile bottom nav */}
       {isMobile && (

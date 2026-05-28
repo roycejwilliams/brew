@@ -29,11 +29,8 @@ function LoginContent() {
   useEffect(() => {
     setIsMobile(window.innerWidth < 768);
     document.body.style.overflow = "hidden";
-    document.body.style.background =
-      "radial-gradient(ellipse at bottom left, rgba(255,80,30,0.22) 0%, transparent 70%), radial-gradient(ellipse at top right, rgba(255,107,53,0.12) 0%, transparent 70%), #0c0c0c";
     return () => {
       document.body.style.overflow = "";
-      document.body.style.background = "#0c0c0c";
     };
   }, []);
 
