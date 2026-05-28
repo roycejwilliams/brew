@@ -10,7 +10,10 @@ import MobileNav from "./mobileNav";
 import { useUserStore } from "@/stores/useUserStore";
 import { useUIStore } from "@/stores/store";
 import MapBoxGl from "./mapBoxGl";
-import { useGetNearbyMoments, useGetAllMomentsUserIsAttendee } from "@/hooks/useMoments";
+import {
+  useGetNearbyMoments,
+  useGetAllMomentsUserIsAttendee,
+} from "@/hooks/useMoments";
 import { useCurrentLocation } from "@/hooks/useCurrentLocation";
 import useDebounce from "@/hooks/useDebounce";
 
@@ -65,7 +68,9 @@ export default function BrewMap() {
 
   const nearbyMoments: MomentProp[] = nearbyData?.data?.data ?? [];
 
-  const { data: attendeeData } = useGetAllMomentsUserIsAttendee(user?.id as string);
+  const { data: attendeeData } = useGetAllMomentsUserIsAttendee(
+    user?.id as string,
+  );
   const attendeeMoments: MomentProp[] = attendeeData?.data?.data ?? [];
 
   // Merge nearby + attendee moments, dedup by id, attendee moments preserve their visibility_type
