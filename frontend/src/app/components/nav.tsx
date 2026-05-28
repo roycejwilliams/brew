@@ -70,7 +70,7 @@ export default function Nav() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        className="absolute left-4 top-4 flex items-center z-40"
+        className="absolute left-4 top-4 flex items-center z-50"
       >
         {/* Main Nav Container */}
         <motion.div
