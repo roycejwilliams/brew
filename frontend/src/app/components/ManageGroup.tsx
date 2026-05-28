@@ -14,7 +14,7 @@ function Manage() {
   const [manage, setManage] = useState<ManageView>("moments");
 
   return (
-    <section className="w-full min-h-dvh bg-[#0c0c0c] flex overflow-hidden relative">
+    <section className="w-full h-dvh bg-[#0c0c0c] flex overflow-hidden relative">
       {/* Ambient glow */}
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 pointer-events-none z-0"
