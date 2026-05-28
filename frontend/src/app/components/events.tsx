@@ -113,7 +113,11 @@ export default function Events({
       {/* Header */}
       <div
         className="relative z-10 px-5 pb-4 flex items-start justify-between border-b border-white/5"
-        style={{ paddingTop: isFullHeight ? "calc(env(safe-area-inset-top, 0px) + 1.5rem)" : "1.5rem" }}
+        style={{
+          paddingTop: isFullHeight
+            ? "calc(env(safe-area-inset-top, 0px) + 1.5rem)"
+            : "1.5rem",
+        }}
       >
         <div className="space-y-0.5">
           <p className="text-[10px] tracking-[3px] uppercase text-white/20 font-medium">
@@ -231,7 +235,9 @@ export default function Events({
             style={{
               background: "rgba(8,8,8,0.95)",
               backdropFilter: "blur(24px)",
-              borderTop: isFullHeight ? "none" : "1px solid rgba(255,255,255,0.08)",
+              borderTop: isFullHeight
+                ? "none"
+                : "1px solid rgba(255,255,255,0.08)",
               paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 4.5rem)",
               height: "100dvh",
             }}

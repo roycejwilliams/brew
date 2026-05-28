@@ -19,7 +19,7 @@ export default function MobileNav({
 }: MobileNavProps) {
   return (
     <div
-      className="fixed bottom-8 left-0 right-0 z-50 px-4"
+      className="fixed bottom-8 left-0 right-0 z-10 px-4"
       style={{
         paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 0.75rem)",
       }}
