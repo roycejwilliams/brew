@@ -224,7 +224,7 @@ export default function Events({
             animate={{ y: isFullHeight ? 0 : `calc(100% - ${PEEK_HEIGHT}px)` }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 32, stiffness: 300 }}
-            className="fixed inset-x-0 bottom-0 z-40 flex flex-col rounded-t-2xl overflow-hidden"
+            className="fixed inset-x-0 bottom-0 z-50 flex flex-col rounded-t-2xl overflow-hidden"
             style={{
               background: "rgba(8,8,8,0.95)",
               backdropFilter: "blur(24px)",
