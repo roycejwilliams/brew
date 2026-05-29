@@ -98,7 +98,7 @@ export default function ManageMoments() {
     <section className="flex-1 h-full overflow-hidden flex flex-col relative">
       {/* Header */}
       <div
-        className="flex items-center justify-between px-6 pt-28 pb-4 sm:pt-4 shrink-0 relative z-10"
+        className="flex items-center justify-between px-6 pt-20 pb-4 sm:pt-4 shrink-0 relative z-10"
         style={{
           borderBottom: "1px solid rgba(var(--fg),0.06)",
           background: "rgba(var(--bg),0.6)",

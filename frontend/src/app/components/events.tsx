@@ -16,6 +16,8 @@ import {
   useInviteUserMomentView,
   useInviteUserCircleView,
 } from "@/hooks/useInvites";
+import { useGetNearbyFriendNotifications } from "@/hooks/useNotifications";
+import { useGetKnocksForOwner } from "@/hooks/useMoments";
 
 type ScopeType = "here" | "nearby" | "area";
 type TimeFilter = "tonight" | "tomorrow" | "week";
@@ -73,6 +75,10 @@ export default function Events({
   const { data: circleInvitesData } = useInviteUserCircleView(
     user?.id as string,
   );
+  const { data: nearbyFriendData } = useGetNearbyFriendNotifications(
+    user?.id as string,
+  );
+  const { data: knocksData } = useGetKnocksForOwner(user?.id as string);
 
   const pendingCount =
     (momentInvitesData?.data?.data ?? []).filter(
@@ -80,6 +86,12 @@ export default function Events({
     ).length +
     (circleInvitesData?.data?.data ?? []).filter(
       (i: { status: string }) => i.status === "pending",
+    ).length +
+    (nearbyFriendData?.data?.data ?? []).filter(
+      (n: { read: boolean }) => !n.read,
+    ).length +
+    (knocksData?.data?.data ?? []).filter(
+      (k: { status: string }) => k.status === "pending",
     ).length;
 
   const timeLabel = {

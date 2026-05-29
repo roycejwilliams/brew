@@ -9,6 +9,7 @@ import CreateModal from "./CreateModal";
 import MobileNav from "./mobileNav";
 import { useUserStore } from "@/stores/useUserStore";
 import { useUIStore } from "@/stores/store";
+import MomentMiniModal from "./MomentMiniModal";
 import MapBoxGl from "./mapBoxGl";
 import {
   useGetNearbyMoments,
@@ -24,6 +25,14 @@ const SCOPE_TO_RADIUS: Record<ScopeType, number> = {
   here: 1000,
   nearby: 10000,
   area: 50000,
+};
+
+// Derives query radius (metres) from Mapbox zoom level so markers load
+// progressively: tighter radius when zoomed in, wider when zoomed out.
+// Formula: 40_000_000 / 2^zoom, clamped to [500m, 100km].
+const zoomToRadius = (zoom: number): number => {
+  const raw = Math.round(40_000_000 / Math.pow(2, zoom));
+  return Math.max(500, Math.min(100_000, raw));
 };
 
 const MOBILE_BREAKPOINT = 820;
@@ -55,15 +64,30 @@ export default function BrewMap() {
     [number, number] | null
   >(null);
   const [selectedZoom, setSelectedZoom] = useState(11);
-  const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
+
+  // Seed with the map's starting center so nearbyMoments fires on first render,
+  // not after waiting for geolocation.
+  const [mapCenter, setMapCenter] = useState<[number, number]>([-122.4194, 37.7749]);
   const debouncedMapCenter = useDebounce(mapCenter, 700);
+
+  // Track zoom so radius scales with what the user actually sees.
+  const [mapZoom, setMapZoom] = useState(5);
+  const debouncedMapZoom = useDebounce(mapZoom, 700);
+
+  // Once geolocation resolves, shift the query center to the user's actual location
+  // so markers reflect their area, not the default center.
+  useEffect(() => {
+    if (coordinates && !selectedCoordinates) {
+      setMapCenter(coordinates);
+    }
+  }, [coordinates, selectedCoordinates]);
 
   const activeCoords = selectedCoordinates ?? debouncedMapCenter ?? coordinates;
 
   const { data: nearbyData } = useGetNearbyMoments({
     lng: activeCoords?.[0],
     lat: activeCoords?.[1],
-    radius: SCOPE_TO_RADIUS[activeScope],
+    radius: zoomToRadius(debouncedMapZoom),
     filter,
   });
 
@@ -107,15 +131,16 @@ export default function BrewMap() {
         {/* RIGHT — Map takes all remaining space */}
         <div className="flex-1 relative min-w-0 touch-none">
           <MapBoxGl
-            zoom={selectedCoordinates ? selectedZoom : 4.5}
-            center={[-122.4194, 37.7749]}
+            zoom={selectedCoordinates ? selectedZoom : 5}
+            center={(selectedCoordinates ?? coordinates ?? [-122.4194, 37.7749]) as [number, number]}
             userCoordinates={selectedCoordinates ?? coordinates}
             dragPan={true}
             dragRotate={true}
             scrollZoom={true}
             moments={allMapMoments}
-            onMove={(center) => {
+            onMove={(center, zoom) => {
               setMapCenter(center);
+              setMapZoom(zoom);
               setSelectedCoordinates(null);
             }}
           />
@@ -141,6 +166,8 @@ export default function BrewMap() {
           <Notification onClose={() => setActiveModal(null)} />
         )}
       </AnimatePresence>
+
+      <MomentMiniModal />
     </>
   );
 }

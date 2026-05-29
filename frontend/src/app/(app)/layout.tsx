@@ -18,6 +18,8 @@ export default function AppLayout({
   const { user, hasHydrated } = useUserStore();
   useSocket();
 
+  const hideSidebar = pathname === "/checkin" || pathname === "/join";
+
   useEffect(() => {
     if (!hasHydrated) return;
     if (!user) {
@@ -28,9 +30,9 @@ export default function AppLayout({
 
   return (
     <main className="flex h-dvh overflow-hidden">
-      <AppSidebar />
-      <MobileDrawer />
-      <div className="flex-1 min-w-0 relative overflow-hidden">
+      {!hideSidebar && <AppSidebar />}
+      {!hideSidebar && <MobileDrawer />}
+      <div className="flex-1 min-w-0 relative overflow-y-auto">
         {hasHydrated && (
           <motion.div
             key={pathname}
@@ -38,7 +40,7 @@ export default function AppLayout({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="h-full"
+            className="min-h-full"
           >
             {children}
           </motion.div>

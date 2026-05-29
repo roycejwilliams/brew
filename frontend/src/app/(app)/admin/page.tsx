@@ -99,7 +99,7 @@ export default function AdminPage() {
   ];
 
   return (
-    <section className="min-h-dvh overflow-y-auto overscroll-contain bg-[#f5f5f5] dark:bg-[#0c0c0c] text-black dark:text-white px-4 sm:px-8 lg:px-12 py-10 pb-24">
+    <section className="min-h-dvh bg-[#f5f5f5] dark:bg-[#0c0c0c] text-black dark:text-white px-4 sm:px-8 lg:px-12 py-10 pb-24">
       {/* Ambient glow */}
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 pointer-events-none"

@@ -11,7 +11,10 @@ import {
   useRemoveMemberBasedOnRole,
   useDeleteCircleByOwner,
 } from "@/hooks/useCircles";
-import { useInviteMemberToCircle, useInviteExternalToCircle } from "@/hooks/useInvites";
+import {
+  useInviteMemberToCircle,
+  useInviteExternalToCircle,
+} from "@/hooks/useInvites";
 import { useUserStore } from "@/stores/useUserStore";
 import { ChevronRight, X } from "lucide-react";
 import InvitePeople, { InviteUserProp } from "./InvitePeople";
@@ -41,7 +44,8 @@ export default function ManageCircle() {
   const { mutate: removeMember } = useRemoveMemberBasedOnRole();
   const { mutate: inviteMember } = useInviteMemberToCircle();
   const { mutate: inviteExternal } = useInviteExternalToCircle();
-  const { mutate: deleteCircle, isPending: isDeleting } = useDeleteCircleByOwner();
+  const { mutate: deleteCircle, isPending: isDeleting } =
+    useDeleteCircleByOwner();
 
   const nextMarker = () =>
     setMarkerIndex((i) => (i + 1) % (featured?.members?.length ?? 1));
@@ -64,7 +68,10 @@ export default function ManageCircle() {
     if (!featured) return;
     selectedUsers.forEach((u) => {
       if (u.isExternal) {
-        inviteExternal({ circle_id: featured.id as string, recipient: u.email || u.phonenumber });
+        inviteExternal({
+          circle_id: featured.id as string,
+          recipient: u.email || u.phonenumber,
+        });
       } else {
         inviteMember({
           circle: featured as CircleProp,
@@ -144,7 +151,7 @@ export default function ManageCircle() {
 
       {/* Header */}
       <div
-        className="flex items-center justify-between px-4 md:px-6 pt-28 pb-2 sm:pt-2 md:pt-4 md:pb-4 shrink-0 relative z-10"
+        className="flex items-center justify-between px-4 md:px-6 pt-20 pb-2 sm:pt-2 md:pt-4 md:pb-4 shrink-0 relative z-10"
         style={{
           borderBottom: "1px solid rgba(var(--fg),0.06)",
           background: "rgba(var(--bg),0.6)",
@@ -160,7 +167,10 @@ export default function ManageCircle() {
         {featured && (
           <div className="flex items-center gap-1.5">
             <button
-              onClick={() => { setShowAddMember(true); setConfirmDelete(false); }}
+              onClick={() => {
+                setShowAddMember(true);
+                setConfirmDelete(false);
+              }}
               className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-medium tracking-[-0.1px] cursor-pointer transition-all duration-150"
               style={{
                 background: "rgba(var(--fg),0.04)",

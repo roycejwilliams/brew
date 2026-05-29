@@ -43,7 +43,7 @@ const stagger = (i: number) => ({
 });
 
 const inputClass =
-  "w-full px-3 py-2.5 border text-sm rounded-xl bg-white/4 text-black dark:text-white placeholder:text-black/20 dark:placeholder:text-white/20 focus:outline-none focus:bg-white/6 transition-colors duration-150 tracking-[-0.1px]";
+  "w-full px-3 py-2.5 border text-sm rounded-xl bg-black/4 dark:bg-white/4 text-black dark:text-white placeholder:text-black/20 dark:placeholder:text-white/20 focus:outline-none focus:bg-black/6 dark:focus:bg-white/6 transition-colors duration-150 tracking-[-0.1px]";
 
 function Dashboard({ profile }: DashboardProp) {
   const [revealEdit, setRevealEdit] = useState<boolean>(false);
@@ -131,7 +131,7 @@ function Dashboard({ profile }: DashboardProp) {
   };
 
   return (
-    <section className="min-h-dvh overflow-x-hidden overflow-y-auto overscroll-contain bg-[#f5f5f5] dark:bg-[#0c0c0c] relative flex flex-col">
+    <section className="min-h-dvh overflow-x-hidden bg-[#f5f5f5] dark:bg-[#0c0c0c] relative flex flex-col">
       {/* Ambient glow */}
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 pointer-events-none"
@@ -143,7 +143,7 @@ function Dashboard({ profile }: DashboardProp) {
         }}
       />
 
-      <div className="relative max-w-4xl w-full mx-auto px-4 sm:px-6 pt-28 sm:pt-6 pb-6 flex flex-col flex-1">
+      <div className="relative max-w-4xl w-full mx-auto px-4 sm:px-6 pt-20 sm:pt-6 pb-6 flex flex-col flex-1">
         {/* Profile header */}
         <div className="flex items-start justify-between gap-4 sm:gap-8">
           {/* Left — avatar + info */}
@@ -154,7 +154,7 @@ function Dashboard({ profile }: DashboardProp) {
                 className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden relative group"
                 style={{
                   border: "1px solid rgba(var(--fg),0.08)",
-                  boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+                  boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
                 }}
               >
                 <Image
@@ -422,8 +422,7 @@ function Dashboard({ profile }: DashboardProp) {
           className="my-6"
           style={{
             height: 1,
-            background:
-              `linear-gradient(90deg, transparent, rgba(var(--fg),0.06), transparent)`,
+            background: `linear-gradient(90deg, transparent, rgba(var(--fg),0.06), transparent)`,
           }}
         />
 
@@ -462,7 +461,12 @@ function Dashboard({ profile }: DashboardProp) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="w-full max-w-md px-5 sm:px-8 py-8 my-8"
+              className="w-full max-w-md px-5 sm:px-8 py-8 my-8 rounded-2xl"
+              style={{
+                background: "rgba(var(--bg),0.97)",
+                border: "1px solid rgba(var(--fg),0.08)",
+                backdropFilter: "blur(24px)",
+              }}
             >
               <p
                 className="text-[10px] tracking-[4px] uppercase font-medium mb-1"
@@ -470,7 +474,7 @@ function Dashboard({ profile }: DashboardProp) {
               >
                 BR3W
               </p>
-              <h2 className="text-xl font-medium tracking-[-0.4px] mb-1">
+              <h2 className="text-xl font-medium tracking-[-0.4px] mb-1" style={{ color: "rgba(var(--fg),0.9)" }}>
                 Manage Profile.
               </h2>
               <p
@@ -748,12 +752,10 @@ function Dashboard({ profile }: DashboardProp) {
                     color: "rgba(var(--fg),0.6)",
                   }}
                   onMouseEnter={(e) =>
-                    (e.currentTarget.style.background =
-                      "rgba(var(--fg),0.07)")
+                    (e.currentTarget.style.background = "rgba(var(--fg),0.07)")
                   }
                   onMouseLeave={(e) =>
-                    (e.currentTarget.style.background =
-                      "rgba(var(--fg),0.04)")
+                    (e.currentTarget.style.background = "rgba(var(--fg),0.04)")
                   }
                 >
                   <span>Save changes</span>
@@ -886,7 +888,12 @@ function Dashboard({ profile }: DashboardProp) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="w-full max-w-md px-5 sm:px-8 py-8 my-8"
+              className="w-full max-w-md px-5 sm:px-8 py-8 my-8 rounded-2xl"
+              style={{
+                background: "rgba(var(--bg),0.97)",
+                border: "1px solid rgba(var(--fg),0.08)",
+                backdropFilter: "blur(24px)",
+              }}
             >
               <p
                 className="text-[10px] tracking-[4px] uppercase font-medium mb-1"
@@ -894,7 +901,7 @@ function Dashboard({ profile }: DashboardProp) {
               >
                 BR3W
               </p>
-              <h2 className="text-xl font-medium tracking-[-0.4px] mb-1">
+              <h2 className="text-xl font-medium tracking-[-0.4px] mb-1" style={{ color: "rgba(var(--fg),0.9)" }}>
                 Connections.
               </h2>
               <p

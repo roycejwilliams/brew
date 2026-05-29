@@ -10,13 +10,19 @@ import {
   useInviteAttendeeDecision,
   useInviteMemberDecision,
 } from "@/hooks/useInvites";
+import { useGetKnocksForOwner, useDecideKnock } from "@/hooks/useMoments";
+import {
+  useGetNearbyFriendNotifications,
+  useDismissNotification,
+  type NearbyFriendNotification,
+} from "@/hooks/useNotifications";
 import Image from "next/image";
 
 interface NotificationProp {
   onClose: () => void;
 }
 
-type Tab = "moments" | "circles";
+type Tab = "moments" | "circles" | "knocks";
 
 export default function Notification({ onClose }: NotificationProp) {
   const ref = useRef<HTMLDivElement | null>(null);
@@ -33,6 +39,10 @@ export default function Notification({ onClose }: NotificationProp) {
   );
   const { mutate: decideMoment } = useInviteAttendeeDecision();
   const { mutate: decideCircle } = useInviteMemberDecision();
+  const { data: knocksData } = useGetKnocksForOwner(user?.id as string);
+  const { mutate: decideKnock } = useDecideKnock();
+  const { data: nearbyFriendData } = useGetNearbyFriendNotifications(user?.id as string);
+  const { mutate: dismiss } = useDismissNotification();
 
   const momentInvites = (momentInvitesData?.data?.data ?? []).filter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -42,9 +52,16 @@ export default function Notification({ onClose }: NotificationProp) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (i: any) => i.status === "pending",
   );
-  const totalCount = momentInvites.length + circleInvites.length;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const knockRequests = (knocksData?.data?.data ?? []).filter((k: any) => k.status === "pending");
+  const nearbySignals: NearbyFriendNotification[] = (nearbyFriendData?.data?.data ?? []).filter(
+    (n: NearbyFriendNotification) => !n.read,
+  );
+  const totalCount =
+    momentInvites.length + circleInvites.length + knockRequests.length + nearbySignals.length;
 
-  const activeInvites = tab === "moments" ? momentInvites : circleInvites;
+  const activeInvites =
+    tab === "moments" ? momentInvites : tab === "circles" ? circleInvites : knockRequests;
   const isEmpty = activeInvites.length === 0;
 
   return (
@@ -144,9 +161,13 @@ export default function Notification({ onClose }: NotificationProp) {
 
           {/* Tabs */}
           <div className="flex gap-1">
-            {(["moments", "circles"] as Tab[]).map((t) => {
+            {(["moments", "circles", "knocks"] as Tab[]).map((t) => {
               const count =
-                t === "moments" ? momentInvites.length : circleInvites.length;
+                t === "moments"
+                  ? momentInvites.length
+                  : t === "circles"
+                  ? circleInvites.length
+                  : knockRequests.length;
               const active = tab === t;
               return (
                 <motion.button
@@ -188,6 +209,89 @@ export default function Notification({ onClose }: NotificationProp) {
           </div>
         </motion.div>
 
+        {/* Nearby-friend signals — passive, no action required */}
+        <AnimatePresence>
+          {nearbySignals.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+              className="overflow-hidden"
+              style={{ borderBottom: "1px solid rgba(var(--fg),0.06)" }}
+            >
+              <div className="px-7 py-3 space-y-2.5">
+                <p
+                  className="text-[9px] tracking-[2.5px] uppercase font-medium"
+                  style={{ color: "rgba(var(--fg),0.25)" }}
+                >
+                  Nearby
+                </p>
+                {nearbySignals.map((signal, i) => (
+                  <motion.div
+                    key={signal.id}
+                    initial={{ opacity: 0, x: -8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -8 }}
+                    transition={{ delay: i * 0.04, duration: 0.2 }}
+                    className="flex items-center gap-3"
+                  >
+                    {/* Friend avatar */}
+                    <div
+                      className="w-7 h-7 rounded-full relative overflow-hidden shrink-0 flex items-center justify-center text-[10px] font-medium"
+                      style={{
+                        background: "rgba(var(--fg),0.06)",
+                        border: "1px solid rgba(var(--fg),0.1)",
+                        color: "rgba(var(--fg),0.4)",
+                      }}
+                    >
+                      {signal.friend_profile_image ? (
+                        <Image
+                          src={signal.friend_profile_image}
+                          alt={signal.friend_username}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        `${signal.friend_first_name?.[0]}${signal.friend_last_name?.[0]}`
+                      )}
+                    </div>
+
+                    {/* Text */}
+                    <p
+                      className="flex-1 text-[11px] leading-snug tracking-[-0.1px]"
+                      style={{ color: "rgba(var(--fg),0.45)" }}
+                    >
+                      <span style={{ color: "rgba(var(--fg),0.75)", fontWeight: 500 }}>
+                        {signal.friend_first_name}
+                      </span>
+                      {" is going to "}
+                      <span style={{ color: "rgba(var(--fg),0.75)", fontWeight: 500 }}>
+                        {signal.moments_name}
+                      </span>
+                    </p>
+
+                    {/* Dismiss */}
+                    <motion.button
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => dismiss(signal.id)}
+                      className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center cursor-pointer transition-colors duration-150"
+                      style={{
+                        background: "rgba(var(--fg),0.05)",
+                        color: "rgba(var(--fg),0.25)",
+                      }}
+                    >
+                      <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+                        <path d="M1 1l6 6M7 1L1 7" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+                      </svg>
+                    </motion.button>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Content */}
         <div className="flex-1 overflow-y-auto no-scrollbar">
           <AnimatePresence mode="wait">
@@ -217,7 +321,9 @@ export default function Notification({ onClose }: NotificationProp) {
                     It&apos;s quiet.
                   </p>
                   <p className="text-xs text-black/20 dark:text-white/20 tracking-[-0.1px]">
-                    No pending {tab} invites right now.
+                    {tab === "knocks"
+                      ? "No knock requests right now."
+                      : `No pending ${tab} invites right now.`}
                   </p>
                 </div>
               </motion.div>
@@ -231,107 +337,130 @@ export default function Notification({ onClose }: NotificationProp) {
                 className="px-5 py-5 space-y-2"
               >
                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                {activeInvites.map((invite: any, i: number) => (
-                  <motion.div
-                    key={invite.id}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{
-                      delay: i * 0.05,
-                      duration: 0.3,
-                      ease: [0.16, 1, 0.3, 1],
-                    }}
-                    className="rounded-xl overflow-hidden"
-                    style={{
-                      background: "rgba(var(--fg),0.03)",
-                      border: "1px solid rgba(var(--fg),0.07)",
-                    }}
-                  >
-                    <div className="flex gap-3 p-4">
-                      {/* Avatar / image */}
-                      <div
-                        className="w-12 h-12 rounded-lg overflow-hidden relative shrink-0"
-                        style={{ border: "1px solid rgba(var(--fg),0.08)" }}
-                      >
-                        {invite.image || invite.circle_image ? (
-                          <Image
-                            src={invite.image || invite.circle_image}
-                            alt="invite"
-                            fill
-                            className="object-cover brightness-75"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-white/5 flex items-center justify-center text-black/20 dark:text-white/20 text-xs font-medium">
-                            {
-                              (invite.moments_name ||
-                                invite.circle_name ||
-                                "?")?.[0]
-                            }
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Info */}
-                      <div className="flex-1 min-w-0 space-y-0.5">
-                        <p className="text-sm font-medium text-black/90 dark:text-white/90 tracking-[-0.1px] truncate">
-                          {invite.moments_name ||
-                            invite.circle_name ||
-                            "Untitled"}
-                        </p>
-                        <p className="text-[11px] text-black/30 dark:text-white/30 tracking-[-0.1px]">
-                          {tab === "moments" && invite.moment_start
-                            ? new Date(invite.moment_start).toLocaleDateString(
-                                "en-US",
-                                {
-                                  weekday: "short",
-                                  month: "short",
-                                  day: "numeric",
-                                },
-                              )
-                            : "Circle invite"}
-                        </p>
-                        <p className="text-[10px] text-black/20 dark:text-white/20">
-                          from @{invite.invited_by_username ?? "someone"}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Actions */}
-                    <div
-                      className="flex"
-                      style={{ borderTop: "1px solid rgba(var(--fg),0.05)" }}
+                {activeInvites.map((invite: any, i: number) => {
+                  const isKnock = tab === "knocks";
+                  return (
+                    <motion.div
+                      key={invite.id}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.05, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                      className="rounded-xl overflow-hidden"
+                      style={{ background: "rgba(var(--fg),0.03)", border: "1px solid rgba(var(--fg),0.07)" }}
                     >
-                      <motion.button
-                        whileTap={{ scale: 0.97 }}
-                        onClick={() =>
-                          tab === "moments"
-                            ? decideMoment({ ...invite, status: "accepted" })
-                            : decideCircle({ ...invite, status: "accepted" })
-                        }
-                        className="flex-1 py-2.5 text-[11px] font-medium text-black/50 dark:text-white/50 hover:text-black/90 dark:text-white/90 hover:bg-white/4 transition-all cursor-pointer tracking-[-0.1px]"
-                      >
-                        Accept
-                      </motion.button>
-                      <div
-                        style={{
-                          width: 1,
-                          background: "rgba(var(--fg),0.05)",
-                        }}
-                      />
-                      <motion.button
-                        whileTap={{ scale: 0.97 }}
-                        onClick={() =>
-                          tab === "moments"
-                            ? decideMoment({ ...invite, status: "rejected" })
-                            : decideCircle({ ...invite, status: "rejected" })
-                        }
-                        className="flex-1 py-2.5 text-[11px] text-black/25 dark:text-white/25 hover:text-red-400/60 hover:bg-red-500/5 transition-all cursor-pointer tracking-[-0.1px]"
-                      >
-                        Decline
-                      </motion.button>
-                    </div>
-                  </motion.div>
-                ))}
+                      <div className="flex gap-3 p-4">
+                        {/* Avatar — for knocks show requester profile image; for invites show moment/circle image */}
+                        <div
+                          className="w-12 h-12 rounded-lg overflow-hidden relative shrink-0 flex items-center justify-center"
+                          style={{ border: "1px solid rgba(var(--fg),0.08)" }}
+                        >
+                          {isKnock ? (
+                            invite.requester_profile_image ? (
+                              <Image
+                                src={invite.requester_profile_image}
+                                alt={invite.requester_username ?? "requester"}
+                                fill
+                                className="object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-black/30 dark:text-white/30 text-sm font-medium" style={{ background: "rgba(var(--fg),0.06)" }}>
+                                {invite.requester_first_name?.[0]}
+                                {invite.requester_last_name?.[0]}
+                              </div>
+                            )
+                          ) : invite.image || invite.circle_image ? (
+                            <Image
+                              src={invite.image || invite.circle_image}
+                              alt="invite"
+                              fill
+                              className="object-cover brightness-75"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-white/5 flex items-center justify-center text-black/20 dark:text-white/20 text-xs font-medium">
+                              {(invite.moments_name || invite.circle_name || "?")?.[0]}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Info */}
+                        <div className="flex-1 min-w-0 space-y-0.5">
+                          {isKnock ? (
+                            <>
+                              <p className="text-sm font-medium text-black/90 dark:text-white/90 tracking-[-0.1px] truncate">
+                                {invite.requester_first_name} {invite.requester_last_name}
+                              </p>
+                              <p className="text-[11px] text-black/30 dark:text-white/30 tracking-[-0.1px]">
+                                wants into{" "}
+                                <span className="text-black/50 dark:text-white/50">
+                                  {invite.moments_name ?? "your moment"}
+                                </span>
+                              </p>
+                              {invite.requester_username && (
+                                <p className="text-[10px] text-black/20 dark:text-white/20">
+                                  @{invite.requester_username}
+                                  {invite.mutual_context ? ` · ${invite.mutual_context}` : ""}
+                                </p>
+                              )}
+                            </>
+                          ) : (
+                            <>
+                              <p className="text-sm font-medium text-black/90 dark:text-white/90 tracking-[-0.1px] truncate">
+                                {invite.moments_name || invite.circle_name || "Untitled"}
+                              </p>
+                              <p className="text-[11px] text-black/30 dark:text-white/30 tracking-[-0.1px]">
+                                {tab === "moments" && invite.moment_start
+                                  ? new Date(invite.moment_start).toLocaleDateString("en-US", {
+                                      weekday: "short",
+                                      month: "short",
+                                      day: "numeric",
+                                    })
+                                  : "Circle invite"}
+                              </p>
+                              <p className="text-[10px] text-black/20 dark:text-white/20">
+                                from @{invite.invited_by_username ?? "someone"}
+                              </p>
+                            </>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex" style={{ borderTop: "1px solid rgba(var(--fg),0.05)" }}>
+                        <motion.button
+                          whileTap={{ scale: 0.97 }}
+                          onClick={() => {
+                            if (isKnock) {
+                              decideKnock({ knock_id: invite.id, status: "accepted" });
+                            } else if (tab === "moments") {
+                              decideMoment({ ...invite, status: "accepted" });
+                            } else {
+                              decideCircle({ ...invite, status: "accepted" });
+                            }
+                          }}
+                          className="flex-1 py-2.5 text-[11px] font-medium text-black/50 dark:text-white/50 hover:text-black/90 dark:hover:text-white/90 hover:bg-white/4 transition-all cursor-pointer tracking-[-0.1px]"
+                        >
+                          {isKnock ? "Let in" : "Accept"}
+                        </motion.button>
+                        <div style={{ width: 1, background: "rgba(var(--fg),0.05)" }} />
+                        <motion.button
+                          whileTap={{ scale: 0.97 }}
+                          onClick={() => {
+                            if (isKnock) {
+                              decideKnock({ knock_id: invite.id, status: "rejected" });
+                            } else if (tab === "moments") {
+                              decideMoment({ ...invite, status: "rejected" });
+                            } else {
+                              decideCircle({ ...invite, status: "rejected" });
+                            }
+                          }}
+                          className="flex-1 py-2.5 text-[11px] text-black/25 dark:text-white/25 hover:text-red-400/60 hover:bg-red-500/5 transition-all cursor-pointer tracking-[-0.1px]"
+                        >
+                          Decline
+                        </motion.button>
+                      </div>
+                    </motion.div>
+                  );
+                })}
               </motion.div>
             )}
           </AnimatePresence>

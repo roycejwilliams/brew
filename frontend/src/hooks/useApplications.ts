@@ -24,7 +24,7 @@ export const useGetAllApplications = () => {
 
 export const useLookUpUser = () => {
   return useMutation({
-    mutationFn: (email: string) => api.post(`/auth/lookup/`, { email }),
+    mutationFn: (email: string) => api.post(`/auth/lookup`, { email }),
   });
 };
 

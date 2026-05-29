@@ -1,9 +1,8 @@
 import { useRef, useEffect, useState } from "react";
 import mapboxgl, { LngLatLike } from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { openEventCard } from "@/stores/store";
+import { useMiniModal } from "@/stores/store";
 import { motion } from "motion/react";
-import { useRouter } from "next/navigation";
 import { useTheme } from "@/providers/ThemeProvider";
 
 const MAP_STYLE_DARK  = "mapbox://styles/mapbox/dark-v11";
@@ -35,8 +34,7 @@ function MapBoxGl({
   const markersRef = useRef<mapboxgl.Marker[]>([]);
   const selectedMarkerRef = useRef<string | null>(null);
   const [mapReady, setMapReady] = useState(false);
-  const openCard = openEventCard((state) => state.openEvent);
-  const router = useRouter();
+  const openMini = useMiniModal((state) => state.openMini);
   const { theme } = useTheme();
 
   useEffect(() => {
@@ -204,8 +202,11 @@ function MapBoxGl({
             essential: true,
           });
         } else {
-          openCard(moment);
-          router.push(`/moments/${moment.id}`, { scroll: false });
+          const rect = wrapper.getBoundingClientRect();
+          openMini(moment, {
+            x: rect.left + rect.width / 2,
+            y: rect.top,
+          });
           selectedMarkerRef.current = null;
         }
       });

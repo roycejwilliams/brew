@@ -95,8 +95,8 @@ export default function MobileDrawer() {
             </svg>
           </motion.button>
 
-          {/* Pulse toggle */}
-          <motion.button
+          {/* Pulse toggle — only relevant on the map */}
+          {path.startsWith("/pulse") && <motion.button
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.05 }}
@@ -128,7 +128,7 @@ export default function MobileDrawer() {
                 strokeWidth="1"
               />
             </svg>
-          </motion.button>
+          </motion.button>}
         </div>
       )}
 

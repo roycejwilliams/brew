@@ -78,39 +78,46 @@ function EventCard() {
         )}
       </div>
 
-      {/* Close button */}
-      <motion.button
-        onClick={handleClose}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.25, ease: EASE }}
-        whileTap={{ scale: 0.94 }}
-        className="fixed z-50 flex items-center gap-2 cursor-pointer group"
-        style={{ top: "calc(env(safe-area-inset-top, 0px) + 1.25rem)", left: "1rem" }}
-      >
-        <div
-          className="flex items-center justify-center transition-colors duration-200"
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: "50%",
-            background: "rgba(var(--fg),0.08)",
-            border: "1px solid rgba(var(--fg),0.12)",
-            backdropFilter: "blur(8px)",
-          }}
-        >
-          <CloseIcon color="currentColor" size={14} />
-        </div>
-        <span
-          className="text-xs tracking-[-0.1px] opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-          style={{ color: "rgba(var(--fg),0.3)" }}
-        >
-          Close
-        </span>
-      </motion.button>
-
       {/* Content */}
-      <div className="relative z-10 w-full px-4 sm:px-8 md:px-16 lg:px-24 pb-28 pt-20">
+      <div className="relative z-10 w-full px-4 sm:px-8 md:px-16 lg:px-24 pb-28">
+        {/* Close button — sticky so it stays accessible while scrolling */}
+        <motion.div
+          className="sticky z-20 flex items-center"
+          style={{
+            top: 0,
+            paddingTop: "calc(env(safe-area-inset-top, 0px) + 1.25rem)",
+            paddingBottom: "0.75rem",
+          }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.25, ease: EASE }}
+        >
+          <motion.button
+            onClick={handleClose}
+            whileTap={{ scale: 0.94 }}
+            className="flex items-center gap-2 cursor-pointer group"
+          >
+            <div
+              className="flex items-center justify-center transition-colors duration-200"
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: "50%",
+                background: "rgba(var(--bg),0.7)",
+                border: "1px solid rgba(var(--fg),0.12)",
+                backdropFilter: "blur(12px)",
+              }}
+            >
+              <CloseIcon color="currentColor" size={14} />
+            </div>
+            <span
+              className="text-xs tracking-[-0.1px] opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+              style={{ color: "rgba(var(--fg),0.3)" }}
+            >
+              Close
+            </span>
+          </motion.button>
+        </motion.div>
         <EventHero eventCard={eventCard} />
 
         <AnimatePresence mode="popLayout">

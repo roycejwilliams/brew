@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "motion/react";
 import { EditIcon } from "./icons";
-import { useUpdateMomentsByOwner } from "@/hooks/useMoments";
+import { useUpdateMomentsByOwner, useRegenerateVibes } from "@/hooks/useMoments";
 import { normalizeDate } from "@/lib/momentsUtil";
 import {
   useLocationSearch,
@@ -20,6 +20,9 @@ export default function EditMoment({ setUtils, featured }: EditMomentProps) {
     isPending,
     isSuccess,
   } = useUpdateMomentsByOwner();
+
+  const { mutateAsync: regenerateVibes, isPending: isRegenerating } =
+    useRegenerateVibes();
 
   const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
   const [locationQuery, setLocationQuery] = useState("");
@@ -72,16 +75,14 @@ export default function EditMoment({ setUtils, featured }: EditMomentProps) {
     }
   };
 
-  //PostgreSQL's point type expects the l
-  // iteral string format (x,y) but you're sending it a JSON object.
-  //Location_name and location are a pair and must be changed together
+  const descriptionChanged =
+    form.description.trim() !== (featured?.description ?? "").trim();
+
   const handleSave = async () => {
     if (!featured) return;
 
     let location = form.location;
 
-    //if the form location name does match the db
-    //call the reverseGeoLocate to Search
     if (form.location_name !== featured.location_name) {
       const result = await geocodeQuery(form.location_name);
       if (result?.center) {
@@ -89,9 +90,31 @@ export default function EditMoment({ setUtils, featured }: EditMomentProps) {
       }
     }
 
-    const updatedMoment = { ...featured, ...form, location } as MomentProp;
+    // If description changed, regenerate AI-derived fields before saving.
+    // Failures are silent — save proceeds with existing vibes/principles/etc.
+    let generated: Partial<MomentProp> = {};
+    if (descriptionChanged && form.description.trim()) {
+      try {
+        generated = await regenerateVibes({
+          description: form.description,
+          moments_name: form.moments_name,
+          location_name: form.location_name,
+        });
+      } catch {
+        generated = {};
+      }
+    }
+
+    const updatedMoment = {
+      ...featured,
+      ...form,
+      location,
+      ...generated,
+    } as MomentProp;
+
     updateMoment(updatedMoment, {
       onSuccess: () => {
+        // Reflect changes in the open EventCard without a page reload
         const storeMoment = openEventCard.getState().moment;
         if (storeMoment?.id === featured.id) {
           openEventCard.getState().openEvent(updatedMoment);
@@ -217,7 +240,17 @@ export default function EditMoment({ setUtils, featured }: EditMomentProps) {
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className={labelClass}>Description</label>
+          <div className="flex items-center gap-2">
+            <label className={labelClass}>Description</label>
+            {descriptionChanged && (
+              <span
+                className="text-[9px] tracking-[1.5px] uppercase font-medium"
+                style={{ color: "rgba(var(--fg),0.35)" }}
+              >
+                ✦ will regenerate
+              </span>
+            )}
+          </div>
           <textarea
             name="description"
             rows={5}
@@ -263,13 +296,19 @@ export default function EditMoment({ setUtils, featured }: EditMomentProps) {
       {/* Save */}
       <motion.button
         onClick={handleSave}
-        disabled={isPending}
+        disabled={isRegenerating || isPending}
         className="relative w-full bg-white text-black text-xs uppercase tracking-widest font-medium py-3 rounded-sm overflow-hidden mt-auto disabled:opacity-40 cursor-pointer"
-        whileHover={{ scale: isPending ? 1 : 1.02 }}
-        whileTap={{ scale: isPending ? 1 : 0.97 }}
+        whileHover={{ scale: isRegenerating || isPending ? 1 : 1.02 }}
+        whileTap={{ scale: isRegenerating || isPending ? 1 : 0.97 }}
       >
         <div className="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-white/60 to-transparent" />
-        {isPending ? "Saving..." : isSuccess ? "Saved ✓" : "Save Changes"}
+        {isRegenerating
+          ? "Regenerating..."
+          : isPending
+          ? "Saving..."
+          : isSuccess
+          ? "Saved ✓"
+          : "Save Changes"}
       </motion.button>
     </motion.div>
   );

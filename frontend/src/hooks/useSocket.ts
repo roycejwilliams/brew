@@ -52,6 +52,23 @@ export const useSocket = () => {
       queryClient.invalidateQueries({ queryKey: ["circle-owner"] });
     });
 
+    // Knock: host receives a new knock request
+    socket.on("knock:received", () => {
+      queryClient.invalidateQueries({ queryKey: ["knocks-for-owner"] });
+    });
+
+    // Knock: requester learns their knock was approved or declined
+    socket.on("knock:decided", ({ moment_id }: { moment_id: string }) => {
+      queryClient.invalidateQueries({ queryKey: ["moment-attendees-with-details", moment_id] });
+      // Approved knock adds the user to moment_attendees — Coming Up should reflect this immediately
+      queryClient.invalidateQueries({ queryKey: ["moment-attendee"] });
+    });
+
+    // Ripple: someone in the host's network gets a passive nearby-friend signal
+    socket.on("nearby:friend", () => {
+      queryClient.invalidateQueries({ queryKey: ["nearby-friend-notifications"] });
+    });
+
     return () => {
       socket.off("moment:created");
       socket.off("invite:moment");
@@ -60,6 +77,9 @@ export const useSocket = () => {
       socket.off("circle:updated");
       socket.off("member:added");
       socket.off("member:removed");
+      socket.off("knock:received");
+      socket.off("knock:decided");
+      socket.off("nearby:friend");
       socket.disconnect();
     };
   }, [user?.id, queryClient]);

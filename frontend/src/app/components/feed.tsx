@@ -35,7 +35,7 @@ function Feed({ completed, userId, onCreateMoment }: FeedProp) {
           <Hosted id={userId} />
         </div>
       ) : (
-        <div className="relative flex flex-col gap-y-10 flex-1 justify-center items-center w-full">
+        <div className="relative flex flex-col gap-y-10 flex-1 justify-center items-center w-full px-8">
           {/* Background glow */}
           <div
             className="absolute inset-0 pointer-events-none"

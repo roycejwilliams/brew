@@ -102,7 +102,7 @@ function Card({ width, height, moment }: CardProp) {
                 className="w-4.5 h-4.5 rounded-full"
                 style={{
                   background: `rgba(var(--fg),${0.12 + i * 0.04})`,
-                  border: "1.5px solid rgba(17,17,17,0.8)",
+                  border: "1.5px solid rgb(var(--bg))",
                   marginLeft: i === 0 ? 0 : -6,
                 }}
               />

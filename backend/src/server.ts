@@ -73,6 +73,25 @@ io.on("connection", (socket) => {
   });
 });
 
+// Ensure notifications table exists (idempotent)
+pool.query(`
+  CREATE TABLE IF NOT EXISTS notifications (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    type TEXT NOT NULL,
+    moment_id UUID REFERENCES moments(id) ON DELETE CASCADE,
+    moments_name TEXT,
+    moment_image TEXT,
+    friend_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    friend_first_name TEXT,
+    friend_last_name TEXT,
+    friend_username TEXT,
+    friend_profile_image TEXT,
+    read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+  )
+`).catch((err: Error) => console.error("notifications table init failed:", err));
+
 //Used to control the rate of traffic sent or received by a network interface or service
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -934,6 +953,7 @@ app.put(
       const circleUpdated: CircleProp = updateCircle.rows[0];
 
       if (circleUpdated) {
+        io.to(`user:${req.params.id}`).emit("circle:updated");
         return res.status(200).send({
           success: true,
           data: {
@@ -1012,6 +1032,7 @@ app.delete(
       const removeMember = removeMemberFromCircle.rows[0];
 
       if (removeMember) {
+        io.to(`user:${ownerOfCircle.owner_id}`).emit("member:removed");
         return res.status(200).send({
           success: true,
           message: `Removed ${removeMember.member_id}`,
@@ -1298,6 +1319,94 @@ app.get(
   },
 );
 
+// Knock — requester requests access to a moment
+app.post(
+  "/moments/:moment_id/knock",
+  authenticateToken,
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { requester_id } = req.body;
+    if (!requester_id) return res.status(400).send("requester_id is required.");
+    if (req.user?.id !== requester_id) return res.status(403).send("Unauthorized.");
+
+    try {
+      const momentResult = await pool.query(
+        `SELECT creator_id, moments_name, close_moment FROM moments WHERE id = $1`,
+        [req.params.moment_id],
+      );
+      const moment = momentResult.rows[0];
+      if (!moment) return res.status(404).send("Moment not found.");
+      if (moment.close_moment) return res.status(403).send("This moment is closed.");
+      if (moment.creator_id === requester_id) return res.status(400).send("You are the host.");
+
+      // Prevent duplicate knocks
+      const existing = await pool.query(
+        `SELECT id FROM invite_attendees WHERE moment_id = $1 AND attendee_id = $2 AND invited_by = $2`,
+        [req.params.moment_id, requester_id],
+      );
+      if (existing.rows.length) return res.status(409).send("Knock already sent.");
+
+      // Store knock as a self-invite (invited_by = attendee_id distinguishes it from host invites)
+      const insert = await pool.query(
+        `INSERT INTO invite_attendees (moment_id, attendee_id, invited_by) VALUES ($1, $2, $2) RETURNING *`,
+        [req.params.moment_id, requester_id],
+      );
+      const knock = insert.rows[0];
+
+      // Notify host via socket
+      io.to(`user:${moment.creator_id}`).emit("knock:received", { knock_id: knock.id, moment_id: req.params.moment_id });
+
+      // Notify host via email + SMS
+      const [hostResult, requesterResult] = await Promise.all([
+        pool.query(`SELECT email, phone_number FROM users WHERE id = $1`, [moment.creator_id]),
+        pool.query(`SELECT first_name, last_name FROM users WHERE id = $1`, [requester_id]),
+      ]);
+      const host = hostResult.rows[0];
+      const requester = requesterResult.rows[0];
+      if (host && requester) {
+        const requesterName = `${requester.first_name} ${requester.last_name}`.trim();
+        const momentUrl = `https://br3w.app/moments/${req.params.moment_id}`;
+        await sendEmail({ email: host.email, knock_received: { moments_name: moment.moments_name, requester_name: requesterName }, action_url: momentUrl });
+        await sendSMS({ phone_number: host.phone_number, knock_received: { moments_name: moment.moments_name, requester_name: requesterName }, action_url: momentUrl });
+      }
+
+      return res.status(201).send({ success: true, data: knock });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+// Host fetches all pending knock requests across their moments
+app.get(
+  "/moments/knocks/received/:owner_id",
+  authenticateToken,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (req.user?.id !== req.params.owner_id) return res.status(403).send("Unauthorized.");
+
+      const result = await pool.query(
+        `SELECT ia.id, ia.attendee_id AS requester_id, ia.status, ia.created_at,
+                m.id AS moment_id, m.moments_name, m.image,
+                u.first_name AS requester_first_name,
+                u.last_name  AS requester_last_name,
+                u.username   AS requester_username,
+                u.profile_image AS requester_profile_image
+         FROM invite_attendees ia
+         JOIN moments m ON m.id = ia.moment_id
+         JOIN users   u ON u.id = ia.attendee_id
+         WHERE m.creator_id = $1
+           AND ia.invited_by = ia.attendee_id
+         ORDER BY ia.created_at DESC`,
+        [req.params.owner_id],
+      );
+
+      return res.status(200).send({ success: true, data: result.rows });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
 // Get all moments created by user
 app.get(
   "/moments/:id",
@@ -1423,6 +1532,128 @@ app.get(
         success: true,
         data: attendees,
       });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+// Host approves or declines a knock
+app.put(
+  "/moments/knocks/:knock_id",
+  authenticateToken,
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { status } = req.body;
+    if (status !== "accepted" && status !== "rejected") return res.status(400).send("status must be accepted or rejected.");
+
+    try {
+      // Fetch knock + verify caller is the host
+      const knockResult = await pool.query(
+        `SELECT ia.id, ia.attendee_id AS requester_id, ia.moment_id, ia.status AS current_status,
+                m.creator_id, m.moments_name, m.image AS moment_image, m.cap_attendance
+         FROM invite_attendees ia
+         JOIN moments m ON m.id = ia.moment_id
+         WHERE ia.id = $1 AND ia.invited_by = ia.attendee_id`,
+        [req.params.knock_id],
+      );
+      const knock = knockResult.rows[0];
+      if (!knock) return res.status(404).send("Knock not found.");
+      if (knock.creator_id !== req.user?.id) return res.status(403).send("Unauthorized.");
+      if (knock.current_status !== "pending") return res.status(409).send("Knock already decided.");
+
+      // Update status
+      await pool.query(
+        `UPDATE invite_attendees SET status = $1, accepted_at = $2 WHERE id = $3`,
+        [status, status === "accepted" ? new Date().toISOString() : null, req.params.knock_id],
+      );
+
+      const momentUrl = `https://br3w.app/moments/${knock.moment_id}`;
+
+      if (status === "accepted") {
+        // Capacity check
+        const capacityResult = await pool.query(
+          `SELECT COUNT(*) FROM moment_attendees WHERE moment_id = $1`,
+          [knock.moment_id],
+        );
+        const confirmed = parseInt(capacityResult.rows[0].count);
+        if (knock.cap_attendance && confirmed >= knock.cap_attendance) {
+          return res.status(409).send("This moment is at capacity.");
+        }
+
+        // Add to attendees
+        await pool.query(
+          `INSERT INTO moment_attendees (attendee_id, moment_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+          [knock.requester_id, knock.moment_id],
+        );
+
+        // Notify requester via socket + email/SMS
+        io.to(`user:${knock.requester_id}`).emit("knock:decided", { status: "accepted", moment_id: knock.moment_id });
+
+        const requesterResult = await pool.query(
+          `SELECT email, phone_number, first_name, last_name, username, profile_image FROM users WHERE id = $1`,
+          [knock.requester_id],
+        );
+        const requester = requesterResult.rows[0];
+        if (requester) {
+          await sendEmail({ email: requester.email, knock_decided: { moments_name: knock.moments_name, approved: true }, action_url: momentUrl });
+          await sendSMS({ phone_number: requester.phone_number, knock_decided: { moments_name: knock.moments_name, approved: true }, action_url: momentUrl });
+        }
+
+        // The Ripple — notify host's circle members not already on this moment
+        const rippleResult = await pool.query(
+          `SELECT DISTINCT u.id, u.first_name, u.last_name, u.username, u.profile_image
+           FROM circle_members cm
+           JOIN users u ON u.id = cm.member_id
+           WHERE cm.circle_id IN (SELECT id FROM circles WHERE owner_id = $1)
+             AND cm.member_id != $2
+             AND cm.member_id NOT IN (
+               SELECT attendee_id FROM moment_attendees WHERE moment_id = $3
+             )
+             AND cm.member_id NOT IN (
+               SELECT attendee_id FROM invite_attendees
+               WHERE moment_id = $3 AND status IN ('pending', 'accepted')
+             )`,
+          [knock.creator_id, knock.requester_id, knock.moment_id],
+        );
+
+        for (const member of rippleResult.rows) {
+          // Persist the signal
+          await pool.query(
+            `INSERT INTO notifications
+               (user_id, type, moment_id, moments_name, moment_image,
+                friend_id, friend_first_name, friend_last_name, friend_username, friend_profile_image)
+             VALUES ($1, 'moment_nearby_friend', $2, $3, $4, $5, $6, $7, $8, $9)`,
+            [
+              member.id, knock.moment_id, knock.moments_name, knock.moment_image ?? null,
+              knock.requester_id,
+              requester?.first_name ?? null,
+              requester?.last_name ?? null,
+              requester?.username ?? null,
+              requester?.profile_image ?? null,
+            ],
+          );
+          // Real-time signal
+          io.to(`user:${member.id}`).emit("nearby:friend", {
+            moment_id: knock.moment_id,
+            moments_name: knock.moments_name,
+          });
+        }
+      } else {
+        // Declined — notify requester
+        io.to(`user:${knock.requester_id}`).emit("knock:decided", { status: "rejected", moment_id: knock.moment_id });
+
+        const requesterResult = await pool.query(
+          `SELECT email, phone_number FROM users WHERE id = $1`,
+          [knock.requester_id],
+        );
+        const requester = requesterResult.rows[0];
+        if (requester) {
+          await sendEmail({ email: requester.email, knock_decided: { moments_name: knock.moments_name, approved: false } });
+          await sendSMS({ phone_number: requester.phone_number, knock_decided: { moments_name: knock.moments_name, approved: false } });
+        }
+      }
+
+      return res.status(200).send({ success: true, data: { status } });
     } catch (error) {
       next(error);
     }
@@ -1649,6 +1880,7 @@ app.post(
         });
       }
 
+      io.to(`moment:${req.params.moment_id}`).emit("photo:new", result.rows[0]);
       return res.status(201).send({ success: true, data: result.rows[0] });
     } catch (error) {
       next(error);
@@ -1716,6 +1948,7 @@ app.post(
 
         const invitedUser: UserProp = getInvitedUser.rows[0];
 
+        io.to(`user:${req.params.member_id}`).emit("invite:circle");
         await sendEmail({
           email: invitedUser.email,
           invite_type: "received",
@@ -1950,6 +2183,7 @@ app.put(
 
         if (path) {
           io.to(`user:${decision.invited_by}`).emit("invite:decision", { target: "circle", status: "accepted", circle_id: memberId.circle_id });
+          io.to(`user:${decision.invited_by}`).emit("member:added");
           return res.status(201).send({
             success: true,
             data: path,
@@ -2081,6 +2315,7 @@ app.post(
         inviteAttendeeToMoment.rows[0];
 
       if (invitedAttendee) {
+        io.to(`user:${recipientUser.id}`).emit("invite:moment");
         await sendEmail({
           email: recipientUser.email,
           invite_type: "received",
@@ -2553,7 +2788,59 @@ app.post(
         });
       }
 
+      io.to(`moment:${moment_id}`).emit("recap:ready", { recap });
       return res.status(200).send({ success: true, data: { recap } });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+// Notifications — fetch for a user (supports ?type= and ?read= filters)
+app.get(
+  "/notifications/:user_id",
+  authenticateToken,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (req.user?.id !== req.params.user_id) return res.status(403).send("Unauthorized.");
+
+      const { type, read } = req.query;
+      const conditions: string[] = ["user_id = $1"];
+      const values: unknown[] = [req.params.user_id];
+
+      if (type) {
+        values.push(type);
+        conditions.push(`type = $${values.length}`);
+      }
+      if (read !== undefined) {
+        values.push(read === "true");
+        conditions.push(`read = $${values.length}`);
+      }
+
+      const result = await pool.query(
+        `SELECT * FROM notifications WHERE ${conditions.join(" AND ")} ORDER BY created_at DESC LIMIT 50`,
+        values,
+      );
+
+      return res.status(200).send({ success: true, data: result.rows });
+    } catch (error) {
+      next(error);
+    }
+  },
+);
+
+// Notifications — mark one as read
+app.patch(
+  "/notifications/:notification_id/read",
+  authenticateToken,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const result = await pool.query(
+        `UPDATE notifications SET read = TRUE WHERE id = $1 AND user_id = $2 RETURNING id`,
+        [req.params.notification_id, req.user?.id],
+      );
+      if (!result.rows.length) return res.status(404).send("Notification not found.");
+      return res.status(200).send({ success: true });
     } catch (error) {
       next(error);
     }
@@ -2717,6 +3004,7 @@ app.post(
         });
       }
 
+      io.to(`moment:${moment_id}`).emit("checkin:update");
       return res.status(200).send({ success: true, data: result.rows[0] });
     } catch (error) {
       next(error);
@@ -2746,10 +3034,18 @@ app.post(
 
       // Add to circle_members
       await pool.query(
-        `INSERT INTO circle_members (circle_id, member_id) 
+        `INSERT INTO circle_members (circle_id, member_id)
          VALUES ($1, $2) ON CONFLICT DO NOTHING`,
         [circle_id, req.user?.id],
       );
+
+      const ownerResult = await pool.query(
+        `SELECT owner_id FROM circles WHERE id = $1`,
+        [circle_id],
+      );
+      if (ownerResult.rows[0]) {
+        io.to(`user:${ownerResult.rows[0].owner_id}`).emit("member:added");
+      }
 
       return res.status(200).send({ success: true, data: result.rows[0] });
     } catch (error) {
