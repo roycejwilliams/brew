@@ -57,17 +57,17 @@ export default function Nearby({
   if (!activeCoords && !momentsProp) {
     return (
       <div className="space-y-2">
-        <p className="text-[10px] tracking-[2px] uppercase text-white/25 font-medium px-1">
+        <p className="text-[10px] tracking-[2px] uppercase text-black/25 dark:text-white/25 font-medium px-1">
           Nearby
         </p>
         <div
           className="rounded-md px-4 py-5 text-center space-y-1"
           style={{
-            background: "rgba(255,255,255,0.02)",
-            border: "1px solid rgba(255,255,255,0.06)",
+            background: "rgba(var(--fg),0.02)",
+            border: "1px solid rgba(var(--fg),0.06)",
           }}
         >
-          <p className="text-xs text-white/40 tracking-[-0.1px]">
+          <p className="text-xs text-black/40 dark:text-white/40 tracking-[-0.1px]">
             Allow location access to see nearby moments.
           </p>
         </div>
@@ -78,7 +78,7 @@ export default function Nearby({
   if (!momentsProp && isLoading) {
     return (
       <div className="space-y-2">
-        <p className="text-[10px] tracking-[2px] uppercase text-white/25 font-medium px-1">
+        <p className="text-[10px] tracking-[2px] uppercase text-black/25 dark:text-white/25 font-medium px-1">
           Nearby
         </p>
         <div className="flex gap-2 overflow-hidden">
@@ -96,20 +96,20 @@ export default function Nearby({
   if (moments.length === 0) {
     return (
       <div className="space-y-2">
-        <p className="text-[10px] tracking-[2px] uppercase text-white/25 font-medium px-1">
+        <p className="text-[10px] tracking-[2px] uppercase text-black/25 dark:text-white/25 font-medium px-1">
           Nearby
         </p>
         <div
           className="rounded-md px-4 py-5 text-center space-y-1"
           style={{
-            background: "rgba(255,255,255,0.02)",
-            border: "1px solid rgba(255,255,255,0.06)",
+            background: "rgba(var(--fg),0.02)",
+            border: "1px solid rgba(var(--fg),0.06)",
           }}
         >
-          <p className="text-xs text-white/40 tracking-[-0.1px]">
+          <p className="text-xs text-black/40 dark:text-white/40 tracking-[-0.1px]">
             Nothing nearby right now.
           </p>
-          <p className="text-[11px] text-white/20 tracking-[-0.1px]">
+          <p className="text-[11px] text-black/20 dark:text-white/20 tracking-[-0.1px]">
             Expand your search or check back later.
           </p>
         </div>
@@ -120,15 +120,15 @@ export default function Nearby({
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between px-1">
-        <p className="text-[10px] tracking-[2px] uppercase text-white/25 font-medium">
+        <p className="text-[10px] tracking-[2px] uppercase text-black/25 dark:text-white/25 font-medium">
           Nearby
         </p>
         <span
           className="text-[10px] px-1.5 py-0.5 rounded-full tabular-nums"
           style={{
-            background: "rgba(255,255,255,0.06)",
-            border: "1px solid rgba(255,255,255,0.08)",
-            color: "rgba(255,255,255,0.4)",
+            background: "rgba(var(--fg),0.06)",
+            border: "1px solid rgba(var(--fg),0.08)",
+            color: "rgba(var(--fg),0.4)",
           }}
         >
           {moments.length}
@@ -154,8 +154,8 @@ export default function Nearby({
                 }}
                 className={`${styles.embla__slide} rounded-md overflow-hidden cursor-pointer relative`}
                 style={{
-                  background: "rgba(255,255,255,0.03)",
-                  border: "1px solid rgba(255,255,255,0.07)",
+                  background: "rgba(var(--fg),0.03)",
+                  border: "1px solid rgba(var(--fg),0.07)",
                   flex: "0 0 75%",
                   minWidth: 0,
                 }}
@@ -169,15 +169,15 @@ export default function Nearby({
                     sizes="(max-width: 768px) 75vw, 200px"
                     className="object-cover brightness-75"
                   />
-                  <div className="absolute inset-0 bg-linear-to-t bg-center from-black/70 via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-linear-to-t bg-center dark:from-black/70 from-white/70 via-transparent to-transparent" />
 
                   {/* Time badge */}
                   {moment.moment_start && (
                     <span
-                      className="absolute top-2 right-2 text-[10px] text-white/70 px-2 py-0.5 rounded-md"
+                      className="absolute top-2 right-2 text-[10px] text-black/70 dark:text-white/70 px-2 py-0.5 rounded-md"
                       style={{
-                        background: "rgba(0,0,0,0.6)",
-                        border: "1px solid rgba(0,0,0,0.3)",
+                        background: "rgba(var(--bg),0.75)",
+                        border: "1px solid rgba(var(--fg),0.1)",
                         backdropFilter: "blur(8px)",
                       }}
                     >
@@ -190,11 +190,11 @@ export default function Nearby({
 
                   {/* Name overlaid on image bottom */}
                   <div className="absolute bottom-0 left-0 right-0 p-3">
-                    <p className="text-sm font-medium text-white/90 leading-snug tracking-[-0.1px] truncate">
+                    <p className="text-sm font-medium text-black/90 dark:text-white/90 leading-snug tracking-[-0.1px] truncate">
                       {moment.moments_name}
                     </p>
                     {moment.location_name && (
-                      <p className="text-[11px] text-white/40 tracking-[-0.1px] truncate mt-0.5">
+                      <p className="text-[11px] text-black/40 dark:text-white/40 tracking-[-0.1px] truncate mt-0.5">
                         {moment.location_name}
                       </p>
                     )}

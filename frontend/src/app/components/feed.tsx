@@ -62,9 +62,9 @@ function Feed({ completed, userId, onCreateMoment }: FeedProp) {
                 height: "clamp(120px, 38vw, 175px)",
                 borderRadius: 14,
                 marginBottom: 28,
-                border: "1px solid rgba(255,255,255,0.12)",
+                border: "1px solid rgba(var(--fg),0.12)",
                 boxShadow:
-                  "0 16px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04)",
+                  "0 16px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(var(--fg),0.04)",
                 zIndex: 1,
                 marginRight: -18,
               }}
@@ -94,9 +94,9 @@ function Feed({ completed, userId, onCreateMoment }: FeedProp) {
                 width: "clamp(105px, 32vw, 148px)",
                 height: "clamp(140px, 42vw, 200px)",
                 borderRadius: 16,
-                border: "1px solid rgba(255,255,255,0.16)",
+                border: "1px solid rgba(var(--fg),0.16)",
                 boxShadow:
-                  "0 24px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06)",
+                  "0 24px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(var(--fg),0.06)",
                 zIndex: 3,
               }}
             >
@@ -127,9 +127,9 @@ function Feed({ completed, userId, onCreateMoment }: FeedProp) {
                 height: "clamp(120px, 38vw, 175px)",
                 borderRadius: 14,
                 marginBottom: 28,
-                border: "1px solid rgba(255,255,255,0.12)",
+                border: "1px solid rgba(var(--fg),0.12)",
                 boxShadow:
-                  "0 16px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04)",
+                  "0 16px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(var(--fg),0.04)",
                 zIndex: 1,
                 marginLeft: -18,
               }}
@@ -159,13 +159,13 @@ function Feed({ completed, userId, onCreateMoment }: FeedProp) {
           >
             <p
               className="text-[15px] font-medium tracking-[-0.2px]"
-              style={{ color: "rgba(255,255,255,0.7)" }}
+              style={{ color: "rgba(var(--fg),0.7)" }}
             >
               Your story begins when you show up.
             </p>
             <p
               className="text-sm tracking-[-0.1px]"
-              style={{ color: "rgba(255,255,255,0.25)" }}
+              style={{ color: "rgba(var(--fg),0.25)" }}
             >
               Find your first night or make one.
             </p>
@@ -181,10 +181,10 @@ function Feed({ completed, userId, onCreateMoment }: FeedProp) {
             <motion.button
               whileTap={{ scale: 0.97 }}
               onClick={() => router.push("/pulse")}
-              className="flex-1 max-w-40 px-4 py-2.5 text-sm sm:text-xs font-medium tracking-[-0.1px] cursor-pointer rounded-xl transition-colors duration-150"
+              className="whitespace-nowrap px-5 py-2.5 text-sm font-medium tracking-[-0.1px] cursor-pointer rounded-xl transition-colors duration-150"
               style={{
-                background: "rgba(255,255,255,0.9)",
-                color: "#111111",
+                background: "rgba(var(--fg),0.9)",
+                color: "rgb(var(--bg))",
                 boxShadow: "0 4px 16px rgba(0,0,0,0.3)",
               }}
             >
@@ -193,17 +193,17 @@ function Feed({ completed, userId, onCreateMoment }: FeedProp) {
 
             <div
               className="w-1 h-1 rounded-full shrink-0"
-              style={{ background: "rgba(255,255,255,0.2)" }}
+              style={{ background: "rgba(var(--fg),0.2)" }}
             />
 
             <motion.button
               whileTap={{ scale: 0.97 }}
               onClick={onCreateMoment}
-              className="flex-1 max-w-40 px-4 py-2.5 text-sm sm:text-xs font-medium tracking-[-0.1px] cursor-pointer rounded-xl transition-colors duration-150"
+              className="whitespace-nowrap px-5 py-2.5 text-sm font-medium tracking-[-0.1px] cursor-pointer rounded-xl transition-colors duration-150"
               style={{
-                background: "rgba(255,255,255,0.06)",
-                color: "rgba(255,255,255,0.7)",
-                border: "1px solid rgba(255,255,255,0.1)",
+                background: "rgba(var(--fg),0.06)",
+                color: "rgba(var(--fg),0.7)",
+                border: "1px solid rgba(var(--fg),0.1)",
               }}
             >
               Curate your own event

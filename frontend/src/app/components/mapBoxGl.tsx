@@ -4,6 +4,10 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import { openEventCard } from "@/stores/store";
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
+import { useTheme } from "@/providers/ThemeProvider";
+
+const MAP_STYLE_DARK  = "mapbox://styles/mapbox/dark-v11";
+const MAP_STYLE_LIGHT = "mapbox://styles/roycwilliams/cmh2r2dac003j01rfhgc38cft";
 
 interface MapBoxProp {
   zoom: number;
@@ -33,6 +37,7 @@ function MapBoxGl({
   const [mapReady, setMapReady] = useState(false);
   const openCard = openEventCard((state) => state.openEvent);
   const router = useRouter();
+  const { theme } = useTheme();
 
   useEffect(() => {
     mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOXGL_PUBLIC_TOKEN!;
@@ -47,7 +52,7 @@ function MapBoxGl({
       dragPan: dragPan,
       dragRotate: dragRotate,
       pitch: 0,
-      style: "mapbox://styles/mapbox/dark-v11",
+      style: theme === "dark" ? MAP_STYLE_DARK : MAP_STYLE_LIGHT,
     });
 
     mapRef.current.on("load", () => {
@@ -73,6 +78,13 @@ function MapBoxGl({
 
   useEffect(() => {
     if (!mapRef.current || !mapReady) return;
+    mapRef.current.setStyle(
+      theme === "dark" ? MAP_STYLE_DARK : MAP_STYLE_LIGHT,
+    );
+  }, [theme, mapReady]);
+
+  useEffect(() => {
+    if (!mapRef.current || !mapReady) return;
 
     // Clear existing markers
     markersRef.current.forEach((m) => m.remove());
@@ -89,22 +101,22 @@ function MapBoxGl({
         moment.visibility_type === "circle"
           ? "rgba(251,191,36,0.5)"
           : moment.visibility_type === "people"
-          ? "rgba(99,102,241,0.6)"
-          : "rgba(255,255,255,0.25)";
+            ? "rgba(99,102,241,0.6)"
+            : "rgba(var(--fg),0.25)";
 
       const hoverBorderColor =
         moment.visibility_type === "circle"
           ? "rgba(251,191,36,0.9)"
           : moment.visibility_type === "people"
-          ? "rgba(99,102,241,1)"
-          : "rgba(255,255,255,0.5)";
+            ? "rgba(99,102,241,1)"
+            : "rgba(var(--fg),0.5)";
 
       const selectedBorderColor =
         moment.visibility_type === "circle"
           ? "rgba(251,191,36,1)"
           : moment.visibility_type === "people"
-          ? "rgba(129,140,248,1)"
-          : "rgba(255,255,255,0.8)";
+            ? "rgba(129,140,248,1)"
+            : "rgba(var(--fg),0.8)";
 
       // Wrapper — stable 44px hit target
       const wrapper = document.createElement("div");
@@ -123,7 +135,7 @@ function MapBoxGl({
         width: 36px;
         height: 36px;
         border-radius: 50%;
-        background: rgba(10,10,10,0.9);
+        background: rgba(var(--bg),0.9);
         border: 1.5px solid ${borderColor};
         backdrop-filter: blur(8px);
         box-shadow: 0 4px 16px rgba(0,0,0,0.4);
@@ -154,7 +166,7 @@ function MapBoxGl({
           width: 8px;
           height: 8px;
           border-radius: 50%;
-          background: rgba(255,255,255,0.6);
+          background: rgba(var(--fg),0.6);
         `;
         inner.appendChild(dot);
       }
@@ -220,7 +232,7 @@ function MapBoxGl({
   return (
     <motion.div
       ref={mapContainerRef}
-      className="absolute w-full h-full inset-0 brightness-85 contrast-110"
+      className="absolute w-full h-full brightness-85 contrast-110"
       initial={{ opacity: 0 }}
       animate={{ opacity: mapReady ? 1 : 0 }}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}

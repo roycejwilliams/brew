@@ -17,6 +17,14 @@ interface CreateModalProp {
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
+const STEP_COPY: Record<string, { title: string; subtitle: string }> = {
+  start:   { title: "Start a moment.",   subtitle: "Set something in motion."          },
+  circle:  { title: "Your circle.",       subtitle: "Who's part of this one?"           },
+  people:  { title: "Curate the room.",   subtitle: "Pick who's coming."                },
+  nearby:  { title: "Open discovery.",    subtitle: "Anyone nearby can find this."      },
+  confirm: { title: "The details.",       subtitle: "Add the finishing touches."        },
+};
+
 function CreateModal({ onClose }: CreateModalProp) {
   const cardActionRef = useRef<HTMLDivElement>(null);
 
@@ -37,7 +45,7 @@ function CreateModal({ onClose }: CreateModalProp) {
       exit={{ opacity: 0 }}
       transition={{ duration: 0.25 }}
       className="w-full min-h-dvh absolute left-0 top-0 z-80 overflow-hidden"
-      style={{ background: "#0c0c0c" }}
+      style={{ background: `rgb(var(--bg))` }}
     >
       {/* Background glows */}
       <div
@@ -61,7 +69,7 @@ function CreateModal({ onClose }: CreateModalProp) {
           width: "60%",
           height: "55%",
           background:
-            "radial-gradient(ellipse, rgba(18,18,18,0.9) 0%, rgba(10,10,10,0.5) 40%, transparent 70%)",
+            "radial-gradient(ellipse, rgba(var(--fg),0.04) 0%, rgba(var(--fg),0.02) 40%, transparent 70%)",
           filter: "blur(30px)",
           pointerEvents: "none",
         }}
@@ -91,7 +99,7 @@ function CreateModal({ onClose }: CreateModalProp) {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
             whileTap={{ scale: 0.94 }}
-            className="fixed z-50 flex items-center gap-2 cursor-pointer group"
+            className="absolute z-50 flex items-center gap-2 cursor-pointer group"
             style={{ top: "calc(env(safe-area-inset-top, 0px) + 1.5rem)", left: "1.5rem" }}
           >
             <div
@@ -100,13 +108,13 @@ function CreateModal({ onClose }: CreateModalProp) {
                 width: 36,
                 height: 36,
                 borderRadius: "50%",
-                background: "rgba(255,255,255,0.06)",
-                border: "1px solid rgba(255,255,255,0.1)",
+                background: `rgba(var(--fg),0.06)`,
+                border: `1px solid rgba(var(--fg),0.1)`,
               }}
             >
-              <CloseIcon color="#fff" size={14} />
+              <CloseIcon color="currentColor" size={14} />
             </div>
-            <span className="text-white/25 text-xs tracking-[-0.1px] opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <span className="text-black/25 dark:text-white/25 text-xs tracking-[-0.1px] opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               Close
             </span>
           </motion.button>
@@ -124,7 +132,7 @@ function CreateModal({ onClose }: CreateModalProp) {
           transition={{ duration: 0.3, ease: EASE }}
           className="mx-auto text-center flex flex-col justify-center items-center px-6 gap-2"
         >
-          {/* Asterisk + extra copy + divider — all exit together instantly */}
+          {/* Asterisk — landing only */}
           <AnimatePresence>
             {cardAction === null && (
               <motion.div
@@ -137,54 +145,54 @@ function CreateModal({ onClose }: CreateModalProp) {
                 <div
                   className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full"
                   style={{
-                    background: "rgba(255,255,255,0.06)",
-                    border: "1px solid rgba(255,255,255,0.1)",
+                    background: `rgba(var(--fg),0.06)`,
+                    border: `1px solid rgba(var(--fg),0.1)`,
                   }}
                 >
-                  <Asterisk size={18} color="rgba(255,255,255,0.7)" />
+                  <Asterisk size={18} color={`rgba(var(--fg),0.7)`} />
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Title */}
+          {/* Title — per-step when in create flow */}
           <AnimatePresence mode="wait">
             <motion.h1
-              key={cardAction ?? "default"}
+              key={cardAction === "create" ? selectedModal : (cardAction ?? "default")}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
-              className="text-2xl sm:text-3xl font-medium tracking-[-0.6px] text-white"
+              className="text-2xl sm:text-3xl font-medium tracking-[-0.6px] text-black dark:text-white"
             >
               {cardAction === "create"
-                ? "Start a moment."
+                ? (STEP_COPY[selectedModal]?.title ?? "Start a moment.")
                 : cardAction === "invite"
                   ? "Invite people."
                   : "Create a moment."}
             </motion.h1>
           </AnimatePresence>
 
-          {/* Subtitle */}
+          {/* Subtitle — per-step when in create flow */}
           <AnimatePresence mode="wait">
             <motion.p
-              key={`sub-${cardAction}-${selectedModal}-${inviteSelection}`}
+              key={`sub-${cardAction === "create" ? selectedModal : cardAction}-${inviteSelection}`}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
               className="text-sm tracking-[-0.1px] leading-relaxed max-w-xs"
-              style={{ color: "rgba(255,255,255,0.3)" }}
+              style={{ color: `rgba(var(--fg),0.3)` }}
             >
-              {cardAction === "create" && selectedModal === "start"
-                ? "Set something in motion."
+              {cardAction === "create"
+                ? (STEP_COPY[selectedModal]?.subtitle ?? "")
                 : cardAction === "invite"
                   ? "Start with people. We'll figure out the rest."
                   : "Turn a passing idea into a real plan."}
             </motion.p>
           </AnimatePresence>
 
-          {/* Extra copy + divider — exit together with asterisk */}
+          {/* Extra copy + divider — landing only */}
           <AnimatePresence>
             {cardAction === null && (
               <motion.div
@@ -196,7 +204,7 @@ function CreateModal({ onClose }: CreateModalProp) {
               >
                 <p
                   className="text-sm tracking-[-0.1px]"
-                  style={{ color: "rgba(255,255,255,0.2)" }}
+                  style={{ color: `rgba(var(--fg),0.2)` }}
                 >
                   Invite people, set the tone, and see what happens.
                 </p>
@@ -204,8 +212,7 @@ function CreateModal({ onClose }: CreateModalProp) {
                   className="w-full max-w-xs mt-2"
                   style={{
                     height: 1,
-                    background:
-                      "linear-gradient(90deg, transparent, rgba(255,255,255,0.07), transparent)",
+                    background: `linear-gradient(90deg, transparent, rgba(var(--fg),0.07), transparent)`,
                   }}
                 />
               </motion.div>
@@ -217,7 +224,7 @@ function CreateModal({ onClose }: CreateModalProp) {
         <motion.div
           animate={{ marginTop: cardAction !== null ? "0" : "1rem" }}
           transition={{ duration: 0.3, ease: EASE }}
-          className="w-full flex-1 min-h-0 overflow-hidden mx-auto"
+          className="w-full flex-1 min-h-0 overflow-y-auto mx-auto"
         >
           <AnimatePresence mode="wait">
             {cardAction === "create" ? (
@@ -233,6 +240,7 @@ function CreateModal({ onClose }: CreateModalProp) {
                   setSelectedModal={setSelectedModal}
                   selectedModal={selectedModal}
                   onGoBack={() => setCardAction(null)}
+                  onInvite={() => setCardAction("invite")}
                   onClose={onClose}
                 />
               </motion.div>

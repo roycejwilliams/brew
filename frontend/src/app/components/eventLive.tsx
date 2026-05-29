@@ -36,7 +36,7 @@ export default function EventLive({ activeModal, eventCard }: EventLiveProp) {
         transition={{ duration: 0.3, ease: EASE }}
         className="flex items-center gap-2 w-fit"
         style={{
-          borderBottom: "1px solid rgba(255,255,255,0.07)",
+          borderBottom: "1px solid rgba(var(--fg),0.07)",
           paddingBottom: 16,
         }}
       >
@@ -57,7 +57,7 @@ export default function EventLive({ activeModal, eventCard }: EventLiveProp) {
         </div>
         <span
           className="text-sm font-medium tracking-[-0.1px]"
-          style={{ color: "rgba(255,255,255,0.6)" }}
+          style={{ color: "rgba(var(--fg),0.6)" }}
         >
           Live Now
         </span>
@@ -72,7 +72,7 @@ export default function EventLive({ activeModal, eventCard }: EventLiveProp) {
       >
         <div className="flex flex-col items-center gap-2">
           <h2
-            className="text-white font-semibold leading-tight"
+            className="text-black dark:text-white font-semibold leading-tight"
             style={{
               fontSize: "clamp(36px, 8vw, 52px)",
               letterSpacing: "-2px",
@@ -82,7 +82,7 @@ export default function EventLive({ activeModal, eventCard }: EventLiveProp) {
           </h2>
           <p
             className="text-base tracking-[-0.1px]"
-            style={{ color: "rgba(255,255,255,0.35)" }}
+            style={{ color: "rgba(var(--fg),0.35)" }}
           >
             Time to Brew
           </p>
@@ -96,7 +96,7 @@ export default function EventLive({ activeModal, eventCard }: EventLiveProp) {
           style={{
             background: "#f0efed",
             borderRadius: 18,
-            boxShadow: "0 24px 60px rgba(0,0,0,0.5)",
+            boxShadow: "0 24px 60px rgba(var(--fg),0.15)",
             overflow: "hidden",
           }}
         >
@@ -116,13 +116,13 @@ export default function EventLive({ activeModal, eventCard }: EventLiveProp) {
         >
           <p
             className="text-sm font-medium tracking-[-0.1px]"
-            style={{ color: "rgba(255,255,255,0.6)" }}
+            style={{ color: "rgba(var(--fg),0.6)" }}
           >
             Check in with host
           </p>
           <p
             className="text-xs tracking-[-0.1px]"
-            style={{ color: "rgba(255,255,255,0.2)" }}
+            style={{ color: "rgba(var(--fg),0.2)" }}
           >
             Show this at the door
           </p>
@@ -138,7 +138,7 @@ export default function EventLive({ activeModal, eventCard }: EventLiveProp) {
         style={{
           height: 1,
           background:
-            "linear-gradient(90deg, rgba(255,255,255,0.07) 0%, transparent 80%)",
+            "linear-gradient(90deg, rgba(var(--fg),0.07) 0%, transparent 80%)",
         }}
       />
 
@@ -156,8 +156,8 @@ export default function EventLive({ activeModal, eventCard }: EventLiveProp) {
             style={{
               height: "clamp(240px, 40vw, 500px)",
               borderRadius: 16,
-              border: "1px solid rgba(255,255,255,0.07)",
-              boxShadow: "0 24px 60px rgba(0,0,0,0.5)",
+              border: "1px solid rgba(var(--fg),0.07)",
+              boxShadow: "0 24px 60px rgba(var(--fg),0.15)",
               opacity: 0.88,
             }}
           >
@@ -170,7 +170,7 @@ export default function EventLive({ activeModal, eventCard }: EventLiveProp) {
             />
             <div
               className="absolute inset-0 pointer-events-none rounded-2xl"
-              style={{ boxShadow: "inset 0 0 60px rgba(0,0,0,0.4)" }}
+              style={{ boxShadow: "inset 0 0 60px rgba(var(--fg),0.12)" }}
             />
           </div>
 
@@ -183,21 +183,21 @@ export default function EventLive({ activeModal, eventCard }: EventLiveProp) {
             whileTap={{ scale: 0.96 }}
             className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2 rounded-full cursor-pointer"
             style={{
-              background: "rgba(10,10,10,0.85)",
-              border: "1px solid rgba(255,255,255,0.12)",
+              background: `rgba(var(--bg),0.85)`,
+              border: "1px solid rgba(var(--fg),0.12)",
               backdropFilter: "blur(16px)",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.4)",
+              boxShadow: "0 4px 20px rgba(var(--fg),0.12)",
             }}
           >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
               <path
                 d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"
-                fill="rgba(255,255,255,0.6)"
+                fill="rgba(var(--fg),0.6)"
               />
             </svg>
             <span
               className="text-[11px] tracking-[-0.1px] whitespace-nowrap"
-              style={{ color: "rgba(255,255,255,0.6)" }}
+              style={{ color: "rgba(var(--fg),0.6)" }}
             >
               Get directions
             </span>

@@ -6,12 +6,13 @@ interface TimeProp {
 
 export default function useTimingStates({ eventCard }: TimeProp) {
   const [activeEvent, setActive] = useState<"prequel" | "live" | "end">(() => {
-    if (!eventCard?.moment_start || !eventCard?.moment_end) return "prequel";
+    if (!eventCard?.moment_start) return "prequel";
     const now = new Date();
     const start = new Date(eventCard.moment_start);
-    const end = new Date(eventCard.moment_end);
     if (now < start) return "prequel";
-    if (now >= start && now <= end) return "live";
+    if (!eventCard.moment_end) return "live";
+    const end = new Date(eventCard.moment_end);
+    if (now <= end) return "live";
     return "end";
   });
 
@@ -19,21 +20,26 @@ export default function useTimingStates({ eventCard }: TimeProp) {
     const timingStates = () => {
       const now = new Date();
 
-      if (!eventCard?.moment_start || !eventCard?.moment_end) return;
+      if (!eventCard?.moment_start) return;
 
       const start = new Date(eventCard.moment_start);
-      const end = new Date(eventCard.moment_end);
-
       if (now < start) {
         setActive("prequel");
-      } else if (now >= start && now <= end) {
+        return;
+      }
+      if (!eventCard.moment_end) {
+        setActive("live");
+        return;
+      }
+      const end = new Date(eventCard.moment_end);
+      if (now <= end) {
         setActive("live");
       } else {
         setActive("end");
       }
     };
     timingStates();
-    const interval = setInterval(timingStates, 60_000);
+    const interval = setInterval(timingStates, 10_000);
     return () => clearInterval(interval);
   }, [eventCard?.moment_start, eventCard?.moment_end]);
 

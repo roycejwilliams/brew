@@ -17,6 +17,7 @@ interface selectedModalProp {
   setSelectedModal: (selectedModal: MomentSelectionProp) => void;
   selectedUsers: UserProp[];
   setSelectedUsers: React.Dispatch<React.SetStateAction<UserProp[]>>;
+  onInvite?: () => void;
 }
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -26,6 +27,7 @@ export default function People({
   setSelectedModal,
   selectedUsers,
   setSelectedUsers,
+  onInvite,
 }: selectedModalProp) {
   const [userQuery, setUserQuery] = useState("");
   const [isSearchingUser] = useState<boolean>(false);
@@ -109,7 +111,7 @@ export default function People({
           {/* Search */}
           <div
             className="rounded-xl overflow-hidden"
-            style={{ border: "1px solid rgba(255,255,255,0.08)" }}
+            style={{ border: "1px solid rgba(var(--fg),0.08)" }}
           >
             <SearchMap
               selectedModal={selectedModal}
@@ -118,6 +120,62 @@ export default function People({
               autoFocus={false}
             />
           </div>
+
+          {/* Empty state — no members in any circle */}
+          {!isSearchingUser && userQuery === "" && allMembers.length === 0 && (
+            <motion.div
+              key="no-people"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2, ease: EASE }}
+              className="rounded-xl px-6 py-10 text-center flex flex-col items-center gap-5"
+              style={{
+                background: "rgba(var(--fg),0.02)",
+                border: "1px solid rgba(var(--fg),0.07)",
+              }}
+            >
+              <div
+                className="w-10 h-10 rounded-full flex items-center justify-center"
+                style={{
+                  background: "rgba(var(--fg),0.05)",
+                  border: "1px solid rgba(var(--fg),0.08)",
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="1.5" style={{ color: "rgba(var(--fg),0.35)" }} />
+                  <path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" style={{ color: "rgba(var(--fg),0.35)" }} />
+                  <path d="M16 11h6m-3-3v6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" style={{ color: "rgba(var(--fg),0.35)" }} />
+                </svg>
+              </div>
+              <div className="space-y-1">
+                <p
+                  className="text-sm font-medium tracking-[-0.1px]"
+                  style={{ color: "rgba(var(--fg),0.55)" }}
+                >
+                  No one in your circles yet
+                </p>
+                <p
+                  className="text-[11px] leading-relaxed tracking-[-0.1px] max-w-[220px] mx-auto"
+                  style={{ color: "rgba(var(--fg),0.25)" }}
+                >
+                  Search by username above to invite someone, or skip ahead to the details.
+                </p>
+              </div>
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                onClick={() => onInvite?.()}
+                className="text-xs tracking-[-0.1px] px-5 py-2.5 rounded-lg cursor-pointer transition-colors"
+                style={{
+                  background: "rgba(var(--fg),0.06)",
+                  border: "1px solid rgba(var(--fg),0.1)",
+                  color: "rgba(var(--fg),0.5)",
+                }}
+              >
+                Invite people →
+              </motion.button>
+            </motion.div>
+          )}
 
           {/* Circles filter + default member list */}
           {!isSearchingUser &&
@@ -131,8 +189,8 @@ export default function People({
                 transition={{ duration: 0.18 }}
                 className="rounded-xl overflow-hidden"
                 style={{
-                  background: "rgba(255,255,255,0.02)",
-                  border: "1px solid rgba(255,255,255,0.07)",
+                  background: "rgba(var(--fg),0.02)",
+                  border: "1px solid rgba(var(--fg),0.07)",
                 }}
               >
                 {/* Top shimmer */}
@@ -140,7 +198,7 @@ export default function People({
                   style={{
                     height: 1,
                     background:
-                      "linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)",
+                      "linear-gradient(90deg, transparent, rgba(var(--fg),0.06), transparent)",
                   }}
                 />
 
@@ -149,7 +207,7 @@ export default function People({
                   <div className="flex flex-col gap-3">
                     <p
                       className="text-left text-[9px] tracking-[2px] uppercase font-medium"
-                      style={{ color: "rgba(255,255,255,0.2)" }}
+                      style={{ color: "rgba(var(--fg),0.2)" }}
                     >
                       Your circles
                     </p>
@@ -181,8 +239,8 @@ export default function People({
                             style={{
                               border:
                                 activeCircleFilter === circle.id
-                                  ? "1px solid rgba(255,255,255,0.25)"
-                                  : "1px solid rgba(255,255,255,0.08)",
+                                  ? "1px solid rgba(var(--fg),0.25)"
+                                  : "1px solid rgba(var(--fg),0.08)",
                               opacity:
                                 activeCircleFilter &&
                                 activeCircleFilter !== circle.id
@@ -201,7 +259,7 @@ export default function People({
                           </div>
                           <span
                             className="text-[9px] tracking-[-0.1px] max-w-12 truncate"
-                            style={{ color: "rgba(255,255,255,0.45)" }}
+                            style={{ color: "rgba(var(--fg),0.45)" }}
                           >
                             {circle.circle_name}
                           </span>
@@ -213,8 +271,8 @@ export default function People({
                         whileTap={{ scale: 0.96 }}
                         className="w-12 h-12 cursor-pointer rounded-xl flex justify-center items-center transition-colors duration-200"
                         style={{
-                          background: "rgba(255,255,255,0.03)",
-                          border: "1px solid rgba(255,255,255,0.07)",
+                          background: "rgba(var(--fg),0.03)",
+                          border: "1px solid rgba(var(--fg),0.07)",
                         }}
                       >
                         <PlusIcon size={16} color="#fff" />
@@ -224,7 +282,7 @@ export default function People({
 
                   {/* Divider */}
                   <div
-                    style={{ height: 1, background: "rgba(255,255,255,0.05)" }}
+                    style={{ height: 1, background: "rgba(var(--fg),0.05)" }}
                   />
 
                   {/* Member list */}
@@ -232,7 +290,7 @@ export default function People({
                     <div className="flex flex-col gap-0.5">
                       <p
                         className="text-left text-[9px] tracking-[2px] uppercase font-medium mb-2"
-                        style={{ color: "rgba(255,255,255,0.2)" }}
+                        style={{ color: "rgba(var(--fg),0.2)" }}
                       >
                         {activeCircleFilter ? "Circle members" : "All members"}
                       </p>
@@ -258,7 +316,7 @@ export default function People({
                             style={{ background: "transparent" }}
                             onMouseEnter={(e) =>
                               (e.currentTarget.style.background =
-                                "rgba(255,255,255,0.04)")
+                                "rgba(var(--fg),0.04)")
                             }
                             onMouseLeave={(e) =>
                               (e.currentTarget.style.background = "transparent")
@@ -267,7 +325,7 @@ export default function People({
                             <div
                               className="w-9 h-9 rounded-lg relative overflow-hidden shrink-0"
                               style={{
-                                border: "1px solid rgba(255,255,255,0.08)",
+                                border: "1px solid rgba(var(--fg),0.08)",
                               }}
                             >
                               <Image
@@ -280,13 +338,13 @@ export default function People({
                             <div className="flex-1 min-w-0 text-left">
                               <p
                                 className="text-sm font-medium tracking-[-0.1px] truncate"
-                                style={{ color: "rgba(255,255,255,0.82)" }}
+                                style={{ color: "rgba(var(--fg),0.82)" }}
                               >
                                 {person.first_name} {person.last_name}
                               </p>
                               <p
                                 className="text-[11px] truncate tracking-[-0.1px]"
-                                style={{ color: "rgba(255,255,255,0.3)" }}
+                                style={{ color: "rgba(var(--fg),0.3)" }}
                               >
                                 @{person.username}
                               </p>
@@ -294,14 +352,14 @@ export default function People({
                             <div
                               className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
                               style={{
-                                background: "rgba(255,255,255,0.05)",
-                                border: "1px solid rgba(255,255,255,0.09)",
+                                background: "rgba(var(--fg),0.05)",
+                                border: "1px solid rgba(var(--fg),0.09)",
                               }}
                             >
                               <span
                                 style={{
                                   fontSize: 12,
-                                  color: "rgba(255,255,255,0.3)",
+                                  color: "rgba(var(--fg),0.3)",
                                   lineHeight: 1,
                                 }}
                               >
@@ -327,8 +385,8 @@ export default function People({
               transition={{ duration: 0.18 }}
               className="rounded-xl overflow-hidden"
               style={{
-                background: "rgba(255,255,255,0.02)",
-                border: "1px solid rgba(255,255,255,0.07)",
+                background: "rgba(var(--fg),0.02)",
+                border: "1px solid rgba(var(--fg),0.07)",
               }}
             >
               <div className="p-3 flex flex-col gap-0.5">
@@ -349,7 +407,7 @@ export default function People({
                       style={{ background: "transparent" }}
                       onMouseEnter={(e) =>
                         (e.currentTarget.style.background =
-                          "rgba(255,255,255,0.04)")
+                          "rgba(var(--fg),0.04)")
                       }
                       onMouseLeave={(e) =>
                         (e.currentTarget.style.background = "transparent")
@@ -357,7 +415,7 @@ export default function People({
                     >
                       <div
                         className="w-9 h-9 rounded-lg relative overflow-hidden shrink-0"
-                        style={{ border: "1px solid rgba(255,255,255,0.08)" }}
+                        style={{ border: "1px solid rgba(var(--fg),0.08)" }}
                       >
                         <Image
                           src={person.profile_image ?? "/fallback.jpg"}
@@ -369,13 +427,13 @@ export default function People({
                       <div className="flex-1 min-w-0 text-left">
                         <p
                           className="text-sm font-medium tracking-[-0.1px] truncate"
-                          style={{ color: "rgba(255,255,255,0.82)" }}
+                          style={{ color: "rgba(var(--fg),0.82)" }}
                         >
                           {person.first_name} {person.last_name}
                         </p>
                         <p
                           className="text-[11px] truncate tracking-[-0.1px]"
-                          style={{ color: "rgba(255,255,255,0.3)" }}
+                          style={{ color: "rgba(var(--fg),0.3)" }}
                         >
                           @{person.username}
                         </p>
@@ -399,19 +457,19 @@ export default function People({
                 transition={{ duration: 0.18 }}
                 className="rounded-xl p-8 text-center"
                 style={{
-                  background: "rgba(255,255,255,0.02)",
-                  border: "1px solid rgba(255,255,255,0.07)",
+                  background: "rgba(var(--fg),0.02)",
+                  border: "1px solid rgba(var(--fg),0.07)",
                 }}
               >
                 <p
                   className="text-sm tracking-[-0.1px]"
-                  style={{ color: "rgba(255,255,255,0.3)" }}
+                  style={{ color: "rgba(var(--fg),0.3)" }}
                 >
                   No results for &quot;{userQuery}&quot;
                 </p>
                 <p
                   className="text-[11px] mt-1 tracking-[-0.1px]"
-                  style={{ color: "rgba(255,255,255,0.18)" }}
+                  style={{ color: "rgba(var(--fg),0.18)" }}
                 >
                   Try a different name
                 </p>
@@ -428,8 +486,8 @@ export default function People({
               transition={{ duration: 0.18 }}
               className="rounded-xl p-8 flex flex-col items-center gap-3"
               style={{
-                background: "rgba(255,255,255,0.02)",
-                border: "1px solid rgba(255,255,255,0.07)",
+                background: "rgba(var(--fg),0.02)",
+                border: "1px solid rgba(var(--fg),0.07)",
               }}
             >
               <motion.div
@@ -437,13 +495,13 @@ export default function People({
                 transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                 className="w-5 h-5 rounded-full border-2"
                 style={{
-                  borderColor: "rgba(255,255,255,0.08)",
-                  borderTopColor: "rgba(255,255,255,0.5)",
+                  borderColor: "rgba(var(--fg),0.08)",
+                  borderTopColor: "rgba(var(--fg),0.5)",
                 }}
               />
               <p
                 className="text-[11px] tracking-[-0.1px]"
-                style={{ color: "rgba(255,255,255,0.3)" }}
+                style={{ color: "rgba(var(--fg),0.3)" }}
               >
                 Searching...
               </p>
@@ -488,7 +546,7 @@ export default function People({
                     </button>
                     <div
                       className="w-14 h-14 rounded-xl overflow-hidden relative"
-                      style={{ border: "1px solid rgba(255,255,255,0.1)" }}
+                      style={{ border: "1px solid rgba(var(--fg),0.1)" }}
                     >
                       <Image
                         src={u.profile_image ?? "/fallback.jpg"}
@@ -499,7 +557,7 @@ export default function People({
                     </div>
                     <span
                       className="text-[9px] tracking-[-0.1px] max-w-14 truncate"
-                      style={{ color: "rgba(255,255,255,0.45)" }}
+                      style={{ color: "rgba(var(--fg),0.45)" }}
                     >
                       {u.first_name}
                     </span>
@@ -513,9 +571,9 @@ export default function People({
                 whileTap={{ scale: 0.98 }}
                 className="w-full flex justify-between items-center px-4 py-3 rounded-xl cursor-pointer transition-all duration-150 text-sm font-medium tracking-[-0.1px]"
                 style={{
-                  background: "rgba(255,255,255,0.9)",
-                  color: "#0c0c0c",
-                  border: "1px solid rgba(255,255,255,0.2)",
+                  background: "rgba(var(--fg),0.9)",
+                  color: "rgb(var(--bg))",
+                  border: "1px solid rgba(var(--fg),0.2)",
                 }}
               >
                 <span>

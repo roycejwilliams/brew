@@ -35,8 +35,8 @@ function EventCard() {
 
   return (
     <main
-      className="min-h-dvh overflow-x-hidden w-full text-white"
-      style={{ background: "#0c0c0c" }}
+      className="min-h-dvh overflow-x-hidden w-full text-black dark:text-white"
+      style={{ background: `rgb(var(--bg))` }}
     >
       {/* Background — fixed so it stays while scrolling */}
       <div className="fixed inset-0 z-0 pointer-events-none">
@@ -54,7 +54,7 @@ function EventCard() {
               className="absolute inset-0"
               style={{
                 background:
-                  "linear-gradient(180deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.85) 100%)",
+                  "linear-gradient(180deg, rgba(var(--bg),0.45) 0%, rgba(var(--bg),0.85) 100%)",
               }}
             />
           </>
@@ -62,7 +62,7 @@ function EventCard() {
           <>
             <div
               className="absolute inset-0"
-              style={{ background: "#0c0c0c" }}
+              style={{ background: `rgb(var(--bg))` }}
             />
             <div
               className="absolute top-0 left-1/2 -translate-x-1/2 pointer-events-none"
@@ -70,7 +70,7 @@ function EventCard() {
                 width: 900,
                 height: 500,
                 background:
-                  "radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 40%, transparent 70%)",
+                  "radial-gradient(ellipse at 50% 0%, rgba(var(--fg),0.06) 0%, rgba(var(--fg),0.02) 40%, transparent 70%)",
               }}
             />
           </>
@@ -93,16 +93,16 @@ function EventCard() {
             width: 36,
             height: 36,
             borderRadius: "50%",
-            background: "rgba(255,255,255,0.08)",
-            border: "1px solid rgba(255,255,255,0.12)",
+            background: "rgba(var(--fg),0.08)",
+            border: "1px solid rgba(var(--fg),0.12)",
             backdropFilter: "blur(8px)",
           }}
         >
-          <CloseIcon color="#fff" size={14} />
+          <CloseIcon color="currentColor" size={14} />
         </div>
         <span
           className="text-xs tracking-[-0.1px] opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-          style={{ color: "rgba(255,255,255,0.3)" }}
+          style={{ color: "rgba(var(--fg),0.3)" }}
         >
           Close
         </span>

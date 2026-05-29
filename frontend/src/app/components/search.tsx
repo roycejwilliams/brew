@@ -53,7 +53,8 @@ export default function SearchMap({
       <motion.div
         whileFocus={{ scale: 1.01 }}
         transition={{ duration: 0.2 }}
-        className="w-full px-4 py-2.5 sm:px-5 sm:py-3.5 bg-[#1c1c1c] backdrop-blur-xl  mx-auto flex items-center gap-3 shadow-2xl shadow-black/20"
+        className="w-full px-4 py-2.5 sm:px-5 sm:py-3.5 backdrop-blur-xl  mx-auto flex items-center gap-3 shadow-2xl shadow-black/20"
+        style={{ background: `rgb(var(--bg-elevated))` }}
       >
         <motion.div
           initial={{ opacity: 0.5 }}
@@ -71,7 +72,7 @@ export default function SearchMap({
           onChange={handleChange}
           onFocus={onFocus}
           autoFocus={autoFocus}
-          className="text-white/90 flex-1 text-sm placeholder:text-xs block p-0 bg-transparent placeholder:text-white/30 focus:outline-none transition-all"
+          className="text-black/90 dark:text-white/90 flex-1 text-sm placeholder:text-xs block p-0 bg-transparent placeholder:text-black/30 dark:placeholder:text-white/30 focus:outline-none transition-all"
           placeholder={placeholder || defaultPlaceholder}
           required
         />

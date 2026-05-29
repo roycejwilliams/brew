@@ -2,6 +2,7 @@ import { useEffect, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { socket } from "@/lib/socket";
 import { useUserStore } from "@/stores/useUserStore";
+import { openEventCard } from "@/stores/store";
 
 export const useSocket = () => {
   const { user } = useUserStore();
@@ -36,11 +37,29 @@ export const useSocket = () => {
       }
     });
 
+    socket.on("circle:updated", () => {
+      queryClient.invalidateQueries({ queryKey: ["circles-with-members"] });
+      queryClient.invalidateQueries({ queryKey: ["circle-owner"] });
+    });
+
+    socket.on("member:added", () => {
+      queryClient.invalidateQueries({ queryKey: ["circles-with-members"] });
+      queryClient.invalidateQueries({ queryKey: ["circle-owner"] });
+    });
+
+    socket.on("member:removed", () => {
+      queryClient.invalidateQueries({ queryKey: ["circles-with-members"] });
+      queryClient.invalidateQueries({ queryKey: ["circle-owner"] });
+    });
+
     return () => {
       socket.off("moment:created");
       socket.off("invite:moment");
       socket.off("invite:circle");
       socket.off("invite:decision");
+      socket.off("circle:updated");
+      socket.off("member:added");
+      socket.off("member:removed");
       socket.disconnect();
     };
   }, [user?.id, queryClient]);
@@ -73,6 +92,9 @@ export const useSocket = () => {
         queryClient.setQueryData(["moment", momentId], updated);
         queryClient.invalidateQueries({ queryKey: ["moment-owner"] });
         queryClient.invalidateQueries({ queryKey: ["nearby-moments"] });
+        // Sync Zustand store so useTimingStates reacts to time changes instantly
+        const { moment, updateMoment } = openEventCard.getState();
+        if (moment?.id === momentId) updateMoment(updated);
       });
 
       socket.on("recap:ready", ({ recap }: { recap: string }) => {

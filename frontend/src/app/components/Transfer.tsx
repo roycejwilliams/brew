@@ -69,9 +69,9 @@ function Transfer() {
       className="max-w-xl mx-auto overflow-hidden"
       style={{
         borderRadius: 18,
-        border: "1px solid rgba(255,255,255,0.07)",
-        background: "rgba(255,255,255,0.03)",
-        boxShadow: "0 24px 60px rgba(0,0,0,0.4)",
+        border: "1px solid rgba(var(--fg),0.07)",
+        background: "rgba(var(--fg),0.03)",
+        boxShadow: "0 24px 60px rgba(var(--fg),0.12)",
       }}
     >
       {/* QR */}
@@ -82,7 +82,7 @@ function Transfer() {
             borderRadius: 14,
             background: "#f0efed",
             padding: 8,
-            boxShadow: "0 16px 40px rgba(0,0,0,0.5)",
+            boxShadow: "0 16px 40px rgba(var(--fg),0.12)",
           }}
         >
           <CanvasQRcode
@@ -94,9 +94,9 @@ function Transfer() {
         <div className="flex items-center gap-2">
           <span
             className="w-1.5 h-1.5 rounded-full"
-            style={{ background: "rgba(255,255,255,0.2)" }}
+            style={{ background: "rgba(var(--fg),0.2)" }}
           />
-          <p className="text-white/30 text-xs tracking-[-0.1px]">
+          <p className="text-black/30 dark:text-white/30 text-xs tracking-[-0.1px]">
             Scan for entry
           </p>
         </div>
@@ -105,13 +105,13 @@ function Transfer() {
       {/* Divider */}
       <div
         className="w-full h-px"
-        style={{ background: "rgba(255,255,255,0.06)" }}
+        style={{ background: "rgba(var(--fg),0.06)" }}
       />
 
       {/* Actions */}
       <div className="flex flex-col items-center justify-center py-10 px-6 gap-6">
         {/* Eyebrow */}
-        <p className="text-[10px] tracking-[3px] uppercase text-white/20">
+        <p className="text-[10px] tracking-[3px] uppercase text-black/20 dark:text-white/20">
           {active
             ? active === "transfer"
               ? "Transfer"
@@ -126,9 +126,9 @@ function Transfer() {
             width: 64,
             height: 64,
             borderRadius: "50%",
-            background: "rgba(255,255,255,0.05)",
-            border: "1px solid rgba(255,255,255,0.08)",
-            boxShadow: "0 8px 24px rgba(0,0,0,0.3)",
+            background: "rgba(var(--fg),0.05)",
+            border: "1px solid rgba(var(--fg),0.08)",
+            boxShadow: "0 8px 24px rgba(var(--fg),0.1)",
           }}
         >
           {current ? (
@@ -144,12 +144,12 @@ function Transfer() {
         {/* Title + sub */}
         <div className="text-center flex flex-col gap-1">
           <h2
-            className="text-white font-medium tracking-[-0.3px]"
+            className="text-black dark:text-white font-medium tracking-[-0.3px]"
             style={{ fontSize: 17 }}
           >
             {current?.title ?? "Your night begins here"}
           </h2>
-          <p className="text-white/35 text-sm tracking-[-0.1px]">
+          <p className="text-black/35 dark:text-white/35 text-sm tracking-[-0.1px]">
             {current?.sub ?? "A quiet moment before the night unfolds."}
           </p>
         </div>
@@ -176,21 +176,21 @@ function Transfer() {
                   width: 40,
                   height: 40,
                   borderRadius: "50%",
-                  background: "rgba(255,255,255,0.05)",
-                  border: "1px solid rgba(255,255,255,0.08)",
+                  background: "rgba(var(--fg),0.05)",
+                  border: "1px solid rgba(var(--fg),0.08)",
                 }}
               >
-                <ChevronLeftIcon size={20} color="#fff" />
+                <ChevronLeftIcon size={20} color="currentColor" />
               </motion.button>
 
               <input
                 type="text"
                 value={recipient}
                 onChange={(e) => setRecipient(e.target.value)}
-                className="flex-1 bg-transparent text-white text-sm placeholder-white/20 outline-none px-4 py-2.5 rounded-xl"
+                className="flex-1 bg-transparent text-black dark:text-white text-sm placeholder-black/20 dark:placeholder-white/20 outline-none px-4 py-2.5 rounded-xl"
                 style={{
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  background: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(var(--fg),0.08)",
+                  background: "rgba(var(--fg),0.04)",
                 }}
                 placeholder={current?.placeholder}
                 required
@@ -221,19 +221,19 @@ function Transfer() {
                     ? "rgba(74,222,128,0.15)"
                     : isError
                       ? "rgba(220,80,80,0.15)"
-                      : "rgba(255,255,255,0.1)",
+                      : "rgba(var(--fg),0.1)",
                   border: isSuccess
                     ? "1px solid rgba(74,222,128,0.3)"
                     : isError
                       ? "1px solid rgba(220,80,80,0.3)"
-                      : "1px solid rgba(255,255,255,0.15)",
+                      : "1px solid rgba(var(--fg),0.15)",
                 }}
               >
                 {isPending ? (
                   <FontAwesomeIcon
                     icon={faArrowRotateRight}
                     size="xs"
-                    className="animate-spin text-white/60"
+                    className="animate-spin text-black/60 dark:text-white/60"
                   />
                 ) : isSuccess ? (
                   <FontAwesomeIcon
@@ -248,7 +248,7 @@ function Transfer() {
                     className="text-red-400/70"
                   />
                 ) : (
-                  <SendIcon size={16} color="#fff" />
+                  <SendIcon size={16} color="currentColor" />
                 )}
               </motion.button>
             </motion.form>
@@ -290,14 +290,14 @@ function Transfer() {
                           width: 56,
                           height: 56,
                           borderRadius: "50%",
-                          background: "rgba(255,255,255,0.05)",
-                          border: "1px solid rgba(255,255,255,0.08)",
-                          boxShadow: "0 4px 16px rgba(0,0,0,0.3)",
+                          background: "rgba(var(--fg),0.05)",
+                          border: "1px solid rgba(var(--fg),0.08)",
+                          boxShadow: "0 4px 16px rgba(var(--fg),0.1)",
                         }}
                       >
                         <Icon size={22} color="#FFFFFF80" />
                       </div>
-                      <span className="text-white/30 text-xs tracking-[-0.1px] group-hover:text-white/60 transition-colors duration-200">
+                      <span className="text-black/30 dark:text-white/30 text-xs tracking-[-0.1px] group-hover:text-black/60 dark:text-white/60 transition-colors duration-200">
                         {key === "transfer" ? "Transfer" : "Invite"}
                       </span>
                     </motion.button>

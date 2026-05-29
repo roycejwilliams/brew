@@ -54,7 +54,7 @@ interface SelectModal {
 const EASE = [0.16, 1, 0.3, 1] as const;
 
 const inputClass =
-  "w-full bg-transparent text-white/90 text-sm placeholder:text-white/25 resize-none px-4 pt-4 pb-10 focus:outline-none tracking-[-0.1px]";
+  "w-full bg-transparent text-black/90 dark:text-white/90 text-sm placeholder:text-black/25 dark:text-white/25 dark:placeholder:text-white/25 resize-none px-4 pt-4 pb-10 focus:outline-none tracking-[-0.1px]";
 
 export default function MomentDetails({
   selectedModal,
@@ -80,9 +80,9 @@ export default function MomentDetails({
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const [hasTyped, setHasTyped] = useState<boolean>(false);
   const [file, setFile] = useState<File | null>(null);
-  const [stage, setStage] = useState<"details" | "generating" | "done" | "error">(
-    "details",
-  );
+  const [stage, setStage] = useState<
+    "details" | "generating" | "done" | "error"
+  >("details");
   const [createdMomentId, setCreatedMomentId] = useState<string | null>(null);
   const [locationCoordinates, setLocationCoordinates] = useState<
     [number, number] | null
@@ -224,66 +224,77 @@ export default function MomentDetails({
   if (stage === "error")
     return (
       <AnimatePresence mode="wait">
-      <motion.div
-        key="error"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="flex flex-col items-center justify-center h-full min-h-[50vh] gap-10"
-      >
         <motion.div
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.4, ease: EASE }}
-          className="w-16 h-16 rounded-full flex items-center justify-center"
-          style={{
-            background: "rgba(255,80,50,0.08)",
-            border: "1px solid rgba(255,80,50,0.2)",
-          }}
+          key="error"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="flex flex-col items-center justify-center h-full min-h-[50vh] gap-10"
         >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-            <path d="M12 8v4m0 4h.01" stroke="rgba(255,100,80,0.8)" strokeWidth="1.5" strokeLinecap="round" />
-            <circle cx="12" cy="12" r="9" stroke="rgba(255,100,80,0.4)" strokeWidth="1.5" />
-          </svg>
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15, ease: EASE }}
-          className="flex flex-col items-center gap-2 text-center"
-        >
-          <h2 className="text-white/80 text-xl font-medium tracking-[-0.3px]">
-            Moment didn&apos;t go through.
-          </h2>
-          <p className="text-white/30 text-sm tracking-[-0.1px] max-w-[240px]">
-            Something went wrong on our end. Your details are still saved.
-          </p>
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25, ease: EASE }}
-          className="flex items-center gap-4"
-        >
-          <button
-            onClick={onClose}
-            className="px-5 py-2.5 text-sm text-white/35 hover:text-white/60 transition-colors cursor-pointer"
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.4, ease: EASE }}
+            className="w-16 h-16 rounded-full flex items-center justify-center"
+            style={{
+              background: "rgba(255,80,50,0.08)",
+              border: "1px solid rgba(255,80,50,0.2)",
+            }}
           >
-            Close
-          </button>
-          <button
-            onClick={() => setStage("details")}
-            className="px-5 py-2.5 text-sm text-white/80 bg-white/5 border border-white/10 rounded-md hover:bg-white/8 hover:border-white/18 transition-all cursor-pointer tracking-[-0.1px]"
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M12 8v4m0 4h.01"
+                stroke="rgba(255,100,80,0.8)"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
+              <circle
+                cx="12"
+                cy="12"
+                r="9"
+                stroke="rgba(255,100,80,0.4)"
+                strokeWidth="1.5"
+              />
+            </svg>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15, ease: EASE }}
+            className="flex flex-col items-center gap-2 text-center"
           >
-            Try again
-          </button>
+            <h2 className="text-black/80 dark:text-white/80 text-xl font-medium tracking-[-0.3px]">
+              Moment didn&apos;t go through.
+            </h2>
+            <p className="text-black/30 dark:text-white/30 text-sm tracking-[-0.1px] max-w-60">
+              Something went wrong on our end. Your details are still saved.
+            </p>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25, ease: EASE }}
+            className="flex items-center gap-4"
+          >
+            <button
+              onClick={onClose}
+              className="px-5 py-2.5 text-sm text-black/35 dark:text-white/35 hover:text-black/60 dark:text-white/60 transition-colors cursor-pointer"
+            >
+              Close
+            </button>
+            <button
+              onClick={() => setStage("details")}
+              className="px-5 py-2.5 text-sm text-black/80 dark:text-white/80 bg-white/5 border border-white/10 rounded-md hover:bg-white/8 hover:border-white/18 transition-all cursor-pointer tracking-[-0.1px]"
+            >
+              Try again
+            </button>
+          </motion.div>
         </motion.div>
-      </motion.div>
       </AnimatePresence>
     );
 
   return (
-    <div className="w-full h-full text-white px-4 sm:px-6 pb-24 sm:pb-10 overflow-y-auto">
+    <div className="w-full h-full text-black dark:text-white px-4 sm:px-6 pb-24 sm:pb-10 overflow-y-auto">
       <div className="w-full max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 items-start">
         {/* Image drop */}
         <div className="w-full">
@@ -294,10 +305,10 @@ export default function MomentDetails({
         <div className="flex flex-col gap-4">
           {/* Location selector */}
           <div
-            className="rounded-xl overflow-hidden"
+            className="rounded-xl "
             style={{
-              background: "rgba(255,255,255,0.02)",
-              border: "1px solid rgba(255,255,255,0.07)",
+              background: "rgba(var(--fg),0.02)",
+              border: "1px solid rgba(var(--fg),0.07)",
             }}
           >
             {/* Top shimmer */}
@@ -305,10 +316,10 @@ export default function MomentDetails({
               style={{
                 height: 1,
                 background:
-                  "linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)",
+                  "linear-gradient(90deg, transparent, rgba(var(--fg),0.06), transparent)",
               }}
             />
-            <div className="p-4">
+            <div className="p-4 ">
               <LocationSelector
                 selectedLocation={selectedLocation}
                 onLocationChange={locationChange}
@@ -317,22 +328,27 @@ export default function MomentDetails({
                 {selectedLocation === "near" && (
                   <NearYou place={near as string} />
                 )}
-                {selectedLocation === "area" && viewport && (
-                  <ChooseAreaPanel
-                    onAreaSelected={(center, zoom) => {
-                      setSelectedArea({ center, zoom });
-                      setLocationCoordinates(center);
-                    }}
-                    viewport={viewport as MapViewport}
-                    isAreaConfirmed={isConfirming}
-                    onAreaCleared={handleChangeArea}
-                    selectedArea={selectedArea}
-                    setViewport={setViewport}
-                    place={around as string}
-                    onCancel={() => setSelectedLocation("area")}
-                  />
-                )}
-                {selectedLocation === "venue" && viewport && (
+                {selectedLocation === "area" &&
+                  (viewport ? (
+                    <ChooseAreaPanel
+                      onAreaSelected={(center, zoom) => {
+                        setSelectedArea({ center, zoom });
+                        setLocationCoordinates(center);
+                      }}
+                      viewport={viewport as MapViewport}
+                      isAreaConfirmed={isConfirming}
+                      onAreaCleared={handleChangeArea}
+                      selectedArea={selectedArea}
+                      setViewport={setViewport}
+                      place={around as string}
+                      onCancel={() => setSelectedLocation("area")}
+                    />
+                  ) : (
+                    <p className="text-xs text-black/30 dark:text-white/30 py-3 text-center tracking-[-0.1px]">
+                      Locating you…
+                    </p>
+                  ))}
+                {selectedLocation === "venue" && (
                   <Venue
                     selectedModal={selectedModal}
                     viewport={viewport as MapViewport}
@@ -358,8 +374,8 @@ export default function MomentDetails({
               <div
                 className="relative w-full rounded-xl overflow-hidden"
                 style={{
-                  background: "rgba(255,255,255,0.02)",
-                  border: "1px solid rgba(255,255,255,0.07)",
+                  background: "rgba(var(--fg),0.02)",
+                  border: "1px solid rgba(var(--fg),0.07)",
                 }}
               >
                 {/* Top shimmer */}
@@ -367,7 +383,7 @@ export default function MomentDetails({
                   style={{
                     height: 1,
                     background:
-                      "linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)",
+                      "linear-gradient(90deg, transparent, rgba(var(--fg),0.06), transparent)",
                   }}
                 />
                 <textarea
@@ -385,17 +401,17 @@ export default function MomentDetails({
                 />
                 <div
                   className="absolute bottom-0 left-0 right-0 px-4 py-2.5 flex justify-between items-center"
-                  style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}
+                  style={{ borderTop: "1px solid rgba(var(--fg),0.05)" }}
                 >
                   <span
                     className="text-[9px] tracking-[2px] uppercase font-medium"
-                    style={{ color: "rgba(255,255,255,0.2)" }}
+                    style={{ color: "rgba(var(--fg),0.2)" }}
                   >
                     Description
                   </span>
                   <span
                     className="text-[10px] tabular-nums tracking-[-0.1px]"
-                    style={{ color: "rgba(255,255,255,0.2)" }}
+                    style={{ color: "rgba(var(--fg),0.2)" }}
                   >
                     {form.description?.length}/300
                   </span>
@@ -406,7 +422,10 @@ export default function MomentDetails({
 
           {/* Generate button */}
           {locationError && (
-            <p className="text-xs text-center" style={{ color: "rgba(255,100,80,0.8)" }}>
+            <p
+              className="text-xs text-center"
+              style={{ color: "rgba(255,100,80,0.8)" }}
+            >
               {locationError}
             </p>
           )}
@@ -423,9 +442,9 @@ export default function MomentDetails({
                 whileTap={{ scale: isPending ? 1 : 0.97 }}
                 className="w-full flex justify-between items-center px-4 py-3 rounded-xl cursor-pointer transition-all duration-150 text-sm font-medium tracking-[-0.1px] disabled:opacity-40 disabled:cursor-not-allowed"
                 style={{
-                  background: "rgba(255,255,255,0.9)",
-                  color: "#0c0c0c",
-                  border: "1px solid rgba(255,255,255,0.2)",
+                  background: "rgba(var(--fg),0.9)",
+                  color: "rgb(var(--bg))",
+                  border: "1px solid rgba(var(--fg),0.2)",
                 }}
               >
                 <span>{isPending ? "Creating..." : "Generate Moment"}</span>
@@ -435,7 +454,11 @@ export default function MomentDetails({
                 {isPending && (
                   <motion.div
                     animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    transition={{
+                      duration: 1,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
                     className="w-4 h-4 rounded-full border-2"
                     style={{
                       borderColor: "rgba(0,0,0,0.1)",

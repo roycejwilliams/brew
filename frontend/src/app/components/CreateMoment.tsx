@@ -49,19 +49,19 @@ export default function CreateMoment({ setCardAction }: CreateMomentProp) {
             <motion.div
               animate={{
                 borderColor: isActive
-                  ? "rgba(255,255,255,0.14)"
-                  : "rgba(255,255,255,0.06)",
+                  ? `rgba(var(--fg),0.14)`
+                  : `rgba(var(--fg),0.06)`,
                 background: isActive
-                  ? "rgba(255,255,255,0.05)"
-                  : "rgba(255,255,255,0.02)",
+                  ? `rgba(var(--fg),0.05)`
+                  : `rgba(var(--fg),0.02)`,
               }}
               transition={{ duration: 0.3, ease: EASE }}
               className="w-full rounded-2xl relative overflow-hidden flex sm:flex-col sm:aspect-square flex-row items-center gap-5 px-5 py-5 sm:justify-center"
               style={{
-                border: "1px solid rgba(255,255,255,0.06)",
+                border: `1px solid rgba(var(--fg),0.06)`,
                 boxShadow: isActive
-                  ? "0 8px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06)"
-                  : "0 2px 8px rgba(0,0,0,0.2)",
+                  ? "0 8px 24px rgba(var(--fg),0.1), inset 0 1px 0 rgba(var(--fg),0.04)"
+                  : "0 2px 8px rgba(var(--fg),0.06)",
               }}
             >
               {/* Top shimmer */}
@@ -72,8 +72,7 @@ export default function CreateMoment({ setCardAction }: CreateMomentProp) {
                   left: 0,
                   right: 0,
                   height: 1,
-                  background:
-                    "linear-gradient(90deg, transparent, rgba(255,255,255,0.07), transparent)",
+                  background: `linear-gradient(90deg, transparent, rgba(var(--fg),0.07), transparent)`,
                   pointerEvents: "none",
                 }}
               />
@@ -114,15 +113,15 @@ export default function CreateMoment({ setCardAction }: CreateMomentProp) {
 
               {/* Text */}
               <div className="relative z-10 flex flex-col gap-0.5 text-left sm:text-center sm:mt-3">
-                <p className="text-sm text-white font-medium tracking-[-0.2px]">
+                <p className="text-sm text-black dark:text-white font-medium tracking-[-0.2px]">
                   {label}
                 </p>
                 <p
                   className="text-[11px] leading-relaxed tracking-[-0.1px]"
                   style={{
                     color: isActive
-                      ? "rgba(255,255,255,0.4)"
-                      : "rgba(255,255,255,0.2)",
+                      ? `rgba(var(--fg),0.4)`
+                      : `rgba(var(--fg),0.2)`,
                     transition: "color 0.3s",
                   }}
                 >

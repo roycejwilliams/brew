@@ -33,10 +33,9 @@ export default function BrewMap() {
     "createModal" | "notifications" | null
   >(null);
   const [isMobile, setIsMobile] = useState<boolean | null>(null);
-  const [eventsOpen, setEventsOpen] = useState(false);
   const [filter, setFilter] = useState<TimeFilter>("tonight");
   const [activeScope, setActiveScope] = useState<ScopeType>("nearby");
-  const { setPulseOpen } = useUIStore();
+  const { setPulseOpen, eventsOpen, setEventsOpen } = useUIStore();
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
@@ -46,14 +45,16 @@ export default function BrewMap() {
   }, []);
 
   useEffect(() => {
-    setPulseOpen(eventsOpen);
-  }, [eventsOpen, setPulseOpen]);
+    if (isMobile === null) return;
+    setPulseOpen(isMobile ? eventsOpen : true);
+  }, [eventsOpen, setPulseOpen, isMobile]);
 
   const { user } = useUserStore();
   const { coordinates } = useCurrentLocation();
   const [selectedCoordinates, setSelectedCoordinates] = useState<
     [number, number] | null
   >(null);
+  const [selectedZoom, setSelectedZoom] = useState(11);
   const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
   const debouncedMapCenter = useDebounce(mapCenter, 700);
 
@@ -84,52 +85,50 @@ export default function BrewMap() {
 
   return (
     <>
-      {/* Map layer */}
-      <div className="fixed inset-0 flex touch-none">
-        <MapBoxGl
-          zoom={selectedCoordinates ? 11 : 3.5}
-          center={[-122.4194, 37.7749]}
-          userCoordinates={selectedCoordinates ?? coordinates}
-          dragPan={true}
-          dragRotate={true}
-          scrollZoom={true}
-          moments={allMapMoments}
-          onMove={(center) => {
-            setMapCenter(center);
-            setSelectedCoordinates(null); // user pan overrides scope selection
-          }}
+      <div className="flex h-dvh w-full overflow-hidden">
+        {/* LEFT — Pulse panel (desktop sidebar | mobile bottom sheet) */}
+        <Events
+          id={user?.id as string}
+          openModal={(type) => setActiveModal(type)}
+          userCoordinates={coordinates}
+          setSelectedCoordinates={setSelectedCoordinates}
+          setSelectedZoom={setSelectedZoom}
+          selectedCoordinates={selectedCoordinates}
+          isMobile={isMobile}
+          eventsOpen={eventsOpen}
+          setEventsOpen={setEventsOpen}
+          filter={filter}
+          setFilter={setFilter}
+          activeScope={activeScope}
+          setActiveScope={setActiveScope}
+          nearbyMoments={nearbyMoments}
         />
 
-        {/* Desktop create button — hidden on mobile */}
-        {!isMobile && (
-          <CreateModalButtton openModal={(type) => setActiveModal(type)} />
-        )}
+        {/* RIGHT — Map takes all remaining space */}
+        <div className="flex-1 relative min-w-0 touch-none">
+          <MapBoxGl
+            zoom={selectedCoordinates ? selectedZoom : 4.5}
+            center={[-122.4194, 37.7749]}
+            userCoordinates={selectedCoordinates ?? coordinates}
+            dragPan={true}
+            dragRotate={true}
+            scrollZoom={true}
+            moments={allMapMoments}
+            onMove={(center) => {
+              setMapCenter(center);
+              setSelectedCoordinates(null);
+            }}
+          />
+          {!isMobile && (
+            <CreateModalButtton openModal={(type) => setActiveModal(type)} />
+          )}
+        </div>
       </div>
 
-      {/* Events panel — outside map div so its z-50 is in the root stacking context */}
-      <Events
-        id={user?.id as string}
-        openModal={(type) => setActiveModal(type)}
-        userCoordinates={coordinates}
-        setSelectedCoordinates={setSelectedCoordinates}
-        selectedCoordinates={selectedCoordinates}
-        isMobile={isMobile}
-        eventsOpen={eventsOpen}
-        setEventsOpen={setEventsOpen}
-        filter={filter}
-        setFilter={setFilter}
-        activeScope={activeScope}
-        setActiveScope={setActiveScope}
-        nearbyMoments={nearbyMoments}
-      />
-
-      {/* Mobile bottom nav */}
+      {/* Mobile bottom nav — fixed, outside flex flow */}
       {isMobile && (
         <MobileNav
-          user={user}
-          onEventsPress={() => setEventsOpen((prev) => !prev)}
           onCreatePress={() => setActiveModal("createModal")}
-          eventsOpen={eventsOpen}
         />
       )}
 

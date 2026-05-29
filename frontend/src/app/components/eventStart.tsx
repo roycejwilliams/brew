@@ -33,15 +33,15 @@ export default function EventStart({ activeModal, eventCard }: EventStartProp) {
           <motion.div
             {...stagger(0)}
             className="flex flex-col gap-2 pb-4 sm:pb-5"
-            style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}
+            style={{ borderBottom: "1px solid rgba(var(--fg),0.07)" }}
           >
             <p
               className="text-[10px] tracking-widest uppercase font-medium"
-              style={{ color: "rgba(255,255,255,0.2)" }}
+              style={{ color: "rgba(var(--fg),0.2)" }}
             >
               Philosophy
             </p>
-            <h2 className="text-white text-base font-medium tracking-[-0.3px]">
+            <h2 className="text-black dark:text-white text-base font-medium tracking-[-0.3px]">
               Event Principles
             </h2>
           </motion.div>
@@ -55,11 +55,11 @@ export default function EventStart({ activeModal, eventCard }: EventStartProp) {
               >
                 <span
                   className="mt-1.5 shrink-0 w-1 h-1 rounded-full"
-                  style={{ background: "rgba(255,255,255,0.2)" }}
+                  style={{ background: "rgba(var(--fg),0.2)" }}
                 />
                 <p
                   className="text-sm tracking-[-0.1px] leading-relaxed"
-                  style={{ color: "rgba(255,255,255,0.5)" }}
+                  style={{ color: "rgba(var(--fg),0.5)" }}
                 >
                   {principle}
                 </p>
@@ -73,15 +73,15 @@ export default function EventStart({ activeModal, eventCard }: EventStartProp) {
           <motion.div
             {...stagger(0, 0.1)}
             className="flex flex-col gap-2 pb-4 sm:pb-5"
-            style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}
+            style={{ borderBottom: "1px solid rgba(var(--fg),0.07)" }}
           >
             <p
               className="text-[10px] tracking-widest uppercase font-medium"
-              style={{ color: "rgba(255,255,255,0.2)" }}
+              style={{ color: "rgba(var(--fg),0.2)" }}
             >
               Experience
             </p>
-            <h2 className="text-white text-base font-medium tracking-[-0.3px]">
+            <h2 className="text-black dark:text-white text-base font-medium tracking-[-0.3px]">
               What Guests Can Expect
             </h2>
           </motion.div>
@@ -95,11 +95,11 @@ export default function EventStart({ activeModal, eventCard }: EventStartProp) {
               >
                 <span
                   className="mt-1.5 shrink-0 w-1 h-1 rounded-full"
-                  style={{ background: "rgba(255,255,255,0.2)" }}
+                  style={{ background: "rgba(var(--fg),0.2)" }}
                 />
                 <p
                   className="text-sm tracking-[-0.1px] leading-relaxed"
-                  style={{ color: "rgba(255,255,255,0.5)" }}
+                  style={{ color: "rgba(var(--fg),0.5)" }}
                 >
                   {expectation}
                 </p>
@@ -118,7 +118,7 @@ export default function EventStart({ activeModal, eventCard }: EventStartProp) {
         style={{
           height: 1,
           background:
-            "linear-gradient(90deg, rgba(255,255,255,0.07) 0%, transparent 80%)",
+            "linear-gradient(90deg, rgba(var(--fg),0.07) 0%, transparent 80%)",
         }}
       />
 
@@ -131,8 +131,8 @@ export default function EventStart({ activeModal, eventCard }: EventStartProp) {
         style={{
           height: "clamp(240px, 40vw, 500px)",
           borderRadius: 16,
-          border: "1px solid rgba(255,255,255,0.07)",
-          boxShadow: "0 24px 60px rgba(0,0,0,0.5)",
+          border: "1px solid rgba(var(--fg),0.07)",
+          boxShadow: "0 24px 60px rgba(var(--fg),0.15)",
           opacity: 0.88,
         }}
       >
@@ -150,7 +150,7 @@ export default function EventStart({ activeModal, eventCard }: EventStartProp) {
         />
         <div
           className="absolute inset-0 pointer-events-none rounded-2xl"
-          style={{ boxShadow: "inset 0 0 60px rgba(0,0,0,0.4)" }}
+          style={{ boxShadow: "inset 0 0 60px rgba(var(--fg),0.12)" }}
         />
       </motion.div>
 
@@ -173,7 +173,7 @@ export default function EventStart({ activeModal, eventCard }: EventStartProp) {
           <div
             className="flex flex-col items-center justify-center py-10 gap-3"
             style={{
-              border: "1px solid rgba(255,255,255,0.07)",
+              border: "1px solid rgba(var(--fg),0.07)",
               borderRadius: 16,
             }}
           >
@@ -183,13 +183,13 @@ export default function EventStart({ activeModal, eventCard }: EventStartProp) {
             />
             <p
               className="text-sm tracking-[-0.1px]"
-              style={{ color: "rgba(255,255,255,0.4)" }}
+              style={{ color: "rgba(var(--fg),0.4)" }}
             >
               This moment is closed.
             </p>
             <p
               className="text-xs tracking-[-0.1px]"
-              style={{ color: "rgba(255,255,255,0.2)" }}
+              style={{ color: "rgba(var(--fg),0.2)" }}
             >
               No new check-ins or transfers.
             </p>

@@ -13,7 +13,7 @@ type MomentStage = "start" | "circle" | "people" | "nearby" | "confirm";
 
 interface MomentProp {
   onGoBack?: () => void;
-  onContinue?: () => void;
+  onInvite?: () => void;
   selectedModal: MomentStage;
   setSelectedModal: (selectedModal: MomentStage) => void;
   onClose: () => void;
@@ -31,6 +31,7 @@ const EASE = [0.16, 1, 0.3, 1] as const;
 
 export default function StartMoment({
   onGoBack,
+  onInvite,
   selectedModal,
   setSelectedModal,
   onClose,
@@ -150,42 +151,42 @@ export default function StartMoment({
             width: 36,
             height: 36,
             borderRadius: "50%",
-            background: "rgba(255,255,255,0.06)",
-            border: "1px solid rgba(255,255,255,0.1)",
+            background: "rgba(var(--fg),0.06)",
+            border: "1px solid rgba(var(--fg),0.1)",
           }}
         >
           <ChevronLeftIcon size={16} />
         </div>
         <span
           className="text-xs tracking-[-0.1px] opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-          style={{ color: "rgba(255,255,255,0.25)" }}
+          style={{ color: "rgba(var(--fg),0.25)" }}
         >
           Back
         </span>
       </motion.button>
 
-      {/* Stage indicator dots */}
+      {/* Stage indicator dots — 3 steps: details / who / confirm */}
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 mt-6 flex items-center gap-1.5"
         style={{ zIndex: 20 }}
       >
-        {startMomentProp
-          .filter((s) => s !== "confirm")
-          .map((stage) => {
-            const idx = startMomentProp.indexOf(stage);
-            const currentIdx = startMomentProp.indexOf(selectedModal);
-            const isActive = stage === selectedModal;
-            const isPast = currentIdx > idx;
+        {[0, 1, 2].map((i) => {
+            const stepIndex =
+              selectedModal === "start" ? 0
+              : selectedModal === "confirm" ? 2
+              : 1;
+            const isActive = i === stepIndex;
+            const isPast = stepIndex > i;
             return (
               <motion.div
-                key={stage}
+                key={i}
                 animate={{
                   width: isActive ? 18 : 4,
                   background: isActive
                     ? "#d4a574"
                     : isPast
                       ? "rgba(212,165,116,0.32)"
-                      : "rgba(255,255,255,0.1)",
+                      : "rgba(var(--fg),0.1)",
                 }}
                 transition={{ duration: 0.35, ease: EASE }}
                 style={{ height: 3, borderRadius: 2 }}
@@ -201,7 +202,7 @@ export default function StartMoment({
             ? "max-w-full px-0"
             : "max-w-7xl px-4 sm:px-6 h-full"
         }`}
-        style={{ color: "rgba(255,255,255,0.75)" }}
+        style={{ color: "rgba(var(--fg),0.75)" }}
       >
         <AnimatePresence mode="wait">
           {selectedModal === "start" && (
@@ -241,6 +242,7 @@ export default function StartMoment({
                 setSelectedCircleProp={setSelectedCircleProp}
                 setSelectedModal={setSelectedModal}
                 setForm={setForm}
+                onInvite={onInvite}
               />
             </motion.div>
           )}
@@ -258,6 +260,7 @@ export default function StartMoment({
                 setSelectedModal={setSelectedModal}
                 selectedUsers={selectedUsers}
                 setSelectedUsers={setSelectedUsers}
+                onInvite={onInvite}
               />
             </motion.div>
           )}
