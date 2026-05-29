@@ -176,7 +176,7 @@ function Feed({ completed, userId, onCreateMoment }: FeedProp) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.35, delay: 0.35, ease: EASE }}
-            className="flex items-center gap-3 relative z-10 px-6 w-full justify-center"
+            className="flex items-center gap-3 relative z-10 justify-center"
           >
             <motion.button
               whileTap={{ scale: 0.97 }}
