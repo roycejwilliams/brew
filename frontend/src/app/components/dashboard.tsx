@@ -474,7 +474,10 @@ function Dashboard({ profile }: DashboardProp) {
               >
                 BR3W
               </p>
-              <h2 className="text-xl font-medium tracking-[-0.4px] mb-1" style={{ color: "rgba(var(--fg),0.9)" }}>
+              <h2
+                className="text-xl font-medium tracking-[-0.4px] mb-1"
+                style={{ color: "rgba(var(--fg),0.9)" }}
+              >
                 Manage Profile.
               </h2>
               <p
@@ -877,7 +880,7 @@ function Dashboard({ profile }: DashboardProp) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="w-full h-screen fixed top-0 left-0 z-50 flex justify-center items-start sm:items-center overflow-y-auto"
+            className="w-full h-screen fixed top-0 left-0 z-50 flex justify-center px-8 sm:px-0 items-center overflow-y-auto"
             style={{
               background: "rgba(0,0,0,0.7)",
               backdropFilter: "blur(20px)",
@@ -901,7 +904,10 @@ function Dashboard({ profile }: DashboardProp) {
               >
                 BR3W
               </p>
-              <h2 className="text-xl font-medium tracking-[-0.4px] mb-1" style={{ color: "rgba(var(--fg),0.9)" }}>
+              <h2
+                className="text-xl font-medium tracking-[-0.4px] mb-1"
+                style={{ color: "rgba(var(--fg),0.9)" }}
+              >
                 Connections.
               </h2>
               <p
