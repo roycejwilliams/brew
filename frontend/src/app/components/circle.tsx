@@ -1,6 +1,5 @@
 "use client";
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect } from "react";
 import CircleScene from "./CircleScene";
 import CircleSignal from "./CircleSignal";
 import CircleControls from "./circleControls";

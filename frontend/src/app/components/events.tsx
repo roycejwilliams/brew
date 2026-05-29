@@ -31,7 +31,7 @@ interface OpenModal {
   selectedCoordinates?: [number, number] | null;
   isMobile?: boolean;
   eventsOpen?: boolean;
-  setEventsOpen?: React.Dispatch<React.SetStateAction<boolean>>;
+  setEventsOpen?: (open: boolean) => void;
   filter: TimeFilter;
   setFilter: React.Dispatch<React.SetStateAction<TimeFilter>>;
   activeScope: ScopeType;

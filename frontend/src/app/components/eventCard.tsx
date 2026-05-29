@@ -24,6 +24,7 @@ function EventCard() {
     if (!eventCard?.id) return;
     joinMoment(eventCard.id);
     return () => leaveMoment(eventCard.id!);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventCard?.id]);
 
   const handleClose = () => {
