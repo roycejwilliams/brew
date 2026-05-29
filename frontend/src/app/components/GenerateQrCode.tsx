@@ -70,7 +70,7 @@ function GenerateQrCode({ onClose, inviteType, inviteId }: ShareProp) {
                 background: "#f0efed",
                 borderRadius: 16,
                 boxShadow:
-                  "0 0 0 1px rgba(255,255,255,0.06), 0 24px 48px rgba(0,0,0,0.5)",
+                  "0 0 0 1px rgba(var(--fg),0.06), 0 24px 48px rgba(0,0,0,0.5)",
               }}
             >
               <CanvasQRcode
@@ -102,13 +102,13 @@ function GenerateQrCode({ onClose, inviteType, inviteId }: ShareProp) {
           >
             <h2
               className="text-lg font-medium tracking-[-0.3px]"
-              style={{ color: "rgba(255,255,255,0.45)" }}
+              style={{ color: "rgba(var(--fg),0.45)" }}
             >
               Generating invite
             </h2>
             <p
               className="text-sm tracking-[-0.1px]"
-              style={{ color: "rgba(255,255,255,0.2)" }}
+              style={{ color: "rgba(var(--fg),0.2)" }}
             >
               {inviteType === "moment"
                 ? "Moment access"
@@ -128,13 +128,13 @@ function GenerateQrCode({ onClose, inviteType, inviteId }: ShareProp) {
           >
             <h2
               className="text-lg font-medium tracking-[-0.3px]"
-              style={{ color: "rgba(255,255,255,0.88)" }}
+              style={{ color: "rgba(var(--fg),0.88)" }}
             >
               Ready to go.
             </h2>
             <p
               className="text-sm tracking-[-0.1px]"
-              style={{ color: "rgba(255,255,255,0.3)" }}
+              style={{ color: "rgba(var(--fg),0.3)" }}
             >
               {inviteType === "moment"
                 ? "Share this to bring them to the moment."
@@ -157,8 +157,8 @@ function GenerateQrCode({ onClose, inviteType, inviteId }: ShareProp) {
         <div
           className="flex items-center justify-center gap-4 px-4 py-3 rounded-xl"
           style={{
-            background: "rgba(255,255,255,0.03)",
-            border: "1px solid rgba(255,255,255,0.07)",
+            background: "rgba(var(--fg),0.03)",
+            border: "1px solid rgba(var(--fg),0.07)",
           }}
         >
           <motion.button
@@ -166,7 +166,7 @@ function GenerateQrCode({ onClose, inviteType, inviteId }: ShareProp) {
             onClick={handleCopy}
             className="text-sm tracking-[-0.1px] cursor-pointer transition-colors duration-150"
             style={{
-              color: copied ? "rgba(74,222,128,0.8)" : "rgba(255,255,255,0.4)",
+              color: copied ? "rgba(74,222,128,0.8)" : "rgba(var(--fg),0.4)",
             }}
           >
             {copied ? "✓ Copied" : "Copy link"}
@@ -175,7 +175,7 @@ function GenerateQrCode({ onClose, inviteType, inviteId }: ShareProp) {
             style={{
               width: 1,
               height: 12,
-              background: "rgba(255,255,255,0.1)",
+              background: "rgba(var(--fg),0.1)",
             }}
           />
           <motion.button
@@ -193,9 +193,9 @@ function GenerateQrCode({ onClose, inviteType, inviteId }: ShareProp) {
           whileTap={{ scale: 0.98 }}
           className="w-full flex justify-between items-center px-4 py-3 rounded-xl cursor-pointer transition-all duration-150 text-sm font-medium tracking-[-0.1px]"
           style={{
-            background: "rgba(255,255,255,0.9)",
-            color: "#0c0c0c",
-            border: "1px solid rgba(255,255,255,0.2)",
+            background: "rgba(var(--fg),0.9)",
+            color: "rgb(var(--bg))",
+            border: "1px solid rgba(var(--fg),0.2)",
           }}
         >
           <span>Done</span>

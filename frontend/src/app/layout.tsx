@@ -1,16 +1,9 @@
-import type { Metadata, Viewport } from "next";
+import type { Metadata } from "next";
 import { chillax } from "../../public/fonts/chillax";
 import "@heroui/styles";
 import "./globals.css";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Providers } from "@/providers/providers";
-
-export const viewport: Viewport = {
-  viewportFit: "cover",
-  width: "device-width",
-  initialScale: 1,
-  themeColor: "#0c0c0c",
-};
 
 export const metadata: Metadata = {
   title: "B R 3 W",
@@ -52,10 +45,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark" suppressHydrationWarning>
       <body className={`${chillax.className} antialiased`}>
-        <div className="fixed inset-0 -z-10 bg-[#0c0c0c]" />
-        <Providers>{children}</Providers>
+        {" "}
+        <Providers>{children} </Providers>
       </body>
     </html>
   );

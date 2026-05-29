@@ -17,11 +17,10 @@ export default function CreateModalButton({ openModal }: CreateModalProp) {
       whileTap={{ scale: 0.96 }}
       className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center justify-center cursor-pointer rounded-md px-5 py-3 overflow-hidden"
       style={{
-        background: "rgba(8,8,8,0.95)",
-        border: "1px solid rgba(255,255,255,0.1)",
+        background: `rgba(var(--bg),0.95)`,
+        border: `1px solid rgba(var(--fg),0.1)`,
         backdropFilter: "blur(20px)",
-        boxShadow:
-          "0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.07)",
+        boxShadow: `0 8px 32px var(--shadow-lg), inset 0 1px 0 rgba(var(--fg),0.07)`,
       }}
     >
       {/* Top shimmer */}
@@ -32,8 +31,7 @@ export default function CreateModalButton({ openModal }: CreateModalProp) {
           left: 0,
           right: 0,
           height: 1,
-          background:
-            "linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)",
+          background: `linear-gradient(90deg, transparent, rgba(var(--fg),0.08), transparent)`,
           pointerEvents: "none",
         }}
       />
@@ -62,7 +60,7 @@ export default function CreateModalButton({ openModal }: CreateModalProp) {
         }}
         className="relative z-10"
       >
-        <Asterisk size={18} color="rgba(255,255,255,0.85)" />
+        <Asterisk size={18} color={`rgba(var(--fg),0.85)`} />
       </motion.div>
 
       {/* Label — slides in on hover */}
@@ -84,7 +82,7 @@ export default function CreateModalButton({ openModal }: CreateModalProp) {
       >
         <span
           className="text-xs tracking-widest uppercase font-medium"
-          style={{ color: "rgba(255,255,255,0.72)" }}
+          style={{ color: `rgba(var(--fg),0.72)` }}
         >
           Create
         </span>

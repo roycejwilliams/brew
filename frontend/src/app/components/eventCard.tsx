@@ -24,6 +24,7 @@ function EventCard() {
     if (!eventCard?.id) return;
     joinMoment(eventCard.id);
     return () => leaveMoment(eventCard.id!);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventCard?.id]);
 
   const handleClose = () => {
@@ -35,8 +36,8 @@ function EventCard() {
 
   return (
     <main
-      className="min-h-dvh overflow-x-hidden w-full text-white"
-      style={{ background: "#0c0c0c" }}
+      className="min-h-dvh overflow-x-hidden w-full text-black dark:text-white"
+      style={{ background: `rgb(var(--bg))` }}
     >
       {/* Background — fixed so it stays while scrolling */}
       <div className="fixed inset-0 z-0 pointer-events-none">
@@ -54,7 +55,7 @@ function EventCard() {
               className="absolute inset-0"
               style={{
                 background:
-                  "linear-gradient(180deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.85) 100%)",
+                  "linear-gradient(180deg, rgba(var(--bg),0.45) 0%, rgba(var(--bg),0.85) 100%)",
               }}
             />
           </>
@@ -62,7 +63,7 @@ function EventCard() {
           <>
             <div
               className="absolute inset-0"
-              style={{ background: "#0c0c0c" }}
+              style={{ background: `rgb(var(--bg))` }}
             />
             <div
               className="absolute top-0 left-1/2 -translate-x-1/2 pointer-events-none"
@@ -70,46 +71,53 @@ function EventCard() {
                 width: 900,
                 height: 500,
                 background:
-                  "radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 40%, transparent 70%)",
+                  "radial-gradient(ellipse at 50% 0%, rgba(var(--fg),0.06) 0%, rgba(var(--fg),0.02) 40%, transparent 70%)",
               }}
             />
           </>
         )}
       </div>
 
-      {/* Close button */}
-      <motion.button
-        onClick={handleClose}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.25, ease: EASE }}
-        whileTap={{ scale: 0.94 }}
-        className="fixed z-50 flex items-center gap-2 cursor-pointer group"
-        style={{ top: "calc(env(safe-area-inset-top, 0px) + 1.25rem)", left: "1rem" }}
-      >
-        <div
-          className="flex items-center justify-center transition-colors duration-200"
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: "50%",
-            background: "rgba(255,255,255,0.08)",
-            border: "1px solid rgba(255,255,255,0.12)",
-            backdropFilter: "blur(8px)",
-          }}
-        >
-          <CloseIcon color="#fff" size={14} />
-        </div>
-        <span
-          className="text-xs tracking-[-0.1px] opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-          style={{ color: "rgba(255,255,255,0.3)" }}
-        >
-          Close
-        </span>
-      </motion.button>
-
       {/* Content */}
-      <div className="relative z-10 w-full px-4 sm:px-8 md:px-16 lg:px-24 pb-28 pt-20">
+      <div className="relative z-10 w-full px-4 sm:px-8 md:px-16 lg:px-24 pb-28">
+        {/* Close button — sticky so it stays accessible while scrolling */}
+        <motion.div
+          className="sticky z-20 flex items-center"
+          style={{
+            top: 0,
+            paddingTop: "calc(env(safe-area-inset-top, 0px) + 1.25rem)",
+            paddingBottom: "0.75rem",
+          }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.25, ease: EASE }}
+        >
+          <motion.button
+            onClick={handleClose}
+            whileTap={{ scale: 0.94 }}
+            className="flex items-center gap-2 cursor-pointer group"
+          >
+            <div
+              className="flex items-center justify-center transition-colors duration-200"
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: "50%",
+                background: "rgba(var(--bg),0.7)",
+                border: "1px solid rgba(var(--fg),0.12)",
+                backdropFilter: "blur(12px)",
+              }}
+            >
+              <CloseIcon color="currentColor" size={14} />
+            </div>
+            <span
+              className="text-xs tracking-[-0.1px] opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+              style={{ color: "rgba(var(--fg),0.3)" }}
+            >
+              Close
+            </span>
+          </motion.button>
+        </motion.div>
         <EventHero eventCard={eventCard} />
 
         <AnimatePresence mode="popLayout">

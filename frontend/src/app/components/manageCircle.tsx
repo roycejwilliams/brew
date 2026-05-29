@@ -11,7 +11,10 @@ import {
   useRemoveMemberBasedOnRole,
   useDeleteCircleByOwner,
 } from "@/hooks/useCircles";
-import { useInviteMemberToCircle, useInviteExternalToCircle } from "@/hooks/useInvites";
+import {
+  useInviteMemberToCircle,
+  useInviteExternalToCircle,
+} from "@/hooks/useInvites";
 import { useUserStore } from "@/stores/useUserStore";
 import { ChevronRight, X } from "lucide-react";
 import InvitePeople, { InviteUserProp } from "./InvitePeople";
@@ -41,7 +44,8 @@ export default function ManageCircle() {
   const { mutate: removeMember } = useRemoveMemberBasedOnRole();
   const { mutate: inviteMember } = useInviteMemberToCircle();
   const { mutate: inviteExternal } = useInviteExternalToCircle();
-  const { mutate: deleteCircle, isPending: isDeleting } = useDeleteCircleByOwner();
+  const { mutate: deleteCircle, isPending: isDeleting } =
+    useDeleteCircleByOwner();
 
   const nextMarker = () =>
     setMarkerIndex((i) => (i + 1) % (featured?.members?.length ?? 1));
@@ -64,7 +68,10 @@ export default function ManageCircle() {
     if (!featured) return;
     selectedUsers.forEach((u) => {
       if (u.isExternal) {
-        inviteExternal({ circle_id: featured.id as string, recipient: u.email || u.phonenumber });
+        inviteExternal({
+          circle_id: featured.id as string,
+          recipient: u.email || u.phonenumber,
+        });
       } else {
         inviteMember({
           circle: featured as CircleProp,
@@ -121,13 +128,13 @@ export default function ManageCircle() {
               <div className="flex flex-col gap-1 mb-5 text-center">
                 <h2
                   className="text-base font-medium tracking-[-0.3px]"
-                  style={{ color: "rgba(255,255,255,0.85)" }}
+                  style={{ color: "rgba(var(--fg),0.85)" }}
                 >
                   Add to {featured?.circle_name}
                 </h2>
                 <p
                   className="text-sm tracking-[-0.1px]"
-                  style={{ color: "rgba(255,255,255,0.3)" }}
+                  style={{ color: "rgba(var(--fg),0.3)" }}
                 >
                   Search your circles or invite someone new.
                 </p>
@@ -144,37 +151,40 @@ export default function ManageCircle() {
 
       {/* Header */}
       <div
-        className="flex items-center justify-between px-4 md:px-6 py-2 md:py-4 shrink-0 relative z-10"
+        className="flex items-center justify-between px-4 md:px-6 pt-20 pb-2 sm:pt-2 md:pt-4 md:pb-4 shrink-0 relative z-10"
         style={{
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
-          background: "rgba(8,8,8,0.6)",
+          borderBottom: "1px solid rgba(var(--fg),0.06)",
+          background: "rgba(var(--bg),0.6)",
           backdropFilter: "blur(12px)",
         }}
       >
         <p
-          className="text-[9px] tracking-[3px] uppercase font-medium"
-          style={{ color: "rgba(255,255,255,0.25)" }}
+          className="text-[9px] tracking-[3px] uppercase font-medium py-1.5"
+          style={{ color: "rgba(var(--fg),0.25)" }}
         >
           {featured?.circle_name ?? "Circles"}
         </p>
         {featured && (
           <div className="flex items-center gap-1.5">
             <button
-              onClick={() => { setShowAddMember(true); setConfirmDelete(false); }}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium tracking-[-0.1px] cursor-pointer transition-all duration-150"
+              onClick={() => {
+                setShowAddMember(true);
+                setConfirmDelete(false);
+              }}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-medium tracking-[-0.1px] cursor-pointer transition-all duration-150"
               style={{
-                background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(255,255,255,0.07)",
-                color: "rgba(255,255,255,0.45)",
+                background: "rgba(var(--fg),0.04)",
+                border: "1px solid rgba(var(--fg),0.07)",
+                color: "rgba(var(--fg),0.45)",
               }}
               onMouseEnter={(e) =>
-                (e.currentTarget.style.background = "rgba(255,255,255,0.07)")
+                (e.currentTarget.style.background = "rgba(var(--fg),0.07)")
               }
               onMouseLeave={(e) =>
-                (e.currentTarget.style.background = "rgba(255,255,255,0.04)")
+                (e.currentTarget.style.background = "rgba(var(--fg),0.04)")
               }
             >
-              <PlusCircleIcon className="w-3 h-3" />
+              <PlusCircleIcon className="w-3.5 h-3.5" />
               <span>Add member</span>
             </button>
 
@@ -191,11 +201,11 @@ export default function ManageCircle() {
                 >
                   <button
                     onClick={() => setConfirmDelete(false)}
-                    className="px-2.5 py-1.5 rounded-lg text-[10px] font-medium tracking-[-0.1px] cursor-pointer transition-all duration-150"
+                    className="px-3.5 py-2 rounded-lg text-xs font-medium tracking-[-0.1px] cursor-pointer transition-all duration-150"
                     style={{
-                      background: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(255,255,255,0.07)",
-                      color: "rgba(255,255,255,0.35)",
+                      background: "rgba(var(--fg),0.04)",
+                      border: "1px solid rgba(var(--fg),0.07)",
+                      color: "rgba(var(--fg),0.35)",
                     }}
                   >
                     Cancel
@@ -211,7 +221,7 @@ export default function ManageCircle() {
                       });
                     }}
                     disabled={isDeleting}
-                    className="px-2.5 py-1.5 rounded-lg text-[10px] font-medium tracking-[-0.1px] cursor-pointer transition-all duration-150 disabled:opacity-50"
+                    className="px-3.5 py-2 rounded-lg text-xs font-medium tracking-[-0.1px] cursor-pointer transition-all duration-150 disabled:opacity-50"
                     style={{
                       background: "rgba(239,68,68,0.12)",
                       border: "1px solid rgba(239,68,68,0.2)",
@@ -229,14 +239,14 @@ export default function ManageCircle() {
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.15 }}
                   onClick={() => setConfirmDelete(true)}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium tracking-[-0.1px] cursor-pointer transition-all duration-150"
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-medium tracking-[-0.1px] cursor-pointer transition-all duration-150"
                   style={{
                     background: "rgba(239,68,68,0.04)",
                     border: "1px solid rgba(239,68,68,0.08)",
                     color: "rgba(248,113,113,0.45)",
                   }}
                 >
-                  <TrashIcon size={11} color="currentColor" />
+                  <TrashIcon size={13} color="currentColor" />
                 </motion.button>
               )}
             </AnimatePresence>
@@ -250,7 +260,7 @@ export default function ManageCircle() {
         <div className="shrink-0 px-4 pt-3 pb-2">
           <p
             className="text-[9px] tracking-[2px] uppercase font-medium mb-2"
-            style={{ color: "rgba(255,255,255,0.2)" }}
+            style={{ color: "rgba(var(--fg),0.2)" }}
           >
             Circles
           </p>
@@ -262,8 +272,8 @@ export default function ManageCircle() {
                       key={i}
                       className="flex-[0_0_auto] h-10 w-32 rounded-xl"
                       style={{
-                        background: "rgba(255,255,255,0.03)",
-                        border: "1px solid rgba(255,255,255,0.05)",
+                        background: "rgba(var(--fg),0.03)",
+                        border: "1px solid rgba(var(--fg),0.05)",
                       }}
                     />
                   ))
@@ -277,19 +287,19 @@ export default function ManageCircle() {
                         className="flex-[0_0_auto] flex items-center gap-2 px-2.5 py-2 rounded-xl cursor-pointer transition-colors duration-150"
                         style={{
                           background: isActive
-                            ? "rgba(255,255,255,0.06)"
+                            ? "rgba(var(--fg),0.06)"
                             : "transparent",
                           border: isActive
-                            ? "1px solid rgba(255,255,255,0.1)"
-                            : "1px solid rgba(255,255,255,0.05)",
+                            ? "1px solid rgba(var(--fg),0.1)"
+                            : "1px solid rgba(var(--fg),0.05)",
                         }}
                       >
                         <div
                           className="w-7 h-7 rounded-lg overflow-hidden relative shrink-0"
                           style={{
                             border: isActive
-                              ? "1px solid rgba(255,255,255,0.15)"
-                              : "1px solid rgba(255,255,255,0.07)",
+                              ? "1px solid rgba(var(--fg),0.15)"
+                              : "1px solid rgba(var(--fg),0.07)",
                           }}
                         >
                           {circle.circle_image ? (
@@ -303,8 +313,8 @@ export default function ManageCircle() {
                             <div
                               className="w-full h-full flex items-center justify-center text-[9px] font-medium"
                               style={{
-                                color: "rgba(255,255,255,0.3)",
-                                background: "rgba(255,255,255,0.05)",
+                                color: "rgba(var(--fg),0.3)",
+                                background: "rgba(var(--fg),0.05)",
                               }}
                             >
                               {circle.circle_name?.[0]}
@@ -316,15 +326,15 @@ export default function ManageCircle() {
                             className="text-[11px] font-medium tracking-[-0.1px] whitespace-nowrap"
                             style={{
                               color: isActive
-                                ? "rgba(255,255,255,0.85)"
-                                : "rgba(255,255,255,0.45)",
+                                ? "rgba(var(--fg),0.85)"
+                                : "rgba(var(--fg),0.45)",
                             }}
                           >
                             {circle.circle_name}
                           </p>
                           <p
                             className="text-[9px] tracking-[-0.1px]"
-                            style={{ color: "rgba(255,255,255,0.2)" }}
+                            style={{ color: "rgba(var(--fg),0.2)" }}
                           >
                             {circle.members?.length ?? 0} members
                           </p>
@@ -338,14 +348,14 @@ export default function ManageCircle() {
 
         <div
           className="mx-4"
-          style={{ height: 1, background: "rgba(255,255,255,0.05)" }}
+          style={{ height: 1, background: "rgba(var(--fg),0.05)" }}
         />
 
         {/* Search */}
         <div className="px-4 pt-2 shrink-0">
           <div
             className="rounded-xl overflow-hidden"
-            style={{ border: "1px solid rgba(255,255,255,0.07)" }}
+            style={{ border: "1px solid rgba(var(--fg),0.07)" }}
           >
             <SearchMap
               value={query}
@@ -363,7 +373,7 @@ export default function ManageCircle() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="text-center py-10 text-[11px] tracking-[-0.1px]"
-                style={{ color: "rgba(255,255,255,0.2)" }}
+                style={{ color: "rgba(var(--fg),0.2)" }}
               >
                 {query.trim() !== ""
                   ? `No members match "${query}"`
@@ -373,15 +383,15 @@ export default function ManageCircle() {
               <div
                 className="rounded-xl overflow-hidden"
                 style={{
-                  background: "rgba(255,255,255,0.02)",
-                  border: "1px solid rgba(255,255,255,0.07)",
+                  background: "rgba(var(--fg),0.02)",
+                  border: "1px solid rgba(var(--fg),0.07)",
                 }}
               >
                 <div
                   style={{
                     height: 1,
                     background:
-                      "linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)",
+                      "linear-gradient(90deg, transparent, rgba(var(--fg),0.06), transparent)",
                   }}
                 />
                 {filteredMembers.map(
@@ -396,13 +406,13 @@ export default function ManageCircle() {
                       style={{
                         borderBottom:
                           i < filteredMembers.length - 1
-                            ? "1px solid rgba(255,255,255,0.05)"
+                            ? "1px solid rgba(var(--fg),0.05)"
                             : "none",
                       }}
                     >
                       <div
                         className="w-9 h-9 rounded-full overflow-hidden relative shrink-0"
-                        style={{ border: "1px solid rgba(255,255,255,0.08)" }}
+                        style={{ border: "1px solid rgba(var(--fg),0.08)" }}
                       >
                         {member.profile_image ? (
                           <Image
@@ -415,8 +425,8 @@ export default function ManageCircle() {
                           <div
                             className="w-full h-full flex items-center justify-center text-[10px]"
                             style={{
-                              color: "rgba(255,255,255,0.3)",
-                              background: "rgba(255,255,255,0.05)",
+                              color: "rgba(var(--fg),0.3)",
+                              background: "rgba(var(--fg),0.05)",
                             }}
                           >
                             {member.first_name?.[0]}
@@ -426,13 +436,13 @@ export default function ManageCircle() {
                       <div className="flex-1 min-w-0">
                         <p
                           className="text-sm font-medium tracking-[-0.1px] truncate"
-                          style={{ color: "rgba(255,255,255,0.82)" }}
+                          style={{ color: "rgba(var(--fg),0.82)" }}
                         >
                           {member.first_name} {member.last_name}
                         </p>
                         <p
                           className="text-[11px] tracking-[-0.1px]"
-                          style={{ color: "rgba(255,255,255,0.3)" }}
+                          style={{ color: "rgba(var(--fg),0.3)" }}
                         >
                           @{member.username}
                         </p>
@@ -490,7 +500,7 @@ export default function ManageCircle() {
         {/* Sidebar */}
         <div
           className="w-52 lg:w-64 shrink-0 flex flex-col overflow-hidden relative"
-          style={{ borderLeft: "1px solid rgba(255,255,255,0.06)" }}
+          style={{ borderLeft: "1px solid rgba(var(--fg),0.06)" }}
         >
           <div
             style={{
@@ -500,7 +510,7 @@ export default function ManageCircle() {
               right: 0,
               height: 1,
               background:
-                "linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent)",
+                "linear-gradient(90deg, transparent, rgba(var(--fg),0.05), transparent)",
               pointerEvents: "none",
             }}
           />
@@ -510,7 +520,7 @@ export default function ManageCircle() {
             <div className="flex flex-col gap-2">
               <p
                 className="text-[9px] tracking-[2px] uppercase font-medium"
-                style={{ color: "rgba(255,255,255,0.2)" }}
+                style={{ color: "rgba(var(--fg),0.2)" }}
               >
                 Circles
               </p>
@@ -521,8 +531,8 @@ export default function ManageCircle() {
                         key={i}
                         className="h-10 rounded-xl"
                         style={{
-                          background: "rgba(255,255,255,0.03)",
-                          border: "1px solid rgba(255,255,255,0.05)",
+                          background: "rgba(var(--fg),0.03)",
+                          border: "1px solid rgba(var(--fg),0.05)",
                         }}
                       />
                     ))
@@ -536,16 +546,16 @@ export default function ManageCircle() {
                           className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl cursor-pointer transition-colors duration-150 relative"
                           style={{
                             background: isActive
-                              ? "rgba(255,255,255,0.06)"
+                              ? "rgba(var(--fg),0.06)"
                               : "transparent",
                             border: isActive
-                              ? "1px solid rgba(255,255,255,0.1)"
+                              ? "1px solid rgba(var(--fg),0.1)"
                               : "1px solid transparent",
                           }}
                           onMouseEnter={(e) => {
                             if (!isActive)
                               e.currentTarget.style.background =
-                                "rgba(255,255,255,0.03)";
+                                "rgba(var(--fg),0.03)";
                           }}
                           onMouseLeave={(e) => {
                             if (!isActive)
@@ -572,8 +582,8 @@ export default function ManageCircle() {
                             className="w-8 h-8 rounded-lg overflow-hidden relative shrink-0"
                             style={{
                               border: isActive
-                                ? "1px solid rgba(255,255,255,0.15)"
-                                : "1px solid rgba(255,255,255,0.07)",
+                                ? "1px solid rgba(var(--fg),0.15)"
+                                : "1px solid rgba(var(--fg),0.07)",
                             }}
                           >
                             {circle.circle_image ? (
@@ -587,8 +597,8 @@ export default function ManageCircle() {
                               <div
                                 className="w-full h-full flex items-center justify-center text-[10px] font-medium"
                                 style={{
-                                  color: "rgba(255,255,255,0.3)",
-                                  background: "rgba(255,255,255,0.05)",
+                                  color: "rgba(var(--fg),0.3)",
+                                  background: "rgba(var(--fg),0.05)",
                                 }}
                               >
                                 {circle.circle_name?.[0]}
@@ -600,15 +610,15 @@ export default function ManageCircle() {
                               className="text-xs font-medium tracking-[-0.1px] truncate"
                               style={{
                                 color: isActive
-                                  ? "rgba(255,255,255,0.85)"
-                                  : "rgba(255,255,255,0.45)",
+                                  ? "rgba(var(--fg),0.85)"
+                                  : "rgba(var(--fg),0.45)",
                               }}
                             >
                               {circle.circle_name}
                             </p>
                             <p
                               className="text-[10px] tracking-[-0.1px]"
-                              style={{ color: "rgba(255,255,255,0.2)" }}
+                              style={{ color: "rgba(var(--fg),0.2)" }}
                             >
                               {circle.members?.length ?? 0} members
                             </p>
@@ -617,7 +627,7 @@ export default function ManageCircle() {
                             size={12}
                             style={{
                               color: isActive
-                                ? "rgba(255,255,255,0.25)"
+                                ? "rgba(var(--fg),0.25)"
                                 : "transparent",
                               flexShrink: 0,
                             }}
@@ -628,12 +638,12 @@ export default function ManageCircle() {
               </div>
             </div>
 
-            <div style={{ height: 1, background: "rgba(255,255,255,0.05)" }} />
+            <div style={{ height: 1, background: "rgba(var(--fg),0.05)" }} />
 
             {/* Search */}
             <div
               className="rounded-xl overflow-hidden"
-              style={{ border: "1px solid rgba(255,255,255,0.07)" }}
+              style={{ border: "1px solid rgba(var(--fg),0.07)" }}
             >
               <SearchMap
                 value={query}
@@ -662,13 +672,13 @@ export default function ManageCircle() {
                         className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg cursor-pointer transition-colors duration-150 text-left relative"
                         style={{
                           background: isActiveMarker
-                            ? "rgba(255,255,255,0.05)"
+                            ? "rgba(var(--fg),0.05)"
                             : "transparent",
                         }}
                         onMouseEnter={(e) => {
                           if (!isActiveMarker)
                             e.currentTarget.style.background =
-                              "rgba(255,255,255,0.03)";
+                              "rgba(var(--fg),0.03)";
                         }}
                         onMouseLeave={(e) => {
                           if (!isActiveMarker)
@@ -679,8 +689,8 @@ export default function ManageCircle() {
                           className="w-7 h-7 rounded-full overflow-hidden relative shrink-0"
                           style={{
                             border: isActiveMarker
-                              ? "1px solid rgba(255,255,255,0.2)"
-                              : "1px solid rgba(255,255,255,0.07)",
+                              ? "1px solid rgba(var(--fg),0.2)"
+                              : "1px solid rgba(var(--fg),0.07)",
                           }}
                         >
                           {member.profile_image ? (
@@ -694,8 +704,8 @@ export default function ManageCircle() {
                             <div
                               className="w-full h-full flex items-center justify-center text-[9px]"
                               style={{
-                                color: "rgba(255,255,255,0.3)",
-                                background: "rgba(255,255,255,0.05)",
+                                color: "rgba(var(--fg),0.3)",
+                                background: "rgba(var(--fg),0.05)",
                               }}
                             >
                               {member.first_name?.[0]}
@@ -706,8 +716,8 @@ export default function ManageCircle() {
                           className="text-xs tracking-[-0.1px] truncate flex-1"
                           style={{
                             color: isActiveMarker
-                              ? "rgba(255,255,255,0.85)"
-                              : "rgba(255,255,255,0.4)",
+                              ? "rgba(var(--fg),0.85)"
+                              : "rgba(var(--fg),0.4)",
                           }}
                         >
                           {member.first_name} {member.last_name}
@@ -734,7 +744,7 @@ export default function ManageCircle() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   className="text-center py-6 text-[11px] tracking-[-0.1px]"
-                  style={{ color: "rgba(255,255,255,0.2)" }}
+                  style={{ color: "rgba(var(--fg),0.2)" }}
                 >
                   {query.trim() !== ""
                     ? `No members match "${query}"`

@@ -37,7 +37,7 @@ export default function Carousel({ width, height, moments }: CarouselProps) {
             className="pointer-events-none absolute top-0 right-0 h-full w-32 z-10"
             style={{
               background:
-                "linear-gradient(to left, rgba(17,17,17,0.95) 0%, transparent 100%)",
+                `linear-gradient(to left, rgba(var(--bg),0.95) 0%, transparent 100%)`,
             }}
           />
         )}
@@ -54,7 +54,7 @@ export default function Carousel({ width, height, moments }: CarouselProps) {
             className="pointer-events-none absolute top-0 left-0 h-full w-24 z-10"
             style={{
               background:
-                "linear-gradient(to right, rgba(17,17,17,0.9) 0%, transparent 100%)",
+                `linear-gradient(to right, rgba(var(--bg),0.9) 0%, transparent 100%)`,
             }}
           />
         )}
@@ -95,8 +95,8 @@ export default function Carousel({ width, height, moments }: CarouselProps) {
                     width: i === currentIndex ? 16 : 5,
                     background:
                       i === currentIndex
-                        ? "rgba(255,255,255,0.7)"
-                        : "rgba(255,255,255,0.15)",
+                        ? "rgba(var(--fg),0.7)"
+                        : "rgba(var(--fg),0.15)",
                   }}
                   transition={{ duration: 0.3, ease: EASE }}
                   className="h-0.75 rounded-full"

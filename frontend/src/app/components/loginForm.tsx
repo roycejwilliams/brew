@@ -14,7 +14,7 @@ interface Phase {
 const EASE = [0.22, 1, 0.36, 1] as const;
 
 const inputClass =
-  "flex-1 px-4 py-3 bg-white/5 rounded-md border border-white/10 focus:outline-none focus:border-white/25 text-white/90 placeholder:text-white/20 text-sm transition-colors duration-150";
+  "flex-1 px-4 py-3 bg-white/5 rounded-md border border-white/10 focus:outline-none focus:border-white/25 text-black/90 dark:text-white/90 placeholder:text-black/20 dark:text-white/20 text-sm transition-colors duration-150";
 
 function LoginForm({ state, setState, redirect }: Phase) {
   const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
@@ -135,7 +135,7 @@ function LoginForm({ state, setState, redirect }: Phase) {
           className="flex flex-col gap-5"
         >
           <div className="flex flex-col gap-2">
-            <p className="text-[10px] tracking-[3px] uppercase text-white/25">
+            <p className="text-[10px] tracking-[3px] uppercase text-black/25 dark:text-white/25">
               Email
             </p>
             <div className="flex gap-2">
@@ -156,13 +156,13 @@ function LoginForm({ state, setState, redirect }: Phase) {
                 {isPending ? (
                   <div className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white/60 animate-spin" />
                 ) : (
-                  <span className="text-white/50 text-sm">→</span>
+                  <span className="text-black/50 dark:text-white/50 text-sm">→</span>
                 )}
               </motion.button>
             </div>
           </div>
 
-          <p className="text-[10px] text-center text-white/20 tracking-[-0.1px] whitespace-nowrap">
+          <p className="text-[10px] text-center text-black/20 dark:text-white/20 tracking-[-0.1px] whitespace-nowrap">
             By continuing, you agree to B R 3 W&apos;s Terms & Privacy Policy.
           </p>
         </motion.div>
@@ -180,10 +180,10 @@ function LoginForm({ state, setState, redirect }: Phase) {
         >
           <div className="flex flex-col gap-3">
             <div className="flex flex-col gap-1 items-center">
-              <p className="text-[10px] tracking-[3px] uppercase text-white/25">
+              <p className="text-[10px] tracking-[3px] uppercase text-black/25 dark:text-white/25">
                 Verification code
               </p>
-              <p className="text-[11px] text-white/20 tracking-[-0.1px]">
+              <p className="text-[11px] text-black/20 dark:text-white/20 tracking-[-0.1px]">
                 We sent a 6-digit code to your email.
               </p>
             </div>
@@ -201,14 +201,14 @@ function LoginForm({ state, setState, redirect }: Phase) {
                   onChange={(e) => handleOtpChange(e.target.value, i)}
                   onKeyDown={(e) => handleKeyDown(e, i)}
                   onPaste={handlePaste}
-                  className="flex-1 h-12 w-full text-base font-medium text-white text-center rounded-md focus:outline-none transition-colors duration-150"
+                  className="flex-1 h-12 w-full text-base font-medium text-black dark:text-white text-center rounded-md focus:outline-none transition-colors duration-150"
                   style={{
                     background: digit
-                      ? "rgba(255,255,255,0.08)"
-                      : "rgba(255,255,255,0.04)",
+                      ? "rgba(var(--fg),0.08)"
+                      : "rgba(var(--fg),0.04)",
                     border: digit
-                      ? "1px solid rgba(255,255,255,0.2)"
-                      : "1px solid rgba(255,255,255,0.08)",
+                      ? "1px solid rgba(var(--fg),0.2)"
+                      : "1px solid rgba(var(--fg),0.08)",
                     caretColor: "transparent",
                   }}
                 />
@@ -242,11 +242,11 @@ function LoginForm({ state, setState, redirect }: Phase) {
                 transition={{ duration: 0.2 }}
                 className="px-4 py-3 rounded-md text-center"
                 style={{
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.08)",
+                  background: "rgba(var(--fg),0.04)",
+                  border: "1px solid rgba(var(--fg),0.08)",
                 }}
               >
-                <p className="text-[11px] text-white/40 tracking-[-0.1px]">
+                <p className="text-[11px] text-black/40 dark:text-white/40 tracking-[-0.1px]">
                   New code sent.
                 </p>
               </motion.div>
@@ -260,20 +260,20 @@ function LoginForm({ state, setState, redirect }: Phase) {
                 setOtp(Array(6).fill(""));
                 setOtpError(false);
               }}
-              className="text-[11px] text-white/20 text-center hover:text-white/40 transition-colors duration-150 cursor-pointer tracking-[-0.1px]"
+              className="text-[11px] text-black/20 dark:text-white/20 text-center hover:text-black/40 dark:text-white/40 transition-colors duration-150 cursor-pointer tracking-[-0.1px]"
             >
               Wrong email? Go back
             </button>
             <button
               onClick={handleResend}
               disabled={resendCooldown > 0 || isResending}
-              className="text-[11px] text-white/20 hover:text-white/40 transition-colors duration-150 cursor-pointer tracking-[-0.1px] disabled:opacity-40 disabled:cursor-not-allowed"
+              className="text-[11px] text-black/20 dark:text-white/20 hover:text-black/40 dark:text-white/40 transition-colors duration-150 cursor-pointer tracking-[-0.1px] disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {isResending ? "Sending..." : resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend code"}
             </button>
           </div>
 
-          <p className="text-[10px] text-center text-white/20 tracking-[-0.1px] whitespace-nowrap">
+          <p className="text-[10px] text-center text-black/20 dark:text-white/20 tracking-[-0.1px] whitespace-nowrap">
             By continuing, you agree to B R 3 W&apos;s Terms & Privacy Policy.
           </p>
         </motion.div>
@@ -291,11 +291,11 @@ function LoginForm({ state, setState, redirect }: Phase) {
         >
           <div
             className="w-24 h-px"
-            style={{ background: "rgba(255,255,255,0.08)" }}
+            style={{ background: "rgba(var(--fg),0.08)" }}
           >
             <motion.div
               className="h-full"
-              style={{ background: "rgba(255,255,255,0.3)" }}
+              style={{ background: "rgba(var(--fg),0.3)" }}
               initial={{ width: "0%" }}
               animate={{ width: "100%" }}
               transition={{ duration: 3, ease: "linear" }}

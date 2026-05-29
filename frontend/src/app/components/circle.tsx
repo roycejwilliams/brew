@@ -15,6 +15,7 @@ interface CircleSelection {
   setSelectedModal: (selectedModal: "confirm") => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setForm: React.Dispatch<React.SetStateAction<any>>;
+  onInvite?: () => void;
 }
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -26,6 +27,7 @@ export default function Circle({
   setSelectedCircleProp,
   setSelectedModal,
   setForm,
+  onInvite,
 }: CircleSelection) {
   const { user } = useUserStore();
   const { data: getAllCircles } = useGetCirclesWithMembers(user?.id as string);
@@ -50,13 +52,13 @@ export default function Circle({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.25, ease: EASE }}
-        className="text-center flex flex-col items-center justify-center gap-4 px-6 py-16"
+        className="text-center flex flex-col items-center justify-center gap-5 px-6 py-16"
       >
         <div
           className="w-14 h-14 rounded-full flex items-center justify-center"
           style={{
-            background: "rgba(255,255,255,0.04)",
-            border: "1px solid rgba(255,255,255,0.08)",
+            background: `rgba(var(--fg),0.04)`,
+            border: `1px solid rgba(var(--fg),0.08)`,
           }}
         >
           <svg
@@ -64,7 +66,7 @@ export default function Circle({
             height="22"
             viewBox="0 0 24 24"
             fill="none"
-            stroke="rgba(255,255,255,0.25)"
+            stroke={`rgba(var(--fg),0.25)`}
             strokeWidth="1.5"
             strokeLinecap="round"
           >
@@ -75,20 +77,33 @@ export default function Circle({
         <div className="flex flex-col gap-1.5 max-w-xs">
           <p
             className="text-sm font-medium tracking-[-0.2px]"
-            style={{ color: "rgba(255,255,255,0.65)" }}
+            style={{ color: `rgba(var(--fg),0.65)` }}
           >
             No circles yet
           </p>
           <p
             className="text-xs tracking-[-0.1px] leading-relaxed"
-            style={{ color: "rgba(255,255,255,0.3)" }}
+            style={{ color: `rgba(var(--fg),0.3)` }}
           >
-            Create a circle first to invite people you trust to your moment.
+            Create a circle first, or skip ahead and invite people directly.
           </p>
         </div>
+        <motion.button
+          whileTap={{ scale: 0.97 }}
+          onClick={() => onInvite?.()}
+          className="text-xs tracking-[-0.1px] px-5 py-2.5 rounded-lg cursor-pointer transition-colors"
+          style={{
+            background: "rgba(var(--fg),0.06)",
+            border: "1px solid rgba(var(--fg),0.1)",
+            color: "rgba(var(--fg),0.5)",
+          }}
+        >
+          Invite people →
+        </motion.button>
       </motion.section>
     );
   }
+
 
   return (
     <AnimatePresence mode="sync">
@@ -106,17 +121,17 @@ export default function Circle({
             <>
               <h2
                 className="text-base font-medium tracking-[-0.3px]"
-                style={{ color: "rgba(255,255,255,0.85)" }}
+                style={{ color: `rgba(var(--fg),0.85)` }}
               >
                 Inviting your circle
               </h2>
               <p
                 className="text-sm tracking-[-0.1px]"
-                style={{ color: "rgba(255,255,255,0.3)" }}
+                style={{ color: `rgba(var(--fg),0.3)` }}
               >
                 Sending to{" "}
                 <span
-                  style={{ color: "rgba(255,255,255,0.65)", fontWeight: 500 }}
+                  style={{ color: `rgba(var(--fg),0.65)`, fontWeight: 500 }}
                 >
                   {selectedCircle.circle_name}
                 </span>
@@ -126,13 +141,13 @@ export default function Circle({
             <>
               <h2
                 className="text-base font-medium tracking-[-0.3px]"
-                style={{ color: "rgba(255,255,255,0.85)" }}
+                style={{ color: `rgba(var(--fg),0.85)` }}
               >
                 Share with your circle
               </h2>
               <p
                 className="text-sm tracking-[-0.1px]"
-                style={{ color: "rgba(255,255,255,0.3)" }}
+                style={{ color: `rgba(var(--fg),0.3)` }}
               >
                 Invite people you already trust
               </p>
@@ -169,8 +184,8 @@ export default function Circle({
                   <div
                     className="flex items-center gap-2.5 px-3.5 py-2 rounded-full"
                     style={{
-                      background: "rgba(255,255,255,0.05)",
-                      border: "1px solid rgba(255,255,255,0.09)",
+                      background: `rgba(var(--fg),0.05)`,
+                      border: `1px solid rgba(var(--fg),0.09)`,
                     }}
                   >
                     {/* Active dot */}
@@ -180,13 +195,13 @@ export default function Circle({
                     />
                     <span
                       className="text-xs font-medium tracking-[-0.1px]"
-                      style={{ color: "rgba(255,255,255,0.75)" }}
+                      style={{ color: `rgba(var(--fg),0.75)` }}
                     >
                       {activeCircle.circle_name}
                     </span>
                     <span
                       className="text-[10px] tracking-[-0.1px]"
-                      style={{ color: "rgba(255,255,255,0.3)" }}
+                      style={{ color: `rgba(var(--fg),0.3)` }}
                     >
                       {activeCircle.members?.length ?? 0} members
                     </span>

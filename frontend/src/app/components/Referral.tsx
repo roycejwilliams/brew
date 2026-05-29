@@ -56,10 +56,10 @@ export default function Referral({ setInvitedSelection }: ReferProp) {
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             className="flex flex-col items-center gap-2"
           >
-            <h2 className="text-white text-xl font-medium tracking-[-0.3px] leading-tight">
+            <h2 className="text-black dark:text-white text-xl font-medium tracking-[-0.3px] leading-tight">
               Refer to <span className="text-4xl tracking-[4px]">BR3W</span>
             </h2>
-            <p className="text-white/40 text-sm tracking-[-0.1px] text-center">
+            <p className="text-black/40 dark:text-white/40 text-sm tracking-[-0.1px] text-center">
               Brew is curated. Referrals are reviewed to maintain quality.
             </p>
 
@@ -67,18 +67,18 @@ export default function Referral({ setInvitedSelection }: ReferProp) {
             <motion.div
               className="flex items-center gap-3 mt-2 px-4 py-2.5 rounded-md"
               style={{
-                background: "rgba(255,255,255,0.05)",
-                border: "1px solid rgba(255,255,255,0.08)",
+                background: "rgba(var(--fg),0.05)",
+                border: "1px solid rgba(var(--fg),0.08)",
               }}
             >
-              <span className="text-white font-medium tracking-[-0.5px] text-2xl">
+              <span className="text-black dark:text-white font-medium tracking-[-0.5px] text-2xl">
                 {referralsAvailable}
               </span>
               <div className="flex flex-col">
-                <span className="text-white/60 text-xs font-medium tracking-widest uppercase">
+                <span className="text-black/60 dark:text-white/60 text-xs font-medium tracking-widest uppercase">
                   referrals left
                 </span>
-                <span className="text-white/20 text-xs tracking-[-0.1px]">
+                <span className="text-black/20 dark:text-white/20 text-xs tracking-[-0.1px]">
                   use them wisely
                 </span>
               </div>
@@ -92,16 +92,16 @@ export default function Referral({ setInvitedSelection }: ReferProp) {
             transition={{ delay: 0.06, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             className="w-full flex flex-col gap-3"
           >
-            <p className="text-white/25 text-xs tracking-wide uppercase font-medium">
+            <p className="text-black/25 dark:text-white/25 text-xs tracking-wide uppercase font-medium">
               Their email or phone
             </p>
             <div
               className="w-full rounded-md transition-all duration-200"
               style={{
-                background: "rgba(255,255,255,0.04)",
+                background: "rgba(var(--fg),0.04)",
                 border: recipient.trim()
-                  ? "1px solid rgba(255,255,255,0.18)"
-                  : "1px solid rgba(255,255,255,0.08)",
+                  ? "1px solid rgba(var(--fg),0.18)"
+                  : "1px solid rgba(var(--fg),0.08)",
               }}
             >
               <input
@@ -109,7 +109,7 @@ export default function Referral({ setInvitedSelection }: ReferProp) {
                 value={recipient}
                 onChange={(e) => setRecipient(e.target.value)}
                 placeholder="email or phone number"
-                className="w-full bg-transparent text-white placeholder-white/20 text-sm tracking-[-0.2px] outline-none px-4 py-4"
+                className="w-full bg-transparent text-black dark:text-white placeholder-black/20 dark:placeholder-white/20 text-sm tracking-[-0.2px] outline-none px-4 py-4"
               />
             </div>
           </motion.div>
@@ -121,16 +121,16 @@ export default function Referral({ setInvitedSelection }: ReferProp) {
             transition={{ delay: 0.08, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             className="w-full flex flex-col gap-3"
           >
-            <p className="text-white/25 text-xs tracking-wide uppercase font-medium">
+            <p className="text-black/25 dark:text-white/25 text-xs tracking-wide uppercase font-medium">
               Why do they belong?
             </p>
             <div
               className="w-full rounded-md transition-all duration-200"
               style={{
-                background: "rgba(255,255,255,0.04)",
+                background: "rgba(var(--fg),0.04)",
                 border: reason.trim()
-                  ? "1px solid rgba(255,255,255,0.18)"
-                  : "1px solid rgba(255,255,255,0.08)",
+                  ? "1px solid rgba(var(--fg),0.18)"
+                  : "1px solid rgba(var(--fg),0.08)",
               }}
             >
               <textarea
@@ -138,11 +138,11 @@ export default function Referral({ setInvitedSelection }: ReferProp) {
                 onChange={(e) => setReason(e.target.value)}
                 placeholder="Tell us why they belong on Brew..."
                 rows={6}
-                className="w-full bg-transparent text-white placeholder-white/20 text-sm tracking-[-0.2px] outline-none resize-none px-4 py-4"
+                className="w-full bg-transparent text-black dark:text-white placeholder-black/20 dark:placeholder-white/20 text-sm tracking-[-0.2px] outline-none resize-none px-4 py-4"
                 style={{ lineHeight: "1.6" }}
               />
             </div>
-            <p className="text-white/20 text-xs tracking-[-0.1px] text-center">
+            <p className="text-black/20 dark:text-white/20 text-xs tracking-[-0.1px] text-center">
               Access is reviewed.
             </p>
           </motion.div>

@@ -51,8 +51,8 @@ function LoginState({ active, setActive, isMobile, redirect }: ActiveStateProp) 
         transition={{ duration: 0.4, ease: EASE }}
         className="flex flex-col items-center w-full max-w-sm gap-5"
         style={{
-          background: isMobile ? "rgba(8,8,8,0.95)" : "rgba(8,8,8,0.85)",
-          border: "1px solid rgba(255,255,255,0.07)",
+          background: isMobile ? "rgba(var(--bg),0.95)" : "rgba(var(--bg),0.85)",
+          border: "1px solid rgba(var(--fg),0.07)",
           borderRadius: 16,
           padding: "36px 24px",
           backdropFilter: isMobile ? "none" : "blur(20px)",
@@ -67,7 +67,7 @@ function LoginState({ active, setActive, isMobile, redirect }: ActiveStateProp) 
           style={{
             height: 1,
             background:
-              "linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)",
+              "linear-gradient(90deg, transparent, rgba(var(--fg),0.08), transparent)",
           }}
         />
 
@@ -79,18 +79,18 @@ function LoginState({ active, setActive, isMobile, redirect }: ActiveStateProp) 
           transition={{ duration: 0.4, layout: { duration: 0.35, ease: EASE } }}
           className="flex flex-col items-center gap-3"
         >
-          <span className="text-[10px] tracking-[3px] uppercase text-white/25 font-medium">
+          <span className="text-[10px] tracking-[3px] uppercase text-black/25 dark:text-white/25 font-medium">
             Private Beta
           </span>
           {!isSuccess && (
             <div
               className="flex items-center justify-center w-10 h-10 rounded-full"
               style={{
-                background: "rgba(255,255,255,0.06)",
-                border: "1px solid rgba(255,255,255,0.1)",
+                background: "rgba(var(--fg),0.06)",
+                border: "1px solid rgba(var(--fg),0.1)",
               }}
             >
-              <Asterisk size={18} color="rgba(255,255,255,0.7)" />
+              <Asterisk size={18} color="rgba(var(--fg),0.7)" />
             </div>
           )}
         </motion.div>
@@ -106,10 +106,10 @@ function LoginState({ active, setActive, isMobile, redirect }: ActiveStateProp) 
               transition={{ duration: 0.22, ease: EASE }}
               className="flex flex-col items-center gap-1 text-center"
             >
-              <h2 className="text-white text-lg font-medium tracking-[-0.3px]">
+              <h2 className="text-black dark:text-white text-lg font-medium tracking-[-0.3px]">
                 {headerText.title}
               </h2>
-              <p className="text-white/30 text-sm tracking-[-0.1px]">
+              <p className="text-black/30 dark:text-white/30 text-sm tracking-[-0.1px]">
                 {headerText.sub}
               </p>
             </motion.div>
@@ -130,8 +130,8 @@ function LoginState({ active, setActive, isMobile, redirect }: ActiveStateProp) 
               }}
               className="relative w-full flex items-center p-1 rounded-md"
               style={{
-                background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(255,255,255,0.08)",
+                background: "rgba(var(--fg),0.04)",
+                border: "1px solid rgba(var(--fg),0.08)",
               }}
             >
               <motion.div
@@ -140,14 +140,14 @@ function LoginState({ active, setActive, isMobile, redirect }: ActiveStateProp) 
                 transition={{ duration: 0.28, ease: EASE }}
                 style={{
                   width: "calc(50% - 4px)",
-                  background: "rgba(255,255,255,0.08)",
-                  border: "1px solid rgba(255,255,255,0.1)",
+                  background: "rgba(var(--fg),0.08)",
+                  border: "1px solid rgba(var(--fg),0.1)",
                 }}
               />
               <button
                 onClick={() => setActive("login")}
                 className={`relative z-10 flex-1 text-center cursor-pointer py-1.5 text-xs font-medium transition-colors duration-150 ${
-                  active === "login" ? "text-white" : "text-white/35"
+                  active === "login" ? "text-black dark:text-white" : "text-black/35 dark:text-white/35"
                 }`}
               >
                 I have an invite
@@ -155,7 +155,7 @@ function LoginState({ active, setActive, isMobile, redirect }: ActiveStateProp) 
               <button
                 onClick={() => setActive("invite")}
                 className={`relative z-10 flex-1 text-center cursor-pointer py-1.5 text-xs font-medium transition-colors duration-150 ${
-                  active === "invite" ? "text-white" : "text-white/35"
+                  active === "invite" ? "text-black dark:text-white" : "text-black/35 dark:text-white/35"
                 }`}
               >
                 Request Access
@@ -179,7 +179,7 @@ function LoginState({ active, setActive, isMobile, redirect }: ActiveStateProp) 
               style={{
                 height: 1,
                 background:
-                  "linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)",
+                  "linear-gradient(90deg, transparent, rgba(var(--fg),0.06), transparent)",
               }}
             />
           )}

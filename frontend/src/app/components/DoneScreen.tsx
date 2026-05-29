@@ -25,14 +25,14 @@ export default function DoneScreen({ momentId, onClose }: DoneScreenProp) {
         transition={{ duration: 0.5, ease: EASE }}
         className="w-16 h-16 rounded-full flex items-center  justify-center"
         style={{
-          background: "rgba(255,255,255,0.05)",
-          border: "1px solid rgba(255,255,255,0.1)",
+          background: "rgba(var(--fg),0.05)",
+          border: "1px solid rgba(var(--fg),0.1)",
         }}
       >
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
           <motion.path
             d="M5 13l4 4L19 7"
-            stroke="rgba(255,255,255,0.7)"
+            stroke="rgba(var(--fg),0.7)"
             strokeWidth="1.5"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -50,10 +50,10 @@ export default function DoneScreen({ momentId, onClose }: DoneScreenProp) {
         transition={{ delay: 0.2, ease: EASE }}
         className="flex flex-col items-center gap-2"
       >
-        <h2 className="text-white/90 text-xl font-medium tracking-[-0.3px]">
+        <h2 className="text-black/90 dark:text-white/90 text-xl font-medium tracking-[-0.3px]">
           Moment created.
         </h2>
-        <p className="text-white/30 text-sm tracking-[-0.1px]">
+        <p className="text-black/30 dark:text-white/30 text-sm tracking-[-0.1px]">
           It&apos;s set. Now let it unfold.
         </p>
       </motion.div>
@@ -67,7 +67,7 @@ export default function DoneScreen({ momentId, onClose }: DoneScreenProp) {
       >
         <button
           onClick={onClose}
-          className="px-5 py-2.5 text-sm text-white/40 hover:text-white/70 transition-colors cursor-pointer"
+          className="px-5 py-2.5 text-sm text-black/40 dark:text-white/40 hover:text-black/70 dark:hover:text-white/70 transition-colors cursor-pointer"
         >
           Close
         </button>
@@ -76,7 +76,7 @@ export default function DoneScreen({ momentId, onClose }: DoneScreenProp) {
             onClose();
             router.push(`/moments/${momentId}`);
           }}
-          className="px-5 py-2.5 text-sm text-white/90 bg-white/5 border border-white/10 rounded-md hover:bg-white/10 hover:border-white/20 transition-all cursor-pointer"
+          className="px-5 py-2.5 text-sm text-black/90 dark:text-white/90 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-md hover:bg-black/10 dark:hover:bg-white/10 hover:border-black/20 dark:hover:border-white/20 transition-all cursor-pointer"
         >
           View Moment →
         </button>

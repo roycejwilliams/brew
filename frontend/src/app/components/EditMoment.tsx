@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { motion } from "motion/react";
 import { EditIcon } from "./icons";
-import { useUpdateMomentsByOwner } from "@/hooks/useMoments";
+import { useUpdateMomentsByOwner, useRegenerateVibes } from "@/hooks/useMoments";
 import { normalizeDate } from "@/lib/momentsUtil";
 import {
   useLocationSearch,
-  reverseGeolocateSearch,
+  geocodeQuery,
 } from "@/hooks/useReverseGeolocateSearch";
 import { openEventCard } from "@/stores/store";
 
@@ -21,9 +21,12 @@ export default function EditMoment({ setUtils, featured }: EditMomentProps) {
     isSuccess,
   } = useUpdateMomentsByOwner();
 
+  const { mutateAsync: regenerateVibes, isPending: isRegenerating } =
+    useRegenerateVibes();
+
   const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
   const [locationQuery, setLocationQuery] = useState("");
-  const { suggestions } = useLocationSearch(locationQuery);
+  const { suggestions, retrieve } = useLocationSearch(locationQuery);
 
   const [form, setForm] = useState({
     moments_name: featured?.moments_name ?? "",
@@ -72,32 +75,46 @@ export default function EditMoment({ setUtils, featured }: EditMomentProps) {
     }
   };
 
-  //PostgreSQL's point type expects the l
-  // iteral string format (x,y) but you're sending it a JSON object.
-  //Location_name and location are a pair and must be changed together
+  const descriptionChanged =
+    form.description.trim() !== (featured?.description ?? "").trim();
+
   const handleSave = async () => {
     if (!featured) return;
 
     let location = form.location;
 
-    //if the form location name does match the db
-    //call the reverseGeoLocate to Search
     if (form.location_name !== featured.location_name) {
-      const suggestions: { label: string; center?: [number, number] }[] = [];
-      await reverseGeolocateSearch(
-        form.location_name,
-        (results) => suggestions.push(...results),
-        () => {},
-      );
-      const first = suggestions[0];
-      if (first?.center) {
-        location = `(${first.center[0]},${first.center[1]})`;
+      const result = await geocodeQuery(form.location_name);
+      if (result?.center) {
+        location = `(${result.center[0]},${result.center[1]})`;
       }
     }
 
-    const updatedMoment = { ...featured, ...form, location } as MomentProp;
+    // If description changed, regenerate AI-derived fields before saving.
+    // Failures are silent — save proceeds with existing vibes/principles/etc.
+    let generated: Partial<MomentProp> = {};
+    if (descriptionChanged && form.description.trim()) {
+      try {
+        generated = await regenerateVibes({
+          description: form.description,
+          moments_name: form.moments_name,
+          location_name: form.location_name,
+        });
+      } catch {
+        generated = {};
+      }
+    }
+
+    const updatedMoment = {
+      ...featured,
+      ...form,
+      location,
+      ...generated,
+    } as MomentProp;
+
     updateMoment(updatedMoment, {
       onSuccess: () => {
+        // Reflect changes in the open EventCard without a page reload
         const storeMoment = openEventCard.getState().moment;
         if (storeMoment?.id === featured.id) {
           openEventCard.getState().openEvent(updatedMoment);
@@ -108,9 +125,9 @@ export default function EditMoment({ setUtils, featured }: EditMomentProps) {
   };
 
   const inputClass =
-    "bg-white/6 border border-white/10 rounded-sm px-3 py-2.5 text-white text-sm placeholder:text-white/20 focus:outline-none focus:border-white/25 focus:bg-white/8 transition-all w-full";
+    "bg-white/6 border border-white/10 rounded-sm px-3 py-2.5 text-black dark:text-white text-sm placeholder:text-black/20 dark:placeholder:text-white/20 focus:outline-none focus:border-white/25 focus:bg-white/8 transition-all w-full";
 
-  const labelClass = "text-white/30 text-xs uppercase tracking-wide";
+  const labelClass = "text-black/30 dark:text-white/30 text-xs uppercase tracking-wide";
 
   return (
     <motion.div
@@ -125,12 +142,12 @@ export default function EditMoment({ setUtils, featured }: EditMomentProps) {
       <div className="flex items-center justify-between">
         <button
           onClick={() => setUtils("history")}
-          className="text-white/30 hover:text-white/60 text-xs uppercase tracking-wide transition-colors cursor-pointer"
+          className="text-black/30 dark:text-white/30 hover:text-black/60 dark:hover:text-white/60 text-xs uppercase tracking-wide transition-colors cursor-pointer"
         >
           ← Back
         </button>
-        <div className="flex items-center gap-x-2 text-white/50">
-          <EditIcon size={14} color="#fff" />
+        <div className="flex items-center gap-x-2 text-black/50 dark:text-white/50">
+          <EditIcon size={14} color="currentColor" />
           <span className="text-xs uppercase tracking-widest">Edit Moment</span>
         </div>
       </div>
@@ -164,22 +181,21 @@ export default function EditMoment({ setUtils, featured }: EditMomentProps) {
             className={inputClass}
           />
           {showSuggestions && suggestions.length > 0 && (
-            <div className="absolute top-full left-0 right-0 z-10 mt-1 rounded-sm border border-white/10 bg-[#1a1a1a] overflow-hidden">
+            <div className="absolute top-full left-0 right-0 z-10 mt-1 rounded-sm border border-white/10 overflow-hidden" style={{ background: `rgb(var(--bg-elevated))` }}>
               {suggestions.map((s, i) => (
                 <button
-                  key={i}
-                  onClick={() => {
+                  key={s.mapbox_id ?? i}
+                  onClick={async () => {
+                    const center = await retrieve(s.mapbox_id);
                     setForm((prev) => ({
                       ...prev,
                       location_name: s.label,
-                      location: s.center
-                        ? `(${s.center[0]},${s.center[1]})`
-                        : prev.location,
+                      location: center ? `(${center[0]},${center[1]})` : prev.location,
                     }));
                     setLocationQuery("");
                     setShowSuggestions(false);
                   }}
-                  className="w-full text-left px-4 py-2.5 text-xs text-white/60 hover:bg-white/5 hover:text-white/90 transition-colors cursor-pointer"
+                  className="w-full text-left px-4 py-2.5 text-xs text-black/60 dark:text-white/60 hover:bg-black/5 dark:hover:bg-white/5 hover:text-black/90 dark:hover:text-white/90 transition-colors cursor-pointer"
                 >
                   {s.label}
                 </button>
@@ -224,7 +240,17 @@ export default function EditMoment({ setUtils, featured }: EditMomentProps) {
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className={labelClass}>Description</label>
+          <div className="flex items-center gap-2">
+            <label className={labelClass}>Description</label>
+            {descriptionChanged && (
+              <span
+                className="text-[9px] tracking-[1.5px] uppercase font-medium"
+                style={{ color: "rgba(var(--fg),0.35)" }}
+              >
+                ✦ will regenerate
+              </span>
+            )}
+          </div>
           <textarea
             name="description"
             rows={5}
@@ -239,10 +265,10 @@ export default function EditMoment({ setUtils, featured }: EditMomentProps) {
         {/* Close Moment */}
         <div className="flex items-center justify-between px-3 py-2.5 border border-white/8 rounded-sm bg-white/3">
           <div className="flex flex-col gap-0.5">
-            <span className="text-white/70 text-xs font-medium">
+            <span className="text-black/70 dark:text-white/70 text-xs font-medium">
               Close Moment
             </span>
-            <span className="text-white/30 text-[10px]">
+            <span className="text-black/30 dark:text-white/30 text-[10px]">
               No new check-ins or attendees
             </span>
           </div>
@@ -270,13 +296,19 @@ export default function EditMoment({ setUtils, featured }: EditMomentProps) {
       {/* Save */}
       <motion.button
         onClick={handleSave}
-        disabled={isPending}
+        disabled={isRegenerating || isPending}
         className="relative w-full bg-white text-black text-xs uppercase tracking-widest font-medium py-3 rounded-sm overflow-hidden mt-auto disabled:opacity-40 cursor-pointer"
-        whileHover={{ scale: isPending ? 1 : 1.02 }}
-        whileTap={{ scale: isPending ? 1 : 0.97 }}
+        whileHover={{ scale: isRegenerating || isPending ? 1 : 1.02 }}
+        whileTap={{ scale: isRegenerating || isPending ? 1 : 0.97 }}
       >
         <div className="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-white/60 to-transparent" />
-        {isPending ? "Saving..." : isSuccess ? "Saved ✓" : "Save Changes"}
+        {isRegenerating
+          ? "Regenerating..."
+          : isPending
+          ? "Saving..."
+          : isSuccess
+          ? "Saved ✓"
+          : "Save Changes"}
       </motion.button>
     </motion.div>
   );

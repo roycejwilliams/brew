@@ -30,17 +30,17 @@ export default function EventEnd({ activeModal, eventCard }: EventEndProp) {
         transition={{ duration: 0.3, ease: EASE }}
         className="flex items-center gap-2 w-fit"
         style={{
-          borderBottom: "1px solid rgba(255,255,255,0.07)",
+          borderBottom: "1px solid rgba(var(--fg),0.07)",
           paddingBottom: 16,
         }}
       >
         <div
           className="w-2.5 h-2.5 rounded-full"
-          style={{ background: "rgba(255,255,255,0.15)" }}
+          style={{ background: "rgba(var(--fg),0.15)" }}
         />
         <span
           className="text-sm font-medium tracking-[-0.1px]"
-          style={{ color: "rgba(255,255,255,0.35)" }}
+          style={{ color: "rgba(var(--fg),0.35)" }}
         >
           Event Ended
         </span>
@@ -54,7 +54,7 @@ export default function EventEnd({ activeModal, eventCard }: EventEndProp) {
         className="flex flex-col items-end gap-2 text-right"
       >
         <h2
-          className="text-white font-semibold leading-none"
+          className="text-black dark:text-white font-semibold leading-none"
           style={{
             fontSize: "clamp(36px, 8vw, 72px)",
             letterSpacing: "clamp(-1px, -0.04em, -3px)",
@@ -65,7 +65,7 @@ export default function EventEnd({ activeModal, eventCard }: EventEndProp) {
         </h2>
         <p
           className="text-base tracking-[-0.1px] mt-1"
-          style={{ color: "rgba(255,255,255,0.3)" }}
+          style={{ color: "rgba(var(--fg),0.3)" }}
         >
           Relive the energy. Share your moments.
         </p>
@@ -76,13 +76,13 @@ export default function EventEnd({ activeModal, eventCard }: EventEndProp) {
         {...stagger(1)}
         className="flex flex-col gap-3"
         style={{
-          borderLeft: "1px solid rgba(255,255,255,0.08)",
+          borderLeft: "1px solid rgba(var(--fg),0.08)",
           paddingLeft: 20,
         }}
       >
         <p
           className="text-[10px] tracking-widest uppercase font-medium"
-          style={{ color: "rgba(255,255,255,0.2)" }}
+          style={{ color: "rgba(var(--fg),0.2)" }}
         >
           Tonight&apos;s Recap
         </p>
@@ -92,14 +92,14 @@ export default function EventEnd({ activeModal, eventCard }: EventEndProp) {
               <div
                 key={i}
                 className="h-3 rounded-full animate-pulse"
-                style={{ width: `${w}%`, background: "rgba(255,255,255,0.06)" }}
+                style={{ width: `${w}%`, background: "rgba(var(--fg),0.06)" }}
               />
             ))}
           </div>
         ) : recap ? (
           <p
             className="text-sm tracking-[-0.1px] leading-relaxed max-w-lg"
-            style={{ color: "rgba(255,255,255,0.55)" }}
+            style={{ color: "rgba(var(--fg),0.55)" }}
           >
             {recap}
           </p>
@@ -115,7 +115,7 @@ export default function EventEnd({ activeModal, eventCard }: EventEndProp) {
         style={{
           height: 1,
           background:
-            "linear-gradient(90deg, rgba(255,255,255,0.07) 0%, transparent 80%)",
+            "linear-gradient(90deg, rgba(var(--fg),0.07) 0%, transparent 80%)",
         }}
       />
 

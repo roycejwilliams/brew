@@ -50,10 +50,10 @@ export default function ExpectationAssistant({
             className="w-full flex flex-col gap-5"
           >
             <div className="text-center space-y-1">
-              <p className="text-white text-sm font-medium tracking-[-0.2px]">
+              <p className="text-black dark:text-white text-sm font-medium tracking-[-0.2px]">
                 Let us help you set the room.
               </p>
-              <p className="text-white/35 text-sm tracking-[-0.1px]">
+              <p className="text-black/35 dark:text-white/35 text-sm tracking-[-0.1px]">
                 Use our AI assistant to generate the tone of the room.
               </p>
             </div>
@@ -61,10 +61,10 @@ export default function ExpectationAssistant({
             <div
               className="flex items-center gap-2 w-full rounded-xl px-4 py-3 transition-all duration-200"
               style={{
-                background: "rgba(255,255,255,0.05)",
+                background: "rgba(var(--fg),0.05)",
                 border: prompt.trim()
-                  ? "1px solid rgba(255,255,255,0.18)"
-                  : "1px solid rgba(255,255,255,0.08)",
+                  ? "1px solid rgba(var(--fg),0.18)"
+                  : "1px solid rgba(var(--fg),0.08)",
               }}
             >
               <input
@@ -73,7 +73,7 @@ export default function ExpectationAssistant({
                 onChange={(e) => setPrompt(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
                 placeholder="Describe the vibe…"
-                className="flex-1 bg-transparent text-white placeholder-white/20 text-sm tracking-[-0.2px] outline-none"
+                className="flex-1 bg-transparent text-black dark:text-white placeholder-black/20 dark:placeholder-white/20 text-sm tracking-[-0.2px] outline-none"
               />
               <motion.button
                 whileTap={{ scale: 0.93 }}
@@ -83,8 +83,8 @@ export default function ExpectationAssistant({
                   width: 30,
                   height: 30,
                   background: prompt.trim()
-                    ? "rgba(255,255,255,0.12)"
-                    : "rgba(255,255,255,0.05)",
+                    ? "rgba(var(--fg),0.12)"
+                    : "rgba(var(--fg),0.05)",
                 }}
               >
                 <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
@@ -92,8 +92,8 @@ export default function ExpectationAssistant({
                     d="M2 6.5h9M7.5 2.5l4 4-4 4"
                     stroke={
                       prompt.trim()
-                        ? "rgba(255,255,255,0.9)"
-                        : "rgba(255,255,255,0.25)"
+                        ? "rgba(var(--fg),0.9)"
+                        : "rgba(var(--fg),0.25)"
                     }
                     strokeWidth="1.4"
                     strokeLinecap="round"
@@ -116,7 +116,7 @@ export default function ExpectationAssistant({
                   }}
                   whileTap={{ scale: 0.99 }}
                   onClick={() => setPrompt(s)}
-                  className="text-left text-white/30 text-sm tracking-[-0.1px] transition-colors duration-150 hover:text-white/55 cursor-pointer"
+                  className="text-left text-black/30 dark:text-white/30 text-sm tracking-[-0.1px] transition-colors duration-150 hover:text-black/55 dark:text-white/55 cursor-pointer"
                 >
                   {s}
                 </motion.button>
@@ -136,7 +136,7 @@ export default function ExpectationAssistant({
             className="flex flex-col items-center gap-5 py-10"
           >
             <OrbitDots />
-            <p className="text-white/35 text-sm tracking-[-0.1px]">
+            <p className="text-black/35 dark:text-white/35 text-sm tracking-[-0.1px]">
               Reading the room…
             </p>
           </motion.div>
@@ -153,7 +153,7 @@ export default function ExpectationAssistant({
             className="w-full flex flex-col gap-16"
           >
             <div className="text-center">
-              <p className="text-white text-sm font-medium tracking-[-0.2px]">
+              <p className="text-black dark:text-white text-sm font-medium tracking-[-0.2px]">
                 How should this Circle feel?
               </p>
             </div>
@@ -174,14 +174,14 @@ export default function ExpectationAssistant({
                   className="px-5 py-2.5 rounded-md text-sm font-medium tracking-[-0.1px] cursor-pointer transition-all duration-200"
                   style={{
                     background: selected.includes(tag)
-                      ? "rgba(255,255,255,0.12)"
-                      : "rgba(255,255,255,0.05)",
+                      ? "rgba(var(--fg),0.12)"
+                      : "rgba(var(--fg),0.05)",
                     border: selected.includes(tag)
-                      ? "1px solid rgba(255,255,255,0.25)"
-                      : "1px solid rgba(255,255,255,0.08)",
+                      ? "1px solid rgba(var(--fg),0.25)"
+                      : "1px solid rgba(var(--fg),0.08)",
                     color: selected.includes(tag)
-                      ? "rgba(255,255,255,0.95)"
-                      : "rgba(255,255,255,0.45)",
+                      ? "rgba(var(--fg),0.95)"
+                      : "rgba(var(--fg),0.45)",
                   }}
                 >
                   {tag}
@@ -190,25 +190,25 @@ export default function ExpectationAssistant({
             </div>
             {/* Invite Note */}
             <div className="flex flex-col gap-2">
-              <p className="text-white/25 text-xs tracking-wide uppercase font-medium">
+              <p className="text-black/25 dark:text-white/25 text-xs tracking-wide uppercase font-medium">
                 Invite Note (optional)
               </p>
 
               <div
                 className="w-full rounded-md px-4 py-4 transition-all duration-200"
                 style={{
-                  background: "rgba(255,255,255,0.05)",
-                  border: "1px solid rgba(255,255,255,0.08)",
+                  background: "rgba(var(--fg),0.05)",
+                  border: "1px solid rgba(var(--fg),0.08)",
                 }}
               >
                 <textarea
                   rows={3}
                   placeholder="Describe how this Circle should feel…"
-                  className="w-full resize-none bg-transparent text-white placeholder-white/20 text-sm tracking-[-0.3px] outline-none"
+                  className="w-full resize-none bg-transparent text-black dark:text-white placeholder-black/20 dark:placeholder-white/20 text-sm tracking-[-0.3px] outline-none"
                 />
               </div>
 
-              <p className="text-white/20 text-xs tracking-[-0.1px] px-1">
+              <p className="text-black/20 dark:text-white/20 text-xs tracking-[-0.1px] px-1">
                 We&apos;ll use this to suggest expectations.
               </p>
             </div>

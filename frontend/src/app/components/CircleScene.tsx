@@ -217,8 +217,7 @@ export default function CircleScene({
             cx={250}
             cy={250}
             r={250}
-            stroke="white"
-            strokeOpacity={0.1}
+            style={{ stroke: "rgba(var(--fg),0.12)" }}
             strokeWidth={1}
             strokeDasharray="10 10"
           />
@@ -226,8 +225,7 @@ export default function CircleScene({
             cx={250}
             cy={250}
             r={212.5}
-            stroke="white"
-            strokeOpacity={0.08}
+            style={{ stroke: "rgba(var(--fg),0.08)" }}
             strokeWidth={1}
             strokeDasharray="5 10"
           />
@@ -255,9 +253,8 @@ export default function CircleScene({
               cy={cy}
               r={175}
               fill="none"
-              stroke="#3A3A3A"
+              style={{ stroke: "rgba(var(--fg),0.15)" }}
               strokeWidth="1"
-              strokeOpacity={0.3}
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.6 }}
@@ -272,7 +269,7 @@ export default function CircleScene({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.25, ease: "easeOut" }}
-              className="text-center my-auto text-[#ececec]/75"
+              className="text-center my-auto text-black/75 dark:text-[#ececec]/75"
             >
               <h1 className="text-lg">
                 {circles?.[circleIndex ?? 0]?.circle_name}
@@ -298,7 +295,7 @@ export default function CircleScene({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.25, ease: "easeOut" }}
-              className="text-center my-auto text-[#ececec]/75"
+              className="text-center my-auto text-black/75 dark:text-[#ececec]/75"
             >
               <h1 className="text-lg">{selectedCircle?.circle_name}</h1>
             </motion.div>
@@ -324,8 +321,7 @@ export default function CircleScene({
             cx={cx}
             cy={cy}
             r={markerRadius}
-            stroke="white"
-            strokeOpacity={0.9}
+            style={{ stroke: "rgba(var(--fg),0.25)" }}
             strokeWidth={1}
             strokeLinecap="round"
             strokeDasharray="10 10"
@@ -340,8 +336,7 @@ export default function CircleScene({
             cx={cx}
             cy={cy}
             r="212.5"
-            stroke="white"
-            strokeOpacity={0.75}
+            style={{ stroke: "rgba(var(--fg),0.18)" }}
             strokeWidth={1}
             strokeLinecap="round"
             strokeDasharray="5 10"
@@ -375,9 +370,8 @@ export default function CircleScene({
             cy={cy}
             r={175}
             fill="none"
-            stroke="#3A3A3A"
+            style={{ stroke: "rgba(var(--fg),0.15)" }}
             strokeWidth="1"
-            strokeOpacity={0.3}
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.6 }}
@@ -386,7 +380,7 @@ export default function CircleScene({
         <g className="markers">
           {selectedCircle.members?.map((member, i) => (
             <g key={i} className="circle-marker">
-              <circle cx="24" cy="24" r="24" fill="#1c1c1c" opacity={0.8} />
+              <circle cx="24" cy="24" r="24" style={{ fill: "rgb(var(--bg))" }} opacity={0.9} />
               {member.profile_image ? (
                 <image
                   href={member.profile_image}
@@ -401,7 +395,7 @@ export default function CircleScene({
                 <text
                   x={24}
                   y={24}
-                  fill="white"
+                  style={{ fill: "rgba(var(--fg),0.8)" }}
                   fontSize="12"
                   fontWeight="600"
                   textAnchor="middle"
@@ -414,11 +408,10 @@ export default function CircleScene({
               )}
               <path
                 d="M24 48V76 M48 24 C48 37.2548 37.2548 48 24 48 C10.7452 48 0 37.2548 0 24 C0 10.7452 10.7452 0 24 0 C37.2548 0 48 10.7452 48 24Z"
-                stroke="white"
+                style={{ stroke: "rgba(var(--fg),0.45)" }}
                 strokeWidth="1.5"
                 fill="none"
                 strokeLinecap="round"
-                strokeOpacity={0.6}
               />
             </g>
           ))}

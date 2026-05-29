@@ -3,7 +3,7 @@ import React, { useState, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useOutsideAlerter } from "../utils/outsideAlert";
 import SearchMap from "./search";
-import { useLocationSearch } from "@/hooks/useReverseGeolocateSearch";
+import { useLocationSearch, zoomForFeatureType } from "@/hooks/useReverseGeolocateSearch";
 import { useGetNearbyMoments } from "@/hooks/useMoments";
 import { openEventCard } from "@/stores/store";
 import { useRouter } from "next/navigation";
@@ -18,6 +18,7 @@ interface FilterProps {
   setSelectedCoordinates: React.Dispatch<
     React.SetStateAction<[number, number] | null>
   >;
+  setSelectedZoom?: React.Dispatch<React.SetStateAction<number>>;
   userCoordinates?: [number, number] | null;
   filter: TimeFilter;
   setFilter: (filter: TimeFilter) => void;
@@ -40,6 +41,7 @@ const TIME_FILTERS = [
 function ScopeLocator({
   onClose,
   setSelectedCoordinates,
+  setSelectedZoom,
   selectedLocation,
   setSelectedLocation,
   setActiveScope,
@@ -52,7 +54,7 @@ function ScopeLocator({
   useOutsideAlerter(ref, onClose);
 
   const [query, setQuery] = useState("");
-  const { suggestions } = useLocationSearch(query, userCoordinates);
+  const { suggestions, retrieve } = useLocationSearch(query, userCoordinates);
   const router = useRouter();
   const openCard = openEventCard((state) => state.openEvent);
 
@@ -63,12 +65,14 @@ function ScopeLocator({
 
   const showResults = query.length >= 2 && (suggestions.length > 0 || momentResults.length > 0);
 
-  const handleSelectLocation = (label: string, center?: [number, number]) => {
+  const handleSelectLocation = async (label: string, mapbox_id: string, feature_type?: string) => {
     setSelectedLocation(label);
+    setQuery("");
+    const center = await retrieve(mapbox_id);
     if (center) {
       setSelectedCoordinates(center);
+      setSelectedZoom?.(zoomForFeatureType(feature_type));
     }
-    setQuery("");
   };
 
   const handleReset = () => {
@@ -81,14 +85,14 @@ function ScopeLocator({
 
   const chipClass = (active: boolean) =>
     `px-3 py-1.5 rounded-md text-[11px] cursor-pointer transition-all duration-200 tracking-[-0.1px] ${
-      active ? "text-white/90" : "text-white/35 hover:text-white/60"
+      active ? "text-black/90 dark:text-white/90" : "text-black/35 dark:text-white/35 hover:text-black/60 dark:text-white/60"
     }`;
 
   const chipStyle = (active: boolean) => ({
-    background: active ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.03)",
+    background: active ? "rgba(var(--fg),0.1)" : "rgba(var(--fg),0.03)",
     border: active
-      ? "1px solid rgba(255,255,255,0.18)"
-      : "1px solid rgba(255,255,255,0.06)",
+      ? "1px solid rgba(var(--fg),0.18)"
+      : "1px solid rgba(var(--fg),0.06)",
   });
 
   const isDefault =
@@ -106,8 +110,8 @@ function ScopeLocator({
       transition={{ duration: 0.35, ease: "easeInOut" }}
       className="mx-auto relative mt-3 rounded-xl overflow-hidden"
       style={{
-        background: "rgba(14,14,14,0.95)",
-        border: "1px solid rgba(255,255,255,0.08)",
+        background: "rgba(var(--bg),0.95)",
+        border: "1px solid rgba(var(--fg),0.08)",
       }}
     >
       <SearchMap
@@ -130,7 +134,7 @@ function ScopeLocator({
             {/* Location results */}
             {suggestions.length > 0 && (
               <>
-                <p className="text-[9px] tracking-[2px] uppercase text-white/20 font-medium px-4 pt-2 pb-1">
+                <p className="text-[9px] tracking-[2px] uppercase text-black/20 dark:text-white/20 font-medium px-4 pt-2 pb-1">
                   Locations
                 </p>
                 {suggestions.map((s, i) => (
@@ -141,26 +145,26 @@ function ScopeLocator({
                     transition={{ delay: i * 0.04, duration: 0.2 }}
                   >
                     <button
-                      onClick={() => handleSelectLocation(s.label, s.center)}
+                      onClick={() => handleSelectLocation(s.label, s.mapbox_id, s.feature_type)}
                       className="w-full text-left px-4 py-2.5 transition-all cursor-pointer hover:bg-white/4"
                     >
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-white/60 hover:text-white/90 tracking-[-0.1px] truncate">
+                        <span className="text-xs text-black/60 dark:text-white/60 hover:text-black/90 dark:text-white/90 tracking-[-0.1px] truncate">
                           {s.label.split(",")[0]}
                         </span>
                         {s.category && (
                           <span
-                            className="shrink-0 text-[10px] text-white/30 px-1.5 py-0.5 rounded-full capitalize"
+                            className="shrink-0 text-[10px] text-black/30 dark:text-white/30 px-1.5 py-0.5 rounded-full capitalize"
                             style={{
-                              background: "rgba(255,255,255,0.05)",
-                              border: "1px solid rgba(255,255,255,0.07)",
+                              background: "rgba(var(--fg),0.05)",
+                              border: "1px solid rgba(var(--fg),0.07)",
                             }}
                           >
                             {s.category}
                           </span>
                         )}
                       </div>
-                      <p className="text-[10px] text-white/25 tracking-[-0.1px] truncate mt-0.5">
+                      <p className="text-[10px] text-black/25 dark:text-white/25 tracking-[-0.1px] truncate mt-0.5">
                         {s.label.split(",").slice(1).join(",").trim()}
                       </p>
                     </button>
@@ -173,9 +177,9 @@ function ScopeLocator({
             {momentResults.length > 0 && (
               <>
                 {suggestions.length > 0 && (
-                  <div style={{ height: 1, background: "rgba(255,255,255,0.05)", margin: "4px 0" }} />
+                  <div style={{ height: 1, background: "rgba(var(--fg),0.05)", margin: "4px 0" }} />
                 )}
-                <p className="text-[9px] tracking-[2px] uppercase text-white/20 font-medium px-4 pt-2 pb-1">
+                <p className="text-[9px] tracking-[2px] uppercase text-black/20 dark:text-white/20 font-medium px-4 pt-2 pb-1">
                   Moments
                 </p>
                 {momentResults.map((m, i) => (
@@ -187,17 +191,21 @@ function ScopeLocator({
                   >
                     <button
                       onClick={() => {
+                        const loc = m.location as unknown as { x: number; y: number };
+                        if (loc?.x != null && loc?.y != null) {
+                          setSelectedCoordinates([loc.x, loc.y]);
+                        }
                         openCard(m);
                         router.push(`/moments/${m.id}`, { scroll: false });
                         onClose();
                       }}
                       className="w-full text-left px-4 py-2.5 transition-all cursor-pointer hover:bg-white/4"
                     >
-                      <p className="text-xs text-white/60 tracking-[-0.1px] truncate">
+                      <p className="text-xs text-black/60 dark:text-white/60 tracking-[-0.1px] truncate">
                         {m.moments_name}
                       </p>
                       {m.location_name && (
-                        <p className="text-[10px] text-white/25 tracking-[-0.1px] truncate mt-0.5">
+                        <p className="text-[10px] text-black/25 dark:text-white/25 tracking-[-0.1px] truncate mt-0.5">
                           {m.location_name}
                         </p>
                       )}
@@ -218,7 +226,7 @@ function ScopeLocator({
           >
             {/* Look around */}
             <div className="space-y-2.5">
-              <p className="text-[10px] tracking-[2px] uppercase text-white/25 font-medium">
+              <p className="text-[10px] tracking-[2px] uppercase text-black/25 dark:text-white/25 font-medium">
                 Look around
               </p>
               <div className="flex flex-wrap gap-2">
@@ -237,11 +245,11 @@ function ScopeLocator({
             </div>
 
             {/* Divider */}
-            <div style={{ height: 1, background: "rgba(255,255,255,0.05)" }} />
+            <div style={{ height: 1, background: "rgba(var(--fg),0.05)" }} />
 
             {/* Time */}
             <div className="space-y-2.5">
-              <p className="text-[10px] tracking-[2px] uppercase text-white/25 font-medium">
+              <p className="text-[10px] tracking-[2px] uppercase text-black/25 dark:text-white/25 font-medium">
                 Time
               </p>
               <div className="flex flex-wrap gap-2">
@@ -260,23 +268,23 @@ function ScopeLocator({
             </div>
 
             {/* Divider */}
-            <div style={{ height: 1, background: "rgba(255,255,255,0.05)" }} />
+            <div style={{ height: 1, background: "rgba(var(--fg),0.05)" }} />
 
             {/* Summary + Reset */}
             <div className="flex items-center justify-between gap-3">
-              <p className="text-[11px] text-white/25 tracking-[-0.1px] leading-relaxed">
+              <p className="text-[11px] text-black/25 dark:text-white/25 tracking-[-0.1px] leading-relaxed">
                 Showing{" "}
-                <span className="text-white/50">
+                <span className="text-black/50 dark:text-white/50">
                   {LOOK_AROUND.find(
                     (o) => o.value === activeScope,
                   )?.label.toLowerCase() ?? "nearby"}
                 </span>{" "}
                 moments around{" "}
-                <span className="text-white/50">
+                <span className="text-black/50 dark:text-white/50">
                   {selectedLocation ?? "your location"}
                 </span>{" "}
                 —{" "}
-                <span className="text-white/50">
+                <span className="text-black/50 dark:text-white/50">
                   {TIME_FILTERS.find(
                     (o) => o.value === filter,
                   )?.label.toLowerCase()}
@@ -292,10 +300,10 @@ function ScopeLocator({
                     transition={{ duration: 0.15 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={handleReset}
-                    className="text-[10px] text-white/25 hover:text-white/60 tracking-[-0.1px] cursor-pointer transition-colors shrink-0 px-2 py-1 rounded-md"
+                    className="text-[10px] text-black/25 dark:text-white/25 hover:text-black/60 dark:text-white/60 tracking-[-0.1px] cursor-pointer transition-colors shrink-0 px-2 py-1 rounded-md"
                     style={{
-                      background: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(255,255,255,0.06)",
+                      background: "rgba(var(--fg),0.04)",
+                      border: "1px solid rgba(var(--fg),0.06)",
                     }}
                   >
                     Reset

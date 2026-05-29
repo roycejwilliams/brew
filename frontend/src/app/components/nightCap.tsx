@@ -42,16 +42,16 @@ export default function NightCap() {
     <section className="flex flex-col gap-10">
       {/* Header */}
       <div className="flex flex-col items-end gap-2 text-right">
-        <p className="text-white/20 text-[10px] tracking-widest uppercase font-medium">
+        <p className="text-black/20 dark:text-white/20 text-[10px] tracking-widest uppercase font-medium">
           Night Cap
         </p>
         <h2
-          className="text-white font-semibold tracking-[-0.5px] leading-tight"
+          className="text-black dark:text-white font-semibold tracking-[-0.5px] leading-tight"
           style={{ fontSize: 28 }}
         >
           {!hasComments ? "Leave something behind" : "Add to the night"}
         </h2>
-        <p className="text-white/35 text-sm tracking-[-0.1px] leading-relaxed max-w-xs">
+        <p className="text-black/35 dark:text-white/35 text-sm tracking-[-0.1px] leading-relaxed max-w-xs">
           {!hasComments
             ? "The night's winding down. Share a thought before it fades."
             : "A few thoughts are already here. Add yours before the night closes."}
@@ -66,8 +66,8 @@ export default function NightCap() {
         className="w-full overflow-hidden"
         style={{
           borderRadius: 14,
-          border: "1px solid rgba(255,255,255,0.07)",
-          background: "rgba(255,255,255,0.03)",
+          border: "1px solid rgba(var(--fg),0.07)",
+          background: "rgba(var(--fg),0.03)",
         }}
       >
         <textarea
@@ -76,13 +76,13 @@ export default function NightCap() {
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder="Share your night…"
-          className="w-full bg-transparent px-5 pt-5 pb-3 text-white text-sm placeholder-white/20 resize-none outline-none tracking-[-0.1px] leading-relaxed"
+          className="w-full bg-transparent px-5 pt-5 pb-3 text-black dark:text-white text-sm placeholder-black/20 dark:placeholder-white/20 resize-none outline-none tracking-[-0.1px] leading-relaxed"
           style={{ transition: "border-color 0.2s" }}
         />
 
         <div
           className="px-5 py-4 flex items-center justify-between"
-          style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
+          style={{ borderTop: "1px solid rgba(var(--fg),0.06)" }}
         >
           <motion.button
             type="button"
@@ -100,8 +100,8 @@ export default function NightCap() {
             style={{
               width: 34,
               height: 34,
-              background: canSubmit ? "#ffffff" : "rgba(255,255,255,0.07)",
-              border: canSubmit ? "none" : "1px solid rgba(255,255,255,0.08)",
+              background: canSubmit ? "#ffffff" : "rgba(var(--fg),0.07)",
+              border: canSubmit ? "none" : "1px solid rgba(var(--fg),0.08)",
             }}
           >
             <SendIcon size={14} color={canSubmit ? "#111111" : "#fff"} />
@@ -135,9 +135,9 @@ export default function NightCap() {
               className="text-sm tracking-[-0.1px] px-5 py-4"
               style={{
                 borderRadius: 12,
-                border: "1px solid rgba(255,255,255,0.06)",
-                background: "rgba(255,255,255,0.02)",
-                color: "rgba(255,255,255,0.25)",
+                border: "1px solid rgba(var(--fg),0.06)",
+                background: "rgba(var(--fg),0.02)",
+                color: "rgba(var(--fg),0.25)",
               }}
             >
               Leave a note from the night.

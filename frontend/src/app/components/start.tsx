@@ -35,9 +35,10 @@ const typeInvite = [
 ];
 
 const inputClass =
-  "appearance-none min-w-0 w-full px-4 py-2 sm:py-3 bg-white/5 rounded-md border border-white/10 focus:outline-none focus:border-white/25 text-white/90 placeholder:text-white/20 text-sm transition-all duration-200";
+  "appearance-none min-w-0 w-full px-4 py-2 sm:py-3 bg-black/5 dark:bg-white/5 rounded-md border border-black/10 dark:border-white/10 focus:outline-none focus:border-black/25 dark:focus:border-white/25 text-black/90 dark:text-white/90 placeholder:text-black/20 dark:placeholder:text-white/20 text-sm transition-all duration-200";
 
-const labelClass = "text-[10px] tracking-[3px] uppercase text-white/25";
+const labelClass =
+  "text-[10px] tracking-[3px] uppercase text-black/25 dark:text-white/25";
 
 export default function Start({
   form,
@@ -66,7 +67,7 @@ export default function Start({
   const canContinue = form.moments_name && dateAndTimeSet && selectedVisbility;
 
   return (
-    <motion.section className="max-w-lg mx-auto px-6 flex flex-col gap-4 sm:gap-8">
+    <motion.section className="max-w-lg mx-auto px-6 pb-10 flex flex-col gap-4 sm:gap-8">
       {/* 1 — Moment name */}
       <div className="flex flex-col gap-2">
         <p className={labelClass}>The move</p>
@@ -81,34 +82,45 @@ export default function Start({
         />
       </div>
 
-      {/* 2 — Date + Start time */}
-      <div className="flex flex-col gap-2">
-        <p className={labelClass}>When</p>
-        <div className="flex gap-3">
-          <input
-            name="moment_start_date"
-            value={form.moment_start.split("T")[0] || ""}
-            type="date"
-            required
-            onInput={(e) => {
-              handleTimeChange(e as React.ChangeEvent<HTMLInputElement>);
-              if ((e.target as HTMLInputElement).value) setReveal(true);
-            }}
-            className={inputClass}
-          />
-          <input
-            name="moment_start_time"
-            value={form.moment_start.split("T")[1] || ""}
-            type="time"
-            required
-            onInput={(e) => {
-              handleTimeChange(e as React.ChangeEvent<HTMLInputElement>);
-              if ((e.target as HTMLInputElement).value) setReveal(true);
-            }}
-            className={inputClass}
-          />
-        </div>
-      </div>
+      {/* 2 — Date + Start time — only after "The move" is filled */}
+      <AnimatePresence>
+        {!!form.moments_name && (
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+            variants={revealUp}
+            transition={{ duration: 0.3, ease: EASE }}
+            className="flex flex-col gap-2"
+          >
+            <p className={labelClass}>When</p>
+            <div className="flex gap-3">
+              <input
+                name="moment_start_date"
+                value={form.moment_start.split("T")[0] || ""}
+                type="date"
+                required
+                onInput={(e) => {
+                  handleTimeChange(e as React.ChangeEvent<HTMLInputElement>);
+                  if ((e.target as HTMLInputElement).value) setReveal(true);
+                }}
+                className={inputClass}
+              />
+              <input
+                name="moment_start_time"
+                value={form.moment_start.split("T")[1] || ""}
+                type="time"
+                required
+                onInput={(e) => {
+                  handleTimeChange(e as React.ChangeEvent<HTMLInputElement>);
+                  if ((e.target as HTMLInputElement).value) setReveal(true);
+                }}
+                className={inputClass}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* 3 — Until + Cap */}
       <AnimatePresence>
@@ -132,7 +144,7 @@ export default function Start({
                 }
                 className={inputClass}
               />
-              <p className="text-[10px] text-white/20 tracking-[-0.1px]">
+              <p className="text-[10px] text-black/20 dark:text-white/20 tracking-[-0.1px]">
                 Optional — leave blank if open-ended
               </p>
             </div>
@@ -148,7 +160,7 @@ export default function Start({
                 placeholder="No limit"
                 className={inputClass}
               />
-              <p className="text-[10px] text-white/20 tracking-[-0.1px]">
+              <p className="text-[10px] text-black/20 dark:text-white/20 tracking-[-0.1px]">
                 Optional — max number of attendees
               </p>
             </div>
@@ -176,9 +188,10 @@ export default function Start({
                 setSelectedVisibility(value as VisibilityType)
               }
               classNames={{
-                label: "mb-2 text-md font-medium text-white/75",
+                label:
+                  "mb-2 text-md font-medium text-black/75 dark:text-white/75",
                 wrapper:
-                  "flex flex-row text-white w-full flex-wrap !gap-x-6 !gap-y-2",
+                  "flex flex-row ml-2 text-black dark:text-white w-full flex-wrap !gap-x-6 !gap-y-2",
               }}
             >
               {typeInvite.map((invite) => (
@@ -205,10 +218,10 @@ export default function Start({
               type="button"
               disabled={!canContinue}
               onClick={() => setSelectedModal(selectedVisbility ?? "start")}
-              className="w-full flex justify-between items-center px-4 py-2.5 border border-white/10 rounded-md hover:bg-white/5 hover:border-white/20 transition-all cursor-pointer text-sm text-white/50 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+              className="w-full flex justify-between items-center px-4 py-2.5 border border-black/10 dark:border-white/10 rounded-md hover:bg-black/5 dark:hover:bg-white/5 hover:border-black/20 dark:hover:border-white/20 transition-all cursor-pointer text-sm text-black/50 dark:text-white/50 hover:text-black dark:hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
             >
               <span>Continue</span>
-              <span className="text-white/25">→</span>
+              <span className="text-black/25 dark:text-white/25">→</span>
             </button>
           </motion.div>
         )}

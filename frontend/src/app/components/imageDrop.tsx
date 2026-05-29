@@ -81,10 +81,10 @@ export default function ImageDrop({ onFileSelect }: ImageProp) {
               transition={{ duration: 0.2 }}
               className="w-full h-full rounded-xl flex items-center justify-center"
               style={{
-                background: "rgba(255,255,255,0.02)",
+                background: "rgba(var(--fg),0.02)",
                 border: isDragging
-                  ? "1px solid rgba(255,255,255,0.2)"
-                  : "1px dashed rgba(255,255,255,0.1)",
+                  ? "1px solid rgba(var(--fg),0.2)"
+                  : "1px dashed rgba(var(--fg),0.1)",
               }}
             >
               {/* Top shimmer */}
@@ -96,7 +96,7 @@ export default function ImageDrop({ onFileSelect }: ImageProp) {
                   right: 0,
                   height: 1,
                   background:
-                    "linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)",
+                    `linear-gradient(90deg, transparent, rgba(var(--fg),0.06), transparent)`,
                   pointerEvents: "none",
                 }}
               />
@@ -108,14 +108,14 @@ export default function ImageDrop({ onFileSelect }: ImageProp) {
                 <div
                   className="w-14 h-14 rounded-full flex items-center justify-center transition-colors duration-200"
                   style={{
-                    background: "rgba(255,255,255,0.05)",
-                    border: "1px solid rgba(255,255,255,0.09)",
+                    background: "rgba(var(--fg),0.05)",
+                    border: "1px solid rgba(var(--fg),0.09)",
                   }}
                 >
                   <svg
                     className="w-6 h-6"
                     fill="none"
-                    stroke="rgba(255,255,255,0.5)"
+                    stroke="rgba(var(--fg),0.5)"
                     viewBox="0 0 24 24"
                     strokeWidth={1.5}
                     strokeLinecap="round"
@@ -128,13 +128,13 @@ export default function ImageDrop({ onFileSelect }: ImageProp) {
                 <div className="flex flex-col gap-1">
                   <p
                     className="text-sm font-medium tracking-[-0.1px]"
-                    style={{ color: "rgba(255,255,255,0.6)" }}
+                    style={{ color: "rgba(var(--fg),0.6)" }}
                   >
                     Drop a photo here
                   </p>
                   <p
                     className="text-[11px] tracking-[-0.1px]"
-                    style={{ color: "rgba(255,255,255,0.25)" }}
+                    style={{ color: "rgba(var(--fg),0.25)" }}
                   >
                     or tap to choose from your library
                   </p>
@@ -156,7 +156,7 @@ export default function ImageDrop({ onFileSelect }: ImageProp) {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
               className="relative w-full h-full rounded-xl overflow-hidden"
-              style={{ border: "1px solid rgba(255,255,255,0.08)" }}
+              style={{ border: "1px solid rgba(var(--fg),0.08)" }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -181,7 +181,7 @@ export default function ImageDrop({ onFileSelect }: ImageProp) {
                 className="absolute top-3 right-3 flex items-center gap-1.5 cursor-pointer transition-all duration-150 sm:opacity-0 sm:group-hover:opacity-100 opacity-100"
                 style={{
                   background: "rgba(0,0,0,0.65)",
-                  border: "1px solid rgba(255,255,255,0.12)",
+                  border: "1px solid rgba(var(--fg),0.12)",
                   borderRadius: 8,
                   padding: "5px 10px",
                   backdropFilter: "blur(8px)",
@@ -190,14 +190,14 @@ export default function ImageDrop({ onFileSelect }: ImageProp) {
                 <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
                   <path
                     d="M2 2l8 8M10 2l-8 8"
-                    stroke="rgba(255,255,255,0.8)"
+                    stroke="rgba(var(--fg),0.8)"
                     strokeWidth="1.5"
                     strokeLinecap="round"
                   />
                 </svg>
                 <span
                   className="text-[10px] font-medium tracking-[-0.1px]"
-                  style={{ color: "rgba(255,255,255,0.75)" }}
+                  style={{ color: "rgba(var(--fg),0.75)" }}
                 >
                   Remove
                 </span>
@@ -209,7 +209,7 @@ export default function ImageDrop({ onFileSelect }: ImageProp) {
                 className="absolute bottom-3 left-3 right-3 flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-150"
                 style={{
                   background: "rgba(0,0,0,0.65)",
-                  border: "1px solid rgba(255,255,255,0.1)",
+                  border: "1px solid rgba(var(--fg),0.1)",
                   borderRadius: 8,
                   padding: "7px 12px",
                   backdropFilter: "blur(8px)",
@@ -220,7 +220,7 @@ export default function ImageDrop({ onFileSelect }: ImageProp) {
                   height="11"
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke="rgba(255,255,255,0.6)"
+                  stroke="rgba(var(--fg),0.6)"
                   strokeWidth="2"
                   strokeLinecap="round"
                 >
@@ -229,7 +229,7 @@ export default function ImageDrop({ onFileSelect }: ImageProp) {
                 </svg>
                 <span
                   className="text-[10px] font-medium tracking-[-0.1px]"
-                  style={{ color: "rgba(255,255,255,0.6)" }}
+                  style={{ color: "rgba(var(--fg),0.6)" }}
                 >
                   Replace photo
                 </span>

@@ -93,6 +93,8 @@ export const useInviteAttendeeDecision = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invite-moment-view"] });
       queryClient.invalidateQueries({ queryKey: ["invite-owner-view-moment"] });
+      // Accepting an invite adds you to moment_attendees — Coming Up should appear immediately
+      queryClient.invalidateQueries({ queryKey: ["moment-attendee"] });
     },
   });
 };

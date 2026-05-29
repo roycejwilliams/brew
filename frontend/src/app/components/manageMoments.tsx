@@ -8,7 +8,10 @@ import { openEventCard } from "@/stores/store";
 import AttendanceList from "./AttendanceList";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/stores/useUserStore";
-import { useGetAllMomentsOwnedByUser, useDeleteMomentsByOwner } from "@/hooks/useMoments";
+import {
+  useGetAllMomentsOwnedByUser,
+  useDeleteMomentsByOwner,
+} from "@/hooks/useMoments";
 import EditMoment from "./EditMoment";
 import { getMomentStatus, sortMomentsByStatus } from "../utils/momentsUtils";
 
@@ -18,8 +21,8 @@ const EASE = [0.16, 1, 0.3, 1] as const;
 
 const statusConfig = {
   live: { label: "Live now", color: "#4ade80" },
-  prequel: { label: "Upcoming", color: "rgba(255,255,255,0.4)" },
-  end: { label: "Ended", color: "rgba(255,255,255,0.2)" },
+  prequel: { label: "Upcoming", color: "rgba(var(--fg),0.4)" },
+  end: { label: "Ended", color: "rgba(var(--fg),0.2)" },
 };
 
 export function FocusStatus({ status }: { status: StatusSymbol }) {
@@ -43,7 +46,7 @@ export function FocusStatus({ status }: { status: StatusSymbol }) {
       )}
       <span
         className="text-[9px] tracking-[2px] uppercase font-medium"
-        style={{ color: "rgba(255,255,255,0.6)" }}
+        style={{ color: "rgba(var(--fg),0.6)" }}
       >
         {config.label}
       </span>
@@ -82,7 +85,8 @@ export default function ManageMoments() {
   const { data: MomentsByUser, isLoading } = useGetAllMomentsOwnedByUser(
     user?.id ?? "",
   );
-  const { mutate: deleteMoment, isPending: isDeleting } = useDeleteMomentsByOwner();
+  const { mutate: deleteMoment, isPending: isDeleting } =
+    useDeleteMomentsByOwner();
 
   const moments: MomentProp[] = MomentsByUser?.data?.data ?? [];
   const sortedMoments = sortMomentsByStatus(moments);
@@ -94,16 +98,16 @@ export default function ManageMoments() {
     <section className="flex-1 h-full overflow-hidden flex flex-col relative">
       {/* Header */}
       <div
-        className="flex items-center justify-between px-6 py-4 shrink-0 relative z-10"
+        className="flex items-center justify-between px-6 pt-20 pb-4 sm:pt-4 shrink-0 relative z-10"
         style={{
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
-          background: "rgba(8,8,8,0.6)",
+          borderBottom: "1px solid rgba(var(--fg),0.06)",
+          background: "rgba(var(--bg),0.6)",
           backdropFilter: "blur(12px)",
         }}
       >
         <p
-          className="text-[9px] tracking-[3px] uppercase font-medium"
-          style={{ color: "rgba(255,255,255,0.25)" }}
+          className="text-[9px] tracking-[3px] uppercase font-medium py-1.5"
+          style={{ color: "rgba(var(--fg),0.25)" }}
         >
           Moments
         </p>
@@ -112,27 +116,30 @@ export default function ManageMoments() {
             {(["attendance", "edit"] as const).map((view) => (
               <button
                 key={view}
-                onClick={() => { setUtils(utils === view ? "history" : view); setConfirmDelete(false); }}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium tracking-[-0.1px] cursor-pointer transition-all duration-150"
+                onClick={() => {
+                  setUtils(utils === view ? "history" : view);
+                  setConfirmDelete(false);
+                }}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-medium tracking-[-0.1px] cursor-pointer transition-all duration-150"
                 style={{
                   background:
                     utils === view
-                      ? "rgba(255,255,255,0.08)"
-                      : "rgba(255,255,255,0.04)",
+                      ? "rgba(var(--fg),0.08)"
+                      : "rgba(var(--fg),0.04)",
                   border:
                     utils === view
-                      ? "1px solid rgba(255,255,255,0.14)"
-                      : "1px solid rgba(255,255,255,0.07)",
+                      ? "1px solid rgba(var(--fg),0.14)"
+                      : "1px solid rgba(var(--fg),0.07)",
                   color:
                     utils === view
-                      ? "rgba(255,255,255,0.82)"
-                      : "rgba(255,255,255,0.35)",
+                      ? "rgba(var(--fg),0.82)"
+                      : "rgba(var(--fg),0.35)",
                 }}
               >
                 {view === "attendance" ? (
-                  <GroupIcon size={11} />
+                  <GroupIcon size={13} />
                 ) : (
-                  <EditIcon size={11} color="currentColor" />
+                  <EditIcon size={13} color="currentColor" />
                 )}
                 <span className="hidden sm:block">
                   {view.charAt(0).toUpperCase() + view.slice(1)}
@@ -153,11 +160,11 @@ export default function ManageMoments() {
                 >
                   <button
                     onClick={() => setConfirmDelete(false)}
-                    className="px-2.5 py-1.5 rounded-lg text-[10px] font-medium tracking-[-0.1px] cursor-pointer transition-all duration-150"
+                    className="px-3.5 py-2 rounded-lg text-xs font-medium tracking-[-0.1px] cursor-pointer transition-all duration-150"
                     style={{
-                      background: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(255,255,255,0.07)",
-                      color: "rgba(255,255,255,0.35)",
+                      background: "rgba(var(--fg),0.04)",
+                      border: "1px solid rgba(var(--fg),0.07)",
+                      color: "rgba(var(--fg),0.35)",
                     }}
                   >
                     Cancel
@@ -174,7 +181,7 @@ export default function ManageMoments() {
                       });
                     }}
                     disabled={isDeleting}
-                    className="px-2.5 py-1.5 rounded-lg text-[10px] font-medium tracking-[-0.1px] cursor-pointer transition-all duration-150 disabled:opacity-50"
+                    className="px-3.5 py-2 rounded-lg text-xs font-medium tracking-[-0.1px] cursor-pointer transition-all duration-150 disabled:opacity-50"
                     style={{
                       background: "rgba(239,68,68,0.12)",
                       border: "1px solid rgba(239,68,68,0.2)",
@@ -192,14 +199,14 @@ export default function ManageMoments() {
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.15 }}
                   onClick={() => setConfirmDelete(true)}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium tracking-[-0.1px] cursor-pointer transition-all duration-150"
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-medium tracking-[-0.1px] cursor-pointer transition-all duration-150"
                   style={{
                     background: "rgba(239,68,68,0.04)",
                     border: "1px solid rgba(239,68,68,0.08)",
                     color: "rgba(248,113,113,0.45)",
                   }}
                 >
-                  <TrashIcon size={11} color="currentColor" />
+                  <TrashIcon size={13} color="currentColor" />
                 </motion.button>
               )}
             </AnimatePresence>
@@ -211,16 +218,16 @@ export default function ManageMoments() {
       <div className="flex-1 flex flex-col sm:flex-row overflow-hidden">
         {/* Featured moment */}
         <div
-          className="sm:w-2/5 lg:w-1/3 shrink-0 relative overflow-hidden"
+          className="sm:flex-1 relative overflow-hidden"
           style={{
             minHeight: 280,
-            borderRight: "1px solid rgba(255,255,255,0.06)",
+            borderRight: "1px solid rgba(var(--fg),0.06)",
           }}
         >
           {isLoading ? (
             <motion.div
               className="w-full h-full"
-              style={{ background: "rgba(255,255,255,0.03)" }}
+              style={{ background: "rgba(var(--fg),0.03)" }}
               animate={{ opacity: [0.3, 0.6, 0.3] }}
               transition={{
                 duration: 1.5,
@@ -257,7 +264,7 @@ export default function ManageMoments() {
                   className="absolute inset-0"
                   style={{
                     background:
-                      "linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 50%)",
+                      "linear-gradient(to top, rgba(var(--bg),0.9) 0%, transparent 55%)",
                   }}
                 />
 
@@ -266,13 +273,13 @@ export default function ManageMoments() {
                   <div className="flex flex-col gap-1 min-w-0 flex-1 mr-3">
                     <h2
                       className="font-medium tracking-[-0.3px] truncate"
-                      style={{ fontSize: 18, color: "rgba(255,255,255,0.9)" }}
+                      style={{ fontSize: 18, color: "rgba(var(--fg),0.9)" }}
                     >
                       {featured.moments_name}
                     </h2>
                     <p
                       className="text-[11px] tracking-[-0.1px]"
-                      style={{ color: "rgba(255,255,255,0.4)" }}
+                      style={{ color: "rgba(var(--fg),0.4)" }}
                     >
                       {featured.moment_start
                         ? formatDate(featured.moment_start)
@@ -281,7 +288,7 @@ export default function ManageMoments() {
                     {featured.location_name && (
                       <p
                         className="text-[10px] tracking-[-0.1px]"
-                        style={{ color: "rgba(255,255,255,0.3)" }}
+                        style={{ color: "rgba(var(--fg),0.3)" }}
                       >
                         {featured.location_name}
                       </p>
@@ -297,9 +304,9 @@ export default function ManageMoments() {
                     whileTap={{ scale: 0.96 }}
                     className="flex items-center gap-1.5 px-3 py-2 rounded-xl cursor-pointer transition-all duration-150 shrink-0 text-[11px] font-medium tracking-[-0.1px]"
                     style={{
-                      background: "rgba(255,255,255,0.1)",
-                      border: "1px solid rgba(255,255,255,0.14)",
-                      color: "rgba(255,255,255,0.75)",
+                      background: "rgba(var(--fg),0.1)",
+                      border: "1px solid rgba(var(--fg),0.14)",
+                      color: "rgba(var(--fg),0.75)",
                       backdropFilter: "blur(8px)",
                     }}
                   >
@@ -314,7 +321,7 @@ export default function ManageMoments() {
               <div className="relative w-14 h-14">
                 <motion.div
                   className="absolute inset-0 rounded-full"
-                  style={{ border: "1px solid rgba(255,255,255,0.08)" }}
+                  style={{ border: "1px solid rgba(var(--fg),0.08)" }}
                   animate={{ scale: [1, 1.6, 1], opacity: [0.4, 0, 0.4] }}
                   transition={{
                     duration: 2.5,
@@ -324,24 +331,24 @@ export default function ManageMoments() {
                 />
                 <div
                   className="absolute inset-0 rounded-full flex items-center justify-center"
-                  style={{ border: "1px solid rgba(255,255,255,0.12)" }}
+                  style={{ border: "1px solid rgba(var(--fg),0.12)" }}
                 >
                   <div
                     className="w-2 h-2 rounded-full"
-                    style={{ background: "rgba(255,255,255,0.25)" }}
+                    style={{ background: "rgba(var(--fg),0.25)" }}
                   />
                 </div>
               </div>
               <div className="text-center flex flex-col gap-1">
                 <p
                   className="text-sm tracking-[-0.1px]"
-                  style={{ color: "rgba(255,255,255,0.4)" }}
+                  style={{ color: "rgba(var(--fg),0.4)" }}
                 >
                   Nothing live yet.
                 </p>
                 <p
                   className="text-[11px] tracking-[-0.1px]"
-                  style={{ color: "rgba(255,255,255,0.2)" }}
+                  style={{ color: "rgba(var(--fg),0.2)" }}
                 >
                   Create a moment and bring people together.
                 </p>
@@ -373,7 +380,7 @@ export default function ManageMoments() {
                         transition={{ duration: 0.18, delay: index * 0.05 }}
                         onClick={() => setSelectedMoment(event)}
                         className="aspect-3/4 rounded-xl overflow-hidden relative cursor-pointer"
-                        style={{ border: "1px solid rgba(255,255,255,0.07)" }}
+                        style={{ border: "1px solid rgba(var(--fg),0.07)" }}
                         whileTap={{ scale: 0.98 }}
                       >
                         <Image
@@ -388,7 +395,7 @@ export default function ManageMoments() {
                           className="absolute inset-0"
                           style={{
                             background:
-                              "linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 50%)",
+                              "linear-gradient(to top, rgba(var(--bg),0.85) 0%, transparent 55%)",
                           }}
                         />
 
@@ -411,8 +418,8 @@ export default function ManageMoments() {
                               style={{
                                 background:
                                   status === "prequel"
-                                    ? "rgba(255,255,255,0.4)"
-                                    : "rgba(255,255,255,0.2)",
+                                    ? "rgba(var(--fg),0.4)"
+                                    : "rgba(var(--fg),0.2)",
                               }}
                             />
                           )}
@@ -421,13 +428,13 @@ export default function ManageMoments() {
                         <div className="absolute bottom-0 left-0 right-0 p-2.5">
                           <p
                             className="text-xs font-medium tracking-[-0.1px] truncate"
-                            style={{ color: "rgba(255,255,255,0.85)" }}
+                            style={{ color: "rgba(var(--fg),0.85)" }}
                           >
                             {event.moments_name}
                           </p>
                           <p
                             className="text-[10px] tracking-[-0.1px] mt-0.5"
-                            style={{ color: "rgba(255,255,255,0.4)" }}
+                            style={{ color: "rgba(var(--fg),0.4)" }}
                           >
                             {event.moment_start
                               ? new Date(event.moment_start).toLocaleDateString(
@@ -449,8 +456,8 @@ export default function ManageMoments() {
                           className="absolute w-20 h-28 rounded-xl"
                           style={{
                             transform: `rotate(${rotate}deg) translateX(${i === 0 ? -20 : i === 1 ? 20 : 0}px) translateY(${i === 2 ? 0 : 8}px)`,
-                            background: "rgba(255,255,255,0.03)",
-                            border: "1px solid rgba(255,255,255,0.08)",
+                            background: "rgba(var(--fg),0.03)",
+                            border: "1px solid rgba(var(--fg),0.08)",
                             opacity: 1 - i * 0.15,
                           }}
                         />
@@ -459,13 +466,13 @@ export default function ManageMoments() {
                     <div className="flex flex-col gap-1">
                       <p
                         className="text-sm tracking-[-0.1px]"
-                        style={{ color: "rgba(255,255,255,0.4)" }}
+                        style={{ color: "rgba(var(--fg),0.4)" }}
                       >
                         Your moments live here.
                       </p>
                       <p
                         className="text-[11px] tracking-[-0.1px]"
-                        style={{ color: "rgba(255,255,255,0.2)" }}
+                        style={{ color: "rgba(var(--fg),0.2)" }}
                       >
                         The nights worth remembering will find their place.
                       </p>

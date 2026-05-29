@@ -25,6 +25,8 @@ interface EmailProp {
   appsubmit?: boolean;
   applicant?: ApplicationProp;
   external_invite?: { inviter_name: string; invite_type: "circle" | "moment"; target_name?: string };
+  knock_received?: { moments_name: string; requester_name: string };
+  knock_decided?: { moments_name: string; approved: boolean };
   welcome?: boolean;
   action_url?: string;
 }
@@ -51,6 +53,8 @@ interface MessageProp {
   moment_invite_reminder?: { moments_name: string; time: string };
   appsubmit?: boolean;
   external_invite?: { inviter_name: string; invite_type: "circle" | "moment"; target_name?: string };
+  knock_received?: { moments_name: string; requester_name: string };
+  knock_decided?: { moments_name: string; approved: boolean };
   welcome?: boolean;
   action_url?: string;
 }
@@ -113,6 +117,8 @@ export const sendSMS = async ({
   circle_invite_reminder,
   moment_invite_reminder,
   external_invite,
+  knock_received,
+  knock_decided,
   welcome,
   action_url,
 }: MessageProp) => {
@@ -257,6 +263,24 @@ export const sendSMS = async ({
       });
     }
 
+    if (knock_received) {
+      await client.messages.create({
+        body: `${knock_received.requester_name} is knocking to get into ${knock_received.moments_name}. Open BR3W to let them in or pass.${link(action_url)}`,
+        to: phone_number,
+        from: process.env.TWILIO_PHONE_NUMBER!,
+      });
+    }
+
+    if (knock_decided) {
+      await client.messages.create({
+        body: knock_decided.approved
+          ? `You're in. Your knock was approved for ${knock_decided.moments_name}. Open BR3W for details.${link(action_url)}`
+          : `Not this time. Your knock for ${knock_decided.moments_name} wasn't approved.`,
+        to: phone_number,
+        from: process.env.TWILIO_PHONE_NUMBER!,
+      });
+    }
+
     if (welcome) {
       await client.messages.create({
         body: `Welcome to BR3W. This is invite-only for a reason — set intentions, build circles, and make moments that matter. Open the app to begin. br3w.app`,
@@ -288,6 +312,8 @@ export const sendEmail = async ({
   applicant,
   appsubmit,
   external_invite,
+  knock_received,
+  knock_decided,
   welcome,
   action_url,
 }: EmailProp) => {
@@ -559,6 +585,39 @@ export const sendEmail = async ({
             p("BR3W is invite-only. Request access to join the moment.") +
             ctaButton("Request Access", "https://br3w.app"),
         ),
+      });
+    }
+
+    if (knock_received) {
+      await resend.emails.send({
+        from: "BR3W <hello@br3w.app>",
+        to: email,
+        subject: `${knock_received.requester_name} wants into ${knock_received.moments_name}.`,
+        html: emailTemplate(
+          h1("Someone's knocking.") +
+            p(`${knock_received.requester_name} is requesting access to ${knock_received.moments_name}. Open BR3W to let them in or pass.`) +
+            cta("Review Knock", action_url ?? "https://br3w.app"),
+        ),
+      });
+    }
+
+    if (knock_decided) {
+      await resend.emails.send({
+        from: "BR3W <hello@br3w.app>",
+        to: email,
+        subject: knock_decided.approved
+          ? `You're in — ${knock_decided.moments_name}.`
+          : `Your knock wasn't approved.`,
+        html: knock_decided.approved
+          ? emailTemplate(
+              h1("You're in.") +
+                p(`Your knock was approved for ${knock_decided.moments_name}. Open BR3W for the details.`) +
+                cta("View Moment", action_url ?? "https://br3w.app"),
+            )
+          : emailTemplate(
+              h1("Not this time.") +
+                p(`Your knock for ${knock_decided.moments_name} wasn't approved. Circles are built on intention.`),
+            ),
       });
     }
 

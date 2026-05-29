@@ -16,7 +16,7 @@ interface EventHeroProp {
 
 export default function EventHero({ eventCard }: EventHeroProp) {
   return (
-    <section className="w-full grid grid-cols-1 xl:grid-cols-2 gap-8 py-12 sm:py-16 items-end">
+    <section className="w-full grid grid-cols-1 xl:grid-cols-2 gap-8 pb-4 sm:pb-16 items-end">
       {/* LEFT — title + description */}
       <motion.div
         {...stagger(0)}
@@ -25,7 +25,7 @@ export default function EventHero({ eventCard }: EventHeroProp) {
         {/* Eyebrow */}
         <p
           className="text-[10px] tracking-widest uppercase font-medium"
-          style={{ color: "rgba(255,255,255,0.2)" }}
+          style={{ color: "rgba(var(--fg),0.2)" }}
         >
           Tonight&apos;s Event
         </p>
@@ -35,7 +35,7 @@ export default function EventHero({ eventCard }: EventHeroProp) {
           {eventCard?.moments_name.split("\n").map((text, index) => (
             <h1
               key={index}
-              className="text-white font-semibold leading-none"
+              className="text-black dark:text-white font-semibold leading-none"
               style={{
                 fontSize: "clamp(36px, 8vw, 108px)",
                 letterSpacing: "clamp(-1px, -0.04em, -4px)",
@@ -49,7 +49,7 @@ export default function EventHero({ eventCard }: EventHeroProp) {
         {/* Description */}
         <p
           className="text-sm tracking-[-0.1px] leading-relaxed max-w-xs"
-          style={{ color: "rgba(255,255,255,0.35)" }}
+          style={{ color: "rgba(var(--fg),0.35)" }}
         >
           {eventCard?.description}
         </p>
@@ -64,8 +64,8 @@ export default function EventHero({ eventCard }: EventHeroProp) {
           style={{
             height: "clamp(220px, 40vw, 525px)",
             borderRadius: 16,
-            border: "1px solid rgba(255,255,255,0.07)",
-            boxShadow: "0 24px 60px rgba(0,0,0,0.5)",
+            border: "1px solid rgba(var(--fg),0.07)",
+            boxShadow: "0 24px 60px rgba(var(--fg),0.15)",
           }}
         >
           <Image
@@ -80,7 +80,7 @@ export default function EventHero({ eventCard }: EventHeroProp) {
             className="absolute inset-0 pointer-events-none"
             style={{
               background:
-                "linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.55) 100%)",
+                "linear-gradient(180deg, transparent 40%, rgba(var(--bg),0.55) 100%)",
               borderRadius: 16,
             }}
           />
@@ -91,16 +91,16 @@ export default function EventHero({ eventCard }: EventHeroProp) {
           {/* Date row */}
           <div
             className="flex items-center justify-between pb-4 sm:pb-5"
-            style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}
+            style={{ borderBottom: "1px solid rgba(var(--fg),0.07)" }}
           >
             <p
               className="text-[10px] tracking-widest uppercase font-medium"
-              style={{ color: "rgba(255,255,255,0.2)" }}
+              style={{ color: "rgba(var(--fg),0.2)" }}
             >
               Date
             </p>
             <p
-              className="text-white font-medium tracking-[-0.5px]"
+              className="text-black dark:text-white font-medium tracking-[-0.5px]"
               style={{ fontSize: "clamp(16px, 4vw, 20px)" }}
             >
               {eventCard?.moment_start
@@ -151,18 +151,18 @@ export default function EventHero({ eventCard }: EventHeroProp) {
                 }}
                 className="flex flex-col gap-1 px-3 sm:px-4 py-3 rounded-xl"
                 style={{
-                  background: "rgba(255,255,255,0.03)",
-                  border: "1px solid rgba(255,255,255,0.06)",
+                  background: "rgba(var(--fg),0.03)",
+                  border: "1px solid rgba(var(--fg),0.06)",
                 }}
               >
                 <span
                   className="text-[10px] tracking-widest uppercase font-medium"
-                  style={{ color: "rgba(255,255,255,0.25)" }}
+                  style={{ color: "rgba(var(--fg),0.25)" }}
                 >
                   {label}
                 </span>
                 <span
-                  className="text-white font-semibold tracking-[-0.5px]"
+                  className="text-black dark:text-white font-semibold tracking-[-0.5px]"
                   style={{ fontSize: "clamp(16px, 4vw, 22px)" }}
                 >
                   {time}

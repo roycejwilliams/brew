@@ -1,12 +1,11 @@
 "use client";
 import { useUserStore } from "@/stores/useUserStore";
-import Nav from "../components/nav";
+import AppSidebar from "../components/AppSidebar";
+import MobileDrawer from "../components/MobileDrawer";
 import { motion } from "motion/react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useSocket } from "@/hooks/useSocket";
-
-const hideNavRoutes = ["/checkin", "/join", "/admin", "/manage"];
 
 export default function AppLayout({
   children,
@@ -14,11 +13,12 @@ export default function AppLayout({
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
-  const showNav = !hideNavRoutes.some((route) => pathname.startsWith(route));
   const router = useRouter();
 
   const { user, hasHydrated } = useUserStore();
   useSocket();
+
+  const hideSidebar = pathname === "/checkin" || pathname === "/join";
 
   useEffect(() => {
     if (!hasHydrated) return;
@@ -29,9 +29,10 @@ export default function AppLayout({
   }, [user, hasHydrated, router]);
 
   return (
-    <main>
-      <div className="relative flex-1">
-        {showNav && <Nav />}
+    <main className="flex h-dvh overflow-hidden">
+      {!hideSidebar && <AppSidebar />}
+      {!hideSidebar && <MobileDrawer />}
+      <div className="flex-1 min-w-0 relative overflow-y-auto">
         {hasHydrated && (
           <motion.div
             key={pathname}
@@ -39,6 +40,7 @@ export default function AppLayout({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="min-h-full"
           >
             {children}
           </motion.div>

@@ -117,10 +117,10 @@ export default function Moments({
         animate={{ opacity: 1, y: 0 }}
         className="flex flex-col items-center w-full px-6 py-10 gap-y-4 text-center"
       >
-        <p className="text-white/40 text-sm">
+        <p className="text-black/40 dark:text-white/40 text-sm">
           You haven&apos;t created any moments yet.
         </p>
-        <p className="text-white/20 text-xs">
+        <p className="text-black/20 dark:text-white/20 text-xs">
           Create a moment first, then invite people to it.
         </p>
       </motion.section>
@@ -143,7 +143,7 @@ export default function Moments({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 4 }}
           transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-          className="text-white md:text-xl text-md text-center font-medium tracking-[-0.3px] leading-tight"
+          className="text-black dark:text-white md:text-xl text-md text-center font-medium tracking-[-0.3px] leading-tight"
         >
           {selectedId
             ? `Inviting ${
@@ -182,8 +182,8 @@ export default function Moments({
               <motion.div
                 animate={{
                   backgroundColor: isSelected
-                    ? "rgba(255,255,255,0.06)"
-                    : "rgba(255,255,255,0)",
+                    ? "rgba(var(--fg),0.06)"
+                    : "rgba(var(--fg),0)",
                 }}
                 transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
                 className="flex items-center gap-4 px-4 py-4 relative"
@@ -224,15 +224,15 @@ export default function Moments({
                   <motion.p
                     animate={{
                       color: isSelected
-                        ? "rgba(255,255,255,0.95)"
-                        : "rgba(255,255,255,0.85)",
+                        ? "rgba(var(--fg),0.95)"
+                        : "rgba(var(--fg),0.85)",
                     }}
                     className="text-sm font-medium leading-snug truncate"
                   >
                     {moment.moments_name}
                   </motion.p>
-                  <p className="text-xs text-white/35 truncate">
-                    <span className="text-white/50">
+                  <p className="text-xs text-black/35 dark:text-white/35 truncate">
+                    <span className="text-black/50 dark:text-white/50">
                       {moment.moment_start
                         ? formatDate(moment.moment_start)
                         : "Date TBD"}
@@ -288,7 +288,7 @@ export default function Moments({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.1, duration: 0.25 }}
-              className="text-xs text-white/30"
+              className="text-xs text-black/30 dark:text-white/30"
             >
               They&apos;ll receive access instantly.
             </motion.p>

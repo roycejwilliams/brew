@@ -109,19 +109,19 @@ export default function EventRecap() {
         <div className="flex flex-col gap-2 min-w-0">
           <p
             className="text-[10px] tracking-widest uppercase font-medium"
-            style={{ color: "rgba(255,255,255,0.2)" }}
+            style={{ color: "rgba(var(--fg),0.2)" }}
           >
             Recap
           </p>
           <h2
-            className="text-white font-semibold tracking-[-0.5px] leading-tight"
+            className="text-black dark:text-white font-semibold tracking-[-0.5px] leading-tight"
             style={{ fontSize: "clamp(20px, 5vw, 28px)" }}
           >
             {hasPhotos ? "Join the recap" : "Be the first to share"}
           </h2>
           <p
             className="text-sm tracking-[-0.1px] leading-relaxed"
-            style={{ color: "rgba(255,255,255,0.35)" }}
+            style={{ color: "rgba(var(--fg),0.35)" }}
           >
             {hasPhotos
               ? "Add your moments from the night and help shape the story."
@@ -133,8 +133,8 @@ export default function EventRecap() {
         <div
           className="hidden sm:flex items-center gap-1 p-1 rounded-lg shrink-0"
           style={{
-            background: "rgba(255,255,255,0.04)",
-            border: "1px solid rgba(255,255,255,0.07)",
+            background: "rgba(var(--fg),0.04)",
+            border: "1px solid rgba(var(--fg),0.07)",
           }}
         >
           {(
@@ -156,8 +156,8 @@ export default function EventRecap() {
                   layoutId="density-pill"
                   className="absolute inset-0 rounded-lg"
                   style={{
-                    background: "rgba(255,255,255,0.1)",
-                    border: "1px solid rgba(255,255,255,0.1)",
+                    background: "rgba(var(--fg),0.1)",
+                    border: "1px solid rgba(var(--fg),0.1)",
                   }}
                   transition={{ duration: 0.25, ease: EASE }}
                 />
@@ -166,8 +166,8 @@ export default function EventRecap() {
                 <Icon
                   color={
                     density === key
-                      ? "rgba(255,255,255,0.8)"
-                      : "rgba(255,255,255,0.25)"
+                      ? "rgba(var(--fg),0.8)"
+                      : "rgba(var(--fg),0.25)"
                   }
                   size={16}
                   changeGrid={() => setDensity(key)}
@@ -223,7 +223,7 @@ export default function EventRecap() {
                     className="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center cursor-pointer z-10 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-150"
                     style={{
                       background: "rgba(0,0,0,0.7)",
-                      border: "1px solid rgba(255,255,255,0.1)",
+                      border: "1px solid rgba(var(--fg),0.1)",
                     }}
                     onClick={() =>
                       deletePhoto({
@@ -234,7 +234,7 @@ export default function EventRecap() {
                   >
                     <span
                       className="leading-none text-xs"
-                      style={{ color: "rgba(255,255,255,0.6)" }}
+                      style={{ color: "rgba(var(--fg),0.6)" }}
                     >
                       ✕
                     </span>
@@ -254,7 +254,7 @@ export default function EventRecap() {
                 </div>
                 <span
                   className="text-[10px] tracking-[-0.1px] truncate"
-                  style={{ color: "rgba(255,255,255,0.3)" }}
+                  style={{ color: "rgba(var(--fg),0.3)" }}
                 >
                   {photo.username}
                 </span>
@@ -270,8 +270,8 @@ export default function EventRecap() {
           onClick={() => !uploading && fileInputRef.current?.click()}
           className="aspect-square flex flex-col items-center justify-center gap-3 sm:gap-4 cursor-pointer rounded-lg"
           style={{
-            border: "1px dashed rgba(255,255,255,0.1)",
-            background: "rgba(255,255,255,0.02)",
+            border: "1px dashed rgba(var(--fg),0.1)",
+            background: "rgba(var(--fg),0.02)",
             opacity: uploading ? 0.5 : 1,
           }}
         >
@@ -279,8 +279,8 @@ export default function EventRecap() {
             <div
               className="w-5 h-5 rounded-full border-2 animate-spin"
               style={{
-                borderColor: "rgba(255,255,255,0.15)",
-                borderTopColor: "rgba(255,255,255,0.6)",
+                borderColor: "rgba(var(--fg),0.15)",
+                borderTopColor: "rgba(var(--fg),0.6)",
               }}
             />
           ) : (
@@ -290,15 +290,15 @@ export default function EventRecap() {
                 style={{
                   width: 36,
                   height: 36,
-                  background: "rgba(255,255,255,0.06)",
-                  border: "1px solid rgba(255,255,255,0.08)",
+                  background: "rgba(var(--fg),0.06)",
+                  border: "1px solid rgba(var(--fg),0.08)",
                 }}
               >
                 <PlusIcon size={16} color="#fff" />
               </div>
               <p
                 className="text-[10px] sm:text-xs tracking-[-0.1px] text-center px-3"
-                style={{ color: "rgba(255,255,255,0.25)" }}
+                style={{ color: "rgba(var(--fg),0.25)" }}
               >
                 Drop your recap here.
               </p>

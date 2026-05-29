@@ -266,3 +266,58 @@ export const useDeleteMomentPhoto = () => {
     },
   });
 };
+
+// Regenerate AI-derived fields (vibes, principles, expectations, faqs) from an updated description.
+// Follows the same pattern as generateRecap — posts to /ai/generate with moment context.
+export const useRegenerateVibes = () => {
+  return useMutation({
+    mutationFn: (payload: {
+      description: string;
+      moments_name: string;
+      location_name: string;
+    }) =>
+      api
+        .post("/ai/generate", payload)
+        .then((r) => r.data.data as Partial<MomentProp>),
+  });
+};
+
+// Knock — discoverer requests access; creates a pending attendee record for the host to approve
+export const useKnockOnMoment = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { moment_id: string; requester_id: string }) =>
+      api.post(`/moments/${data.moment_id}/knock`, {
+        requester_id: data.requester_id,
+      }),
+    onSuccess: (_, { moment_id }) => {
+      queryClient.invalidateQueries({
+        queryKey: ["moment-attendees-with-details", moment_id],
+      });
+      queryClient.invalidateQueries({ queryKey: ["knocks-for-owner"] });
+    },
+  });
+};
+
+// Host fetches all pending knock requests across their moments
+export const useGetKnocksForOwner = (owner_id: string) => {
+  return useQuery({
+    queryKey: ["knocks-for-owner", owner_id],
+    queryFn: () => api.get(`/moments/knocks/received/${owner_id}`),
+    enabled: !!owner_id,
+    refetchOnMount: "always",
+  });
+};
+
+// Host approves or declines a knock
+export const useDecideKnock = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { knock_id: string; status: "accepted" | "rejected" }) =>
+      api.put(`/moments/knocks/${data.knock_id}`, { status: data.status }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["knocks-for-owner"] });
+      queryClient.invalidateQueries({ queryKey: ["moment-attendees-with-details"] });
+    },
+  });
+};
