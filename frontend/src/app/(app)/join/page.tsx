@@ -51,7 +51,7 @@ function JoinContent() {
   }, [circle_id, user?.id]);
 
   return (
-    <div className="min-h-dvh overflow-hidden bg-[#0c0c0c] flex items-center justify-center px-6">
+    <div className="min-h-dvh overflow-hidden bg-[#f5f5f5] dark:bg-[#0c0c0c] flex items-center justify-center px-6">
       <AnimatePresence mode="wait">
         {status === "loading" && (
           <motion.div
@@ -67,7 +67,7 @@ function JoinContent() {
               transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
               className="w-7 h-7 border-2 border-white/10 border-t-white/50 rounded-full"
             />
-            <p className="text-white/30 text-sm tracking-[-0.1px]">
+            <p className="text-black/30 dark:text-white/30 text-sm tracking-[-0.1px]">
               Joining the circle...
             </p>
           </motion.div>
@@ -121,10 +121,10 @@ function JoinContent() {
               transition={{ delay: 0.25, duration: 0.35, ease: EASE }}
               className="flex flex-col gap-1"
             >
-              <h1 className="text-white text-xl font-medium tracking-[-0.3px]">
+              <h1 className="text-black dark:text-white text-xl font-medium tracking-[-0.3px]">
                 You&apos;re in the circle.
               </h1>
-              <p className="text-white/35 text-sm tracking-[-0.1px]">
+              <p className="text-black/35 dark:text-white/35 text-sm tracking-[-0.1px]">
                 You now have access to this circle and its moments.
               </p>
             </motion.div>
@@ -143,14 +143,14 @@ function JoinContent() {
             <div
               className="w-16 h-16 rounded-full flex items-center justify-center"
               style={{
-                border: "1px solid rgba(255,255,255,0.08)",
-                background: "rgba(255,255,255,0.04)",
+                border: `1px solid rgba(var(--fg),0.08)`,
+                background: `rgba(var(--fg),0.04)`,
               }}
             >
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
                 <path
                   d="M12 15v-4m0-4h.01M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"
-                  stroke="rgba(255,255,255,0.3)"
+                  stroke={`rgba(var(--fg),0.3)`}
                   strokeWidth="1.8"
                   strokeLinecap="round"
                 />
@@ -158,10 +158,10 @@ function JoinContent() {
             </div>
             <div className="flex flex-col gap-3">
               <div className="flex flex-col gap-1">
-                <h1 className="text-white text-xl font-medium tracking-[-0.3px]">
+                <h1 className="text-black dark:text-white text-xl font-medium tracking-[-0.3px]">
                   Sign in first.
                 </h1>
-                <p className="text-white/35 text-sm tracking-[-0.1px]">
+                <p className="text-black/35 dark:text-white/35 text-sm tracking-[-0.1px]">
                   You need a BR3W account to join this circle.
                 </p>
               </div>
@@ -175,8 +175,8 @@ function JoinContent() {
                 whileTap={{ scale: 0.97 }}
                 className="px-6 py-2.5 rounded-md text-sm font-medium tracking-[-0.1px] cursor-pointer transition-all"
                 style={{
-                  background: "rgba(255,255,255,0.9)",
-                  color: "#0c0c0c",
+                  background: `rgba(var(--fg),0.9)`,
+                  color: `rgb(var(--bg))`,
                 }}
               >
                 Sign in to BR3W
@@ -211,10 +211,10 @@ function JoinContent() {
               </svg>
             </div>
             <div className="flex flex-col gap-1">
-              <h1 className="text-white text-xl font-medium tracking-[-0.3px]">
+              <h1 className="text-black dark:text-white text-xl font-medium tracking-[-0.3px]">
                 Invalid invite.
               </h1>
-              <p className="text-white/35 text-sm tracking-[-0.1px]">
+              <p className="text-black/35 dark:text-white/35 text-sm tracking-[-0.1px]">
                 This invite link is invalid or has expired.
               </p>
             </div>
@@ -230,7 +230,7 @@ export default function JoinPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-dvh bg-[#0c0c0c] flex items-center justify-center">
+        <div className="min-h-dvh bg-[#f5f5f5] dark:bg-[#0c0c0c] flex items-center justify-center">
           <div className="w-7 h-7 rounded-full border-2 border-white/10 border-t-white/50 animate-spin" />
         </div>
       }

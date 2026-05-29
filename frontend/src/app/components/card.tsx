@@ -52,7 +52,7 @@ function Card({ width, height, moment }: CardProp) {
           hover: { opacity: 1 },
         }}
         transition={{ duration: 0.3, ease: EASE }}
-        style={{ boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.1)" }}
+        style={{ boxShadow: `inset 0 0 0 1px rgba(var(--fg),0.1)` }}
       />
       {/* Scrim */}
       {/* Background */}
@@ -80,15 +80,15 @@ function Card({ width, height, moment }: CardProp) {
       {/* Border */}
       <div
         className="absolute inset-0 rounded-xl pointer-events-none"
-        style={{ border: "1px solid rgba(255,255,255,0.07)" }}
+        style={{ border: `1px solid rgba(var(--fg),0.07)` }}
       />
       {/* Top — tag + attendees */}
       <div className="relative z-10 p-3.5 flex items-start justify-between">
         <span
           className="text-[9px] font-medium tracking-[2px] uppercase text-white/45 px-2.5 py-1 rounded-full"
           style={{
-            background: "rgba(255,255,255,0.06)",
-            border: "1px solid rgba(255,255,255,0.08)",
+            background: `rgba(var(--fg),0.06)`,
+            border: `1px solid rgba(var(--fg),0.08)`,
           }}
         >
           {moment?.visibility_type || "Moment"}
@@ -101,7 +101,7 @@ function Card({ width, height, moment }: CardProp) {
                 key={i}
                 className="w-4.5 h-4.5 rounded-full"
                 style={{
-                  background: `rgba(255,255,255,${0.12 + i * 0.04})`,
+                  background: `rgba(var(--fg),${0.12 + i * 0.04})`,
                   border: "1.5px solid rgba(17,17,17,0.8)",
                   marginLeft: i === 0 ? 0 : -6,
                 }}
@@ -118,7 +118,7 @@ function Card({ width, height, moment }: CardProp) {
         {/* Divider */}
         <div
           className="w-full h-px"
-          style={{ background: "rgba(255,255,255,0.08)" }}
+          style={{ background: `rgba(var(--fg),0.08)` }}
         />
 
         {/* Title */}

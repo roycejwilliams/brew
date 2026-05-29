@@ -86,8 +86,8 @@ export default function Tools({ manage, setManage }: ManageTools) {
     <div
       className="h-full w-16 sm:w-20 flex flex-col items-center py-6 gap-6 shrink-0 relative z-10"
       style={{
-        borderRight: "1px solid rgba(255,255,255,0.06)",
-        background: "rgba(8,8,8,0.8)",
+        borderRight: "1px solid rgba(var(--fg),0.06)",
+        background: "rgba(var(--bg),0.8)",
       }}
     >
       {/* Top shimmer */}
@@ -99,7 +99,7 @@ export default function Tools({ manage, setManage }: ManageTools) {
           right: 0,
           height: 1,
           background:
-            "linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)",
+            "linear-gradient(90deg, transparent, rgba(var(--fg),0.06), transparent)",
           pointerEvents: "none",
         }}
       />
@@ -109,16 +109,16 @@ export default function Tools({ manage, setManage }: ManageTools) {
         href="/pulse"
         className="flex items-center justify-center w-8 h-8 rounded-full shrink-0"
         style={{
-          background: "rgba(255,255,255,0.06)",
-          border: "1px solid rgba(255,255,255,0.1)",
+          background: "rgba(var(--fg),0.06)",
+          border: "1px solid rgba(var(--fg),0.1)",
         }}
       >
-        <Asterisk size={14} color="rgba(255,255,255,0.6)" />
+        <Asterisk size={14} color="rgba(var(--fg),0.6)" />
       </Link>
 
       {/* Divider */}
       <div
-        style={{ width: 24, height: 1, background: "rgba(255,255,255,0.06)" }}
+        style={{ width: 24, height: 1, background: "rgba(var(--fg),0.06)" }}
       />
 
       {/* Nav items */}
@@ -140,14 +140,14 @@ export default function Tools({ manage, setManage }: ManageTools) {
                 className="w-10 h-10 mx-auto flex justify-center items-center rounded-xl cursor-pointer transition-all duration-150"
                 style={{
                   background: isActive
-                    ? "rgba(255,255,255,0.08)"
-                    : "rgba(255,255,255,0.04)",
+                    ? "rgba(var(--fg),0.08)"
+                    : "rgba(var(--fg),0.04)",
                   border: isActive
-                    ? "1px solid rgba(255,255,255,0.14)"
-                    : "1px solid rgba(255,255,255,0.07)",
+                    ? "1px solid rgba(var(--fg),0.14)"
+                    : "1px solid rgba(var(--fg),0.07)",
                   color: isActive
-                    ? "rgba(255,255,255,0.82)"
-                    : "rgba(255,255,255,0.3)",
+                    ? "rgba(var(--fg),0.82)"
+                    : "rgba(var(--fg),0.3)",
                 }}
               >
                 {m.icon}
@@ -173,8 +173,8 @@ export default function Tools({ manage, setManage }: ManageTools) {
                     transition={{ duration: 0.15, ease: EASE }}
                     className="absolute left-full ml-2 top-1/2 -translate-y-1/2 pointer-events-none z-50"
                     style={{
-                      background: "rgba(8,8,8,0.95)",
-                      border: "1px solid rgba(255,255,255,0.08)",
+                      background: "rgba(var(--bg),0.95)",
+                      border: "1px solid rgba(var(--fg),0.08)",
                       borderRadius: 6,
                       padding: "4px 8px",
                       whiteSpace: "nowrap",
@@ -182,7 +182,7 @@ export default function Tools({ manage, setManage }: ManageTools) {
                   >
                     <span
                       className="text-[10px] font-medium tracking-[-0.1px]"
-                      style={{ color: "rgba(255,255,255,0.6)" }}
+                      style={{ color: "rgba(var(--fg),0.6)" }}
                     >
                       {m.label}
                     </span>
@@ -198,7 +198,7 @@ export default function Tools({ manage, setManage }: ManageTools) {
       <div className="mt-auto">
         <p
           className="text-[8px] tracking-[2px] uppercase font-medium"
-          style={{ color: "rgba(255,255,255,0.15)" }}
+          style={{ color: "rgba(var(--fg),0.15)" }}
         >
           Mgmt
         </p>

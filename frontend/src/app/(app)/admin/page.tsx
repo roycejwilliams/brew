@@ -29,7 +29,7 @@ export default function AdminPage() {
 
   if (isPending) {
     return (
-      <section className="min-h-dvh bg-[#0c0c0c] text-white flex items-center justify-center">
+      <section className="min-h-dvh bg-[#f5f5f5] dark:bg-[#0c0c0c] text-black dark:text-white flex items-center justify-center">
         <Loading />
       </section>
     );
@@ -37,7 +37,7 @@ export default function AdminPage() {
 
   if (user?.role !== "admin") {
     return (
-      <section className="min-h-dvh overflow-hidden bg-[#0c0c0c] text-white flex items-center justify-center px-6">
+      <section className="min-h-dvh overflow-hidden bg-[#f5f5f5] dark:bg-[#0c0c0c] text-black dark:text-white flex items-center justify-center px-6">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -47,27 +47,27 @@ export default function AdminPage() {
           <div
             className="w-14 h-14 rounded-full flex items-center justify-center"
             style={{
-              border: "1px solid rgba(255,255,255,0.07)",
-              background: "rgba(255,255,255,0.03)",
+              border: `1px solid rgba(var(--fg),0.07)`,
+              background: `rgba(var(--fg),0.03)`,
             }}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
               <path
                 d="M12 15v-4m0-4h.01M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"
-                stroke="rgba(255,255,255,0.2)"
+                stroke={`rgba(var(--fg),0.2)`}
                 strokeWidth="1.5"
                 strokeLinecap="round"
               />
             </svg>
           </div>
           <div className="flex flex-col gap-2">
-            <p className="text-[10px] tracking-[4px] uppercase text-white/20 font-medium">
+            <p className="text-[10px] tracking-[4px] uppercase text-black/20 dark:text-white/20 font-medium">
               br3w
             </p>
-            <h1 className="text-lg font-medium tracking-[-0.3px] text-white/80">
+            <h1 className="text-lg font-medium tracking-[-0.3px] text-black/80 dark:text-white/80">
               Access restricted.
             </h1>
-            <p className="text-sm text-white/30 leading-relaxed tracking-[-0.1px]">
+            <p className="text-sm text-black/30 dark:text-white/30 leading-relaxed tracking-[-0.1px]">
               This area is for BR3W administrators only. If you think this is a
               mistake, reach out.
             </p>
@@ -99,35 +99,34 @@ export default function AdminPage() {
   ];
 
   return (
-    <section className="min-h-dvh overflow-y-auto overscroll-contain bg-[#0c0c0c] text-white px-4 sm:px-8 lg:px-12 py-10 pb-24">
+    <section className="min-h-dvh overflow-y-auto overscroll-contain bg-[#f5f5f5] dark:bg-[#0c0c0c] text-black dark:text-white px-4 sm:px-8 lg:px-12 py-10 pb-24">
       {/* Ambient glow */}
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 pointer-events-none"
         style={{
           width: 700,
           height: 400,
-          background:
-            "radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.04) 0%, transparent 70%)",
+          background: `radial-gradient(ellipse at 50% 0%, rgba(var(--fg),0.04) 0%, transparent 70%)`,
         }}
       />
 
       <div className="relative max-w-5xl mx-auto">
         {/* Header */}
         <motion.div {...stagger(0)} className="mb-8">
-          <p className="text-[10px] tracking-[4px] uppercase text-white/20 font-medium mb-1.5">
+          <p className="text-[10px] tracking-[4px] uppercase text-black/20 dark:text-white/20 font-medium mb-1.5">
             br3w
           </p>
           <h1 className="text-2xl sm:text-3xl font-medium tracking-[-0.6px] mb-1.5">
             Applications
           </h1>
-          <p className="text-sm text-white/30 tracking-[-0.1px]">
+          <p className="text-sm text-black/30 dark:text-white/30 tracking-[-0.1px]">
             Review and manage access requests
           </p>
         </motion.div>
 
         <div
           className="mb-8"
-          style={{ height: 1, background: "rgba(255,255,255,0.06)" }}
+          style={{ height: 1, background: `rgba(var(--fg),0.06)` }}
         />
 
         {/* Stats */}
@@ -137,11 +136,11 @@ export default function AdminPage() {
               key={stat.label}
               className="rounded-xl p-4 sm:p-5 flex flex-col gap-2"
               style={{
-                background: "rgba(255,255,255,0.02)",
-                border: "1px solid rgba(255,255,255,0.06)",
+                background: `rgba(var(--fg),0.02)`,
+                border: `1px solid rgba(var(--fg),0.06)`,
               }}
             >
-              <p className="text-[10px] tracking-[2px] uppercase text-white/20 font-medium">
+              <p className="text-[10px] tracking-[2px] uppercase text-black/20 dark:text-white/20 font-medium">
                 {stat.label}
               </p>
               <div className="flex items-end gap-2 flex-wrap">
@@ -151,7 +150,7 @@ export default function AdminPage() {
                 >
                   {stat.value}
                 </span>
-                <span className="text-[10px] text-white/20 tracking-[-0.1px] mb-1 hidden sm:block">
+                <span className="text-[10px] text-black/20 dark:text-white/20 tracking-[-0.1px] mb-1 hidden sm:block">
                   {stat.sub}
                 </span>
               </div>
@@ -162,12 +161,12 @@ export default function AdminPage() {
         {/* Desktop table header */}
         <div
           className="hidden md:grid grid-cols-[2.5fr_2fr_0.8fr_1.2fr] gap-3 px-3 pb-3 mb-1"
-          style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+          style={{ borderBottom: `1px solid rgba(var(--fg),0.06)` }}
         >
           {["Applicant", "Contact", "Status", "Actions"].map((h) => (
             <p
               key={h}
-              className="text-[10px] tracking-[3px] uppercase text-white/20 font-medium"
+              className="text-[10px] tracking-[3px] uppercase text-black/20 dark:text-white/20 font-medium"
             >
               {h}
             </p>
@@ -183,33 +182,33 @@ export default function AdminPage() {
                 onClick={() =>
                   setSelected(selected === app.id! ? null : app.id!)
                 }
-                className="hidden md:grid grid-cols-[2.5fr_2fr_0.8fr_1.2fr] gap-3 items-center py-4 px-3 cursor-pointer hover:bg-white/[0.02] transition-all rounded-sm"
-                style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}
+                className="hidden md:grid grid-cols-[2.5fr_2fr_0.8fr_1.2fr] gap-3 items-center py-4 px-3 cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-all rounded-sm"
+                style={{ borderBottom: `1px solid rgba(var(--fg),0.05)` }}
               >
                 <div className="flex items-center gap-3">
                   <div
-                    className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-medium text-white/40 shrink-0"
+                    className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-medium text-black/40 dark:text-white/40 shrink-0"
                     style={{
-                      background: "rgba(255,255,255,0.05)",
-                      border: "1px solid rgba(255,255,255,0.08)",
+                      background: `rgba(var(--fg),0.05)`,
+                      border: `1px solid rgba(var(--fg),0.08)`,
                     }}
                   >
                     {getInitials(app.first_name!, app.last_name!)}
                   </div>
                   <div>
-                    <p className="text-sm text-white/80 tracking-[-0.1px]">
+                    <p className="text-sm text-black/80 dark:text-white/80 tracking-[-0.1px]">
                       {app.first_name} {app.last_name}
                     </p>
-                    <p className="text-[11px] text-white/25 mt-0.5 tracking-[-0.1px]">
+                    <p className="text-[11px] text-black/25 dark:text-white/25 mt-0.5 tracking-[-0.1px]">
                       {app.created_at}
                     </p>
                   </div>
                 </div>
                 <div>
-                  <p className="text-sm text-white/45 tracking-[-0.1px]">
+                  <p className="text-sm text-black/45 dark:text-white/45 tracking-[-0.1px]">
                     {app.email}
                   </p>
-                  <p className="text-[11px] text-white/25 mt-0.5">
+                  <p className="text-[11px] text-black/25 dark:text-white/25 mt-0.5">
                     {app.phone_number}
                   </p>
                 </div>
@@ -227,7 +226,7 @@ export default function AdminPage() {
               {/* Mobile card */}
               <div
                 className="md:hidden flex flex-col gap-3 py-4"
-                style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}
+                style={{ borderBottom: `1px solid rgba(var(--fg),0.05)` }}
               >
                 <div
                   className="flex items-center gap-3 cursor-pointer"
@@ -236,19 +235,19 @@ export default function AdminPage() {
                   }
                 >
                   <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center text-xs font-medium text-white/40 shrink-0"
+                    className="w-10 h-10 rounded-full flex items-center justify-center text-xs font-medium text-black/40 dark:text-white/40 shrink-0"
                     style={{
-                      background: "rgba(255,255,255,0.05)",
-                      border: "1px solid rgba(255,255,255,0.08)",
+                      background: `rgba(var(--fg),0.05)`,
+                      border: `1px solid rgba(var(--fg),0.08)`,
                     }}
                   >
                     {getInitials(app.first_name!, app.last_name!)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-white/80 tracking-[-0.1px]">
+                    <p className="text-sm text-black/80 dark:text-white/80 tracking-[-0.1px]">
                       {app.first_name} {app.last_name}
                     </p>
-                    <p className="text-[11px] text-white/30 mt-0.5 truncate">
+                    <p className="text-[11px] text-black/30 dark:text-white/30 mt-0.5 truncate">
                       {app.email}
                     </p>
                   </div>
@@ -272,37 +271,37 @@ export default function AdminPage() {
                     <div
                       className="grid grid-cols-1 sm:grid-cols-3 gap-5 px-3 py-5"
                       style={{
-                        borderBottom: "1px solid rgba(255,255,255,0.05)",
-                        background: "rgba(255,255,255,0.015)",
+                        borderBottom: `1px solid rgba(var(--fg),0.05)`,
+                        background: `rgba(var(--fg),0.015)`,
                       }}
                     >
                       <div>
-                        <p className="text-[10px] tracking-[3px] uppercase text-white/20 font-medium mb-2">
+                        <p className="text-[10px] tracking-[3px] uppercase text-black/20 dark:text-white/20 font-medium mb-2">
                           Reason
                         </p>
-                        <p className="text-sm text-white/45 leading-relaxed tracking-[-0.1px]">
+                        <p className="text-sm text-black/45 dark:text-white/45 leading-relaxed tracking-[-0.1px]">
                           {app.reason}
                         </p>
                       </div>
                       <div>
-                        <p className="text-[10px] tracking-[3px] uppercase text-white/20 font-medium mb-2">
+                        <p className="text-[10px] tracking-[3px] uppercase text-black/20 dark:text-white/20 font-medium mb-2">
                           Work
                         </p>
                         <a
                           href={app.work_link}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-sm text-white/45 hover:text-white/80 underline underline-offset-2 transition-colors tracking-[-0.1px] break-all"
+                          className="text-sm text-black/45 dark:text-white/45 hover:text-black/80 dark:hover:text-white/80 underline underline-offset-2 transition-colors tracking-[-0.1px] break-all"
                           onClick={(e) => e.stopPropagation()}
                         >
                           {app.work_link?.replace("https://", "")}
                         </a>
                       </div>
                       <div>
-                        <p className="text-[10px] tracking-[3px] uppercase text-white/20 font-medium mb-2">
+                        <p className="text-[10px] tracking-[3px] uppercase text-black/20 dark:text-white/20 font-medium mb-2">
                           Referred by
                         </p>
-                        <p className="text-sm text-white/45 tracking-[-0.1px]">
+                        <p className="text-sm text-black/45 dark:text-white/45 tracking-[-0.1px]">
                           Direct application
                         </p>
                       </div>
@@ -319,16 +318,16 @@ export default function AdminPage() {
             <div
               className="w-10 h-10 rounded-full flex items-center justify-center"
               style={{
-                background: "rgba(255,255,255,0.03)",
-                border: "1px solid rgba(255,255,255,0.06)",
+                background: `rgba(var(--fg),0.03)`,
+                border: `1px solid rgba(var(--fg),0.06)`,
               }}
             >
               <div
                 className="w-1.5 h-1.5 rounded-full"
-                style={{ background: "rgba(255,255,255,0.2)" }}
+                style={{ background: `rgba(var(--fg),0.2)` }}
               />
             </div>
-            <p className="text-sm text-white/25 tracking-[-0.1px]">
+            <p className="text-sm text-black/25 dark:text-white/25 tracking-[-0.1px]">
               No applications yet.
             </p>
           </div>
@@ -346,7 +345,7 @@ function StatusBadge({ status }: { status: string }) {
   };
   return (
     <span
-      className={`text-[10px] tracking-[1px] uppercase border px-2.5 py-1 rounded-full font-medium ${styles[status] ?? "border-white/10 text-white/30"}`}
+      className={`text-[10px] tracking-[1px] uppercase border px-2.5 py-1 rounded-full font-medium ${styles[status] ?? "border-black/10 dark:border-white/10 text-black/30 dark:text-white/30"}`}
     >
       {status}
     </span>
@@ -364,8 +363,8 @@ function ActionButtons({
     <>
       <button
         onClick={() => updateApp({ id: app.id!, status: "accepted" })}
-        className="flex-1 md:flex-none text-[11px] tracking-[-0.1px] px-3.5 py-1.5 rounded-md text-white/40 hover:text-white/85 hover:bg-white/5 transition-all cursor-pointer"
-        style={{ border: "1px solid rgba(255,255,255,0.09)" }}
+        className="flex-1 md:flex-none text-[11px] tracking-[-0.1px] px-3.5 py-1.5 rounded-md text-black/40 dark:text-white/40 hover:text-black/85 dark:hover:text-white/85 hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer"
+        style={{ border: `1px solid rgba(var(--fg),0.09)` }}
       >
         Approve
       </button>

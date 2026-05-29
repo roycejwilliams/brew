@@ -52,7 +52,7 @@ export default function ChooseAreaPanel({
             exit={{ opacity: 0, scale: 0.98 }}
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
             className="relative h-64 rounded-xl overflow-hidden"
-            style={{ border: "1px solid rgba(255,255,255,0.07)" }}
+            style={{ border: `1px solid rgba(var(--fg),0.07)` }}
           >
             {/* Map */}
             <MapBoxGl
@@ -87,17 +87,17 @@ export default function ChooseAreaPanel({
               }}
               className="absolute top-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 px-3 py-1.5 rounded-md"
               style={{
-                background: "rgba(10,10,10,0.8)",
-                border: "1px solid rgba(255,255,255,0.08)",
+                background: `rgba(var(--bg),0.92)`,
+                border: `1px solid rgba(var(--fg),0.08)`,
                 backdropFilter: "blur(16px)",
                 boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
               }}
             >
               {/* Top gloss */}
-              <div className="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-white/10 to-transparent rounded-t-md" />
+              <div className="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-black/10 dark:via-white/10 to-transparent rounded-t-md" />
 
-              <PinIcon size={16} color="#fff" />
-              <span className="text-white/50 text-[11px] tracking-[-0.1px] whitespace-nowrap">
+              <span className="text-black/70 dark:text-white/70"><PinIcon size={16} color="currentColor" /></span>
+              <span className="text-black/50 dark:text-white/50 text-[11px] tracking-[-0.1px] whitespace-nowrap">
                 {place ?? "Locating..."}
               </span>
             </motion.div>
@@ -113,8 +113,8 @@ export default function ChooseAreaPanel({
                 }}
                 className="absolute w-28 h-28 rounded-full"
                 style={{
-                  background: "rgba(255,255,255,0.06)",
-                  border: "1px solid rgba(255,255,255,0.08)",
+                  background: `rgba(var(--fg),0.06)`,
+                  border: `1px solid rgba(var(--fg),0.08)`,
                 }}
               />
               <motion.div
@@ -126,10 +126,10 @@ export default function ChooseAreaPanel({
                   stiffness: 200,
                   damping: 15,
                 }}
-                className="w-3 h-3 rounded-full bg-white/80 shadow-lg"
+                className="w-3 h-3 rounded-full bg-black/80 dark:bg-white/80 shadow-lg"
                 style={{
                   boxShadow:
-                    "0 0 0 4px rgba(255,255,255,0.15), 0 0 20px rgba(255,255,255,0.1)",
+                    `0 0 0 4px rgba(var(--fg),0.15), 0 0 20px rgba(var(--fg),0.1)`,
                 }}
               />
             </div>
@@ -159,14 +159,14 @@ export default function ChooseAreaPanel({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 8 }}
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="bg-[#1c1c1c] rounded-xl border border-white/8 p-5 shadow-2xl shadow-black/20"
+            className="bg-[#1c1c1c] rounded-xl border border-black/8 dark:border-white/8 p-5 shadow-2xl shadow-black/20"
           >
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <div className="text-[10px] uppercase tracking-wider text-white/30 mb-2 font-medium">
+                <div className="text-[10px] uppercase tracking-wider text-black/30 dark:text-white/30 mb-2 font-medium">
                   Around
                 </div>
-                <div className="text-sm  font-medium text-white/90 mb-1 tracking-[-0.1px]">
+                <div className="text-sm  font-medium text-black/90 dark:text-white/90 mb-1 tracking-[-0.1px]">
                   {place ?? "Current area"}
                 </div>
               </div>
@@ -174,7 +174,7 @@ export default function ChooseAreaPanel({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={onAreaCleared}
-                className="text-xs text-white/40 cursor-pointer hover:text-white/70 font-medium whitespace-nowrap ml-4 transition-colors duration-200"
+                className="text-xs text-black/40 dark:text-white/40 cursor-pointer hover:text-black/70 dark:hover:text-white/70 font-medium whitespace-nowrap ml-4 transition-colors duration-200"
               >
                 Change
               </motion.button>
@@ -195,10 +195,10 @@ export default function ChooseAreaPanel({
             whileTap={{ scale: isAreaConfirmed ? 1 : 0.97 }}
             onClick={handleConfirm}
             disabled={isAreaConfirmed}
-            className="w-fit flex items-center gap-2 px-5 py-3 rounded-md text-sm font-medium text-white/70 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200"
+            className="w-fit flex items-center gap-2 px-5 py-3 rounded-md text-sm font-medium text-black/70 dark:text-white/70 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200"
             style={{
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.08)",
+              background: `rgba(var(--fg),0.05)`,
+              border: `1px solid rgba(var(--fg),0.08)`,
             }}
           >
             <AnimatePresence mode="wait">
@@ -217,7 +217,7 @@ export default function ChooseAreaPanel({
                       repeat: Infinity,
                       ease: "linear",
                     }}
-                    className="w-3.5 h-3.5 border border-white/20 border-t-white/60 rounded-full"
+                    className="w-3.5 h-3.5 border border-black/20 dark:border-white/20 border-t-black/60 dark:border-t-white/60 rounded-full"
                   />
                   <span>Setting area...</span>
                 </motion.div>

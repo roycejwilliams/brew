@@ -99,15 +99,15 @@ export default function Invite({
                 width: 36,
                 height: 36,
                 borderRadius: "50%",
-                background: "rgba(255,255,255,0.06)",
-                border: "1px solid rgba(255,255,255,0.1)",
+                background: "rgba(var(--fg),0.06)",
+                border: "1px solid rgba(var(--fg),0.1)",
               }}
             >
               <ChevronLeftIcon size={16} />
             </div>
             <span
               className="text-xs tracking-[-0.1px] opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-              style={{ color: "rgba(255,255,255,0.25)" }}
+              style={{ color: "rgba(var(--fg),0.25)" }}
             >
               Back
             </span>
@@ -134,7 +134,7 @@ export default function Invite({
                   ? "#d4a574"
                   : isPast
                     ? "rgba(212,165,116,0.32)"
-                    : "rgba(255,255,255,0.1)",
+                    : "rgba(var(--fg),0.1)",
               }}
               transition={{ duration: 0.35, ease: EASE }}
               style={{ height: 3, borderRadius: 2 }}

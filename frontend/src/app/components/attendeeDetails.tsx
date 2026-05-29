@@ -18,9 +18,9 @@ const statusLabel = {
 };
 
 const statusColor = {
-  prequel: "rgba(255,255,255,0.35)",
+  prequel: `rgba(var(--fg),0.35)`,
   live: "#4ade80",
-  end: "rgba(255,255,255,0.2)",
+  end: `rgba(var(--fg),0.2)`,
 };
 
 function AttendeeDetails({ activeEvent }: ActiveEventProp) {
@@ -41,8 +41,8 @@ function AttendeeDetails({ activeEvent }: ActiveEventProp) {
           transition={{ duration: 0.35, ease: EASE }}
           className="flex items-center gap-2 px-4 py-2 rounded-full"
           style={{
-            background: "rgba(255,255,255,0.05)",
-            border: "1px solid rgba(255,255,255,0.08)",
+            background: `rgba(var(--fg),0.05)`,
+            border: `1px solid rgba(var(--fg),0.08)`,
           }}
         >
           <span
@@ -51,10 +51,10 @@ function AttendeeDetails({ activeEvent }: ActiveEventProp) {
           />
           <p
             className="text-sm tracking-[-0.1px]"
-            style={{ color: "rgba(255,255,255,0.5)" }}
+            style={{ color: `rgba(var(--fg),0.5)` }}
           >
             Only{" "}
-            <span className="text-white font-semibold">
+            <span className="text-black dark:text-white font-semibold">
               {(eventCard?.cap_attendance || 0) - attendees.length}
             </span>{" "}
             spots remaining
@@ -72,7 +72,7 @@ function AttendeeDetails({ activeEvent }: ActiveEventProp) {
         <div className="flex items-end gap-4 sm:gap-5">
           {/* Big number */}
           <span
-            className="text-white font-semibold leading-none"
+            className="text-black dark:text-white font-semibold leading-none"
             style={{
               fontSize: "clamp(52px, 12vw, 80px)",
               letterSpacing: "clamp(-2px, -0.05em, -4px)",
@@ -96,7 +96,7 @@ function AttendeeDetails({ activeEvent }: ActiveEventProp) {
                   }}
                   className="w-6 h-6 sm:w-7 sm:h-7 rounded-full"
                   style={{
-                    background: `rgba(255,255,255,${0.08 + i * 0.04})`,
+                    background: `rgba(var(--fg),${0.08 + i * 0.04})`,
                     border: "1.5px solid rgba(17,17,17,0.9)",
                     marginLeft: i === 0 ? 0 : -8,
                     boxShadow: "0 2px 6px rgba(0,0,0,0.4)",
@@ -135,7 +135,7 @@ function AttendeeDetails({ activeEvent }: ActiveEventProp) {
           animate={{ scaleX: 1, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.2, ease: EASE }}
           className="w-16 origin-left"
-          style={{ height: 1, background: "rgba(255,255,255,0.08)" }}
+          style={{ height: 1, background: `rgba(var(--fg),0.08)` }}
         />
       </motion.div>
 

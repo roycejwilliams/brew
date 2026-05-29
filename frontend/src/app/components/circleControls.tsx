@@ -27,21 +27,21 @@ const ArrowButton = ({
       width: size,
       height: size,
       borderRadius: "50%",
-      background: "rgba(8,8,8,0.75)",
-      border: "1px solid rgba(255,255,255,0.1)",
+      background: `rgba(var(--bg),0.75)`,
+      border: `1px solid rgba(var(--fg),0.1)`,
       backdropFilter: "blur(12px)",
-      color: "rgba(255,255,255,0.6)",
+      color: `rgba(var(--fg),0.6)`,
       flexShrink: 0,
     }}
     onMouseEnter={(e) => {
-      e.currentTarget.style.background = "rgba(255,255,255,0.08)";
-      e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)";
-      e.currentTarget.style.color = "rgba(255,255,255,0.9)";
+      e.currentTarget.style.background = `rgba(var(--fg),0.08)`;
+      e.currentTarget.style.borderColor = `rgba(var(--fg),0.2)`;
+      e.currentTarget.style.color = `rgba(var(--fg),0.9)`;
     }}
     onMouseLeave={(e) => {
-      e.currentTarget.style.background = "rgba(8,8,8,0.75)";
-      e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)";
-      e.currentTarget.style.color = "rgba(255,255,255,0.6)";
+      e.currentTarget.style.background = `rgba(var(--bg),0.75)`;
+      e.currentTarget.style.borderColor = `rgba(var(--fg),0.1)`;
+      e.currentTarget.style.color = `rgba(var(--fg),0.6)`;
     }}
   >
     {children}

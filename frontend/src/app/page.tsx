@@ -63,7 +63,7 @@ function LoginContent() {
   }, []);
 
   return (
-    <section className="relative min-h-dvh flex justify-center items-center overflow-hidden bg-[#0c0c0c]">
+    <section className="relative min-h-dvh flex justify-center items-center overflow-hidden bg-[#f5f5f5] dark:bg-[#0c0c0c]">
       {/* Background */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -73,7 +73,7 @@ function LoginContent() {
       >
         <div
           className="w-full h-full relative"
-          style={{ background: "#0c0c0c" }}
+          style={{ background: `rgb(var(--bg))` }}
         >
           {/* Primary warm glow — bottom left */}
           <div
@@ -142,7 +142,7 @@ function LoginContent() {
             className="z-10 flex flex-col items-center gap-4"
           >
             <div className="flex flex-col items-center gap-1.5">
-              <h1 className="text-[24px] tracking-[4px] uppercase text-white/60">
+              <h1 className="text-[24px] tracking-[4px] uppercase text-black/60 dark:text-white/60">
                 br3w
               </h1>
               <AnimatePresence mode="wait">
@@ -154,8 +154,8 @@ function LoginContent() {
                   transition={{ duration: 0.18, ease: EASE }}
                   className={`text-sm tracking-[-0.1px] ${
                     authPhase === "confirmed"
-                      ? "text-white/70"
-                      : "text-white/30"
+                      ? "text-black/70 dark:text-white/70"
+                      : "text-black/30 dark:text-white/30"
                   }`}
                 >
                   {phrases[authPhase]}
@@ -176,10 +176,10 @@ function LoginContent() {
             className="z-10 flex flex-col items-center gap-4"
           >
             <div className="flex flex-col items-center gap-1.5">
-              <h1 className="text-[24px] tracking-[4px] uppercase text-white/60">
+              <h1 className="text-[24px] tracking-[4px] uppercase text-black/60 dark:text-white/60">
                 br3w
               </h1>
-              <p className="text-sm text-white/25 tracking-[-0.1px]">
+              <p className="text-sm text-black/25 dark:text-white/25 tracking-[-0.1px]">
                 If you know, you know.
               </p>
             </div>
@@ -213,7 +213,7 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-dvh bg-[#0c0c0c] flex items-center justify-center">
+        <div className="min-h-dvh bg-[#f5f5f5] dark:bg-[#0c0c0c] flex items-center justify-center">
           <div className="w-7 h-7 rounded-full border-2 border-white/10 border-t-white/50 animate-spin" />
         </div>
       }

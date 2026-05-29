@@ -105,5 +105,6 @@ export const useRetriveActiveConnection = (id: string) => {
     queryKey: ["active-connection", id],
     queryFn: () => api.get(`/users/${id}/connections`),
     enabled: !!id,
+    staleTime: 1000 * 60 * 5,
   });
 };

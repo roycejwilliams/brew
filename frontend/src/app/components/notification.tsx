@@ -75,7 +75,7 @@ export default function Notification({ onClose }: NotificationProp) {
         }}
         className="w-full max-w-md h-screen relative rounded-tl-2xl rounded-bl-2xl shadow-2xl shadow-black/60 border-l border-t border-b border-white/8 overflow-hidden flex flex-col"
         style={{
-          background: "rgba(10,10,10,0.97)",
+          background: "rgba(var(--bg),0.97)",
           backdropFilter: "blur(24px)",
         }}
       >
@@ -87,7 +87,7 @@ export default function Notification({ onClose }: NotificationProp) {
           className="absolute top-0 left-0 right-0 h-px origin-left"
           style={{
             background:
-              "linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent)",
+              "linear-gradient(90deg, transparent, rgba(var(--fg),0.15), transparent)",
           }}
         />
 
@@ -97,14 +97,14 @@ export default function Notification({ onClose }: NotificationProp) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
           className="px-7 pt-10 pb-5"
-          style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+          style={{ borderBottom: "1px solid rgba(var(--fg),0.06)" }}
         >
           <div className="flex items-center justify-between mb-5">
             <div className="space-y-0.5">
-              <p className="text-[10px] tracking-[3px] uppercase text-white/20 font-medium">
+              <p className="text-[10px] tracking-[3px] uppercase text-black/20 dark:text-white/20 font-medium">
                 BR3W
               </p>
-              <h2 className="text-base font-medium text-white/90 tracking-[-0.2px]">
+              <h2 className="text-base font-medium text-black/90 dark:text-white/90 tracking-[-0.2px]">
                 Signals
               </h2>
             </div>
@@ -116,9 +116,9 @@ export default function Notification({ onClose }: NotificationProp) {
                   transition={{ delay: 0.3 }}
                   className="text-[10px] px-2 py-0.5 rounded-full tabular-nums"
                   style={{
-                    background: "rgba(255,255,255,0.08)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    color: "rgba(255,255,255,0.5)",
+                    background: "rgba(var(--fg),0.08)",
+                    border: "1px solid rgba(var(--fg),0.1)",
+                    color: "rgba(var(--fg),0.5)",
                   }}
                 >
                   {totalCount}
@@ -129,9 +129,9 @@ export default function Notification({ onClose }: NotificationProp) {
                 onClick={onClose}
                 className="w-7 h-7 flex items-center justify-center rounded-md cursor-pointer transition-colors duration-150"
                 style={{
-                  background: "rgba(255,255,255,0.06)",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  color: "rgba(255,255,255,0.4)",
+                  background: "rgba(var(--fg),0.06)",
+                  border: "1px solid rgba(var(--fg),0.08)",
+                  color: "rgba(var(--fg),0.4)",
                 }}
                 aria-label="Close"
               >
@@ -156,14 +156,14 @@ export default function Notification({ onClose }: NotificationProp) {
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs cursor-pointer transition-all duration-200 capitalize"
                   style={{
                     background: active
-                      ? "rgba(255,255,255,0.08)"
+                      ? "rgba(var(--fg),0.08)"
                       : "transparent",
                     border: active
-                      ? "1px solid rgba(255,255,255,0.1)"
+                      ? "1px solid rgba(var(--fg),0.1)"
                       : "1px solid transparent",
                     color: active
-                      ? "rgba(255,255,255,0.8)"
-                      : "rgba(255,255,255,0.3)",
+                      ? "rgba(var(--fg),0.8)"
+                      : "rgba(var(--fg),0.3)",
                   }}
                 >
                   {t}
@@ -172,11 +172,11 @@ export default function Notification({ onClose }: NotificationProp) {
                       className="text-[10px] px-1.5 py-0.5 rounded-full tabular-nums"
                       style={{
                         background: active
-                          ? "rgba(255,255,255,0.12)"
-                          : "rgba(255,255,255,0.06)",
+                          ? "rgba(var(--fg),0.12)"
+                          : "rgba(var(--fg),0.06)",
                         color: active
-                          ? "rgba(255,255,255,0.7)"
-                          : "rgba(255,255,255,0.3)",
+                          ? "rgba(var(--fg),0.7)"
+                          : "rgba(var(--fg),0.3)",
                       }}
                     >
                       {count}
@@ -203,20 +203,20 @@ export default function Notification({ onClose }: NotificationProp) {
                 <div
                   className="w-16 h-16 rounded-2xl flex items-center justify-center"
                   style={{
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.08)",
+                    background: "rgba(var(--fg),0.04)",
+                    border: "1px solid rgba(var(--fg),0.08)",
                   }}
                 >
                   <FontAwesomeIcon
                     icon={faMugHot}
-                    className="text-2xl text-white/20"
+                    className="text-2xl text-black/20 dark:text-white/20"
                   />
                 </div>
                 <div className="text-center space-y-1">
-                  <p className="text-sm text-white/40 tracking-[-0.1px]">
+                  <p className="text-sm text-black/40 dark:text-white/40 tracking-[-0.1px]">
                     It&apos;s quiet.
                   </p>
-                  <p className="text-xs text-white/20 tracking-[-0.1px]">
+                  <p className="text-xs text-black/20 dark:text-white/20 tracking-[-0.1px]">
                     No pending {tab} invites right now.
                   </p>
                 </div>
@@ -243,15 +243,15 @@ export default function Notification({ onClose }: NotificationProp) {
                     }}
                     className="rounded-xl overflow-hidden"
                     style={{
-                      background: "rgba(255,255,255,0.03)",
-                      border: "1px solid rgba(255,255,255,0.07)",
+                      background: "rgba(var(--fg),0.03)",
+                      border: "1px solid rgba(var(--fg),0.07)",
                     }}
                   >
                     <div className="flex gap-3 p-4">
                       {/* Avatar / image */}
                       <div
                         className="w-12 h-12 rounded-lg overflow-hidden relative shrink-0"
-                        style={{ border: "1px solid rgba(255,255,255,0.08)" }}
+                        style={{ border: "1px solid rgba(var(--fg),0.08)" }}
                       >
                         {invite.image || invite.circle_image ? (
                           <Image
@@ -261,7 +261,7 @@ export default function Notification({ onClose }: NotificationProp) {
                             className="object-cover brightness-75"
                           />
                         ) : (
-                          <div className="w-full h-full bg-white/5 flex items-center justify-center text-white/20 text-xs font-medium">
+                          <div className="w-full h-full bg-white/5 flex items-center justify-center text-black/20 dark:text-white/20 text-xs font-medium">
                             {
                               (invite.moments_name ||
                                 invite.circle_name ||
@@ -273,12 +273,12 @@ export default function Notification({ onClose }: NotificationProp) {
 
                       {/* Info */}
                       <div className="flex-1 min-w-0 space-y-0.5">
-                        <p className="text-sm font-medium text-white/90 tracking-[-0.1px] truncate">
+                        <p className="text-sm font-medium text-black/90 dark:text-white/90 tracking-[-0.1px] truncate">
                           {invite.moments_name ||
                             invite.circle_name ||
                             "Untitled"}
                         </p>
-                        <p className="text-[11px] text-white/30 tracking-[-0.1px]">
+                        <p className="text-[11px] text-black/30 dark:text-white/30 tracking-[-0.1px]">
                           {tab === "moments" && invite.moment_start
                             ? new Date(invite.moment_start).toLocaleDateString(
                                 "en-US",
@@ -290,7 +290,7 @@ export default function Notification({ onClose }: NotificationProp) {
                               )
                             : "Circle invite"}
                         </p>
-                        <p className="text-[10px] text-white/20">
+                        <p className="text-[10px] text-black/20 dark:text-white/20">
                           from @{invite.invited_by_username ?? "someone"}
                         </p>
                       </div>
@@ -299,7 +299,7 @@ export default function Notification({ onClose }: NotificationProp) {
                     {/* Actions */}
                     <div
                       className="flex"
-                      style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}
+                      style={{ borderTop: "1px solid rgba(var(--fg),0.05)" }}
                     >
                       <motion.button
                         whileTap={{ scale: 0.97 }}
@@ -308,14 +308,14 @@ export default function Notification({ onClose }: NotificationProp) {
                             ? decideMoment({ ...invite, status: "accepted" })
                             : decideCircle({ ...invite, status: "accepted" })
                         }
-                        className="flex-1 py-2.5 text-[11px] font-medium text-white/50 hover:text-white/90 hover:bg-white/4 transition-all cursor-pointer tracking-[-0.1px]"
+                        className="flex-1 py-2.5 text-[11px] font-medium text-black/50 dark:text-white/50 hover:text-black/90 dark:text-white/90 hover:bg-white/4 transition-all cursor-pointer tracking-[-0.1px]"
                       >
                         Accept
                       </motion.button>
                       <div
                         style={{
                           width: 1,
-                          background: "rgba(255,255,255,0.05)",
+                          background: "rgba(var(--fg),0.05)",
                         }}
                       />
                       <motion.button
@@ -325,7 +325,7 @@ export default function Notification({ onClose }: NotificationProp) {
                             ? decideMoment({ ...invite, status: "rejected" })
                             : decideCircle({ ...invite, status: "rejected" })
                         }
-                        className="flex-1 py-2.5 text-[11px] text-white/25 hover:text-red-400/60 hover:bg-red-500/5 transition-all cursor-pointer tracking-[-0.1px]"
+                        className="flex-1 py-2.5 text-[11px] text-black/25 dark:text-white/25 hover:text-red-400/60 hover:bg-red-500/5 transition-all cursor-pointer tracking-[-0.1px]"
                       >
                         Decline
                       </motion.button>

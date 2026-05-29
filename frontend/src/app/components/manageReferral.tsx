@@ -66,14 +66,14 @@ export default function ManageReferral() {
             }}
           >
             <div className="text-left space-y-1.5">
-              <label className="text-xs text-white/50">First Name</label>
+              <label className="text-xs text-black/50 dark:text-white/50">First Name</label>
               <input
                 type="text"
                 className="border border-white/20 w-full rounded-sm p-3.5 text-xs bg-transparent focus:outline-0 focus:border-white/40 transition-colors"
               />
             </div>
             <div className="text-left space-y-1.5">
-              <label className="text-xs text-white/50">Last Name</label>
+              <label className="text-xs text-black/50 dark:text-white/50">Last Name</label>
               <input
                 type="text"
                 className="border border-white/20 w-full rounded-sm p-3.5 text-xs bg-transparent focus:outline-0 focus:border-white/40 transition-colors"
@@ -92,14 +92,14 @@ export default function ManageReferral() {
             }}
           >
             <div className="text-left space-y-1.5">
-              <label className="text-xs text-white/50">Email</label>
+              <label className="text-xs text-black/50 dark:text-white/50">Email</label>
               <input
                 type="email"
                 className="border border-white/20 w-full rounded-sm p-3.5 text-xs bg-transparent focus:outline-0 focus:border-white/40 transition-colors"
               />
             </div>
             <div className="text-left space-y-1.5">
-              <label className="text-xs text-white/50">Phone</label>
+              <label className="text-xs text-black/50 dark:text-white/50">Phone</label>
               <input
                 type="tel"
                 className="border border-white/20 w-full rounded-sm p-3.5 text-xs bg-transparent focus:outline-0 focus:border-white/40 transition-colors"
@@ -117,11 +117,11 @@ export default function ManageReferral() {
               },
             }}
           >
-            <label className="text-xs text-white/50">Link to their work</label>
+            <label className="text-xs text-black/50 dark:text-white/50">Link to their work</label>
             <input
               type="url"
               placeholder="instagram, portfolio, soundcloud, etc..."
-              className="border border-white/20 w-full rounded-sm p-3.5 text-xs bg-transparent placeholder:text-white/25 focus:outline-0 focus:border-white/40 transition-colors"
+              className="border border-white/20 w-full rounded-sm p-3.5 text-xs bg-transparent placeholder:text-black/25 dark:text-white/25 focus:outline-0 focus:border-white/40 transition-colors"
             />
           </motion.div>
           <motion.div
@@ -135,7 +135,7 @@ export default function ManageReferral() {
               },
             }}
           >
-            <label className="text-xs text-white/50">
+            <label className="text-xs text-black/50 dark:text-white/50">
               Tell us why they belong on brew...
             </label>
             <textarea
@@ -155,7 +155,7 @@ export default function ManageReferral() {
               },
             }}
           >
-            <span className="text-xs text-white/50">
+            <span className="text-xs text-black/50 dark:text-white/50">
               Have they already applied?
             </span>
             <div className="flex gap-x-3">
@@ -164,8 +164,8 @@ export default function ManageReferral() {
                 onClick={() => setHasApplied(true)}
                 className={`text-xs px-3 py-1.5 rounded-sm border cursor-pointer transition-colors ${
                   hasApplied === true
-                    ? "border-white/40 bg-white/10 text-white"
-                    : "border-white/15 text-white/40 hover:border-white/25"
+                    ? "border-white/40 bg-white/10 text-black dark:text-white"
+                    : "border-white/15 text-black/40 dark:text-white/40 hover:border-white/25"
                 }`}
                 whileTap={{ scale: 0.93 }}
               >
@@ -176,8 +176,8 @@ export default function ManageReferral() {
                 onClick={() => setHasApplied(false)}
                 className={`text-xs px-3 py-1.5 rounded-sm border cursor-pointer transition-colors ${
                   hasApplied === false
-                    ? "border-white/40 bg-white/10 text-white"
-                    : "border-white/15 text-white/40 hover:border-white/25"
+                    ? "border-white/40 bg-white/10 text-black dark:text-white"
+                    : "border-white/15 text-black/40 dark:text-white/40 hover:border-white/25"
                 }`}
                 whileTap={{ scale: 0.93 }}
               >

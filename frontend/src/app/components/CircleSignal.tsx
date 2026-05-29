@@ -39,7 +39,7 @@ export default function CircleSignal({
           >
             {/* Active indicator */}
             <motion.div
-              className="absolute -left-4 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-white/60"
+              className="absolute -left-4 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-black/60 dark:bg-white/60"
               initial={{ scale: 0, opacity: 0 }}
               animate={{
                 scale: activeIndex === i ? 1 : 0,
@@ -52,7 +52,7 @@ export default function CircleSignal({
 
             <div className="flex gap-x-8 justify-between items-center z-20 text-sm relative">
               <motion.div
-                className="absolute -left-4 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-white/60"
+                className="absolute -left-4 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-black/60 dark:bg-white/60"
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{
                   scale: activeIndex === i ? 1 : 0,
@@ -62,14 +62,14 @@ export default function CircleSignal({
               />
 
               <div className="flex flex-col gap-1">
-                <p className="text-xs text-white/60 tracking-[-0.1px]">
+                <p className="text-xs text-black/60 dark:text-white/60 tracking-[-0.1px]">
                   {circle.circle_name}
                 </p>
                 <div className="flex gap-2 items-center flex-wrap w-fit">
                   {circle.members.slice(0, 3).map((member, i) => (
                     <div
                       key={i}
-                      className="relative text-white/80 overflow-hidden border border-white/15 w-12 h-12 rounded-full"
+                      className="relative text-black/80 dark:text-white/80 overflow-hidden border border-black/15 dark:border-white/15 w-12 h-12 rounded-full"
                       style={{
                         left: `${i * -26}px`,
                         zIndex: circle.members.length - i,
@@ -83,7 +83,7 @@ export default function CircleSignal({
                           className="object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-xs text-white/50 font-medium bg-black/10 backdrop-blur-3xl">
+                        <div className="w-full h-full flex items-center justify-center text-xs text-black/50 dark:text-white/50 font-medium bg-black/10 dark:bg-black/10 backdrop-blur-3xl">
                           {member.first_name?.[0]}
                           {member.last_name?.[0]}
                         </div>
@@ -92,7 +92,7 @@ export default function CircleSignal({
                   ))}
 
                   {(circle.members?.length ?? 0) > 3 && (
-                    <div className="px-3 py-1 text-sm border border-white/10 rounded-full text-white/50">
+                    <div className="px-3 py-1 text-sm border border-black/10 dark:border-white/10 rounded-full text-black/50 dark:text-white/50">
                       +{circle.members.length - 3}
                     </div>
                   )}

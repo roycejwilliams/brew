@@ -15,7 +15,7 @@ function ReferralContent() {
   const isValid = !!ref;
 
   return (
-    <div className="min-h-dvh overflow-hidden bg-[#0c0c0c] flex items-center justify-center px-6">
+    <div className="min-h-dvh overflow-hidden bg-[#f5f5f5] dark:bg-[#0c0c0c] flex items-center justify-center px-6">
       {/* Background glow */}
       <div
         className="absolute inset-0 pointer-events-none"
@@ -38,11 +38,11 @@ function ReferralContent() {
           transition={{ delay: 0.1, type: "spring", stiffness: 200, damping: 15 }}
           className="w-16 h-16 rounded-full flex items-center justify-center"
           style={{
-            border: "1px solid rgba(255,255,255,0.1)",
-            background: "rgba(255,255,255,0.05)",
+            border: `1px solid rgba(var(--fg),0.1)`,
+            background: `rgba(var(--fg),0.05)`,
           }}
         >
-          <span className="text-2xl tracking-[3px] text-white/60">✦</span>
+          <span className="text-2xl tracking-[3px] text-black/60 dark:text-white/60">✦</span>
         </motion.div>
 
         {/* Text */}
@@ -52,10 +52,10 @@ function ReferralContent() {
           transition={{ delay: 0.2, duration: 0.35, ease: EASE }}
           className="flex flex-col gap-2"
         >
-          <h1 className="text-white text-xl font-medium tracking-[-0.3px]">
+          <h1 className="text-black dark:text-white text-xl font-medium tracking-[-0.3px]">
             {isValid ? "You've been invited." : "Invalid invite."}
           </h1>
-          <p className="text-white/35 text-sm tracking-[-0.1px] leading-relaxed">
+          <p className="text-black/35 dark:text-white/35 text-sm tracking-[-0.1px] leading-relaxed">
             {isValid
               ? referredBy
                 ? "Someone on BR3W thinks you belong here. Request access to join."
@@ -78,8 +78,8 @@ function ReferralContent() {
               whileTap={{ scale: 0.97 }}
               className="w-full py-3 rounded-xl text-sm font-medium tracking-[-0.1px] cursor-pointer"
               style={{
-                background: "rgba(255,255,255,0.9)",
-                color: "#0c0c0c",
+                background: `rgba(var(--fg),0.9)`,
+                color: `rgb(var(--bg))`,
               }}
             >
               Request Access
@@ -89,9 +89,9 @@ function ReferralContent() {
               whileTap={{ scale: 0.97 }}
               className="w-full py-3 rounded-xl text-sm tracking-[-0.1px] cursor-pointer"
               style={{
-                background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(255,255,255,0.08)",
-                color: "rgba(255,255,255,0.4)",
+                background: `rgba(var(--fg),0.04)`,
+                border: `1px solid rgba(var(--fg),0.08)`,
+                color: `rgba(var(--fg),0.4)`,
               }}
             >
               Sign in instead
@@ -107,7 +107,7 @@ export default function ReferralPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-dvh bg-[#0c0c0c] flex items-center justify-center">
+        <div className="min-h-dvh bg-[#f5f5f5] dark:bg-[#0c0c0c] flex items-center justify-center">
           <div className="w-7 h-7 rounded-full border-2 border-white/10 border-t-white/50 animate-spin" />
         </div>
       }

@@ -59,11 +59,11 @@ export default function AttendanceList({
       <div className="flex items-center justify-between">
         <button
           onClick={() => setUtils("history")}
-          className="text-white/30 hover:text-white/60 text-xs uppercase tracking-wide transition-colors cursor-pointer"
+          className="text-black/30 dark:text-white/30 hover:text-black/60 dark:hover:text-white/60 text-xs uppercase tracking-wide transition-colors cursor-pointer"
         >
           ← Back
         </button>
-        <div className="flex items-center gap-x-2 text-white/50">
+        <div className="flex items-center gap-x-2 text-black/50 dark:text-white/50">
           <GroupIcon size={14} />
           <span className="text-xs uppercase tracking-widest">
             Attendees {attendees.length > 0 && `· ${attendees.length}`}
@@ -77,20 +77,20 @@ export default function AttendanceList({
           [0, 1, 2].map((i) => (
             <div
               key={i}
-              className="h-12 rounded-sm bg-white/3 border border-white/5"
+              className="h-12 rounded-sm bg-black/3 dark:bg-white/3 border border-black/5 dark:border-white/5"
             />
           ))
         ) : attendees.length > 0 ? (
           attendees.map((attendee: Attendee, i: number) => (
             <motion.div
               key={attendee.attendee_id ?? i}
-              className="flex items-center justify-between px-3 py-2.5 border border-white/8 rounded-sm bg-white/3 hover:bg-white/6 transition-colors"
+              className="flex items-center justify-between px-3 py-2.5 border border-black/8 dark:border-white/8 rounded-sm bg-black/3 dark:bg-white/3 hover:bg-black/6 dark:hover:bg-white/6 transition-colors"
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.04, duration: 0.2 }}
             >
               <div className="flex items-center gap-x-3">
-                <div className="w-7 h-7 rounded-full bg-white/10 border border-white/10 relative overflow-hidden flex items-center justify-center text-white/50 text-xs shrink-0">
+                <div className="w-7 h-7 rounded-full bg-black/10 dark:bg-white/10 border border-black/10 dark:border-white/10 relative overflow-hidden flex items-center justify-center text-black/50 dark:text-white/50 text-xs shrink-0">
                   {attendee.profile_image ? (
                     <Image
                       src={attendee.profile_image}
@@ -103,10 +103,10 @@ export default function AttendanceList({
                   )}
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-white/80 text-sm">
+                  <span className="text-black/80 dark:text-white/80 text-sm">
                     {attendee.first_name} {attendee.last_name}
                   </span>
-                  <span className="text-white/30 text-xs">
+                  <span className="text-black/30 dark:text-white/30 text-xs">
                     @{attendee.username}
                   </span>
                 </div>
@@ -123,7 +123,7 @@ export default function AttendanceList({
                         attendee_id: attendee.attendee_id,
                       })
                     }
-                    className="flex items-center gap-x-1 px-2 py-1 rounded text-[10px] text-white/40 border border-white/8 hover:border-white/20 hover:text-white/70 cursor-pointer transition-all duration-150"
+                    className="flex items-center gap-x-1 px-2 py-1 rounded text-[10px] text-black/40 dark:text-white/40 border border-black/8 dark:border-white/8 hover:border-black/20 dark:hover:border-white/20 hover:text-black/70 dark:hover:text-white/70 cursor-pointer transition-all duration-150"
                   >
                     <QrCode size={11} />
                     Check in
@@ -142,7 +142,7 @@ export default function AttendanceList({
                       opacity: 0.7,
                     }}
                   />
-                  <span className="text-white/30 text-xs capitalize">
+                  <span className="text-black/30 dark:text-white/30 text-xs capitalize">
                     {attendee.status}
                   </span>
                 </div>
@@ -154,7 +154,7 @@ export default function AttendanceList({
                       attendee: attendee as unknown as InviteAttendeesProp,
                     })
                   }
-                  className="text-white/20 hover:text-red-400/70 transition-colors cursor-pointer"
+                  className="text-black/20 dark:text-white/20 hover:text-red-400/70 transition-colors cursor-pointer"
                 >
                   <X size={13} />
                 </button>
@@ -162,7 +162,7 @@ export default function AttendanceList({
             </motion.div>
           ))
         ) : (
-          <p className="text-white/20 text-xs text-center py-8">
+          <p className="text-black/20 dark:text-white/20 text-xs text-center py-8">
             No attendees yet.
           </p>
         )}

@@ -120,10 +120,10 @@ export default function CircleDestination({
           transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
           className="text-center space-y-1 pt-2"
         >
-          <h2 className="text-white md:text-xl text-md text-center font-medium tracking-[-0.3px] leading-tight">
+          <h2 className="text-black dark:text-white md:text-xl text-md text-center font-medium tracking-[-0.3px] leading-tight">
             Where should these people live?
           </h2>
-          <p className="text-white/40 text-sm tracking-[-0.1px]">
+          <p className="text-black/40 dark:text-white/40 text-sm tracking-[-0.1px]">
             Invite them into an existing Circle or start a new one.
           </p>
         </motion.div>
@@ -144,12 +144,12 @@ export default function CircleDestination({
             style={{
               background:
                 circleOption === "new"
-                  ? "rgba(255,255,255,0.09)"
-                  : "rgba(255,255,255,0.04)",
+                  ? "rgba(var(--fg),0.09)"
+                  : "rgba(var(--fg),0.04)",
               border:
                 circleOption === "new"
-                  ? "1px solid rgba(255,255,255,0.22)"
-                  : "1px solid rgba(255,255,255,0.06)",
+                  ? "1px solid rgba(var(--fg),0.22)"
+                  : "1px solid rgba(var(--fg),0.06)",
               minHeight: 130,
             }}
           >
@@ -160,8 +160,8 @@ export default function CircleDestination({
                 height: 40,
                 background:
                   circleOption === "new"
-                    ? "rgba(255,255,255,0.14)"
-                    : "rgba(255,255,255,0.06)",
+                    ? "rgba(var(--fg),0.14)"
+                    : "rgba(var(--fg),0.06)",
               }}
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -169,8 +169,8 @@ export default function CircleDestination({
                   d="M8 3v10M3 8h10"
                   stroke={
                     circleOption === "new"
-                      ? "rgba(255,255,255,0.95)"
-                      : "rgba(255,255,255,0.4)"
+                      ? "rgba(var(--fg),0.95)"
+                      : "rgba(var(--fg),0.4)"
                   }
                   strokeWidth="1.6"
                   strokeLinecap="round"
@@ -183,8 +183,8 @@ export default function CircleDestination({
                 style={{
                   color:
                     circleOption === "new"
-                      ? "rgba(255,255,255,0.95)"
-                      : "rgba(255,255,255,0.45)",
+                      ? "rgba(var(--fg),0.95)"
+                      : "rgba(var(--fg),0.45)",
                 }}
               >
                 New Circle
@@ -194,8 +194,8 @@ export default function CircleDestination({
                 style={{
                   color:
                     circleOption === "new"
-                      ? "rgba(255,255,255,0.35)"
-                      : "rgba(255,255,255,0.2)",
+                      ? "rgba(var(--fg),0.35)"
+                      : "rgba(var(--fg),0.2)",
                 }}
               >
                 Start fresh
@@ -218,12 +218,12 @@ export default function CircleDestination({
             style={{
               background:
                 circleOption === "existing"
-                  ? "rgba(255,255,255,0.09)"
-                  : "rgba(255,255,255,0.04)",
+                  ? "rgba(var(--fg),0.09)"
+                  : "rgba(var(--fg),0.04)",
               border:
                 circleOption === "existing"
-                  ? "1px solid rgba(255,255,255,0.22)"
-                  : "1px solid rgba(255,255,255,0.06)",
+                  ? "1px solid rgba(var(--fg),0.22)"
+                  : "1px solid rgba(var(--fg),0.06)",
               minHeight: 130,
             }}
           >
@@ -234,8 +234,8 @@ export default function CircleDestination({
                 height: 40,
                 background:
                   circleOption === "existing"
-                    ? "rgba(255,255,255,0.14)"
-                    : "rgba(255,255,255,0.06)",
+                    ? "rgba(var(--fg),0.14)"
+                    : "rgba(var(--fg),0.06)",
               }}
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -245,8 +245,8 @@ export default function CircleDestination({
                   r="5"
                   stroke={
                     circleOption === "existing"
-                      ? "rgba(255,255,255,0.95)"
-                      : "rgba(255,255,255,0.4)"
+                      ? "rgba(var(--fg),0.95)"
+                      : "rgba(var(--fg),0.4)"
                   }
                   strokeWidth="1.6"
                 />
@@ -256,8 +256,8 @@ export default function CircleDestination({
                   r="2"
                   fill={
                     circleOption === "existing"
-                      ? "rgba(255,255,255,0.95)"
-                      : "rgba(255,255,255,0.4)"
+                      ? "rgba(var(--fg),0.95)"
+                      : "rgba(var(--fg),0.4)"
                   }
                 />
               </svg>
@@ -268,8 +268,8 @@ export default function CircleDestination({
                 style={{
                   color:
                     circleOption === "existing"
-                      ? "rgba(255,255,255,0.95)"
-                      : "rgba(255,255,255,0.45)",
+                      ? "rgba(var(--fg),0.95)"
+                      : "rgba(var(--fg),0.45)",
                 }}
               >
                 Existing
@@ -279,8 +279,8 @@ export default function CircleDestination({
                 style={{
                   color:
                     circleOption === "existing"
-                      ? "rgba(255,255,255,0.35)"
-                      : "rgba(255,255,255,0.2)",
+                      ? "rgba(var(--fg),0.35)"
+                      : "rgba(var(--fg),0.2)",
                 }}
               >
                 Add to one
@@ -299,16 +299,16 @@ export default function CircleDestination({
               transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
               className="flex flex-col gap-1"
             >
-              <p className="text-white/25 text-xs tracking-wide uppercase font-medium mb-2">
+              <p className="text-black/25 dark:text-white/25 text-xs tracking-wide uppercase font-medium mb-2">
                 Circle name
               </p>
               <div
                 className="w-full rounded-md px-4 py-4 transition-all duration-200"
                 style={{
-                  background: "rgba(255,255,255,0.05)",
+                  background: "rgba(var(--fg),0.05)",
                   border: newCircleName.trim()
-                    ? "1px solid rgba(255,255,255,0.2)"
-                    : "1px solid rgba(255,255,255,0.08)",
+                    ? "1px solid rgba(var(--fg),0.2)"
+                    : "1px solid rgba(var(--fg),0.08)",
                 }}
               >
                 <input
@@ -317,10 +317,10 @@ export default function CircleDestination({
                   onChange={(e) => setNewCircleName(e.target.value)}
                   placeholder="e.g. Inner Circle, NYC crew…"
                   autoFocus
-                  className="w-full bg-transparent text-white placeholder-white/20 text-sm tracking-[-0.3px] outline-none"
+                  className="w-full bg-transparent text-black dark:text-white placeholder-black/20 dark:placeholder-white/20 text-sm tracking-[-0.3px] outline-none"
                 />
               </div>
-              <p className="text-white/20 text-xs tracking-[-0.1px] mt-1 px-1">
+              <p className="text-black/20 dark:text-white/20 text-xs tracking-[-0.1px] mt-1 px-1">
                 This name defines who&apos;s inside. Choose carefully.
               </p>
             </motion.div>
@@ -335,7 +335,7 @@ export default function CircleDestination({
               transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
               className="flex flex-col gap-2"
             >
-              <p className="text-white/25 text-xs tracking-wide uppercase font-medium mb-2">
+              <p className="text-black/25 dark:text-white/25 text-xs tracking-wide uppercase font-medium mb-2">
                 Your circles
               </p>
               {isLoading ? (
@@ -353,7 +353,7 @@ export default function CircleDestination({
                   />
                 ))
               ) : circles.length === 0 ? (
-                <p className="text-white/30 text-sm text-center py-4">
+                <p className="text-black/30 dark:text-white/30 text-sm text-center py-4">
                   No circles yet.
                 </p>
               ) : (
@@ -373,12 +373,12 @@ export default function CircleDestination({
                     style={{
                       background:
                         selectedCircle === circle.id
-                          ? "rgba(255,255,255,0.09)"
-                          : "rgba(255,255,255,0.03)",
+                          ? "rgba(var(--fg),0.09)"
+                          : "rgba(var(--fg),0.03)",
                       border:
                         selectedCircle === circle.id
-                          ? "1px solid rgba(255,255,255,0.2)"
-                          : "1px solid rgba(255,255,255,0.05)",
+                          ? "1px solid rgba(var(--fg),0.2)"
+                          : "1px solid rgba(var(--fg),0.05)",
                     }}
                   >
                     <div className="flex gap-x-4 items-center">
@@ -397,8 +397,8 @@ export default function CircleDestination({
                         style={{
                           color:
                             selectedCircle === circle.id
-                              ? "rgba(255,255,255,0.95)"
-                              : "rgba(255,255,255,0.5)",
+                              ? "rgba(var(--fg),0.95)"
+                              : "rgba(var(--fg),0.5)",
                         }}
                       >
                         {circle.circle_name}
@@ -409,8 +409,8 @@ export default function CircleDestination({
                       style={{
                         color:
                           selectedCircle === circle.id
-                            ? "rgba(255,255,255,0.35)"
-                            : "rgba(255,255,255,0.18)",
+                            ? "rgba(var(--fg),0.35)"
+                            : "rgba(var(--fg),0.18)",
                       }}
                     >
                       {circle.members?.length ?? 0} people

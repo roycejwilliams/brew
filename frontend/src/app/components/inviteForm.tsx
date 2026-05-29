@@ -11,7 +11,7 @@ interface Phase {
 const EASE = [0.22, 1, 0.36, 1] as const;
 
 const inputClass =
-  "w-full px-4 py-3 bg-white/5 rounded-md border border-white/10 focus:outline-none focus:border-white/25 text-white/90 placeholder:text-white/20 text-sm transition-colors duration-150";
+  "w-full px-4 py-3 bg-white/5 rounded-md border border-white/10 focus:outline-none focus:border-white/25 text-black/90 dark:text-white/90 placeholder:text-black/20 dark:text-white/20 text-sm transition-colors duration-150";
 
 function InviteForm({ state, setState }: Phase) {
   const [form, setForm] = useState({
@@ -41,7 +41,7 @@ function InviteForm({ state, setState }: Phase) {
         >
           <div className="flex gap-2">
             <div className="flex flex-col gap-2 flex-1">
-              <p className="text-[10px] tracking-[3px] uppercase text-white/25">
+              <p className="text-[10px] tracking-[3px] uppercase text-black/25 dark:text-white/25">
                 First
               </p>
               <input
@@ -55,7 +55,7 @@ function InviteForm({ state, setState }: Phase) {
               />
             </div>
             <div className="flex flex-col gap-2 flex-1">
-              <p className="text-[10px] tracking-[3px] uppercase text-white/25">
+              <p className="text-[10px] tracking-[3px] uppercase text-black/25 dark:text-white/25">
                 Last
               </p>
               <input
@@ -71,7 +71,7 @@ function InviteForm({ state, setState }: Phase) {
           </div>
 
           <div className="flex flex-col gap-2">
-            <p className="text-[10px] tracking-[3px] uppercase text-white/25">
+            <p className="text-[10px] tracking-[3px] uppercase text-black/25 dark:text-white/25">
               Email
             </p>
             <input
@@ -87,10 +87,10 @@ function InviteForm({ state, setState }: Phase) {
 
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <p className="text-[10px] tracking-[3px] uppercase text-white/25">
+              <p className="text-[10px] tracking-[3px] uppercase text-black/25 dark:text-white/25">
                 LinkedIn or work profile
               </p>
-              <p className="text-[10px] tracking-[2px] uppercase text-white/15">
+              <p className="text-[10px] tracking-[2px] uppercase text-black/15 dark:text-white/15">
                 Optional
               </p>
             </div>
@@ -112,13 +112,13 @@ function InviteForm({ state, setState }: Phase) {
               })
             }
             whileTap={{ scale: 0.98 }}
-            className="w-full flex justify-between items-center px-4 py-3 border border-white/10 rounded-md hover:bg-white/5 hover:border-white/20 transition-colors duration-150 cursor-pointer text-sm text-white/50 hover:text-white"
+            className="w-full flex justify-between items-center px-4 py-3 border border-white/10 rounded-md hover:bg-white/5 hover:border-white/20 transition-colors duration-150 cursor-pointer text-sm text-black/50 dark:text-white/50 hover:text-black dark:text-white"
           >
             <span>Submit application</span>
-            <span className="text-white/25">→</span>
+            <span className="text-black/25 dark:text-white/25">→</span>
           </motion.button>
 
-          <p className="text-[10px] text-center text-white/20 tracking-[-0.1px] whitespace-nowrap">
+          <p className="text-[10px] text-center text-black/20 dark:text-white/20 tracking-[-0.1px] whitespace-nowrap">
             By continuing, you agree to B R 3 W&apos;s Terms & Privacy Policy.
           </p>
         </motion.div>
@@ -135,7 +135,7 @@ function InviteForm({ state, setState }: Phase) {
           className="flex flex-col items-center gap-4 py-10"
         >
           <div className="w-7 h-7 rounded-full border-2 border-white/10 border-t-white/40 animate-spin" />
-          <p className="text-sm text-white/30 tracking-[-0.1px]">
+          <p className="text-sm text-black/30 dark:text-white/30 tracking-[-0.1px]">
             Submitting your application...
           </p>
         </motion.div>
@@ -157,13 +157,13 @@ function InviteForm({ state, setState }: Phase) {
             transition={{ delay: 0.08, duration: 0.25, ease: EASE }}
             className="flex items-center justify-center w-12 h-12 rounded-full"
             style={{
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.1)",
+              background: "rgba(var(--fg),0.05)",
+              border: "1px solid rgba(var(--fg),0.1)",
             }}
           >
             <div
               className="w-2 h-2 rounded-full"
-              style={{ background: "rgba(255,255,255,0.4)" }}
+              style={{ background: "rgba(var(--fg),0.4)" }}
             />
           </motion.div>
 
@@ -173,10 +173,10 @@ function InviteForm({ state, setState }: Phase) {
             transition={{ delay: 0.15, duration: 0.25, ease: EASE }}
             className="flex flex-col items-center gap-1.5 text-center"
           >
-            <h3 className="text-white text-base font-medium tracking-[-0.3px]">
+            <h3 className="text-black dark:text-white text-base font-medium tracking-[-0.3px]">
               Application submitted.
             </h3>
-            <p className="text-white/30 text-sm tracking-[-0.1px] max-w-60 leading-relaxed">
+            <p className="text-black/30 dark:text-white/30 text-sm tracking-[-0.1px] max-w-60 leading-relaxed">
               We review every application personally. You&apos;ll hear from us
               soon.
             </p>
@@ -190,7 +190,7 @@ function InviteForm({ state, setState }: Phase) {
             style={{
               height: 1,
               background:
-                "linear-gradient(90deg, rgba(255,255,255,0.07) 0%, transparent 80%)",
+                "linear-gradient(90deg, rgba(var(--fg),0.07) 0%, transparent 80%)",
             }}
           />
 
@@ -200,10 +200,10 @@ function InviteForm({ state, setState }: Phase) {
             transition={{ delay: 0.28, duration: 0.25 }}
             className="flex flex-col items-center gap-1"
           >
-            <p className="text-[10px] tracking-[3px] uppercase text-white/20 font-medium">
+            <p className="text-[10px] tracking-[3px] uppercase text-black/20 dark:text-white/20 font-medium">
               What&apos;s next
             </p>
-            <p className="text-[11px] text-white/25 text-center tracking-[-0.1px]">
+            <p className="text-[11px] text-black/25 dark:text-white/25 text-center tracking-[-0.1px]">
               We&apos;re reviewing it. If it&apos;s a fit, you&apos;ll hear from
               us.
             </p>

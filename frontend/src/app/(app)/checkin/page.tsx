@@ -48,7 +48,7 @@ function CheckInContent() {
   }, [moment_id, attendee_id, hasHydrated]);
 
   return (
-    <div className="min-h-dvh overflow-hidden bg-[#0c0c0c] flex items-center justify-center px-6">
+    <div className="min-h-dvh overflow-hidden bg-[#f5f5f5] dark:bg-[#0c0c0c] flex items-center justify-center px-6">
       <AnimatePresence mode="wait">
         {status === "loading" && (
           <motion.div
@@ -64,7 +64,7 @@ function CheckInContent() {
               transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
               className="w-7 h-7 border-2 border-white/10 border-t-white/50 rounded-full"
             />
-            <p className="text-white/30 text-sm tracking-[-0.1px]">
+            <p className="text-black/30 dark:text-white/30 text-sm tracking-[-0.1px]">
               Checking you in...
             </p>
           </motion.div>
@@ -118,10 +118,10 @@ function CheckInContent() {
               transition={{ delay: 0.25, duration: 0.35, ease: EASE }}
               className="flex flex-col gap-1"
             >
-              <h1 className="text-white text-xl font-medium tracking-[-0.3px]">
+              <h1 className="text-black dark:text-white text-xl font-medium tracking-[-0.3px]">
                 You&apos;re in.
               </h1>
-              <p className="text-white/35 text-sm tracking-[-0.1px]">
+              <p className="text-black/35 dark:text-white/35 text-sm tracking-[-0.1px]">
                 Welcome to the moment.
               </p>
             </motion.div>
@@ -140,14 +140,14 @@ function CheckInContent() {
             <div
               className="w-16 h-16 rounded-full flex items-center justify-center"
               style={{
-                border: "1px solid rgba(255,255,255,0.08)",
-                background: "rgba(255,255,255,0.04)",
+                border: `1px solid rgba(var(--fg),0.08)`,
+                background: `rgba(var(--fg),0.04)`,
               }}
             >
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
                 <path
                   d="M5 13l4 4L19 7"
-                  stroke="rgba(255,255,255,0.3)"
+                  stroke={`rgba(var(--fg),0.3)`}
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -155,10 +155,10 @@ function CheckInContent() {
               </svg>
             </div>
             <div className="flex flex-col gap-1">
-              <h1 className="text-white text-xl font-medium tracking-[-0.3px]">
+              <h1 className="text-black dark:text-white text-xl font-medium tracking-[-0.3px]">
                 Already checked in.
               </h1>
-              <p className="text-white/35 text-sm tracking-[-0.1px]">
+              <p className="text-black/35 dark:text-white/35 text-sm tracking-[-0.1px]">
                 You&apos;re already part of this moment.
               </p>
             </div>
@@ -191,10 +191,10 @@ function CheckInContent() {
               </svg>
             </div>
             <div className="flex flex-col gap-1">
-              <h1 className="text-white text-xl font-medium tracking-[-0.3px]">
+              <h1 className="text-black dark:text-white text-xl font-medium tracking-[-0.3px]">
                 Invalid ticket.
               </h1>
-              <p className="text-white/35 text-sm tracking-[-0.1px]">
+              <p className="text-black/35 dark:text-white/35 text-sm tracking-[-0.1px]">
                 This QR code isn&apos;t valid for this moment.
               </p>
             </div>
@@ -210,7 +210,7 @@ export default function CheckInPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-dvh bg-[#0c0c0c] flex items-center justify-center">
+        <div className="min-h-dvh bg-[#f5f5f5] dark:bg-[#0c0c0c] flex items-center justify-center">
           <div className="w-7 h-7 rounded-full border-2 border-white/10 border-t-white/50 animate-spin" />
         </div>
       }

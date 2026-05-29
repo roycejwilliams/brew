@@ -23,15 +23,15 @@ export default function NeedsAttention() {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between px-1">
-        <p className="text-[10px] tracking-[2px] uppercase text-white/25 font-medium">
+        <p className="text-[10px] tracking-[2px] uppercase text-black/25 dark:text-white/25 font-medium">
           Needs Attention
         </p>
         <span
           className="text-[10px] px-1.5 py-0.5 rounded-full tabular-nums"
           style={{
-            background: "rgba(255,255,255,0.06)",
-            border: "1px solid rgba(255,255,255,0.08)",
-            color: "rgba(255,255,255,0.4)",
+            background: "rgba(var(--fg),0.06)",
+            border: "1px solid rgba(var(--fg),0.08)",
+            color: "rgba(var(--fg),0.4)",
           }}
         >
           {pending.length}
@@ -52,8 +52,8 @@ export default function NeedsAttention() {
             }}
             className="relative rounded-md overflow-hidden"
             style={{
-              background: "rgba(255,255,255,0.03)",
-              border: "1px solid rgba(255,255,255,0.07)",
+              background: "rgba(var(--fg),0.03)",
+              border: "1px solid rgba(var(--fg),0.07)",
             }}
           >
             <div className="flex gap-3 p-3">
@@ -70,7 +70,7 @@ export default function NeedsAttention() {
                   router.push(`/moments/${invite.moment_id}`, { scroll: false });
                 }}
                 className="relative w-16 h-16 rounded-sm overflow-hidden shrink-0 cursor-pointer"
-                style={{ border: "1px solid rgba(255,255,255,0.08)" }}
+                style={{ border: "1px solid rgba(var(--fg),0.08)" }}
               >
                 <Image
                   src={invite.image || "/brew.jpg"}
@@ -83,10 +83,10 @@ export default function NeedsAttention() {
               {/* Info */}
               <div className="flex flex-col justify-between flex-1 min-w-0">
                 <div className="space-y-0.5">
-                  <p className="text-sm font-medium text-white/90 truncate tracking-[-0.1px]">
+                  <p className="text-sm font-medium text-black/90 dark:text-white/90 truncate tracking-[-0.1px]">
                     {invite.moments_name ?? "Untitled Moment"}
                   </p>
-                  <p className="text-[11px] text-white/35 tracking-[-0.1px]">
+                  <p className="text-[11px] text-black/35 dark:text-white/35 tracking-[-0.1px]">
                     {invite.moment_start
                       ? new Date(invite.moment_start).toLocaleDateString(
                           "en-US",
@@ -108,7 +108,7 @@ export default function NeedsAttention() {
                       : "Date TBD"}
                   </p>
                 </div>
-                <p className="text-[10px] text-white/25 tracking-[-0.1px]">
+                <p className="text-[10px] text-black/25 dark:text-white/25 tracking-[-0.1px]">
                   Awaiting your response
                 </p>
               </div>
@@ -117,23 +117,23 @@ export default function NeedsAttention() {
             {/* Actions */}
             <div
               className="flex border-t"
-              style={{ borderColor: "rgba(255,255,255,0.06)" }}
+              style={{ borderColor: "rgba(var(--fg),0.06)" }}
             >
               <motion.button
                 whileTap={{ scale: 0.97 }}
                 onClick={() => decideInvite({ ...invite, status: "accepted" })}
-                className="flex-1 py-2.5 text-[11px] font-medium text-white/50 hover:text-white/90 hover:bg-white/4 transition-all cursor-pointer tracking-[-0.1px]"
+                className="flex-1 py-2.5 text-[11px] font-medium text-black/50 dark:text-white/50 hover:text-black/90 dark:text-white/90 hover:bg-white/4 transition-all cursor-pointer tracking-[-0.1px]"
               >
                 Accept
               </motion.button>
               <div
                 className="w-px"
-                style={{ background: "rgba(255,255,255,0.06)" }}
+                style={{ background: "rgba(var(--fg),0.06)" }}
               />
               <motion.button
                 whileTap={{ scale: 0.97 }}
                 onClick={() => decideInvite({ ...invite, status: "rejected" })}
-                className="flex-1 py-2.5 text-[11px] text-white/25 hover:text-red-400/60 hover:bg-red-500/5 transition-all cursor-pointer tracking-[-0.1px]"
+                className="flex-1 py-2.5 text-[11px] text-black/25 dark:text-white/25 hover:text-red-400/60 hover:bg-red-500/5 transition-all cursor-pointer tracking-[-0.1px]"
               >
                 Decline
               </motion.button>

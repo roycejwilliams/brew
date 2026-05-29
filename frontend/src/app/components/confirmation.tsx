@@ -21,15 +21,15 @@ export default function Confirmation() {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between px-1">
-        <p className="text-[10px] tracking-[2px] uppercase text-white/25 font-medium">
+        <p className="text-[10px] tracking-[2px] uppercase text-black/25 dark:text-white/25 font-medium">
           Coming Up
         </p>
         <span
           className="text-[10px] px-1.5 py-0.5 rounded-full tabular-nums"
           style={{
-            background: "rgba(255,255,255,0.06)",
-            border: "1px solid rgba(255,255,255,0.08)",
-            color: "rgba(255,255,255,0.4)",
+            background: `rgba(var(--fg),0.06)`,
+            border: `1px solid rgba(var(--fg),0.08)`,
+            color: `rgba(var(--fg),0.4)`,
           }}
         >
           {moments.length}
@@ -49,19 +49,19 @@ export default function Confirmation() {
             }}
             className="relative rounded-md overflow-hidden"
             style={{
-              background: "rgba(255,255,255,0.03)",
-              border: "1px solid rgba(255,255,255,0.07)",
+              background: `rgba(var(--fg),0.03)`,
+              border: `1px solid rgba(var(--fg),0.07)`,
             }}
           >
             <div className="p-3 space-y-2">
               <div
                 className="pb-2.5"
-                style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+                style={{ borderBottom: `1px solid rgba(var(--fg),0.06)` }}
               >
-                <p className="text-sm font-medium text-white/90 tracking-[-0.1px] truncate">
+                <p className="text-sm font-medium text-black/90 dark:text-white/90 tracking-[-0.1px] truncate">
                   {moment.moments_name}
                 </p>
-                <p className="text-[11px] text-white/35 mt-0.5 tracking-[-0.1px]">
+                <p className="text-[11px] text-black/35 dark:text-white/35 mt-0.5 tracking-[-0.1px]">
                   {moment.moment_start
                     ? new Date(moment.moment_start).toLocaleDateString(
                         "en-US",
@@ -86,7 +86,7 @@ export default function Confirmation() {
 
               <div className="flex items-center justify-between">
                 {moment.location_name && (
-                  <p className="text-[11px] text-white/30 truncate flex-1 tracking-[-0.1px]">
+                  <p className="text-[11px] text-black/30 dark:text-white/30 truncate flex-1 tracking-[-0.1px]">
                     {moment.location_name}
                   </p>
                 )}
@@ -96,10 +96,10 @@ export default function Confirmation() {
                     openCard(moment);
                     router.push(`/moments/${moment.id}`, { scroll: false });
                   }}
-                  className="text-[11px] px-3 py-1.5 rounded-sm cursor-pointer text-white/50 hover:text-white/90 transition-all shrink-0"
+                  className="text-[11px] px-3 py-1.5 rounded-sm cursor-pointer text-black/50 dark:text-white/50 hover:text-black/90 dark:hover:text-white/90 transition-all shrink-0"
                   style={{
-                    background: "rgba(255,255,255,0.05)",
-                    border: "1px solid rgba(255,255,255,0.08)",
+                    background: `rgba(var(--fg),0.05)`,
+                    border: `1px solid rgba(var(--fg),0.08)`,
                   }}
                 >
                   View

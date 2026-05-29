@@ -12,9 +12,9 @@ function Chip({ label, index }: { label: string; index: number }) {
       whileTap={{ scale: 0.96 }}
       className="py-1.5 px-4 rounded-full text-xs font-medium tracking-[-0.1px] cursor-pointer transition-all duration-200"
       style={{
-        background: "rgba(255,255,255,0.05)",
-        border: "1px solid rgba(255,255,255,0.08)",
-        color: "rgba(255,255,255,0.5)",
+        background: `rgba(var(--fg),0.05)`,
+        border: `1px solid rgba(var(--fg),0.08)`,
+        color: `rgba(var(--fg),0.5)`,
       }}
     >
       {label}

@@ -157,13 +157,13 @@ export default function InvitePeople({
         <div className="flex flex-col gap-1 text-center">
           <h2
             className="text-base font-medium tracking-[-0.3px]"
-            style={{ color: "rgba(255,255,255,0.85)" }}
+            style={{ color: "rgba(var(--fg),0.85)" }}
           >
             These people feel right.
           </h2>
           <p
             className="text-sm tracking-[-0.1px]"
-            style={{ color: "rgba(255,255,255,0.3)" }}
+            style={{ color: "rgba(var(--fg),0.3)" }}
           >
             {selectedInvitedUser.length}{" "}
             {selectedInvitedUser.length === 1 ? "person" : "people"} selected
@@ -173,15 +173,15 @@ export default function InvitePeople({
         <div
           className="rounded-xl overflow-hidden"
           style={{
-            background: "rgba(255,255,255,0.02)",
-            border: "1px solid rgba(255,255,255,0.07)",
+            background: "rgba(var(--fg),0.02)",
+            border: "1px solid rgba(var(--fg),0.07)",
           }}
         >
           <div
             style={{
               height: 1,
               background:
-                "linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)",
+                "linear-gradient(90deg, transparent, rgba(var(--fg),0.06), transparent)",
             }}
           />
           <div className="p-3 flex flex-col gap-0.5">
@@ -193,8 +193,8 @@ export default function InvitePeople({
                 <div
                   className="w-9 h-9 rounded-lg relative overflow-hidden shrink-0 flex items-center justify-center"
                   style={{
-                    background: "rgba(255,255,255,0.05)",
-                    border: "1px solid rgba(255,255,255,0.08)",
+                    background: "rgba(var(--fg),0.05)",
+                    border: "1px solid rgba(var(--fg),0.08)",
                   }}
                 >
                   {!invite.isExternal && invite.profile.avatarUrl ? (
@@ -206,7 +206,7 @@ export default function InvitePeople({
                     />
                   ) : (
                     <span
-                      style={{ fontSize: 13, color: "rgba(255,255,255,0.3)" }}
+                      style={{ fontSize: 13, color: "rgba(var(--fg),0.3)" }}
                     >
                       {queryIsEmail ? "✉" : "#"}
                     </span>
@@ -215,13 +215,13 @@ export default function InvitePeople({
                 <div className="flex-1 min-w-0">
                   <p
                     className="text-sm font-medium tracking-[-0.1px] truncate"
-                    style={{ color: "rgba(255,255,255,0.82)" }}
+                    style={{ color: "rgba(var(--fg),0.82)" }}
                   >
                     {invite.profile.fullname}
                   </p>
                   <p
                     className="text-[11px] truncate tracking-[-0.1px]"
-                    style={{ color: "rgba(255,255,255,0.3)" }}
+                    style={{ color: "rgba(var(--fg),0.3)" }}
                   >
                     {invite.isExternal
                       ? `${queryType} · not on Brew yet`
@@ -238,9 +238,9 @@ export default function InvitePeople({
             onClick={() => setShowConfirmation(false)}
             className="flex-1 flex justify-center items-center px-4 py-3 rounded-xl cursor-pointer transition-colors duration-150 text-sm font-medium tracking-[-0.1px]"
             style={{
-              background: "rgba(255,255,255,0.04)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              color: "rgba(255,255,255,0.55)",
+              background: "rgba(var(--fg),0.04)",
+              border: "1px solid rgba(var(--fg),0.08)",
+              color: "rgba(var(--fg),0.55)",
             }}
           >
             Go back
@@ -250,9 +250,9 @@ export default function InvitePeople({
             whileTap={{ scale: 0.98 }}
             className="flex-1 flex justify-between items-center px-4 py-3 rounded-xl cursor-pointer transition-all duration-150 text-sm font-medium tracking-[-0.1px]"
             style={{
-              background: "rgba(255,255,255,0.9)",
-              color: "#0c0c0c",
-              border: "1px solid rgba(255,255,255,0.2)",
+              background: "rgba(var(--fg),0.9)",
+              color: "rgb(var(--bg))",
+              border: "1px solid rgba(var(--fg),0.2)",
             }}
           >
             <span>Confirm</span>
@@ -274,7 +274,7 @@ export default function InvitePeople({
       {/* Search */}
       <div
         className="rounded-xl overflow-hidden"
-        style={{ border: "1px solid rgba(255,255,255,0.08)" }}
+        style={{ border: "1px solid rgba(var(--fg),0.08)" }}
       >
         <SearchMap
           placeholder="Invite by username, phone, or email"
@@ -295,21 +295,21 @@ export default function InvitePeople({
               transition={{ duration: 0.18 }}
               className="rounded-xl overflow-hidden"
               style={{
-                background: "rgba(255,255,255,0.02)",
-                border: "1px solid rgba(255,255,255,0.07)",
+                background: "rgba(var(--fg),0.02)",
+                border: "1px solid rgba(var(--fg),0.07)",
               }}
             >
               <div
                 style={{
                   height: 1,
                   background:
-                    "linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)",
+                    "linear-gradient(90deg, transparent, rgba(var(--fg),0.06), transparent)",
                 }}
               />
               <div className="p-4 flex flex-col gap-3">
                 <p
                   className="text-left text-[9px] tracking-[2px] uppercase font-medium"
-                  style={{ color: "rgba(255,255,255,0.2)" }}
+                  style={{ color: "rgba(var(--fg),0.2)" }}
                 >
                   From your circles
                 </p>
@@ -332,7 +332,7 @@ export default function InvitePeople({
                         style={{ background: "transparent" }}
                         onMouseEnter={(e) =>
                           (e.currentTarget.style.background =
-                            "rgba(255,255,255,0.04)")
+                            "rgba(var(--fg),0.04)")
                         }
                         onMouseLeave={(e) =>
                           (e.currentTarget.style.background = "transparent")
@@ -341,8 +341,8 @@ export default function InvitePeople({
                         <div
                           className="w-9 h-9 rounded-lg relative overflow-hidden shrink-0 flex items-center justify-center"
                           style={{
-                            background: "rgba(255,255,255,0.05)",
-                            border: "1px solid rgba(255,255,255,0.08)",
+                            background: "rgba(var(--fg),0.05)",
+                            border: "1px solid rgba(var(--fg),0.08)",
                           }}
                         >
                           {suggest.profile.avatarUrl ? (
@@ -355,7 +355,7 @@ export default function InvitePeople({
                           ) : (
                             <span
                               className="text-xs font-medium"
-                              style={{ color: "rgba(255,255,255,0.4)" }}
+                              style={{ color: "rgba(var(--fg),0.4)" }}
                             >
                               {suggest.first_name?.[0]}
                               {suggest.last_name?.[0]}
@@ -365,13 +365,13 @@ export default function InvitePeople({
                         <div className="flex-1 min-w-0">
                           <p
                             className="text-sm font-medium tracking-[-0.1px] truncate"
-                            style={{ color: "rgba(255,255,255,0.82)" }}
+                            style={{ color: "rgba(var(--fg),0.82)" }}
                           >
                             {suggest.profile.fullname}
                           </p>
                           <p
                             className="text-[11px] truncate tracking-[-0.1px]"
-                            style={{ color: "rgba(255,255,255,0.3)" }}
+                            style={{ color: "rgba(var(--fg),0.3)" }}
                           >
                             @{suggest.username}
                           </p>
@@ -379,14 +379,14 @@ export default function InvitePeople({
                         <div
                           className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
                           style={{
-                            background: "rgba(255,255,255,0.05)",
-                            border: "1px solid rgba(255,255,255,0.09)",
+                            background: "rgba(var(--fg),0.05)",
+                            border: "1px solid rgba(var(--fg),0.09)",
                           }}
                         >
                           <span
                             style={{
                               fontSize: 12,
-                              color: "rgba(255,255,255,0.3)",
+                              color: "rgba(var(--fg),0.3)",
                               lineHeight: 1,
                             }}
                           >
@@ -411,8 +411,8 @@ export default function InvitePeople({
             transition={{ duration: 0.18 }}
             className="rounded-xl overflow-hidden"
             style={{
-              background: "rgba(255,255,255,0.02)",
-              border: "1px solid rgba(255,255,255,0.07)",
+              background: "rgba(var(--fg),0.02)",
+              border: "1px solid rgba(var(--fg),0.07)",
             }}
           >
             <div className="p-3 flex flex-col gap-0.5">
@@ -431,7 +431,7 @@ export default function InvitePeople({
                     style={{ background: "transparent" }}
                     onMouseEnter={(e) =>
                       (e.currentTarget.style.background =
-                        "rgba(255,255,255,0.04)")
+                        "rgba(var(--fg),0.04)")
                     }
                     onMouseLeave={(e) =>
                       (e.currentTarget.style.background = "transparent")
@@ -440,8 +440,8 @@ export default function InvitePeople({
                     <div
                       className="w-9 h-9 rounded-lg relative overflow-hidden shrink-0 flex items-center justify-center"
                       style={{
-                        background: "rgba(255,255,255,0.05)",
-                        border: "1px solid rgba(255,255,255,0.08)",
+                        background: "rgba(var(--fg),0.05)",
+                        border: "1px solid rgba(var(--fg),0.08)",
                       }}
                     >
                       {recipient.profile.avatarUrl ? (
@@ -454,7 +454,7 @@ export default function InvitePeople({
                       ) : (
                         <span
                           className="text-xs font-medium"
-                          style={{ color: "rgba(255,255,255,0.4)" }}
+                          style={{ color: "rgba(var(--fg),0.4)" }}
                         >
                           {recipient.first_name?.[0]}
                           {recipient.last_name?.[0]}
@@ -464,13 +464,13 @@ export default function InvitePeople({
                     <div className="flex-1 min-w-0">
                       <p
                         className="text-sm font-medium tracking-[-0.1px] truncate"
-                        style={{ color: "rgba(255,255,255,0.82)" }}
+                        style={{ color: "rgba(var(--fg),0.82)" }}
                       >
                         {recipient.profile.fullname}
                       </p>
                       <p
                         className="text-[11px] truncate tracking-[-0.1px]"
-                        style={{ color: "rgba(255,255,255,0.3)" }}
+                        style={{ color: "rgba(var(--fg),0.3)" }}
                       >
                         @{recipient.username}
                       </p>
@@ -494,8 +494,8 @@ export default function InvitePeople({
               transition={{ duration: 0.18 }}
               className="rounded-xl overflow-hidden"
               style={{
-                background: "rgba(255,255,255,0.02)",
-                border: "1px solid rgba(255,255,255,0.07)",
+                background: "rgba(var(--fg),0.02)",
+                border: "1px solid rgba(var(--fg),0.07)",
               }}
             >
               {isExternalEligible ? (
@@ -506,7 +506,7 @@ export default function InvitePeople({
                   style={{ background: "transparent" }}
                   onMouseEnter={(e) =>
                     (e.currentTarget.style.background =
-                      "rgba(255,255,255,0.04)")
+                      "rgba(var(--fg),0.04)")
                   }
                   onMouseLeave={(e) =>
                     (e.currentTarget.style.background = "transparent")
@@ -515,15 +515,15 @@ export default function InvitePeople({
                   <div
                     className="w-9 h-9 rounded-lg shrink-0 flex items-center justify-center"
                     style={{
-                      background: "rgba(255,255,255,0.05)",
-                      border: "1px solid rgba(255,255,255,0.08)",
+                      background: "rgba(var(--fg),0.05)",
+                      border: "1px solid rgba(var(--fg),0.08)",
                     }}
                   >
                     <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
                       {queryIsEmail ? (
                         <path
                           d="M2 4h12v8H2V4zm0 0l6 5 6-5"
-                          stroke="rgba(255,255,255,0.35)"
+                          stroke="rgba(var(--fg),0.35)"
                           strokeWidth="1.3"
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -531,7 +531,7 @@ export default function InvitePeople({
                       ) : (
                         <path
                           d="M5 2h6a1 1 0 011 1v10a1 1 0 01-1 1H5a1 1 0 01-1-1V3a1 1 0 011-1zm3 10h.01"
-                          stroke="rgba(255,255,255,0.35)"
+                          stroke="rgba(var(--fg),0.35)"
                           strokeWidth="1.3"
                           strokeLinecap="round"
                         />
@@ -541,13 +541,13 @@ export default function InvitePeople({
                   <div className="flex-1 min-w-0">
                     <p
                       className="text-sm font-medium tracking-[-0.1px] truncate"
-                      style={{ color: "rgba(255,255,255,0.8)" }}
+                      style={{ color: "rgba(var(--fg),0.8)" }}
                     >
                       {inviteQuery}
                     </p>
                     <p
                       className="text-[11px] tracking-[-0.1px] mt-0.5"
-                      style={{ color: "rgba(255,255,255,0.3)" }}
+                      style={{ color: "rgba(var(--fg),0.3)" }}
                     >
                       Not on Brew · refer by {queryType}
                     </p>
@@ -555,14 +555,14 @@ export default function InvitePeople({
                   <div
                     className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
                     style={{
-                      background: "rgba(255,255,255,0.05)",
-                      border: "1px solid rgba(255,255,255,0.09)",
+                      background: "rgba(var(--fg),0.05)",
+                      border: "1px solid rgba(var(--fg),0.09)",
                     }}
                   >
                     <span
                       style={{
                         fontSize: 12,
-                        color: "rgba(255,255,255,0.3)",
+                        color: "rgba(var(--fg),0.3)",
                         lineHeight: 1,
                       }}
                     >
@@ -574,13 +574,13 @@ export default function InvitePeople({
                 <div className="p-8 text-center flex flex-col gap-1">
                   <p
                     className="text-sm tracking-[-0.1px]"
-                    style={{ color: "rgba(255,255,255,0.3)" }}
+                    style={{ color: "rgba(var(--fg),0.3)" }}
                   >
                     No results for &quot;{inviteQuery}&quot;
                   </p>
                   <p
                     className="text-[11px] tracking-[-0.1px]"
-                    style={{ color: "rgba(255,255,255,0.18)" }}
+                    style={{ color: "rgba(var(--fg),0.18)" }}
                   >
                     Try an email or phone number
                   </p>
@@ -599,8 +599,8 @@ export default function InvitePeople({
             transition={{ duration: 0.18 }}
             className="rounded-xl p-8 flex flex-col items-center gap-3"
             style={{
-              background: "rgba(255,255,255,0.02)",
-              border: "1px solid rgba(255,255,255,0.07)",
+              background: "rgba(var(--fg),0.02)",
+              border: "1px solid rgba(var(--fg),0.07)",
             }}
           >
             <motion.div
@@ -608,13 +608,13 @@ export default function InvitePeople({
               transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
               className="w-5 h-5 rounded-full border-2"
               style={{
-                borderColor: "rgba(255,255,255,0.08)",
-                borderTopColor: "rgba(255,255,255,0.5)",
+                borderColor: "rgba(var(--fg),0.08)",
+                borderTopColor: "rgba(var(--fg),0.5)",
               }}
             />
             <p
               className="text-[11px] tracking-[-0.1px]"
-              style={{ color: "rgba(255,255,255,0.3)" }}
+              style={{ color: "rgba(var(--fg),0.3)" }}
             >
               Searching...
             </p>
@@ -654,8 +654,8 @@ export default function InvitePeople({
                   <div
                     className="w-14 h-14 rounded-xl overflow-hidden relative flex items-center justify-center"
                     style={{
-                      background: "rgba(255,255,255,0.05)",
-                      border: "1px solid rgba(255,255,255,0.1)",
+                      background: "rgba(var(--fg),0.05)",
+                      border: "1px solid rgba(var(--fg),0.1)",
                     }}
                   >
                     {!u.isExternal && u.profile.avatarUrl ? (
@@ -675,7 +675,7 @@ export default function InvitePeople({
                         {u.email ? (
                           <path
                             d="M2 4h12v8H2V4zm0 0l6 5 6-5"
-                            stroke="rgba(255,255,255,0.3)"
+                            stroke="rgba(var(--fg),0.3)"
                             strokeWidth="1.3"
                             strokeLinecap="round"
                             strokeLinejoin="round"
@@ -683,7 +683,7 @@ export default function InvitePeople({
                         ) : (
                           <path
                             d="M5 2h6a1 1 0 011 1v10a1 1 0 01-1 1H5a1 1 0 01-1-1V3a1 1 0 011-1zm3 10h.01"
-                            stroke="rgba(255,255,255,0.3)"
+                            stroke="rgba(var(--fg),0.3)"
                             strokeWidth="1.3"
                             strokeLinecap="round"
                           />
@@ -693,7 +693,7 @@ export default function InvitePeople({
                   </div>
                   <span
                     className="text-[9px] tracking-[-0.1px] max-w-14 truncate"
-                    style={{ color: "rgba(255,255,255,0.45)" }}
+                    style={{ color: "rgba(var(--fg),0.45)" }}
                   >
                     {u.isExternal
                       ? u.profile.fullname.split("@")[0]
@@ -708,9 +708,9 @@ export default function InvitePeople({
               whileTap={{ scale: 0.98 }}
               className="w-full flex justify-between items-center px-4 py-3 rounded-xl cursor-pointer transition-all duration-150 text-sm font-medium tracking-[-0.1px]"
               style={{
-                background: "rgba(255,255,255,0.9)",
-                color: "#0c0c0c",
-                border: "1px solid rgba(255,255,255,0.2)",
+                background: "rgba(var(--fg),0.9)",
+                color: "rgb(var(--bg))",
+                border: "1px solid rgba(var(--fg),0.2)",
               }}
             >
               <span>

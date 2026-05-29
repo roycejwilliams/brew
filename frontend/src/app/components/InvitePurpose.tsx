@@ -73,14 +73,14 @@ export default function InvitePurpose({
           {/* Header */}
           <div className="flex flex-col gap-1 text-center">
             <h2
-              className="text-white md:text-xl text-md text-center font-medium tracking-[-0.3px] leading-tight"
-              style={{ color: "rgba(255,255,255,0.85)" }}
+              className="text-black dark:text-white md:text-xl text-md text-center font-medium tracking-[-0.3px] leading-tight"
+              style={{ color: "rgba(var(--fg),0.85)" }}
             >
               What is this for?
             </h2>
             <p
               className="text-sm tracking-[-0.1px]"
-              style={{ color: "rgba(255,255,255,0.3)" }}
+              style={{ color: "rgba(var(--fg),0.3)" }}
             >
               Choose where you&apos;re bringing them.
             </p>
@@ -89,7 +89,7 @@ export default function InvitePurpose({
           {/* Purpose cards */}
           <div
             className="rounded-xl overflow-hidden"
-            style={{ border: "1px solid rgba(255,255,255,0.07)" }}
+            style={{ border: "1px solid rgba(var(--fg),0.07)" }}
           >
             {purposes.map((purpose, i) => (
               <motion.button
@@ -105,7 +105,7 @@ export default function InvitePurpose({
                 style={{
                   borderBottom:
                     i < purposes.length - 1
-                      ? "1px solid rgba(255,255,255,0.07)"
+                      ? "1px solid rgba(var(--fg),0.07)"
                       : "none",
                 }}
               >
@@ -135,13 +135,13 @@ export default function InvitePurpose({
                 <div className="flex flex-col gap-1.5">
                   <h3
                     className="text-sm font-medium tracking-[-0.2px] leading-snug"
-                    style={{ color: "rgba(255,255,255,0.9)" }}
+                    style={{ color: "rgba(var(--fg),0.9)" }}
                   >
                     {purpose.title}
                   </h3>
                   <p
                     className="text-[11px] tracking-[-0.1px] transition-colors duration-300"
-                    style={{ color: "rgba(255,255,255,0.38)" }}
+                    style={{ color: "rgba(var(--fg),0.38)" }}
                   >
                     {purpose.description}
                   </p>
@@ -151,13 +151,13 @@ export default function InvitePurpose({
                 <div
                   className="ml-6 shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300"
                   style={{
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    background: "rgba(255,255,255,0.05)",
+                    border: "1px solid rgba(var(--fg),0.1)",
+                    background: "rgba(var(--fg),0.05)",
                   }}
                 >
                   <ArrowUpRight
                     size={14}
-                    className="text-white/40 group-hover:text-white/80 transition-colors duration-300"
+                    className="text-black/40 dark:text-white/40 group-hover:text-black/80 dark:text-white/80 transition-colors duration-300"
                   />
                 </div>
               </motion.button>
